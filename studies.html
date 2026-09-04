@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPHERE — Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared-white.css" />
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('sphere-theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="nav-backdrop" id="navBackdrop" hidden></div>
+<div class="app">
+  <aside class="nav" id="sideNav" aria-label="Primary">
+    <a class="logo" href="studies.html">SPHERE</a>
+    <a class="active" href="studies.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 6.5V22"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      Studies
+    </a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a href="study-home.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+      Study home
+    </a>
+    <a href="mock-shells.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+      Mock Shells
+    </a>
+    <a href="data-hub.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+      Data Hub
+    </a>
+    <a href="compute.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 21h8M12 17v4"/><path d="M8 11h2M12 11h4"/></svg>
+      Compute
+    </a>
+    <a href="tracker.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg>
+      Tracker
+    </a>
+    <a href="publisher.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v4h14v-4"/></svg>
+      Publisher
+    </a>
+    <a href="copilot.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg>
+      Copilot
+    </a>
+    <a href="audit.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.2 2.9 7.8 7 9 4.1-1.2 7-4.8 7-9V6l-7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      Audit
+    </a>
+    <div class="nav-footer">Select a study workspace</div>
+  </aside>
+
+  <section class="main">
+    <header class="top">
+      <div class="top-left">
+        <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation" aria-controls="sideNav" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="crumb"><strong>Studies</strong></div>
+      </div>
+      <div class="top-right">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <div class="tenant-pill">Acme Biometrics</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="stack">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <div class="page-intro" style="margin-bottom:0">
+          <h1 class="page-title">Studies</h1>
+          <p class="page-sub">Pick a study to open its workspace. Modules (Mock Shells, Data Hub, Compute, and the rest) run inside the selected study.</p>
+        </div>
+        <div class="list-tools">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input class="search" type="search" placeholder="Search study or sponsor…" aria-label="Search studies" />
+          </div>
+          <select style="width:140px" aria-label="Filter by status">
+            <option>All statuses</option>
+            <option>Active</option>
+            <option>Startup</option>
+            <option>Closed</option>
+          </select>
+          <button class="btn primary" type="button">+ New study</button>
+        </div>
+      </div>
+
+      <div class="studies-grid">
+        <a class="study-card" href="study-home.html?study=ONC-204-301">
+          <div class="study-card-top">
+            <div>
+              <div class="study-id">ONC-204-301</div>
+              <div class="study-title">Metastatic NSCLC</div>
+            </div>
+            <span class="badge locked">Active</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">Sponsor</span> Acme Biometrics</span>
+            <span><span class="k">Phase</span> 3</span>
+            <span><span class="k">Indication</span> NSCLC 2L+</span>
+          </div>
+          <div class="study-card-foot">
+            <span class="muted">Protocol v4.1 · SAP v2.0 · 428 subjects</span>
+            <span class="open-link">Open workspace →</span>
+          </div>
+        </a>
+
+        <a class="study-card" href="study-home.html?study=ONC-118-402">
+          <div class="study-card-top">
+            <div>
+              <div class="study-id">ONC-118-402</div>
+              <div class="study-title">HER2+ breast cancer</div>
+            </div>
+            <span class="badge locked">Active</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">Sponsor</span> Acme Biometrics</span>
+            <span><span class="k">Phase</span> 2</span>
+            <span><span class="k">Indication</span> HER2+ mBC</span>
+          </div>
+          <div class="study-card-foot">
+            <span class="muted">Protocol v2.0 · SAP draft · 186 subjects</span>
+            <span class="open-link">Open workspace →</span>
+          </div>
+        </a>
+
+        <a class="study-card" href="study-home.html?study=VAC-302-011">
+          <div class="study-card-top">
+            <div>
+              <div class="study-id">VAC-302-011</div>
+              <div class="study-title">RSV vaccine — adults ≥60</div>
+            </div>
+            <span class="badge running">Startup</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">Sponsor</span> Northwind Vaccines</span>
+            <span><span class="k">Phase</span> 3</span>
+            <span><span class="k">Indication</span> RSV prevention</span>
+          </div>
+          <div class="study-card-foot">
+            <span class="muted">Protocol v1.1 · libraries provisioning</span>
+            <span class="open-link">Open workspace →</span>
+          </div>
+        </a>
+
+        <a class="study-card" href="study-home.html?study=HEM-220-015">
+          <div class="study-card-top">
+            <div>
+              <div class="study-id">HEM-220-015</div>
+              <div class="study-title">Relapsed / refractory AML</div>
+            </div>
+            <span class="badge not-started">Closed</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">Sponsor</span> Summit HemOnc</span>
+            <span><span class="k">Phase</span> 1/2</span>
+            <span><span class="k">Indication</span> R/R AML</span>
+          </div>
+          <div class="study-card-foot">
+            <span class="muted">CSR delivered · read-only archive</span>
+            <span class="open-link">Open workspace →</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="title-row">All studies</span>
+          <span class="muted">4 studies · tenant Acme Biometrics + partners</span>
+        </div>
+        <div class="table-wrap">
+        <table class="studies-table">
+          <thead>
+            <tr>
+              <th>Study</th>
+              <th>Title</th>
+              <th>Sponsor</th>
+              <th>Phase</th>
+              <th>Indication</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-link" data-href="study-home.html?study=ONC-204-301">
+              <td class="num">ONC-204-301</td>
+              <td>Metastatic NSCLC</td>
+              <td>Acme Biometrics</td>
+              <td>3</td>
+              <td>NSCLC 2L+</td>
+              <td><span class="badge locked">Active</span></td>
+              <td><a class="btn ghost" href="study-home.html?study=ONC-204-301">Open</a></td>
+            </tr>
+            <tr class="row-link" data-href="study-home.html?study=ONC-118-402">
+              <td class="num">ONC-118-402</td>
+              <td>HER2+ breast cancer</td>
+              <td>Acme Biometrics</td>
+              <td>2</td>
+              <td>HER2+ mBC</td>
+              <td><span class="badge locked">Active</span></td>
+              <td><a class="btn ghost" href="study-home.html?study=ONC-118-402">Open</a></td>
+            </tr>
+            <tr class="row-link" data-href="study-home.html?study=VAC-302-011">
+              <td class="num">VAC-302-011</td>
+              <td>RSV vaccine — adults ≥60</td>
+              <td>Northwind Vaccines</td>
+              <td>3</td>
+              <td>RSV prevention</td>
+              <td><span class="badge running">Startup</span></td>
+              <td><a class="btn ghost" href="study-home.html?study=VAC-302-011">Open</a></td>
+            </tr>
+            <tr class="row-link" data-href="study-home.html?study=HEM-220-015">
+              <td class="num">HEM-220-015</td>
+              <td>Relapsed / refractory AML</td>
+              <td>Summit HemOnc</td>
+              <td>1/2</td>
+              <td>R/R AML</td>
+              <td><span class="badge not-started">Closed</span></td>
+              <td><a class="btn ghost" href="study-home.html?study=HEM-220-015">Open</a></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var body = document.body;
+  var btn = document.getElementById('hamburger');
+  var backdrop = document.getElementById('navBackdrop');
+  var themeBtn = document.getElementById('themeToggle');
+
+  function currentTheme() {
+    return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem('sphere-theme', theme); } catch (e) {}
+    if (themeBtn) {
+      themeBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+  }
+
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+    });
+    applyTheme(currentTheme());
+  }
+
+  if (!btn) return;
+
+  function setOpen(open) {
+    body.classList.toggle('nav-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    if (backdrop) {
+      if (open) backdrop.removeAttribute('hidden');
+      else backdrop.setAttribute('hidden', '');
+    }
+  }
+
+  btn.addEventListener('click', function () {
+    setOpen(!body.classList.contains('nav-open'));
+  });
+
+  if (backdrop) {
+    backdrop.addEventListener('click', function () { setOpen(false); });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 860) setOpen(false);
+  });
+
+  document.querySelectorAll('tr.row-link').forEach(function (row) {
+    row.addEventListener('click', function (e) {
+      if (e.target.closest('a,button')) return;
+      var href = row.getAttribute('data-href');
+      if (href) location.href = href;
+    });
+  });
+})();
+</script>
+</body>
+</html>
