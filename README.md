@@ -9,3 +9,5 @@ Interactive UI previews for **SPHERE**. White-default chrome with a light/dark t
 - Product PRD / build plan: private repo [`atulitllc/sphere`](https://github.com/atulitllc/sphere)
 
 GitHub Pages: https://atulitllc.github.io/sphere-mockups/
+
+Brand: sidebar uses Remy nav lockup (mark + wordmark; light/dark). Full expansion lockup is docs/marketing only.
