@@ -221,7 +221,7 @@
               </div>
               <div class="sheet-type-controls">
                 <button class="sheet-type-btn" type="button" id="typeMenuBtn" aria-haspopup="listbox" aria-expanded="false">
-                  Table
+                  <span id="typeMenuLabel">Table</span>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 <span class="sheet-custom-pill">Custom</span>
@@ -725,7 +725,7 @@
     var id = tr.dataset.id;
     document.getElementById('metaNumber').value = id === 'adhoc-1' ? 'Adhoc 1' : id;
     document.getElementById('metaType').value = tr.dataset.type || 'Table';
-    document.getElementById('typeMenuBtn').childNodes[0].nodeValue = (tr.dataset.type || 'Table') + ' ';
+    document.getElementById('typeMenuLabel').textContent = tr.dataset.type || 'Table';
     if (id === '14.1.1') {
       Object.assign(state, JSON.parse(JSON.stringify(demogPreset)));
       state.activeRow = 0;
@@ -785,7 +785,7 @@
     var cur = document.getElementById('metaType').value;
     var next = types[(types.indexOf(cur) + 1) % types.length];
     document.getElementById('metaType').value = next;
-    this.childNodes[0].nodeValue = next + ' ';
+    document.getElementById('typeMenuLabel').textContent = next;
   });
 
   document.getElementById('btnSaveDraft').addEventListener('click', function () {
