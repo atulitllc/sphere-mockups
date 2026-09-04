@@ -20,8 +20,13 @@
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
 <div class="app">
-  <aside class="nav" id="sideNav" aria-label="Primary">
-    <div class="logo"><img class="logo-light" src="brand/sphere-lockup-nav-on-paper.png" alt="SPHERE" /><img class="logo-dark" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" /></div>
+    <aside class="nav" id="sideNav" aria-label="Primary">
+    <a class="logo" href="studies.html"><img class="logo-light" src="brand/sphere-lockup-nav-on-paper.png" alt="SPHERE" /><img class="logo-dark" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" /></a>
+    <a href="studies.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 6.5V22"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      Studies
+    </a>
+    <div class="nav-divider" aria-hidden="true"></div>
     <a class="active" href="study-home.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
       Study home
@@ -33,6 +38,10 @@
     <a href="data-hub.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
       Data Hub
+    </a>
+    <a href="files.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+      Files
     </a>
     <a href="tracker.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg>
@@ -49,6 +58,10 @@
     <a href="audit.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.2 2.9 7.8 7 9 4.1-1.2 7-4.8 7-9V6l-7-3z"/><path d="M9 12l2 2 4-4"/></svg>
       Audit
+    </a>
+    <a href="admin.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Admin
     </a>
     <div class="nav-footer">ONC-204-301 · Phase 3</div>
   </aside>
@@ -72,6 +85,11 @@
 
     <div class="content">
       <div class="stack">
+      <div class="success-banner" id="structureSuccess" role="status">
+        <span class="note-label" style="color:var(--ok)">Done</span>
+        <div><strong>Folder tree created</strong> for <span data-study-name>ONC-204-301</span> — raw, sdtm, adam, programs, tlf, logs.</div>
+      </div>
+
       <div class="page-intro">
         <h1 class="page-title">ONC-204-301 — Metastatic NSCLC</h1>
         <p class="page-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
@@ -99,7 +117,11 @@
       <div class="card">
         <div class="card-head">
           <span class="title-row">Libraries</span>
-          <span class="muted">Logical layout</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="muted">Logical layout</span>
+            <button class="btn sm" type="button" data-open-structure data-study="ONC-204-301">Create study structure</button>
+            <a class="btn sm ghost" href="files.html" style="text-decoration:none">Browse files</a>
+          </div>
         </div>
         <div class="card-body">
           <div class="lib-row">
@@ -147,6 +169,10 @@
           <a class="module-card" href="data-hub.html">
             <div class="title">Data Hub</div>
             <div class="desc">Upload stubs, Rave/snapshot ingest list for day one.</div>
+          </a>
+          <a class="module-card" href="files.html">
+            <div class="title">Files</div>
+            <div class="desc">Browse the study folder tree (raw / sdtm / adam / programs / tlf / logs).</div>
           </a>
           <a class="module-card" href="tracker.html">
             <div class="title">Tracker</div>
@@ -203,7 +229,36 @@
       </div>
     </div>
   </section>
+
+<div class="modal-backdrop" id="structureModal" hidden role="dialog" aria-modal="true" aria-labelledby="structureTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="structureTitle">Create study structure</h2>
+        <div class="hint">Creates the standard SPHERE folder tree under this study from the tenant template.</div>
+      </div>
+      <button class="btn ghost sm" type="button" id="structureClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="folder-path" id="structureStudyPath">{study}/</div>
+      <p class="hint" style="margin:0 0 10px">Folders that will be created:</p>
+      <ul class="folder-list" id="structurePreview">
+        <li class="dir"><span class="fname">raw/</span></li>
+        <li class="dir"><span class="fname">sdtm/</span></li>
+        <li class="dir"><span class="fname">adam/</span></li>
+        <li class="dir"><span class="fname">programs/</span></li>
+        <li class="dir"><span class="fname">tlf/</span></li>
+        <li class="dir"><span class="fname">logs/</span></li>
+      </ul>
+      <p class="hint" style="margin-top:12px">Template from Admin → Study layout. Existing folders are left as-is (stub).</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="structureCancel">Cancel</button>
+      <button class="btn primary" type="button" id="structureConfirm">Create folders</button>
+    </div>
+  </div>
 </div>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function () {
@@ -260,6 +315,58 @@
     if (window.innerWidth > 860) setOpen(false);
   });
 })();
+
+  /* Create study structure modal */
+  (function () {
+    var modal = document.getElementById('structureModal');
+    if (!modal) return;
+    var openBtns = document.querySelectorAll('[data-open-structure]');
+    var closeBtn = document.getElementById('structureClose');
+    var cancelBtn = document.getElementById('structureCancel');
+    var confirmBtn = document.getElementById('structureConfirm');
+    var pathEl = document.getElementById('structureStudyPath');
+    var toast = document.getElementById('toast');
+    var toastTimer = null;
+    var currentStudy = 'ONC-204-301';
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2800);
+    }
+
+    function open(study) {
+      currentStudy = study || 'ONC-204-301';
+      if (pathEl) pathEl.textContent = currentStudy + '/';
+      modal.removeAttribute('hidden');
+    }
+    function close() { modal.setAttribute('hidden', ''); }
+
+    openBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        open(b.getAttribute('data-study') || currentStudy);
+      });
+    });
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (cancelBtn) cancelBtn.addEventListener('click', close);
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) close();
+    });
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', function () {
+        close();
+        var banner = document.getElementById('structureSuccess');
+        if (banner) {
+          banner.classList.add('show');
+          banner.querySelector('[data-study-name]') && (banner.querySelector('[data-study-name]').textContent = currentStudy);
+        }
+        showToast('Created standard folder tree under ' + currentStudy + ' (stub)');
+      });
+    }
+  })();
+
 </script>
 </body>
 </html>

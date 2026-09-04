@@ -20,7 +20,7 @@
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
 <div class="app">
-  <aside class="nav" id="sideNav" aria-label="Primary">
+    <aside class="nav" id="sideNav" aria-label="Primary">
     <a class="logo" href="studies.html"><img class="logo-light" src="brand/sphere-lockup-nav-on-paper.png" alt="SPHERE" /><img class="logo-dark" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" /></a>
     <a href="studies.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 6.5V22"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
@@ -38,6 +38,10 @@
     <a href="data-hub.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
       Data Hub
+    </a>
+    <a href="files.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+      Files
     </a>
     <a href="tracker.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg>
@@ -88,7 +92,7 @@
 
         <div class="note-banner" role="note">
           <span class="note-label">Note</span>
-          <div><strong>Config is per tenant — one SPHERE build.</strong> Customization = tenant config + feature flags, not per-client repos. Spine always on; modules are pick-and-choose.</div>
+          <div><strong>One SPHERE build; layout is tenant config.</strong> Customization = tenant config + feature flags, not per-client repos. Study folder tree defaults come from this tenant’s Study layout — not a free-form chaos of libs. Spine always on; modules are pick-and-choose.</div>
         </div>
 
         <div class="admin-layout">
@@ -98,7 +102,7 @@
             <button type="button" data-panel="branding">Branding</button>
             <button type="button" data-panel="sso">SSO</button>
             <button type="button" data-panel="users">Users &amp; roles</button>
-            <button type="button" data-panel="defaults">Study defaults</button>
+            <button type="button" data-panel="defaults">Study layout</button>
             <button type="button" data-panel="compliance">Compliance</button>
           </nav>
 
@@ -161,6 +165,16 @@
                     <div class="toggle-meta">
                       <strong>Data Hub</strong>
                       <div class="hint">Snapshot ingest, mapping packages, library views</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Files</strong>
+                      <div class="hint">Study folder browser · tree from tenant Study layout</div>
                     </div>
                     <label class="switch">
                       <input type="checkbox" checked />
@@ -365,26 +379,72 @@
               </div>
             </div>
 
-            <!-- Study defaults -->
+            
+            <!-- Study layout (defaults) -->
             <div class="admin-panel" id="panel-defaults">
               <div class="card">
                 <div class="card-head">
-                  <span class="title-row">Study defaults</span>
-                  <span class="badge">Layout map</span>
+                  <span class="title-row">Study layout</span>
+                  <span class="badge">Tenant template</span>
                 </div>
                 <div class="form">
+                  <div class="note-banner" role="note">
+                    <span class="note-label">Lock</span>
+                    <div>Base tree is <code>{study}/raw | sdtm | adam | programs | tlf | logs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
+                  </div>
+
                   <label>
-                    <span>Default layout paths</span>
-                    <div class="path-list" style="margin-top:6px">
-                      <span class="path-chip">{study}/raw</span>
-                      <span class="path-chip">{study}/sdtm</span>
-                      <span class="path-chip">{study}/adam</span>
-                      <span class="path-chip">{study}/programs</span>
-                      <span class="path-chip">{study}/tlf</span>
-                      <span class="path-chip">{study}/logs</span>
-                    </div>
-                    <span class="hint">Fixed stub for day one — not a free-form libs→folders product yet. Per-study override allowed later.</span>
+                    <span>Standard template subfolders</span>
+                    <ul class="layout-list" id="layoutList" style="margin-top:8px" aria-label="Template folders">
+                      <li draggable="true" data-folder="raw">
+                        <span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+                        <span class="folder-name"><input type="text" value="raw" aria-label="Folder name" /></span>
+                        <button class="btn sm ghost" type="button" data-rename>Rename</button>
+                        <button class="btn sm" type="button" data-remove>Remove</button>
+                      </li>
+                      <li draggable="true" data-folder="sdtm">
+                        <span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+                        <span class="folder-name"><input type="text" value="sdtm" aria-label="Folder name" /></span>
+                        <button class="btn sm ghost" type="button" data-rename>Rename</button>
+                        <button class="btn sm" type="button" data-remove>Remove</button>
+                      </li>
+                      <li draggable="true" data-folder="adam">
+                        <span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+                        <span class="folder-name"><input type="text" value="adam" aria-label="Folder name" /></span>
+                        <button class="btn sm ghost" type="button" data-rename>Rename</button>
+                        <button class="btn sm" type="button" data-remove>Remove</button>
+                      </li>
+                      <li draggable="true" data-folder="programs">
+                        <span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+                        <span class="folder-name"><input type="text" value="programs" aria-label="Folder name" /></span>
+                        <button class="btn sm ghost" type="button" data-rename>Rename</button>
+                        <button class="btn sm" type="button" data-remove>Remove</button>
+                      </li>
+                      <li draggable="true" data-folder="tlf">
+                        <span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+                        <span class="folder-name"><input type="text" value="tlf" aria-label="Folder name" /></span>
+                        <button class="btn sm ghost" type="button" data-rename>Rename</button>
+                        <button class="btn sm" type="button" data-remove>Remove</button>
+                      </li>
+                      <li draggable="true" data-folder="logs">
+                        <span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>
+                        <span class="folder-name"><input type="text" value="logs" aria-label="Folder name" /></span>
+                        <button class="btn sm ghost" type="button" data-rename>Rename</button>
+                        <button class="btn sm" type="button" data-remove>Remove</button>
+                      </li>
+                    </ul>
                   </label>
+
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                    <button class="btn" type="button" id="addFolderBtn">+ Add subfolder</button>
+                    <button class="btn ghost" type="button" id="resetLayoutBtn">Reset to base</button>
+                  </div>
+
+                  <label style="margin-top:8px">
+                    <span>Preview · new studies will get</span>
+                    <div class="layout-preview" id="layoutPreview" aria-live="polite"></div>
+                  </label>
+
                   <div class="grid2">
                     <label>
                       <span>Default template pack</span>
@@ -403,14 +463,17 @@
                       </select>
                     </label>
                   </div>
+
                   <div class="form-actions">
-                    <button class="btn primary" type="button">Save defaults</button>
+                    <button class="btn primary" type="button" id="saveLayoutBtn">Save layout</button>
+                    <button class="btn" type="button" id="applyLayoutBtn" title="Stub — does not rewrite existing studies unless confirmed">Apply to existing…</button>
                   </div>
+                  <p class="hint">Save updates the tenant template for <strong>new</strong> studies only. Apply is a separate, explicit action (stub).</p>
                 </div>
               </div>
             </div>
 
-            <!-- Compliance -->
+<!-- Compliance -->
             <div class="admin-panel" id="panel-compliance">
               <div class="card">
                 <div class="card-head">
@@ -446,6 +509,8 @@
     </div>
   </section>
 </div>
+
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function () {
@@ -513,6 +578,159 @@
       });
     });
   });
+
+  /* Deep-link ?panel=defaults|modules|… (after listeners) */
+  (function () {
+    try {
+      var m = /[?&]panel=([a-z-]+)/.exec(location.search);
+      if (!m) return;
+      var want = m[1];
+      var btn = document.querySelector('.admin-subnav button[data-panel="' + want + '"]');
+      if (!btn) return;
+      navBtns.forEach(function (x) { x.classList.toggle('active', x === btn); });
+      panels.forEach(function (p) {
+        p.classList.toggle('active', p.id === 'panel-' + want);
+      });
+    } catch (e) {}
+  })();
+
+  /* Study layout template editor */
+  var layoutList = document.getElementById('layoutList');
+  var layoutPreview = document.getElementById('layoutPreview');
+  var BASE_FOLDERS = ['raw', 'sdtm', 'adam', 'programs', 'tlf', 'logs'];
+
+  function folderNames() {
+    if (!layoutList) return BASE_FOLDERS.slice();
+    return Array.prototype.map.call(layoutList.querySelectorAll('li input'), function (inp) {
+      return (inp.value || '').trim();
+    }).filter(Boolean);
+  }
+
+  function refreshPreview() {
+    if (!layoutPreview) return;
+    layoutPreview.innerHTML = folderNames().map(function (n) {
+      return '<span class="path-chip">{study}/' + n + '</span>';
+    }).join('');
+  }
+
+  function wireLayoutItem(li) {
+    var removeBtn = li.querySelector('[data-remove]');
+    var renameBtn = li.querySelector('[data-rename]');
+    var inp = li.querySelector('input');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', function () {
+        if (layoutList.children.length <= 1) return;
+        li.remove();
+        refreshPreview();
+      });
+    }
+    if (renameBtn && inp) {
+      renameBtn.addEventListener('click', function () {
+        inp.focus();
+        inp.select();
+      });
+    }
+    if (inp) {
+      inp.addEventListener('input', refreshPreview);
+      inp.addEventListener('change', refreshPreview);
+    }
+    li.addEventListener('dragstart', function (e) {
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'folder');
+    });
+    li.addEventListener('dragend', function () {
+      li.classList.remove('dragging');
+      refreshPreview();
+    });
+  }
+
+  if (layoutList) {
+    Array.prototype.forEach.call(layoutList.children, wireLayoutItem);
+    layoutList.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      var dragging = layoutList.querySelector('.dragging');
+      if (!dragging) return;
+      var after = null;
+      var items = Array.prototype.filter.call(layoutList.querySelectorAll('li:not(.dragging)'), function () { return true; });
+      for (var i = 0; i < items.length; i++) {
+        var box = items[i].getBoundingClientRect();
+        if (e.clientY < box.top + box.height / 2) { after = items[i]; break; }
+      }
+      if (after) layoutList.insertBefore(dragging, after);
+      else layoutList.appendChild(dragging);
+    });
+  }
+
+  var addFolderBtn = document.getElementById('addFolderBtn');
+  if (addFolderBtn && layoutList) {
+    addFolderBtn.addEventListener('click', function () {
+      var name = prompt('New subfolder name (lowercase, no slashes)', 'data');
+      if (!name) return;
+      name = name.trim().replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+      if (!name) return;
+      var li = document.createElement('li');
+      li.setAttribute('draggable', 'true');
+      li.setAttribute('data-folder', name);
+      li.innerHTML = '<span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>' +
+        '<span class="folder-name"><input type="text" value="' + name + '" aria-label="Folder name" /></span>' +
+        '<button class="btn sm ghost" type="button" data-rename>Rename</button>' +
+        '<button class="btn sm" type="button" data-remove>Remove</button>';
+      layoutList.appendChild(li);
+      wireLayoutItem(li);
+      refreshPreview();
+    });
+  }
+
+  var resetLayoutBtn = document.getElementById('resetLayoutBtn');
+  if (resetLayoutBtn && layoutList) {
+    resetLayoutBtn.addEventListener('click', function () {
+      layoutList.innerHTML = '';
+      BASE_FOLDERS.forEach(function (name) {
+        var li = document.createElement('li');
+        li.setAttribute('draggable', 'true');
+        li.setAttribute('data-folder', name);
+        li.innerHTML = '<span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>' +
+          '<span class="folder-name"><input type="text" value="' + name + '" aria-label="Folder name" /></span>' +
+          '<button class="btn sm ghost" type="button" data-rename>Rename</button>' +
+          '<button class="btn sm" type="button" data-remove>Remove</button>';
+        layoutList.appendChild(li);
+        wireLayoutItem(li);
+      });
+      refreshPreview();
+    });
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.className = 'toast';
+      t.setAttribute('role', 'status');
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__layoutToast);
+    window.__layoutToast = setTimeout(function () { t.classList.remove('show'); }, 2800);
+  }
+
+  var saveLayoutBtn = document.getElementById('saveLayoutBtn');
+  if (saveLayoutBtn) {
+    saveLayoutBtn.addEventListener('click', function () {
+      showToast('Study layout saved for new studies (stub)');
+    });
+  }
+  var applyLayoutBtn = document.getElementById('applyLayoutBtn');
+  if (applyLayoutBtn) {
+    applyLayoutBtn.addEventListener('click', function () {
+      showToast('Apply to existing studies — not run (stub)');
+    });
+  }
+
+  refreshPreview();
+
 })();
 </script>
 </body>
