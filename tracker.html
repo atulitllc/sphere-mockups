@@ -105,7 +105,7 @@
 
       <div class="note-banner" role="note">
         <span class="note-label">Note</span>
-        <div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files and still gates edit. <strong>Run selected</strong> uses checked-out or otherwise allowed programs (demo). <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC.</div>
+        <div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files and still gates edit. <strong>Run selected</strong> uses checked-out or otherwise allowed programs (demo). <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC — <strong>not UI-only</strong>: it also updates share ACLs on <a href="files.html">Files</a> to View-only (<strong>Frozen / View only on share</strong>). <strong>Return to programmer</strong> restores Edit on the share. App checkout state and file-share permissions stay in sync.</div>
       </div>
 
       <div class="card">
@@ -211,7 +211,7 @@
               </td>
               <td><span class="badge shell-locked">Locked</span></td>
               <td class="job-cell"><span class="badge queued">Queued</span></td>
-              <td><span class="badge frozen" title="Program + related files uneditable until returned from QC">Frozen</span></td>
+              <td><span class="badge frozen" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></td>
               <td>
                 <div class="row-actions">
                   <button class="btn sm" type="button">Return to programmer</button>
