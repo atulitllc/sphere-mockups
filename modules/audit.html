@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPHERE — Audit</title>
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="nav">
+    <div class="logo">SPHERE</div>
+    <a href="study-home.html">Study home</a>
+    <a href="mock-shells.html">Mock Shells</a>
+    <a href="data-hub.html">Data Hub</a>
+    <a href="compute.html">Compute</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="publisher.html">Publisher</a>
+    <a href="copilot.html">Copilot</a>
+    <a class="active" href="audit.html">Audit</a>
+  </aside>
+  <section class="main">
+    <header class="top">
+      <div class="crumb">Studies / <strong>ONC-204-301</strong> / Audit</div>
+      <div class="study-pill">Acme Biometrics · study ONC-204-301</div>
+    </header>
+    <div class="content stack">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <div>
+          <h1 class="page-title">Audit trail</h1>
+          <p class="page-sub">Part 11–style timeline · append-only · includes locks and rejected Copilot suggestions</p>
+        </div>
+        <div class="list-tools">
+          <input class="search" placeholder="Search actor, entity…" style="width:200px" />
+          <select style="width:150px">
+            <option>All event types</option>
+            <option>Lock</option>
+            <option>Copilot reject</option>
+            <option>Copilot accept</option>
+            <option>Ingest</option>
+            <option>Job</option>
+            <option>Shell edit</option>
+          </select>
+          <button class="btn">Export</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>
+          <span>Event timeline</span>
+          <span class="badge ok">Immutable log</span>
+        </h2>
+        <div style="padding-top:16px">
+          <ul class="timeline">
+            <li>
+              <div class="when">Today<br>4:48:02 PM ET</div>
+              <div><div class="dot"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Job started · JOB-1842</div>
+                <div class="detail">Programs adam_adae.R, tfl_14_1_1_demog.R submitted by J. Patel. Runtime R 4.4.1.</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge running">Compute</span><span class="badge">Actor · J. Patel</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Today<br>4:12:19 PM ET</div>
+              <div><div class="dot" style="background:var(--ok)"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Shell locked · 14.1.2 Baseline characteristics</div>
+                <div class="detail">Human lock by M. Chen. Prior status In review → Locked. Edit and Copilot overwrite blocked. Reason: “SAP-aligned; biostat sign-off complete.”</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge locked">Lock</span><span class="badge">Actor · M. Chen</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Today<br>2:40:07 PM ET</div>
+              <div><div class="dot" style="background:var(--danger)"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Copilot suggestion rejected · Mapping Assist</div>
+                <div class="detail">Suggestion ID MAP-992: AE.AETERM free-text → preferred term dictionary. Rejected by J. Patel. Comment: “Keep manual MedDRA coding workflow for this cut.”</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge rejected">Copilot reject</span><span class="badge">Actor · J. Patel</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Yesterday<br>6:05:41 PM ET</div>
+              <div><div class="dot"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Snapshot ingest complete · Raw</div>
+                <div class="detail">Label “EDC cut 2026-08-28”. Mapping package study default v1.4. Checksum recorded. 38 domains mapped, 2 pending.</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge ok">Ingest</span><span class="badge">Actor · System</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Yesterday<br>4:15:33 PM ET</div>
+              <div><div class="dot" style="background:var(--ok)"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Copilot suggestion accepted · TLF Assist</div>
+                <div class="detail">Footnote text applied to draft shell 14.1.2 from SAP §9.2. Shell remained Draft; no lock performed by Copilot.</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge ok">Copilot accept</span><span class="badge">Actor · M. Chen</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Yesterday<br>11:20:12 AM ET</div>
+              <div><div class="dot"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Job complete · JOB-1839 · adam_adsl.R</div>
+                <div class="detail">Output ADaM.ADSL written. Tracker status → QC. Duration 00:06:18.</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge ok">Compute</span><span class="badge">Actor · Compute</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Tue<br>5:30:44 PM ET</div>
+              <div><div class="dot" style="background:var(--danger)"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Copilot suggestion rejected · Mapping Assist</div>
+                <div class="detail">Suggestion ID MAP-971: CM route code → SDTM CMROUTE. Rejected by S. Ortiz. Comment: “Vendor codes already normalized upstream.”</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge rejected">Copilot reject</span><span class="badge">Actor · S. Ortiz</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Tue<br>3:18:02 PM ET</div>
+              <div><div class="dot"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Shell saved · 14.3.1 Adverse events — overview</div>
+                <div class="detail">Draft update by J. Patel. Columns and footnotes revised. Generated Word shell artifact stored.</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge draft">Shell edit</span><span class="badge">Actor · J. Patel</span></div>
+              </div>
+            </li>
+            <li>
+              <div class="when">Mon<br>10:02:55 AM ET</div>
+              <div><div class="dot" style="background:var(--ok)"></div><div class="line"></div></div>
+              <div>
+                <div class="evt">Dataset locked · ADSL</div>
+                <div class="detail">Human lock by J. Patel after QC pass. Downstream TLF programs may reference locked ADSL.</div>
+                <div class="stat-pills" style="margin-top:8px"><span class="badge locked">Lock</span><span class="badge">Actor · J. Patel</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

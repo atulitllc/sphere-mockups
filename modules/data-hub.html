@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPHERE — Data Hub</title>
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="nav">
+    <div class="logo">SPHERE</div>
+    <a href="study-home.html">Study home</a>
+    <a href="mock-shells.html">Mock Shells</a>
+    <a class="active" href="data-hub.html">Data Hub</a>
+    <a href="compute.html">Compute</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="publisher.html">Publisher</a>
+    <a href="copilot.html">Copilot</a>
+    <a href="audit.html">Audit</a>
+  </aside>
+  <section class="main">
+    <header class="top">
+      <div class="crumb">Studies / <strong>ONC-204-301</strong> / Data Hub</div>
+      <div class="study-pill">Acme Biometrics · study ONC-204-301</div>
+    </header>
+    <div class="content stack">
+      <div>
+        <h1 class="page-title">Data Hub</h1>
+        <p class="page-sub">Day-one: upload list and snapshot ingest stubs. Mapping Assist is out of scope for day one.</p>
+      </div>
+
+      <div class="split">
+        <div class="card">
+          <h2>
+            <span>Ingest / snapshot list</span>
+            <div class="list-tools">
+              <select style="width:140px">
+                <option>All sources</option>
+                <option>Rave export</option>
+                <option>Snapshot</option>
+                <option>Manual upload</option>
+              </select>
+              <button class="btn">Refresh</button>
+            </div>
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Label</th>
+                <th>Received</th>
+                <th>Target lib</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected">
+                <td>Rave export</td>
+                <td>EDC cut 2026-08-28</td>
+                <td>28 Aug 2026 · 9:14 AM ET</td>
+                <td>Raw</td>
+                <td><span class="badge ok">Complete</span></td>
+              </tr>
+              <tr>
+                <td>Snapshot</td>
+                <td>Vendor labs · chemistry</td>
+                <td>27 Aug 2026 · 4:02 PM ET</td>
+                <td>Raw</td>
+                <td><span class="badge review">In review</span></td>
+              </tr>
+              <tr>
+                <td>Rave export</td>
+                <td>EDC cut 2026-07-15</td>
+                <td>15 Jul 2026 · 10:30 AM ET</td>
+                <td>Raw</td>
+                <td><span class="badge locked">Archived</span></td>
+              </tr>
+              <tr>
+                <td>Manual upload</td>
+                <td>PK concentration CSV</td>
+                <td>12 Aug 2026 · 1:45 PM ET</td>
+                <td>Raw</td>
+                <td><span class="badge draft">Uploaded</span></td>
+              </tr>
+              <tr>
+                <td>Snapshot</td>
+                <td>Central ECG transfer</td>
+                <td>20 Aug 2026 · 8:05 AM ET</td>
+                <td>Raw</td>
+                <td><span class="badge danger">Needs fix</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2><span>Upload stub</span><span class="mode-tag">DAY ONE</span></h2>
+          <div class="form">
+            <label><span class="req">Source type</span>
+              <select>
+                <option selected>Rave export</option>
+                <option>Snapshot file</option>
+                <option>Manual upload</option>
+              </select>
+            </label>
+            <label><span class="req">Label</span>
+              <input placeholder="e.g. EDC cut 2026-09-01" />
+            </label>
+            <label>Target library
+              <select>
+                <option selected>Raw</option>
+                <option>SDTM (derived — usually via programs)</option>
+              </select>
+            </label>
+            <div class="dropzone">
+              <strong>Drop files here or browse</strong>
+              Accepts SAS transport, CSV, Excel, and zip packages from EDC.
+              <div style="margin-top:12px"><button class="btn">Browse files</button></div>
+            </div>
+            <div class="hint">Day-one surface is upload / snapshot ingest only. SAP and aCRF live as uploads here (and on Mock Shells) — no mapping-assist UI yet.</div>
+            <div class="form-actions">
+              <div class="left-actions"></div>
+              <div class="right-actions">
+                <button class="btn">Cancel</button>
+                <button class="btn primary">Upload</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>
+          <span>Study uploads</span>
+          <div class="stat-pills">
+            <span class="badge ok">3 files</span>
+            <span class="badge info">Stub · day one</span>
+          </div>
+        </h2>
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Type</th>
+              <th>Uploaded</th>
+              <th>Used by</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ONC-204-301_SAP_v2.0.pdf</td>
+              <td>SAP</td>
+              <td>01 Aug 2026 · 11:00 AM ET</td>
+              <td>Mock Shells (reference upload)</td>
+              <td><span class="badge ok">Available</span></td>
+            </tr>
+            <tr>
+              <td>ONC-204-301_aCRF_v3.pdf</td>
+              <td>aCRF</td>
+              <td>01 Aug 2026 · 11:05 AM ET</td>
+              <td>Data Hub / Mock Shells</td>
+              <td><span class="badge ok">Available</span></td>
+            </tr>
+            <tr>
+              <td>shell_templates_pack.zip</td>
+              <td>Templates</td>
+              <td>05 Aug 2026 · 3:20 PM ET</td>
+              <td>Mock Shells · Word/RTF generate</td>
+              <td><span class="badge ok">Available</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="card-body">
+          <div class="hint">No Mapping Assist grid on day one. SAP/aCRF live as uploads on Mock Shells / Data Hub — not a separate Files explorer.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

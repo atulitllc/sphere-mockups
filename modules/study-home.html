@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPHERE — Study Home</title>
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="nav">
+    <div class="logo">SPHERE</div>
+    <a class="active" href="study-home.html">Study home</a>
+    <a href="mock-shells.html">Mock Shells</a>
+    <a href="data-hub.html">Data Hub</a>
+    <a href="compute.html">Compute</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="publisher.html">Publisher</a>
+    <a href="copilot.html">Copilot</a>
+    <a href="audit.html">Audit</a>
+  </aside>
+  <section class="main">
+    <header class="top">
+      <div class="crumb">Studies / <strong>ONC-204-301</strong> / Study home</div>
+      <div class="study-pill">Acme Biometrics · study ONC-204-301</div>
+    </header>
+    <div class="content stack">
+      <div>
+        <h1 class="page-title">ONC-204-301 — Metastatic NSCLC</h1>
+        <p class="page-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
+      </div>
+
+      <div class="card">
+        <h2><span>Study meta</span><span class="badge locked">Active</span></h2>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-item"><div class="k">Sponsor</div><div class="v">Acme Biometrics</div></div>
+            <div class="meta-item"><div class="k">Indication</div><div class="v">NSCLC 2L+</div></div>
+            <div class="meta-item"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
+            <div class="meta-item"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
+            <div class="meta-item"><div class="k">Lead programmer</div><div class="v">J. Patel</div></div>
+            <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
+            <div class="meta-item"><div class="k">SAP status</div><div class="v">Locked</div></div>
+            <div class="meta-item"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span>Libraries</span><span class="muted">Logical layout</span></h2>
+        <div class="card-body">
+          <div class="lib-row">
+            <div class="lib-card">
+              <div class="name">Raw</div>
+              <span class="badge ok">Synced</span>
+              <div class="hint" style="margin-top:8px">{study}/raw · Snapshot 2026-08-28</div>
+            </div>
+            <div class="lib-card">
+              <div class="name">SDTM</div>
+              <span class="badge locked">Locked</span>
+              <div class="hint" style="margin-top:8px">{study}/sdtm · 42 domains · v1.3</div>
+            </div>
+            <div class="lib-card">
+              <div class="name">ADaM</div>
+              <span class="badge review">In QC</span>
+              <div class="hint" style="margin-top:8px">{study}/adam · 18 datasets</div>
+            </div>
+            <div class="lib-card">
+              <div class="name">Programs</div>
+              <span class="badge ok">Ready</span>
+              <div class="hint" style="margin-top:8px">{study}/programs · R / SAS stubs</div>
+            </div>
+            <div class="lib-card">
+              <div class="name">TLF</div>
+              <span class="badge running">In progress</span>
+              <div class="hint" style="margin-top:8px">{study}/tlf · 64 shells · 21 locked</div>
+            </div>
+            <div class="lib-card">
+              <div class="name">Logs</div>
+              <span class="badge info">Available</span>
+              <div class="hint" style="margin-top:8px">{study}/logs · Job &amp; QC output</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" style="margin-bottom:10px">Modules</div>
+        <div class="module-grid">
+          <a class="module-card" href="mock-shells.html">
+            <div class="title">Mock Shells</div>
+            <div class="desc">Catalog, add/edit, generate Word/RTF shells from templates.</div>
+          </a>
+          <a class="module-card" href="data-hub.html">
+            <div class="title">Data Hub</div>
+            <div class="desc">Upload stubs, Rave/snapshot ingest list for day one.</div>
+          </a>
+          <a class="module-card" href="compute.html">
+            <div class="title">Compute</div>
+            <div class="desc">Select programs, run jobs, review logs.</div>
+          </a>
+          <a class="module-card" href="tracker.html">
+            <div class="title">Tracker</div>
+            <div class="desc">TLF and dataset status grid through lock.</div>
+          </a>
+          <a class="module-card" href="publisher.html">
+            <div class="title">Publisher</div>
+            <div class="desc">Bundle locked shells and outputs into PDF/Word.</div>
+          </a>
+          <a class="module-card" href="copilot.html">
+            <div class="title">Copilot</div>
+            <div class="desc">Governed suggestions — accept/reject; human lock only.</div>
+          </a>
+          <a class="module-card" href="audit.html">
+            <div class="title">Audit</div>
+            <div class="desc">Part 11-style timeline of edits, locks, and rejects.</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span>Recent activity</span><a class="btn ghost" href="audit.html" style="text-decoration:none">Open audit</a></h2>
+        <ul class="activity">
+          <li>
+            <span class="when">Today · 4:12 PM ET</span>
+            <span><strong>Shell 14.1.2 locked</strong> — Baseline characteristics</span>
+            <span class="who">M. Chen</span>
+          </li>
+          <li>
+            <span class="when">Today · 2:40 PM ET</span>
+            <span><strong>Copilot suggestion rejected</strong> — Mapping Assist for AE.AETERM</span>
+            <span class="who">J. Patel</span>
+          </li>
+          <li>
+            <span class="when">Yesterday · 6:05 PM ET</span>
+            <span><strong>Snapshot ingest complete</strong> — Raw lib updated (snapshot 2026-08-28)</span>
+            <span class="who">System</span>
+          </li>
+          <li>
+            <span class="when">Yesterday · 11:20 AM ET</span>
+            <span><strong>Job finished</strong> — adam_adsl.R · QC ready</span>
+            <span class="who">Compute</span>
+          </li>
+          <li>
+            <span class="when">Tue · 3:18 PM ET</span>
+            <span><strong>Shell 14.3.1 saved</strong> — Adverse events overview (draft)</span>
+            <span class="who">J. Patel</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
