@@ -39,10 +39,6 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
       Data Hub
     </a>
-    <a href="compute.html">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 21h8M12 17v4"/><path d="M8 11h2M12 11h4"/></svg>
-      Compute
-    </a>
     <a class="active" href="tracker.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg>
       Tracker
@@ -87,10 +83,10 @@
       <div class="stack">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
         <div class="page-intro" style="margin-bottom:0">
-          <h1 class="page-title">TLF &amp; dataset tracker</h1>
-          <p class="page-sub">Statuses: Not started → In dev (checked out) → In QC (checked in) → Approved → Frozen</p>
+          <h1 class="page-title">Tracker — programs, TLFs &amp; datasets</h1>
+          <p class="page-sub">Home for inventory, tags, SAP sections, check-out / QC, and <strong>Run selected</strong> (R/SAS). Compute run UI lives here.</p>
         </div>
-        <div class="stat-pills">
+        <div class="stat-pills" id="statPills">
           <span class="badge not-started">8 Not started</span>
           <span class="badge in-dev">6 In dev</span>
           <span class="badge qc">14 In QC</span>
@@ -101,47 +97,67 @@
 
       <div class="note-banner" role="note">
         <span class="note-label">Note</span>
-        <div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files. <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC.</div>
+        <div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files and still gates edit. <strong>Run selected</strong> uses checked-out or otherwise allowed programs (demo). <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC.</div>
       </div>
 
       <div class="card">
         <div class="card-head">
           <span class="title-row">Tracker grid</span>
           <div class="list-tools">
-            <input class="search" placeholder="Search ID or title…" aria-label="Search tracker" />
-            <select style="width:130px" aria-label="Filter by type">
-              <option>All types</option>
+            <input class="search" id="searchInput" placeholder="Search ID or title…" aria-label="Search tracker" />
+            <select id="filterType" style="width:120px" aria-label="Filter by type">
+              <option value="">All types</option>
               <option>Table</option>
               <option>Listing</option>
               <option>Figure</option>
               <option>Dataset</option>
             </select>
-            <select style="width:160px" aria-label="Filter by status">
-              <option>All statuses</option>
+            <select id="filterStatus" style="width:140px" aria-label="Filter by status">
+              <option value="">All statuses</option>
               <option>Not started</option>
               <option>In dev</option>
               <option>In QC</option>
               <option>Approved</option>
               <option>Frozen</option>
             </select>
+            <select id="filterTag" style="width:130px" aria-label="Filter by tag">
+              <option value="">All tags</option>
+              <option>First look</option>
+              <option>Second wave</option>
+              <option>DMC</option>
+              <option>CSR</option>
+            </select>
+            <select id="filterSap" style="width:140px" aria-label="Filter by SAP section">
+              <option value="">All SAP sections</option>
+              <option>Demographics</option>
+              <option>Efficacy</option>
+              <option>Safety TLFs</option>
+              <option>Labs</option>
+            </select>
+            <button class="btn primary" type="button" id="btnImport">Browse / Import programs</button>
             <button class="btn" type="button">Export CSV</button>
           </div>
         </div>
         <div class="table-wrap">
-        <table>
+        <table id="trackerTable">
           <thead>
             <tr>
+              <th class="col-check"><input type="checkbox" id="checkAll" aria-label="Select all visible" /></th>
               <th>Artifact</th>
               <th>Type</th>
+              <th>Tags</th>
+              <th>SAP</th>
               <th>Status</th>
               <th>Checkout</th>
               <th>Shell</th>
+              <th>Job</th>
               <th>Files</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
+          <tbody id="trackerBody">
+            <tr data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R" data-checkout="out">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select Demographics" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.1.1 · Demographics</span>
@@ -149,6 +165,8 @@
                 </div>
               </td>
               <td><span class="badge table">Table</span></td>
+              <td><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></td>
+              <td><span class="sap-chip">Demographics</span></td>
               <td><span class="badge in-dev">In dev</span></td>
               <td>
                 <div class="cell-stack">
@@ -157,6 +175,7 @@
                 </div>
               </td>
               <td><span class="badge shell-locked">Locked</span></td>
+              <td class="job-cell"><span class="badge done">Done</span></td>
               <td><span class="badge editable" title="Owner can edit program + related files">Editable</span></td>
               <td>
                 <div class="row-actions">
@@ -164,7 +183,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Table" data-status="In QC" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R" data-checkout="qc">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.2.1 · Primary endpoint — ORR</span>
@@ -172,6 +192,8 @@
                 </div>
               </td>
               <td><span class="badge table">Table</span></td>
+              <td><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">Second wave</span></div></td>
+              <td><span class="sap-chip">Efficacy</span></td>
               <td><span class="badge qc">In QC</span></td>
               <td>
                 <div class="cell-stack">
@@ -180,6 +202,7 @@
                 </div>
               </td>
               <td><span class="badge shell-locked">Locked</span></td>
+              <td class="job-cell"><span class="badge queued">Queued</span></td>
               <td><span class="badge frozen" title="Program + related files uneditable until returned from QC">Frozen</span></td>
               <td>
                 <div class="row-actions">
@@ -188,7 +211,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Dataset" data-status="In QC" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.R" data-checkout="qc">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADAE" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">ADAE · Adverse events analysis</span>
@@ -196,6 +220,8 @@
                 </div>
               </td>
               <td><span class="badge dataset">Dataset</span></td>
+              <td><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></td>
+              <td><span class="sap-chip">Safety TLFs</span></td>
               <td><span class="badge qc">In QC</span></td>
               <td>
                 <div class="cell-stack">
@@ -204,6 +230,7 @@
                 </div>
               </td>
               <td><span class="badge shell-na">n/a</span></td>
+              <td class="job-cell"><span class="badge running">Running</span></td>
               <td><span class="badge frozen">Frozen</span></td>
               <td>
                 <div class="row-actions">
@@ -212,7 +239,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Dataset" data-status="Approved" data-tags="CSR" data-sap="Demographics" data-job="done" data-program="adam_adsl.R" data-checkout="released">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADSL" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">ADSL · Subject-level analysis</span>
@@ -220,6 +248,8 @@
                 </div>
               </td>
               <td><span class="badge dataset">Dataset</span></td>
+              <td><div class="chip-row"><span class="tag-chip">CSR</span></div></td>
+              <td><span class="sap-chip">Demographics</span></td>
               <td><span class="badge approved">Approved</span></td>
               <td>
                 <div class="cell-stack">
@@ -228,6 +258,7 @@
                 </div>
               </td>
               <td><span class="badge shell-na">n/a</span></td>
+              <td class="job-cell"><span class="badge done">Done</span></td>
               <td><span class="badge frozen">Frozen</span></td>
               <td>
                 <div class="row-actions">
@@ -235,7 +266,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Table" data-status="Frozen" data-tags="CSR,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_2_base.R" data-checkout="released">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select Baseline characteristics" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.1.2 · Baseline characteristics</span>
@@ -243,6 +275,8 @@
                 </div>
               </td>
               <td><span class="badge table">Table</span></td>
+              <td><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">DMC</span></div></td>
+              <td><span class="sap-chip">Demographics</span></td>
               <td><span class="badge frozen">Frozen</span></td>
               <td>
                 <div class="cell-stack">
@@ -251,6 +285,7 @@
                 </div>
               </td>
               <td><span class="badge shell-locked">Locked</span></td>
+              <td class="job-cell"><span class="badge done">Done</span></td>
               <td><span class="badge frozen">Frozen</span></td>
               <td>
                 <div class="row-actions">
@@ -258,7 +293,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Table" data-status="In dev" data-tags="Second wave" data-sap="Labs" data-job="" data-program="tfl_14_3_5_lb.R" data-checkout="out">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.3.5 · Laboratory — chemistry shifts</span>
@@ -266,6 +302,8 @@
                 </div>
               </td>
               <td><span class="badge table">Table</span></td>
+              <td><div class="chip-row"><span class="tag-chip">Second wave</span></div></td>
+              <td><span class="sap-chip">Labs</span></td>
               <td><span class="badge in-dev">In dev</span></td>
               <td>
                 <div class="cell-stack">
@@ -274,6 +312,7 @@
                 </div>
               </td>
               <td><span class="badge shell-draft">Draft</span></td>
+              <td class="job-cell"><span class="muted">—</span></td>
               <td><span class="badge editable">Editable</span></td>
               <td>
                 <div class="row-actions">
@@ -281,7 +320,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Listing" data-status="In QC" data-tags="DMC,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_ae.R" data-checkout="qc">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select AE overview" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.3.1 · Adverse events — overview</span>
@@ -289,6 +329,8 @@
                 </div>
               </td>
               <td><span class="badge listing">Listing</span></td>
+              <td><div class="chip-row"><span class="tag-chip">DMC</span><span class="tag-chip">First look</span></div></td>
+              <td><span class="sap-chip">Safety TLFs</span></td>
               <td><span class="badge qc">In QC</span></td>
               <td>
                 <div class="cell-stack">
@@ -297,6 +339,7 @@
                 </div>
               </td>
               <td><span class="badge shell-locked">Locked</span></td>
+              <td class="job-cell"><span class="badge done">Done</span></td>
               <td><span class="badge frozen">Frozen</span></td>
               <td>
                 <div class="row-actions">
@@ -305,7 +348,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Dataset" data-status="Not started" data-tags="" data-sap="Efficacy" data-job="" data-program="" data-checkout="">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADTTE" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">ADTTE · Time-to-event</span>
@@ -313,9 +357,12 @@
                 </div>
               </td>
               <td><span class="badge dataset">Dataset</span></td>
+              <td><span class="muted">—</span></td>
+              <td><span class="sap-chip">Efficacy</span></td>
               <td><span class="badge not-started">Not started</span></td>
               <td><span class="muted">—</span></td>
               <td><span class="badge shell-na">n/a</span></td>
+              <td class="job-cell"><span class="muted">—</span></td>
               <td><span class="badge not-started">—</span></td>
               <td>
                 <div class="row-actions">
@@ -323,7 +370,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Figure" data-status="Not started" data-tags="Second wave" data-sap="Efficacy" data-job="" data-program="" data-checkout="">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select Kaplan-Meier" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.3.2 · Kaplan–Meier overall survival</span>
@@ -331,9 +379,12 @@
                 </div>
               </td>
               <td><span class="badge figure">Figure</span></td>
+              <td><div class="chip-row"><span class="tag-chip">Second wave</span></div></td>
+              <td><span class="sap-chip">Efficacy</span></td>
               <td><span class="badge not-started">Not started</span></td>
               <td><span class="muted">—</span></td>
               <td><span class="badge shell-draft">Draft</span></td>
+              <td class="job-cell"><span class="muted">—</span></td>
               <td><span class="badge not-started">—</span></td>
               <td>
                 <div class="row-actions">
@@ -341,7 +392,8 @@
                 </div>
               </td>
             </tr>
-            <tr>
+            <tr data-type="Table" data-status="Approved" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_8_cm.R" data-checkout="released">
+              <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select Concomitant medications" /></td>
               <td>
                 <div class="cell-stack">
                   <span class="num">14.3.8 · Concomitant medications</span>
@@ -349,6 +401,8 @@
                 </div>
               </td>
               <td><span class="badge table">Table</span></td>
+              <td><div class="chip-row"><span class="tag-chip">CSR</span></div></td>
+              <td><span class="sap-chip">Safety TLFs</span></td>
               <td><span class="badge approved">Approved</span></td>
               <td>
                 <div class="cell-stack">
@@ -357,6 +411,7 @@
                 </div>
               </td>
               <td><span class="badge shell-locked">Locked</span></td>
+              <td class="job-cell"><span class="badge done">Done</span></td>
               <td><span class="badge frozen">Frozen</span></td>
               <td>
                 <div class="row-actions">
@@ -367,11 +422,126 @@
           </tbody>
         </table>
         </div>
+
+        <div class="bulk-bar" id="bulkBar" aria-live="polite">
+          <div class="bulk-left">
+            <span class="sel-count" id="selCount">0 selected</span>
+            <span class="muted" style="font-size:12px">Run uses checked-out or allowed programs (demo)</span>
+          </div>
+          <div class="bulk-right">
+            <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
+            <select id="bulkTag" style="width:140px" aria-label="Assign tag">
+              <option value="">Edit tags…</option>
+              <option value="First look">+ First look</option>
+              <option value="Second wave">+ Second wave</option>
+              <option value="DMC">+ DMC</option>
+              <option value="CSR">+ CSR</option>
+            </select>
+            <select id="bulkSap" style="width:150px" aria-label="Assign SAP section">
+              <option value="">Assign SAP…</option>
+              <option>Demographics</option>
+              <option>Efficacy</option>
+              <option>Safety TLFs</option>
+              <option>Labs</option>
+            </select>
+            <button class="btn ghost" type="button" id="btnClearSel">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card job-panel" id="jobPanel">
+        <div class="card-head">
+          <span class="title-row">Job status (from Tracker)</span>
+          <span class="badge running" id="jobRunningBadge">1 running</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Job</th>
+                <th>Programs</th>
+                <th>Started</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="jobBody">
+              <tr>
+                <td>JOB-1842</td>
+                <td>adam_adae.R · tfl_14_1_1…</td>
+                <td>Today · 9:48 AM ET</td>
+                <td><span class="badge running">Running</span></td>
+              </tr>
+              <tr>
+                <td>JOB-1839</td>
+                <td>adam_adsl.R</td>
+                <td>Today · 8:02 AM ET</td>
+                <td><span class="badge done">Done</span></td>
+              </tr>
+              <tr>
+                <td>JOB-1831</td>
+                <td>tfl_14_2_1_orr.R</td>
+                <td>Yesterday · 5:40 PM ET</td>
+                <td><span class="badge queued">Queued</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       </div>
     </div>
   </section>
 </div>
+
+<!-- Import programs modal -->
+<div class="modal-backdrop" id="importModal" hidden role="dialog" aria-modal="true" aria-labelledby="importTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="importTitle">Browse / Import programs</h2>
+        <div class="hint">Points at the study <code>programs/</code> folder; SPHERE lists R and SAS files and creates tracker records.</div>
+      </div>
+      <button class="btn ghost" type="button" id="btnCloseImport" aria-label="Close">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="folder-path">ONC-204-301 / programs/</div>
+      <ul class="folder-list" id="folderList">
+        <li class="dir">📁 adam/</li>
+        <li>
+          <input type="checkbox" class="import-file" value="adam/adam_adlb.R" data-title="ADLB · Laboratory analysis" data-type="Dataset" data-sap="Labs" checked />
+          <span class="fname">adam_adlb.R</span>
+          <span class="badge dataset">R</span>
+        </li>
+        <li>
+          <input type="checkbox" class="import-file" value="adam/adam_adcm.R" data-title="ADCM · Concomitant meds analysis" data-type="Dataset" data-sap="Safety TLFs" checked />
+          <span class="fname">adam_adcm.R</span>
+          <span class="badge dataset">R</span>
+        </li>
+        <li class="dir">📁 tlf/</li>
+        <li>
+          <input type="checkbox" class="import-file" value="tlf/tfl_14_3_3_ae_soc.sas" data-title="14.3.3 · AE by SOC/PT" data-type="Table" data-sap="Safety TLFs" checked />
+          <span class="fname">tfl_14_3_3_ae_soc.sas</span>
+          <span class="badge table">SAS</span>
+        </li>
+        <li>
+          <input type="checkbox" class="import-file" value="tlf/tfl_14_3_6_lb_heme.R" data-title="14.3.6 · Laboratory — hematology" data-type="Table" data-sap="Labs" />
+          <span class="fname">tfl_14_3_6_lb_heme.R</span>
+          <span class="badge table">R</span>
+        </li>
+        <li>
+          <input type="checkbox" class="import-file" value="tlf/tfl_14_2_2_pfs.R" data-title="14.2.2 · Progression-free survival" data-type="Figure" data-sap="Efficacy" />
+          <span class="fname">tfl_14_2_2_pfs.R</span>
+          <span class="badge figure">R</span>
+        </li>
+      </ul>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="btnCancelImport">Cancel</button>
+      <button class="btn primary" type="button" id="btnConfirmImport">Create tracker records</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function () {
@@ -400,33 +570,285 @@
     applyTheme(currentTheme());
   }
 
-  if (!btn) return;
-
   function setOpen(open) {
     body.classList.toggle('nav-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    if (btn) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    }
     if (backdrop) {
       if (open) backdrop.removeAttribute('hidden');
       else backdrop.setAttribute('hidden', '');
     }
   }
 
-  btn.addEventListener('click', function () {
-    setOpen(!body.classList.contains('nav-open'));
-  });
-
-  if (backdrop) {
-    backdrop.addEventListener('click', function () { setOpen(false); });
+  if (btn) {
+    btn.addEventListener('click', function () {
+      setOpen(!body.classList.contains('nav-open'));
+    });
   }
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') setOpen(false);
-  });
-
+  if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
   window.addEventListener('resize', function () {
     if (window.innerWidth > 860) setOpen(false);
   });
+
+  /* —— Tracker interactions —— */
+  var tbody = document.getElementById('trackerBody');
+  var checkAll = document.getElementById('checkAll');
+  var bulkBar = document.getElementById('bulkBar');
+  var selCount = document.getElementById('selCount');
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  var jobSeq = 1850;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2800);
+  }
+
+  function visibleRows() {
+    return Array.prototype.slice.call(tbody.querySelectorAll('tr')).filter(function (tr) {
+      return tr.style.display !== 'none';
+    });
+  }
+
+  function selectedRows() {
+    return visibleRows().filter(function (tr) {
+      var cb = tr.querySelector('.row-check');
+      return cb && cb.checked;
+    });
+  }
+
+  function syncBulk() {
+    var sel = selectedRows();
+    var n = sel.length;
+    selCount.textContent = n + ' selected';
+    bulkBar.classList.toggle('visible', n > 0);
+    visibleRows().forEach(function (tr) {
+      var cb = tr.querySelector('.row-check');
+      tr.classList.toggle('row-selected', !!(cb && cb.checked));
+    });
+    var vis = visibleRows();
+    var allChecked = vis.length > 0 && vis.every(function (tr) {
+      var cb = tr.querySelector('.row-check');
+      return cb && cb.checked;
+    });
+    checkAll.checked = allChecked;
+    checkAll.indeterminate = !allChecked && sel.length > 0;
+  }
+
+  function applyFilters() {
+    var q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    var type = document.getElementById('filterType').value;
+    var status = document.getElementById('filterStatus').value;
+    var tag = document.getElementById('filterTag').value;
+    var sap = document.getElementById('filterSap').value;
+    Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function (tr) {
+      var text = tr.textContent.toLowerCase();
+      var ok = true;
+      if (q && text.indexOf(q) === -1) ok = false;
+      if (type && tr.getAttribute('data-type') !== type) ok = false;
+      if (status && tr.getAttribute('data-status') !== status) ok = false;
+      if (tag) {
+        var tags = (tr.getAttribute('data-tags') || '').split(',').map(function (s) { return s.trim(); });
+        if (tags.indexOf(tag) === -1) ok = false;
+      }
+      if (sap && tr.getAttribute('data-sap') !== sap) ok = false;
+      tr.style.display = ok ? '' : 'none';
+      if (!ok) {
+        var cb = tr.querySelector('.row-check');
+        if (cb) cb.checked = false;
+      }
+    });
+    syncBulk();
+  }
+
+  ['searchInput', 'filterType', 'filterStatus', 'filterTag', 'filterSap'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener(id === 'searchInput' ? 'input' : 'change', applyFilters);
+  });
+
+  checkAll.addEventListener('change', function () {
+    visibleRows().forEach(function (tr) {
+      var cb = tr.querySelector('.row-check');
+      if (cb) cb.checked = checkAll.checked;
+    });
+    syncBulk();
+  });
+
+  tbody.addEventListener('change', function (e) {
+    if (e.target && e.target.classList.contains('row-check')) syncBulk();
+  });
+
+  document.getElementById('btnClearSel').addEventListener('click', function () {
+    Array.prototype.forEach.call(tbody.querySelectorAll('.row-check'), function (cb) { cb.checked = false; });
+    syncBulk();
+  });
+
+  function renderTagChips(tr, tags) {
+    var cell = tr.children[3];
+    if (!tags.length) {
+      cell.innerHTML = '<span class="muted">—</span>';
+      return;
+    }
+    cell.innerHTML = '<div class="chip-row">' + tags.map(function (t) {
+      return '<span class="tag-chip">' + t + '</span>';
+    }).join('') + '</div>';
+  }
+
+  document.getElementById('bulkTag').addEventListener('change', function () {
+    var tag = this.value;
+    if (!tag) return;
+    selectedRows().forEach(function (tr) {
+      var tags = (tr.getAttribute('data-tags') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      if (tags.indexOf(tag) === -1) tags.push(tag);
+      tr.setAttribute('data-tags', tags.join(','));
+      renderTagChips(tr, tags);
+    });
+    showToast('Tagged ' + selectedRows().length + ' row(s) with “' + tag + '”');
+    this.value = '';
+  });
+
+  document.getElementById('bulkSap').addEventListener('change', function () {
+    var sap = this.value;
+    if (!sap) return;
+    selectedRows().forEach(function (tr) {
+      tr.setAttribute('data-sap', sap);
+      tr.children[4].innerHTML = '<span class="sap-chip">' + sap + '</span>';
+    });
+    showToast('Assigned SAP “' + sap + '” to ' + selectedRows().length + ' row(s)');
+    this.value = '';
+  });
+
+  document.getElementById('btnRun').addEventListener('click', function () {
+    var rows = selectedRows();
+    if (!rows.length) return;
+    var runnable = [];
+    var blocked = [];
+    rows.forEach(function (tr) {
+      var co = tr.getAttribute('data-checkout') || '';
+      var status = tr.getAttribute('data-status') || '';
+      var prog = tr.getAttribute('data-program') || '';
+      // Demo rule: checked-out (out) or released/approved/frozen allowed; QC frozen programs blocked for edit but may re-run if approved path — keep simple: out or released or approved/frozen OK; empty program blocked; In QC blocked
+      if (!prog) { blocked.push(tr); return; }
+      if (status === 'In QC') { blocked.push(tr); return; }
+      if (co === 'out' || co === 'released' || status === 'Approved' || status === 'Frozen' || status === 'In dev') {
+        runnable.push(tr);
+      } else {
+        blocked.push(tr);
+      }
+    });
+    if (!runnable.length) {
+      showToast('No runnable programs in selection (need check-out or allowed status; demo)');
+      return;
+    }
+    jobSeq += 1;
+    var jobId = 'JOB-' + jobSeq;
+    var names = runnable.map(function (tr) { return tr.getAttribute('data-program'); }).join(' · ');
+    runnable.forEach(function (tr) {
+      tr.setAttribute('data-job', 'queued');
+      var cell = tr.querySelector('.job-cell');
+      if (cell) cell.innerHTML = '<span class="badge queued">Queued</span>';
+    });
+    // Simulate: first → running shortly
+    setTimeout(function () {
+      runnable.forEach(function (tr, i) {
+        tr.setAttribute('data-job', i === 0 ? 'running' : 'queued');
+        var cell = tr.querySelector('.job-cell');
+        if (cell) cell.innerHTML = i === 0
+          ? '<span class="badge running">Running</span>'
+          : '<span class="badge queued">Queued</span>';
+      });
+      if (runnable[0]) {
+        setTimeout(function () {
+          runnable.forEach(function (tr) {
+            tr.setAttribute('data-job', 'done');
+            var cell = tr.querySelector('.job-cell');
+            if (cell) cell.innerHTML = '<span class="badge done">Done</span>';
+          });
+          var jobRows = document.getElementById('jobBody').querySelectorAll('tr');
+          if (jobRows[0]) {
+            jobRows[0].querySelector('td:last-child').innerHTML = '<span class="badge done">Done</span>';
+          }
+          showToast(jobId + ' complete');
+        }, 2200);
+      }
+    }, 600);
+
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + jobId + '</td><td>' + names + '</td><td>Just now</td><td><span class="badge queued">Queued</span></td>';
+    document.getElementById('jobBody').insertBefore(tr, document.getElementById('jobBody').firstChild);
+    setTimeout(function () {
+      tr.querySelector('td:last-child').innerHTML = '<span class="badge running">Running</span>';
+    }, 600);
+
+    var msg = 'Queued ' + runnable.length + ' program(s) as ' + jobId;
+    if (blocked.length) msg += ' · ' + blocked.length + ' skipped (QC / no program)';
+    showToast(msg);
+  });
+
+  /* Import modal */
+  var importModal = document.getElementById('importModal');
+  function openImport() { importModal.removeAttribute('hidden'); }
+  function closeImport() { importModal.setAttribute('hidden', ''); }
+  document.getElementById('btnImport').addEventListener('click', openImport);
+  document.getElementById('btnCloseImport').addEventListener('click', closeImport);
+  document.getElementById('btnCancelImport').addEventListener('click', closeImport);
+  importModal.addEventListener('click', function (e) {
+    if (e.target === importModal) closeImport();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      setOpen(false);
+      closeImport();
+    }
+  });
+
+  var typeBadge = { Table: 'table', Listing: 'listing', Figure: 'figure', Dataset: 'dataset' };
+
+  document.getElementById('btnConfirmImport').addEventListener('click', function () {
+    var files = Array.prototype.slice.call(document.querySelectorAll('.import-file:checked'));
+    if (!files.length) {
+      showToast('Select at least one .R / .sas file');
+      return;
+    }
+    files.forEach(function (f) {
+      var fname = f.value.split('/').pop();
+      var title = f.getAttribute('data-title');
+      var type = f.getAttribute('data-type');
+      var sap = f.getAttribute('data-sap');
+      var tr = document.createElement('tr');
+      tr.setAttribute('data-type', type);
+      tr.setAttribute('data-status', 'Not started');
+      tr.setAttribute('data-tags', 'First look');
+      tr.setAttribute('data-sap', sap);
+      tr.setAttribute('data-job', '');
+      tr.setAttribute('data-program', fname);
+      tr.setAttribute('data-checkout', '');
+      tr.innerHTML =
+        '<td class="col-check"><input type="checkbox" class="row-check" aria-label="Select ' + title + '" /></td>' +
+        '<td><div class="cell-stack"><span class="num">' + title + '</span><span class="sub">' + fname + ' · imported from programs/</span></div></td>' +
+        '<td><span class="badge ' + (typeBadge[type] || 'info') + '">' + type + '</span></td>' +
+        '<td><div class="chip-row"><span class="tag-chip">First look</span></div></td>' +
+        '<td><span class="sap-chip">' + sap + '</span></td>' +
+        '<td><span class="badge not-started">Not started</span></td>' +
+        '<td><span class="muted">—</span></td>' +
+        '<td><span class="badge shell-na">n/a</span></td>' +
+        '<td class="job-cell"><span class="muted">—</span></td>' +
+        '<td><span class="badge not-started">—</span></td>' +
+        '<td><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></td>';
+      tbody.appendChild(tr);
+      f.checked = false;
+    });
+    closeImport();
+    applyFilters();
+    showToast('Created ' + files.length + ' tracker record(s) from programs/');
+  });
+
+  syncBulk();
 })();
 </script>
 </body>
