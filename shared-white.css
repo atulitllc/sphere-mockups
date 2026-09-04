@@ -181,6 +181,90 @@ a.logo { text-decoration: none; color: inherit; display: block; }
   font-size: 12px;
 }
 
+
+.logo img.logo-mark { display: none; }
+
+/* —— Desktop nav collapse (icons-only rail) —— */
+html.nav-collapsed,
+html.nav-collapsed[data-theme="light"],
+html.nav-collapsed[data-theme="dark"],
+body.nav-collapsed {
+  --nav-w: 72px;
+}
+
+@media (min-width: 861px) {
+  .app { transition: grid-template-columns .18s ease; }
+
+  body.nav-collapsed .nav,
+  html.nav-collapsed body .nav {
+    padding: 18px 8px;
+    overflow-x: hidden;
+  }
+
+  body.nav-collapsed .logo,
+  html.nav-collapsed body .logo {
+    margin: 4px auto 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  body.nav-collapsed .logo img.logo-full,
+  html.nav-collapsed body .logo img.logo-full {
+    display: none !important;
+  }
+
+  body.nav-collapsed .logo img.logo-mark-light,
+  html.nav-collapsed body .logo img.logo-mark-light {
+    display: block;
+    width: 28px;
+    height: 28px;
+    max-height: 28px;
+  }
+
+  body.nav-collapsed .logo img.logo-mark-dark,
+  html.nav-collapsed body .logo img.logo-mark-dark {
+    display: none;
+  }
+
+  html[data-theme="dark"].nav-collapsed body .logo img.logo-mark-light,
+  html[data-theme="dark"] body.nav-collapsed .logo img.logo-mark-light {
+    display: none;
+  }
+
+  html[data-theme="dark"].nav-collapsed body .logo img.logo-mark-dark,
+  html[data-theme="dark"] body.nav-collapsed .logo img.logo-mark-dark {
+    display: block;
+    width: 28px;
+    height: 28px;
+    max-height: 28px;
+  }
+
+  body.nav-collapsed .nav a:not(.logo),
+  html.nav-collapsed body .nav a:not(.logo) {
+    justify-content: center;
+    gap: 0;
+    padding: 10px 0;
+    font-size: 0;
+    line-height: 0;
+  }
+
+  body.nav-collapsed .nav-divider,
+  html.nav-collapsed body .nav-divider {
+    margin: 10px 4px 12px;
+  }
+
+  body.nav-collapsed .nav-footer,
+  html.nav-collapsed body .nav-footer {
+    font-size: 0;
+    line-height: 0;
+    color: transparent;
+    padding: 10px 0 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+
 /* —— Main —— */
 .main { display: flex; flex-direction: column; min-width: 0; }
 
@@ -205,7 +289,7 @@ a.logo { text-decoration: none; color: inherit; display: block; }
 }
 
 .hamburger {
-  display: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
@@ -582,6 +666,15 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 @media (max-width: 860px) {
+
+  /* Collapsed rail is desktop-only; mobile keeps full-width drawer labels */
+  html.nav-collapsed,
+  html.nav-collapsed[data-theme="light"],
+  html.nav-collapsed[data-theme="dark"],
+  body.nav-collapsed {
+    --nav-w: 232px;
+  }
+
   .app { grid-template-columns: 1fr; }
   .hamburger { display: inline-flex; }
 

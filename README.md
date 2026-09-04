@@ -1,6 +1,6 @@
 # SPHERE mockups (public)
 
-Interactive UI previews for **SPHERE**. White-default chrome with a light/dark theme toggle on every module.
+Interactive UI previews for **SPHERE**. White-default chrome with a light/dark theme toggle and a desktop-collapsible left nav (icons-only rail; preference in `localStorage`) on every module.
 
 - **Entry:** `studies.html` — pick a study, then open the in-study workspace
 - **Style lock:** `mock-shells.html` (+ `shared-white.css`) — spreadsheet-like shell editor (double-click cells, row indent toolbar, footnotes blocks); build the React app against this look

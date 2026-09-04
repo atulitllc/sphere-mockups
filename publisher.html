@@ -13,6 +13,9 @@
   try {
     var t = localStorage.getItem('sphere-theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (localStorage.getItem('sphere-nav-collapsed') === 'true') {
+      document.documentElement.classList.add('nav-collapsed');
+    }
   } catch (e) {}
 })();
 </script>
@@ -21,7 +24,7 @@
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
 <div class="app">
     <aside class="nav" id="sideNav" aria-label="Primary">
-    <a class="logo" href="studies.html"><img class="logo-light" src="brand/sphere-lockup-nav-on-paper.png" alt="SPHERE" /><img class="logo-dark" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" /></a>
+    <a class="logo" href="studies.html" title="SPHERE"><img class="logo-light logo-full" src="brand/sphere-lockup-nav-on-paper.png" alt="SPHERE" /><img class="logo-dark logo-full" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" /><img class="logo-mark logo-mark-light" src="brand/sphere-mark.svg" alt="" /><img class="logo-mark logo-mark-dark" src="brand/sphere-mark-inverse.svg" alt="" /></a>
     <a href="studies.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 6.5V22"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
       Studies
@@ -73,7 +76,7 @@
   <section class="main">
     <header class="top">
       <div class="top-left">
-        <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation" aria-controls="sideNav" aria-expanded="false">
+        <button class="hamburger" id="hamburger" type="button" aria-label="Collapse navigation" aria-controls="sideNav" aria-expanded="true" title="Collapse navigation">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
         <div class="crumb">Studies / <strong>ONC-204-301</strong> / Publisher</div>
@@ -263,31 +266,69 @@
 
   if (!btn) return;
 
+  function isMobileNav() { return window.innerWidth <= 860; }
+
+  function syncNavBtn() {
+    if (!btn) return;
+    if (isMobileNav()) {
+      var open = body.classList.contains('nav-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      btn.setAttribute('title', open ? 'Close navigation' : 'Open navigation');
+    } else {
+      var collapsed = body.classList.contains('nav-collapsed');
+      btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      btn.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+      btn.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    }
+  }
+
+  function setCollapsed(collapsed) {
+    body.classList.toggle('nav-collapsed', collapsed);
+    root.classList.toggle('nav-collapsed', collapsed);
+    try { localStorage.setItem('sphere-nav-collapsed', collapsed ? 'true' : 'false'); } catch (e) {}
+    syncNavBtn();
+  }
+
   function setOpen(open) {
     body.classList.toggle('nav-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
     if (backdrop) {
       if (open) backdrop.removeAttribute('hidden');
       else backdrop.setAttribute('hidden', '');
     }
+    syncNavBtn();
   }
 
-  btn.addEventListener('click', function () {
-    setOpen(!body.classList.contains('nav-open'));
+  try {
+    if (localStorage.getItem('sphere-nav-collapsed') === 'true') {
+      body.classList.add('nav-collapsed');
+      root.classList.add('nav-collapsed');
+    }
+  } catch (e) {}
+
+  document.querySelectorAll('.nav a:not(.logo)').forEach(function (a) {
+    if (!a.getAttribute('title')) {
+      var label = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      if (label) a.setAttribute('title', label);
+    }
   });
 
-  if (backdrop) {
-    backdrop.addEventListener('click', function () { setOpen(false); });
+  if (btn) {
+    btn.addEventListener('click', function () {
+      if (isMobileNav()) setOpen(!body.classList.contains('nav-open'));
+      else setCollapsed(!body.classList.contains('nav-collapsed'));
+    });
   }
-
+  if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
+  window.addEventListener('resize', function () {
+    if (!isMobileNav()) setOpen(false);
+    syncNavBtn();
+  });
+  syncNavBtn();
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') setOpen(false);
   });
 
-  window.addEventListener('resize', function () {
-    if (window.innerWidth > 860) setOpen(false);
-  });
 })();
 </script>
 </body>
