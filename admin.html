@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPHERE — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared-white.css" />
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('sphere-theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="nav-backdrop" id="navBackdrop" hidden></div>
+<div class="app">
+  <aside class="nav" id="sideNav" aria-label="Primary">
+    <a class="logo" href="studies.html">SPHERE</a>
+    <a href="studies.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 6.5V22"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      Studies
+    </a>
+    <div class="nav-divider" aria-hidden="true"></div>
+    <a href="study-home.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+      Study home
+    </a>
+    <a href="mock-shells.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+      Mock Shells
+    </a>
+    <a href="data-hub.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+      Data Hub
+    </a>
+    <a href="compute.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 21h8M12 17v4"/><path d="M8 11h2M12 11h4"/></svg>
+      Compute
+    </a>
+    <a href="tracker.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg>
+      Tracker
+    </a>
+    <a href="publisher.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v4h14v-4"/></svg>
+      Publisher
+    </a>
+    <a href="copilot.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg>
+      Copilot
+    </a>
+    <a href="audit.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.2 2.9 7.8 7 9 4.1-1.2 7-4.8 7-9V6l-7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      Audit
+    </a>
+    <a class="active" href="admin.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Admin
+    </a>
+    <div class="nav-footer">Acme Biometrics · tenant</div>
+  </aside>
+
+  <section class="main">
+    <header class="top">
+      <div class="top-left">
+        <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation" aria-controls="sideNav" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="crumb"><a href="studies.html">Studies</a> / <strong>Admin</strong> / Tenant config</div>
+      </div>
+      <div class="top-right">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <div class="tenant-pill">Acme Biometrics · Admin</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="stack">
+        <div class="page-intro">
+          <h1 class="page-title">Tenant admin</h1>
+          <p class="page-sub">Thin config for this client org — modules, branding, SSO stubs. Do not gold-plate.</p>
+        </div>
+
+        <div class="note-banner" role="note">
+          <span class="note-label">Note</span>
+          <div><strong>Config is per tenant — one SPHERE build.</strong> Customization = tenant config + feature flags, not per-client repos. Spine always on; modules are pick-and-choose.</div>
+        </div>
+
+        <div class="admin-layout">
+          <nav class="admin-subnav" aria-label="Admin sections">
+            <button type="button" class="active" data-panel="overview">Overview</button>
+            <button type="button" data-panel="modules">Modules</button>
+            <button type="button" data-panel="branding">Branding</button>
+            <button type="button" data-panel="sso">SSO</button>
+            <button type="button" data-panel="users">Users &amp; roles</button>
+            <button type="button" data-panel="defaults">Study defaults</button>
+            <button type="button" data-panel="compliance">Compliance</button>
+          </nav>
+
+          <div class="admin-panels">
+            <!-- Overview -->
+            <div class="admin-panel active" id="panel-overview">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Tenant overview</span>
+                  <span class="badge ok">Active</span>
+                </div>
+                <div class="card-body">
+                  <div class="meta-grid">
+                    <div class="meta-item">
+                      <div class="k">Tenant</div>
+                      <div class="v">Acme Biometrics</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="k">Plan / SKU</div>
+                      <div class="v">Mock Shells + SCE core</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="k">Dedicated VPC</div>
+                      <div class="v">Stub · us-east-1</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="k">Environments</div>
+                      <div class="v">3 · Dev / QC / Prod</div>
+                    </div>
+                  </div>
+                  <p class="hint" style="margin-top:14px">Org ID <code style="font-size:12px">ten_acme_biometrics</code> · created 2026-03-12 · region AWS first</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modules -->
+            <div class="admin-panel" id="panel-modules">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Module flags</span>
+                  <span class="badge">Feature flags</span>
+                </div>
+                <div class="card-body" style="padding-top:4px;padding-bottom:8px">
+                  <div class="note-banner" role="note" style="margin-bottom:8px">
+                    <span class="note-label">Spine</span>
+                    <div>Tenant, SSO, study, layout map, and Part 11 audit are <strong>always on</strong> — not toggled here.</div>
+                  </div>
+
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Mock Shells</strong>
+                      <div class="hint">Standalone SKU · shell catalog, generate Word/RTF, human lock</div>
+                    </div>
+                    <label class="switch" title="Enabled">
+                      <input type="checkbox" checked />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Data Hub</strong>
+                      <div class="hint">Snapshot ingest, mapping packages, library views</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Compute</strong>
+                      <div class="hint">Job submit + logs · off in this example tenant</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Tracker</strong>
+                      <div class="hint">TLF &amp; dataset statuses · check-out / Send to QC</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Publisher</strong>
+                      <div class="hint">PDF / RTF bundle assembly</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Copilot</strong>
+                      <div class="hint">Governed suggestions only · attaches to enabled modules</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
+                      <strong>Audit</strong>
+                      <div class="hint">Module UI for trail browser · append-only log is spine</div>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Branding -->
+            <div class="admin-panel" id="panel-branding">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Branding</span>
+                  <span class="badge">Tenant chrome</span>
+                </div>
+                <div class="form">
+                  <div class="grid2">
+                    <label>
+                      <span>Display name</span>
+                      <input type="text" value="Acme Biometrics" />
+                    </label>
+                    <label>
+                      <span>Accent color</span>
+                      <div class="color-swatch">
+                        <input type="color" value="#2563EB" aria-label="Accent color" />
+                        <input type="text" value="#2563EB" style="flex:1" aria-label="Accent hex" />
+                      </div>
+                    </label>
+                  </div>
+                  <label>
+                    <span>Logo</span>
+                    <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
+                      <div class="logo-placeholder">Logo<br/>placeholder</div>
+                      <div>
+                        <button class="btn" type="button">Upload logo</button>
+                        <div class="hint" style="margin-top:8px">PNG/SVG · light &amp; dark variants later · not wired</div>
+                      </div>
+                    </div>
+                  </label>
+                  <div class="form-actions">
+                    <button class="btn primary" type="button">Save branding</button>
+                    <button class="btn ghost" type="button">Reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SSO -->
+            <div class="admin-panel" id="panel-sso">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">SSO · SAML / OIDC</span>
+                  <span class="badge warn">Stub · not wired</span>
+                </div>
+                <div class="form">
+                  <div class="note-banner" role="note">
+                    <span class="note-label">Stub</span>
+                    <div>Fields for IdP setup only. Day-one auth is local/dev login; SAML/OIDC lands later.</div>
+                  </div>
+                  <label>
+                    <span>Protocol</span>
+                    <select>
+                      <option>SAML 2.0</option>
+                      <option>OIDC</option>
+                    </select>
+                  </label>
+                  <div class="grid2">
+                    <label>
+                      <span>Entity ID</span>
+                      <input type="text" placeholder="https://idp.acme.example/entity" value="https://idp.acmebiometrics.com/saml" />
+                    </label>
+                    <label>
+                      <span>Metadata URL</span>
+                      <input type="url" placeholder="https://idp.acme.example/metadata.xml" value="https://idp.acmebiometrics.com/saml/metadata" />
+                    </label>
+                  </div>
+                  <label>
+                    <span>ACS URL (SP)</span>
+                    <input type="text" readonly value="https://sphere.atulit.com/sso/acs/ten_acme_biometrics" />
+                    <span class="hint">Read-only SP endpoint — copy to IdP</span>
+                  </label>
+                  <div class="form-actions">
+                    <button class="btn primary" type="button" disabled title="Not wired">Save SSO</button>
+                    <button class="btn" type="button" disabled>Test connection</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Users & roles -->
+            <div class="admin-panel" id="panel-users">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Users &amp; roles</span>
+                  <button class="btn primary sm" type="button">Invite user</button>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last active</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>J. Patel</strong></td>
+                        <td>j.patel@acmebio.example</td>
+                        <td><span class="badge info">Programmer</span></td>
+                        <td><span class="badge ok">Active</span></td>
+                        <td>Today · 4:48 PM ET</td>
+                      </tr>
+                      <tr>
+                        <td><strong>M. Chen</strong></td>
+                        <td>m.chen@acmebio.example</td>
+                        <td><span class="badge review">Reviewer</span></td>
+                        <td><span class="badge ok">Active</span></td>
+                        <td>Today · 4:12 PM ET</td>
+                      </tr>
+                      <tr>
+                        <td><strong>S. Ortiz</strong></td>
+                        <td>s.ortiz@acmebio.example</td>
+                        <td><span class="badge info">Programmer</span></td>
+                        <td><span class="badge ok">Active</span></td>
+                        <td>Tue · 5:30 PM ET</td>
+                      </tr>
+                      <tr>
+                        <td><strong>A. Rivera</strong></td>
+                        <td>a.rivera@acmebio.example</td>
+                        <td><span class="badge">Admin</span></td>
+                        <td><span class="badge ok">Active</span></td>
+                        <td>Mon · 10:02 AM ET</td>
+                      </tr>
+                      <tr>
+                        <td><strong>R. Nguyen</strong></td>
+                        <td>r.nguyen@acmebio.example</td>
+                        <td><span class="badge review">Reviewer</span></td>
+                        <td><span class="badge warn">Invited</span></td>
+                        <td>—</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="card-body" style="padding-top:0">
+                  <p class="hint">Roles: programmer · reviewer · admin. Invite is stub — SSO will map groups later.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Study defaults -->
+            <div class="admin-panel" id="panel-defaults">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Study defaults</span>
+                  <span class="badge">Layout map</span>
+                </div>
+                <div class="form">
+                  <label>
+                    <span>Default layout paths</span>
+                    <div class="path-list" style="margin-top:6px">
+                      <span class="path-chip">{study}/raw</span>
+                      <span class="path-chip">{study}/sdtm</span>
+                      <span class="path-chip">{study}/adam</span>
+                      <span class="path-chip">{study}/programs</span>
+                      <span class="path-chip">{study}/tlf</span>
+                      <span class="path-chip">{study}/logs</span>
+                    </div>
+                    <span class="hint">Fixed stub for day one — not a free-form libs→folders product yet. Per-study override allowed later.</span>
+                  </label>
+                  <div class="grid2">
+                    <label>
+                      <span>Default template pack</span>
+                      <select>
+                        <option>Acme standard v1.4</option>
+                        <option>ICH E3 core</option>
+                        <option>Oncology TLF pack</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Default output formats</span>
+                      <select>
+                        <option>Word (.docx) + RTF</option>
+                        <option>Word (.docx) only</option>
+                        <option>RTF only</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn primary" type="button">Save defaults</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compliance -->
+            <div class="admin-panel" id="panel-compliance">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Compliance</span>
+                  <span class="badge ok">Part 11 trail</span>
+                </div>
+                <div class="card-body stack" style="gap:14px">
+                  <div class="meta-grid" style="grid-template-columns: repeat(2, 1fr)">
+                    <div class="meta-item">
+                      <div class="k">Audit retention</div>
+                      <div class="v">7 years</div>
+                      <div class="hint" style="margin-top:6px">Append-only · exportable · immutable log lives with the spine</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="k">E-sign</div>
+                      <div class="v" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        Not in v1
+                        <span class="badge warn">Later</span>
+                      </div>
+                      <div class="hint" style="margin-top:6px">Approve / freeze in Tracker stays human-gated; Part 11 e-sign badge lands after MVP</div>
+                    </div>
+                  </div>
+                  <div class="note-banner" role="note">
+                    <span class="note-label">Thin</span>
+                    <div>IQ/OQ kit and security questionnaire answers live outside this screen. Admin stays configuration-only.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var body = document.body;
+  var btn = document.getElementById('hamburger');
+  var backdrop = document.getElementById('navBackdrop');
+  var themeBtn = document.getElementById('themeToggle');
+
+  function currentTheme() {
+    return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem('sphere-theme', theme); } catch (e) {}
+    if (themeBtn) {
+      themeBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+  }
+
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+    });
+    applyTheme(currentTheme());
+  }
+
+  function setOpen(open) {
+    body.classList.toggle('nav-open', open);
+    if (btn) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    }
+    if (backdrop) {
+      if (open) backdrop.removeAttribute('hidden');
+      else backdrop.setAttribute('hidden', '');
+    }
+  }
+
+  if (btn) {
+    btn.addEventListener('click', function () {
+      setOpen(!body.classList.contains('nav-open'));
+    });
+  }
+  if (backdrop) {
+    backdrop.addEventListener('click', function () { setOpen(false); });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setOpen(false);
+  });
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 860) setOpen(false);
+  });
+
+  /* Admin subnav panels */
+  var navBtns = document.querySelectorAll('.admin-subnav button[data-panel]');
+  var panels = document.querySelectorAll('.admin-panel');
+  navBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.getAttribute('data-panel');
+      navBtns.forEach(function (x) { x.classList.toggle('active', x === b); });
+      panels.forEach(function (p) {
+        p.classList.toggle('active', p.id === 'panel-' + id);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
