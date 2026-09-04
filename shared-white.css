@@ -598,3 +598,179 @@ label .req::after { content: " *"; color: var(--danger); }
   .col-row input:nth-child(3),
   .col-row input:nth-child(4) { display: none; }
 }
+
+
+/* —— Module layout helpers —— */
+.content.stack { display: grid; gap: 18px; }
+.stack { display: grid; gap: 18px; }
+.split {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.2fr) minmax(300px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.muted { color: var(--muted); }
+.stat-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.card-body { padding: 16px; }
+
+/* Legacy card h2 → same look as card-head when used */
+.card > h2 {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Extra badges used across modules */
+.badge.ok, .badge.mapped, .badge.complete { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-border); }
+.badge.running { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
+.badge.qc { color: var(--purple); background: var(--purple-soft); border-color: var(--purple-border); }
+.badge.warn, .badge.pending { color: var(--warn); background: var(--warn-soft); border-color: var(--warn-border); }
+.badge.danger, .badge.failed, .badge.rejected { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-border); }
+.badge.info { color: var(--blue); background: var(--blue-soft); border-color: var(--blue-border); }
+.badge.dataset { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-border); }
+
+.btn.ok { color: var(--ok); border-color: var(--ok-border); background: var(--ok-soft); }
+.btn.ok:hover { background: var(--ok-soft); filter: brightness(0.97); }
+.btn:disabled, .btn.disabled { opacity: 0.45; cursor: not-allowed; }
+
+.search { width: 180px; }
+
+.meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.meta-item {
+  background: var(--row-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.meta-item .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.meta-item .v { font-size: 15px; font-weight: 600; }
+
+.lib-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.lib-card {
+  background: var(--row-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+.lib-card .name { font-weight: 600; margin-bottom: 8px; }
+
+.module-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.module-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.module-card:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-ring); }
+.module-card .title { font-weight: 600; margin-bottom: 6px; }
+.module-card .desc { color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+.activity { list-style: none; margin: 0; padding: 0; }
+.activity li {
+  display: grid; grid-template-columns: 140px 1fr auto;
+  gap: 12px; padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+.activity li:last-child { border-bottom: none; }
+.activity .when { color: var(--muted); font-size: 12px; }
+.activity .who { color: var(--muted); font-size: 12px; }
+
+.check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-row input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+
+.log-panel {
+  background: var(--th-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-height: 280px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+[data-theme="dark"] .log-panel {
+  background: #0a0e13;
+  color: #a8b8c8;
+}
+
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li {
+  display: grid;
+  grid-template-columns: 160px 14px 1fr;
+  gap: 14px;
+  padding: 0 16px 18px;
+  position: relative;
+}
+.timeline .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  margin-top: 4px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.timeline .line {
+  position: absolute;
+  left: calc(160px + 18px);
+  top: 16px; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.timeline li:last-child .line { display: none; }
+.timeline .when { color: var(--muted); font-size: 12px; }
+.timeline .evt { font-weight: 600; margin-bottom: 4px; }
+.timeline .detail { color: var(--muted); line-height: 1.45; }
+
+.suggestion {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--surface);
+  display: grid; gap: 10px;
+}
+.suggestion .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.suggestion .body { color: var(--muted); line-height: 1.45; }
+.suggestion .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.dropzone {
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--row-hover);
+}
+.dropzone strong { color: var(--text); display: block; margin-bottom: 6px; }
+
+@media (max-width: 1100px) {
+  .split { grid-template-columns: 1fr; }
+  .lib-row { grid-template-columns: repeat(3, 1fr); }
+  .module-grid { grid-template-columns: repeat(2, 1fr); }
+  .meta-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .lib-row { grid-template-columns: repeat(2, 1fr); }
+  .module-grid { grid-template-columns: 1fr; }
+  .meta-grid { grid-template-columns: 1fr; }
+  .activity li { grid-template-columns: 1fr; gap: 4px; }
+  .timeline li { grid-template-columns: 100px 14px 1fr; }
+  .timeline .line { left: calc(100px + 18px); }
+  .search { width: 140px; }
+}

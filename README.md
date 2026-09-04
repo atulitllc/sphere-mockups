@@ -1,9 +1,10 @@
 # SPHERE mockups (public)
 
-Interactive UI previews for **SPHERE**.
+Interactive UI previews for **SPHERE**. White-default chrome with a light/dark theme toggle on every module.
 
-- **Style lock:** `mock-shells-white.html` (+ `shared-white.css`) — build the React app against this look
-- **Module screens (dark, earlier):** `modules/*.html` — Study home, Mock Shells, Data Hub, Compute, Tracker, Publisher, Copilot, Audit
+- **Style lock:** `mock-shells.html` (+ `shared-white.css`) — build the React app against this look
+- **Modules (all white + toggle):** `study-home.html`, `mock-shells.html`, `data-hub.html`, `compute.html`, `tracker.html`, `publisher.html`, `copilot.html`, `audit.html`
+- `mock-shells-white.html` is kept as an alias of `mock-shells.html` for older Pages links
 - Product PRD / build plan: private repo [`atulitllc/sphere`](https://github.com/atulitllc/sphere)
 
 GitHub Pages: https://atulitllc.github.io/sphere-mockups/
