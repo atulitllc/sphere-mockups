@@ -20,7 +20,7 @@
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
 <div class="app">
-    <aside class="nav" id="sideNav" aria-label="Primary">
+  <aside class="nav" id="sideNav" aria-label="Primary">
     <a class="logo" href="studies.html"><img class="logo-light" src="brand/sphere-lockup-nav-on-paper.png" alt="SPHERE" /><img class="logo-dark" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" /></a>
     <a href="studies.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 6.5V22"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
@@ -90,39 +90,39 @@
     <div class="content">
       <div class="page-intro">
         <h1 class="page-title">Mock Shells</h1>
-        <p class="page-sub">Build TLF shells from approved templates. Map SAP sections and aCRF as references, then save a draft or generate the shell for review. <strong>Shell lock ≠ program freeze</strong> — locking a shell freezes titles/columns/footnotes only; the TLF program can still be In dev in Tracker/Compute.</p>
+        <p class="page-sub">Edit TLF shells as a sheet — double-click cells, indent rows, add columns. <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
       </div>
 
-      <div class="workspace cols-2">
+      <div class="workspace shell-workspace">
         <!-- Catalog -->
-        <div class="card">
+        <div class="card shell-catalog">
           <div class="card-head">
             <span class="title-row">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
               Shell catalog
             </span>
-            <div class="list-tools">
-              <div class="search-wrap">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                <input class="search" type="search" placeholder="Search number, title…" aria-label="Search shells" />
-              </div>
-              <div class="filter-wrap">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7v5l-4 2v-7L4 5z"/></svg>
-                <select aria-label="Filter by type">
-                  <option>All types</option>
-                  <option>Table</option>
-                  <option>Listing</option>
-                  <option>Figure</option>
-                </select>
-              </div>
-              <button class="btn primary" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                Add shell
-              </button>
+            <button class="btn primary btn-sm" type="button" id="btnAddShell">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Add
+            </button>
+          </div>
+          <div class="shell-catalog-tools">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input class="search" id="catalogSearch" type="search" placeholder="Search…" aria-label="Search shells" />
+            </div>
+            <div class="filter-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7v5l-4 2v-7L4 5z"/></svg>
+              <select id="catalogFilter" aria-label="Filter by type">
+                <option>All types</option>
+                <option>Table</option>
+                <option>Listing</option>
+                <option>Figure</option>
+              </select>
             </div>
           </div>
           <div class="table-wrap">
-            <table>
+            <table id="catalogTable">
               <thead>
                 <tr>
                   <th>Number</th>
@@ -131,239 +131,145 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr class="selected">
+              <tbody id="catalogBody">
+                <tr class="selected" data-id="14.1.1" data-type="Table">
                   <td class="num">14.1.1</td>
-                  <td><span class="badge table">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
-                    Table
-                  </span></td>
+                  <td><span class="badge table">Table</span></td>
                   <td>Demographics</td>
-                  <td><span class="badge draft">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                    Draft
-                  </span></td>
+                  <td><span class="badge draft">Draft</span></td>
                 </tr>
-                <tr>
+                <tr data-id="14.1.2" data-type="Table">
                   <td class="num">14.1.2</td>
-                  <td><span class="badge table">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
-                    Table
-                  </span></td>
+                  <td><span class="badge table">Table</span></td>
                   <td>Baseline characteristics</td>
-                  <td><span class="badge locked">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-                    Locked
-                  </span></td>
+                  <td><span class="badge locked">Locked</span></td>
                 </tr>
-                <tr>
+                <tr data-id="14.2.1" data-type="Table">
                   <td class="num">14.2.1</td>
-                  <td><span class="badge table">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
-                    Table
-                  </span></td>
+                  <td><span class="badge table">Table</span></td>
                   <td>Primary endpoint — ORR</td>
                   <td><span class="badge review">In review</span></td>
                 </tr>
-                <tr>
+                <tr data-id="14.3.1" data-type="Listing">
                   <td class="num">14.3.1</td>
-                  <td><span class="badge listing">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                    Listing
-                  </span></td>
+                  <td><span class="badge listing">Listing</span></td>
                   <td>Adverse events — overview</td>
-                  <td><span class="badge draft">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                    Draft
-                  </span></td>
+                  <td><span class="badge draft">Draft</span></td>
                 </tr>
-                <tr>
+                <tr data-id="14.3.2" data-type="Figure">
                   <td class="num">14.3.2</td>
-                  <td><span class="badge figure">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>
-                    Figure
-                  </span></td>
+                  <td><span class="badge figure">Figure</span></td>
                   <td>Kaplan–Meier overall survival</td>
-                  <td><span class="badge draft">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                    Draft
-                  </span></td>
+                  <td><span class="badge draft">Draft</span></td>
                 </tr>
-                <tr>
-                  <td class="num">14.3.5</td>
-                  <td><span class="badge table">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
-                    Table
-                  </span></td>
-                  <td>Laboratory — chemistry shifts</td>
-                  <td><span class="badge not-started">Not started</span></td>
+                <tr data-id="adhoc-1" data-type="Table">
+                  <td class="num">Adhoc 1</td>
+                  <td><span class="badge table">Table</span></td>
+                  <td>{Adhoc Shell 1}</td>
+                  <td><span class="badge draft">Draft</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Edit form -->
-        <div class="card">
-          <div class="card-head">
-            <span class="title-row">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-              Edit mock shell
-            </span>
-            <span class="mode-tag">EDIT · 14.1.1</span>
-          </div>
-          <div class="form">
-            <div class="grid3">
-              <label><span class="req">Shell number</span>
-                <input value="14.1.1" />
+        <!-- Sheet editor -->
+        <div class="card shell-editor">
+          <div class="shell-action-bar">
+            <div class="shell-meta-strip">
+              <label class="meta-field">Shell
+                <input id="metaNumber" value="14.1.1" />
               </label>
-              <label><span class="req">Type</span>
-                <select>
+              <label class="meta-field">Type
+                <select id="metaType">
                   <option selected>Table</option>
                   <option>Listing</option>
                   <option>Figure</option>
                 </select>
               </label>
-              <label><span class="req">Analysis set</span>
-                <select>
+              <label class="meta-field">Analysis set
+                <select id="metaSet">
                   <option selected>Safety</option>
                   <option>ITT</option>
                   <option>mITT</option>
                   <option>PP</option>
                 </select>
               </label>
-            </div>
-
-            <label><span class="req">Title</span>
-              <input value="Demographics and Baseline Characteristics" />
-            </label>
-
-            <div class="grid2">
-              <label>Template
-                <select>
-                  <option selected>std.table.demog.v3</option>
-                  <option>std.table.ae.overview.v2</option>
-                  <option>std.figure.km.v1</option>
-                  <option>Custom (blank shell)</option>
-                </select>
-                <div class="hint">Day-one shells generate from templates</div>
-              </label>
-              <label>Output format
-                <select>
-                  <option selected>Word (.docx)</option>
-                  <option>RTF</option>
-                  <option>Both</option>
-                </select>
-              </label>
-            </div>
-
-            <div class="grid2">
-              <label>SAP source
-                <select>
-                  <option selected>SAP §9.2 Demographics</option>
-                  <option>SAP §10.1 Efficacy</option>
-                  <option>SAP §11.2 Safety</option>
-                </select>
-                <div class="hint">Optional reference only — does not drive generate on day one</div>
-              </label>
-              <label>aCRF reference
-                <select>
-                  <option selected>DM — Demographics</option>
-                  <option>AE — Adverse Events</option>
-                  <option>None</option>
-                </select>
-              </label>
-            </div>
-
-            <div class="section-title">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
-              Columns
-            </div>
-            <div class="cols">
-              <div class="col-row">
-                <input value="1" aria-label="Row order" />
-                <input value="Parameter" aria-label="Column label" />
-                <input value="Placebo" aria-label="Treatment 1" />
-                <input value="Drug X 100mg" aria-label="Treatment 2" />
-                <button class="btn icon-only" type="button" aria-label="Remove row">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-                </button>
-              </div>
-              <div class="col-row">
-                <input value="2" aria-label="Row order" />
-                <input value="Age (years)" aria-label="Column label" />
-                <input value="n / mean (SD)" aria-label="Treatment 1" />
-                <input value="n / mean (SD)" aria-label="Treatment 2" />
-                <button class="btn icon-only" type="button" aria-label="Remove row">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-                </button>
-              </div>
-              <button class="btn" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                Add column / stub row
-              </button>
-            </div>
-
-            <div class="section-title">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 8h8M8 12h6"/></svg>
-              Footnotes
-            </div>
-            <div class="footnotes">
-              <div class="fn-row">
-                <input value="[1]" aria-label="Footnote marker" />
-                <textarea aria-label="Footnote text">Safety analysis set. Percentages based on number of subjects in each treatment group.</textarea>
-                <button class="btn icon-only" type="button" aria-label="Remove footnote">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-                </button>
-              </div>
-              <div class="fn-row">
-                <input value="[2]" aria-label="Footnote marker" />
-                <textarea aria-label="Footnote text">Age is calculated at informed consent.</textarea>
-                <button class="btn icon-only" type="button" aria-label="Remove footnote">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-                </button>
-              </div>
-              <button class="btn" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                Add footnote
-              </button>
-            </div>
-
-            <div class="grid2">
-              <label>Programming notes
-                <textarea placeholder="Optional notes for stats programmer (not printed on shell)"></textarea>
-              </label>
-              <label>Status
-                <select>
+              <label class="meta-field">Status
+                <select id="metaStatus">
                   <option selected>Draft</option>
                   <option>In review</option>
-                  <option>Locked (human)</option>
+                  <option>Locked</option>
                 </select>
-                <div class="hint">Lock requires human confirm · audited · Copilot cannot lock</div>
               </label>
             </div>
+            <div class="shell-actions">
+              <button class="btn" type="button" id="btnSaveDraft">Save draft</button>
+              <button class="btn primary" type="button" id="btnGenerate">Save &amp; generate</button>
+              <button class="btn" type="button" id="btnLock">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                Lock
+              </button>
+            </div>
+          </div>
 
-            <div class="form-actions">
-              <div class="left-actions">
-                <button class="btn danger" type="button">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg>
-                  Delete
+          <div class="sheet-canvas">
+            <div class="sheet-title-row">
+              <div class="sheet-titles">
+                <div class="sheet-title" id="shellTitle" data-placeholder="{Adhoc Shell 1}" contenteditable="false" title="Double-click to edit">{Adhoc Shell 1}</div>
+                <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
+              </div>
+              <div class="sheet-type-controls">
+                <button class="sheet-type-btn" type="button" id="typeMenuBtn" aria-haspopup="listbox" aria-expanded="false">
+                  Table
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
-                <button class="btn ghost" type="button">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>
-                  Duplicate
+                <span class="sheet-custom-pill">Custom</span>
+              </div>
+            </div>
+
+            <div class="sheet-grid-wrap" id="sheetGridWrap">
+              <div class="row-float-toolbar" id="rowToolbar" hidden>
+                <button type="button" data-act="outdent" title="Outdent" aria-label="Outdent">
+                  <svg viewBox="0 0 24 24"><path d="M4 12h12M10 6l-6 6 6 6"/><path d="M20 6v12"/></svg>
+                </button>
+                <button type="button" data-act="indent" title="Indent" aria-label="Indent">
+                  <svg viewBox="0 0 24 24"><path d="M8 12h12M14 6l6 6-6 6"/><path d="M4 6v12"/></svg>
+                </button>
+                <button type="button" data-act="up" title="Up" aria-label="Move up">
+                  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </button>
+                <button type="button" data-act="down" title="Down" aria-label="Move down">
+                  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                </button>
+                <button type="button" data-act="add" title="Add row" aria-label="Add row">
+                  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+                <button type="button" data-act="delete" title="Delete row" aria-label="Delete row" class="danger">
+                  <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
                 </button>
               </div>
-              <div class="right-actions">
-                <button class="btn" type="button">Cancel</button>
-                <button class="btn" type="button">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-                  Save draft
-                </button>
-                <button class="btn primary" type="button">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v4h14v-4"/></svg>
-                  Save &amp; generate
-                </button>
+
+              <table class="sheet-grid" id="sheetGrid" aria-label="Shell layout grid">
+                <thead id="sheetHead"></thead>
+                <tbody id="sheetBody"></tbody>
+              </table>
+            </div>
+
+            <button class="sheet-add-row" type="button" id="btnAddRow">+ Add Row</button>
+
+            <div class="sheet-blocks">
+              <div class="sheet-block" data-field="footnotes">
+                <span class="block-label">Footnotes:</span>
+                <span class="block-value empty" data-placeholder="Double-click to edit">Double-click to edit</span>
+              </div>
+              <div class="sheet-block" data-field="notes">
+                <span class="block-label">Programming Notes:</span>
+                <span class="block-value empty" data-placeholder="Double-click to edit">Double-click to edit</span>
+              </div>
+              <div class="sheet-block" data-field="program">
+                <span class="block-label">Program Name:</span>
+                <span class="block-value empty" data-placeholder="Double-click to edit">Double-click to edit</span>
               </div>
             </div>
           </div>
@@ -373,8 +279,24 @@
   </section>
 </div>
 
+<!-- Context menu -->
+<div class="sheet-ctx" id="ctxMenu" hidden role="menu">
+  <button type="button" data-cmd="insert-row-above" role="menuitem">Insert row above</button>
+  <button type="button" data-cmd="insert-row-below" role="menuitem">Insert row below</button>
+  <button type="button" data-cmd="delete-row" role="menuitem">Delete row</button>
+  <div class="ctx-sep"></div>
+  <button type="button" data-cmd="insert-col-left" role="menuitem">Insert column left</button>
+  <button type="button" data-cmd="insert-col-right" role="menuitem">Insert column right</button>
+  <button type="button" data-cmd="delete-col" role="menuitem">Delete column</button>
+  <div class="ctx-sep"></div>
+  <button type="button" data-cmd="indent" role="menuitem">Indent</button>
+  <button type="button" data-cmd="outdent" role="menuitem">Outdent</button>
+  <button type="button" data-cmd="clear" role="menuitem">Clear cell</button>
+</div>
+
 <script>
 (function () {
+  /* —— chrome: theme + nav —— */
   var root = document.documentElement;
   var body = document.body;
   var btn = document.getElementById('hamburger');
@@ -384,7 +306,6 @@
   function currentTheme() {
     return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
-
   function applyTheme(theme) {
     root.setAttribute('data-theme', theme);
     try { localStorage.setItem('sphere-theme', theme); } catch (e) {}
@@ -392,41 +313,507 @@
       themeBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
     }
   }
-
   if (themeBtn) {
     themeBtn.addEventListener('click', function () {
       applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
     });
     applyTheme(currentTheme());
   }
-
-  if (!btn) return;
-
   function setOpen(open) {
     body.classList.toggle('nav-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    if (btn) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    }
     if (backdrop) {
       if (open) backdrop.removeAttribute('hidden');
       else backdrop.setAttribute('hidden', '');
     }
   }
-
-  btn.addEventListener('click', function () {
-    setOpen(!body.classList.contains('nav-open'));
-  });
-
-  if (backdrop) {
-    backdrop.addEventListener('click', function () { setOpen(false); });
+  if (btn) {
+    btn.addEventListener('click', function () {
+      setOpen(!body.classList.contains('nav-open'));
+    });
   }
-
+  if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Escape') {
+      setOpen(false);
+      hideCtx();
+    }
   });
-
   window.addEventListener('resize', function () {
     if (window.innerWidth > 860) setOpen(false);
   });
+
+  /* —— sheet model —— */
+  var state = {
+    title: '{Adhoc Shell 1}',
+    subtitle: '',
+    columns: ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'],
+    rows: [
+      { indent: 0, label: 'indent 1', cells: ['', '', '', '', ''] },
+      { indent: 1, label: 'Indent 2', cells: ['', '', '', '', ''] },
+      { indent: 2, label: 'indent 3', cells: ['', '', '', '', ''] },
+      { indent: 3, label: '111 indent 413', cells: ['', '', '', '', ''], badges: true },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] }
+    ],
+    footnotes: '',
+    notes: '',
+    program: '',
+    activeRow: -1,
+    ctx: { row: -1, col: -1 }
+  };
+
+  var demogPreset = {
+    title: 'Table 14.1.1 Demographics',
+    subtitle: 'Safety Analysis Set',
+    columns: ['Placebo', 'Drug X 100mg', 'Total'],
+    rows: [
+      { indent: 0, label: 'Age (years)', cells: ['', '', ''] },
+      { indent: 1, label: 'n', cells: ['xx', 'xx', 'xx'] },
+      { indent: 1, label: 'Mean (SD)', cells: ['xx.x (xx.xx)', 'xx.x (xx.xx)', 'xx.x (xx.xx)'] },
+      { indent: 1, label: 'Median', cells: ['xx.x', 'xx.x', 'xx.x'] },
+      { indent: 1, label: 'Min, Max', cells: ['xx, xx', 'xx, xx', 'xx, xx'] },
+      { indent: 0, label: 'Sex, n (%)', cells: ['', '', ''] },
+      { indent: 1, label: 'Male', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] },
+      { indent: 1, label: 'Female', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
+    ],
+    footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Age calculated at informed consent.',
+    notes: '',
+    program: 't_14_1_1_demog.sas'
+  };
+
+  var headEl = document.getElementById('sheetHead');
+  var bodyEl = document.getElementById('sheetBody');
+  var toolbar = document.getElementById('rowToolbar');
+  var ctxMenu = document.getElementById('ctxMenu');
+  var wrap = document.getElementById('sheetGridWrap');
+
+  function ensureRowCells(row) {
+    while (row.cells.length < state.columns.length) row.cells.push('');
+    if (row.cells.length > state.columns.length) row.cells.length = state.columns.length;
+  }
+
+  function render() {
+    state.rows.forEach(ensureRowCells);
+
+    var hr = '<tr><th class="col-idx">#</th><th class="col-label"></th>';
+    state.columns.forEach(function (c, i) {
+      hr += '<th class="col-data" data-col="' + i + '"><span class="th-text" data-col="' + i + '">' +
+        escapeHtml(c) + '</span></th>';
+    });
+    hr += '<th class="col-add"><button type="button" class="col-add-btn" id="btnAddCol" title="Add column" aria-label="Add column">+</button></th></tr>';
+    headEl.innerHTML = hr;
+
+    var html = '';
+    state.rows.forEach(function (row, ri) {
+      var sel = ri === state.activeRow ? ' selected' : '';
+      html += '<tr class="sheet-row' + sel + '" data-row="' + ri + '">';
+      html += '<td class="col-idx">' + (ri + 1) + '</td>';
+      html += '<td class="col-label indent-' + Math.min(row.indent, 6) + '" data-row="' + ri + '" data-col="-1">';
+      html += '<span class="cell-text">' + escapeHtml(row.label) + '</span>';
+      if (row.badges) {
+        html += '<span class="cell-badges"><span class="cell-badge comment">1</span><span class="cell-badge note">2</span></span>';
+      }
+      html += '</td>';
+      row.cells.forEach(function (val, ci) {
+        html += '<td class="col-data" data-row="' + ri + '" data-col="' + ci + '"><span class="cell-text">' +
+          escapeHtml(val) + '</span></td>';
+      });
+      html += '<td class="col-add"></td></tr>';
+    });
+    bodyEl.innerHTML = html;
+
+    document.getElementById('shellTitle').textContent = state.title || document.getElementById('shellTitle').dataset.placeholder;
+    document.getElementById('shellTitle').classList.toggle('empty', !state.title);
+    var sub = document.getElementById('shellSubtitle');
+    if (state.subtitle) {
+      sub.textContent = state.subtitle;
+      sub.classList.remove('empty');
+    } else {
+      sub.textContent = sub.dataset.placeholder;
+      sub.classList.add('empty');
+    }
+
+    setBlock('footnotes', state.footnotes);
+    setBlock('notes', state.notes);
+    setBlock('program', state.program);
+
+    if (state.activeRow >= 0) positionToolbar(state.activeRow);
+    else toolbar.hidden = true;
+  }
+
+  function setBlock(field, value) {
+    var el = document.querySelector('.sheet-block[data-field="' + field + '"] .block-value');
+    if (!el) return;
+    if (value) {
+      el.textContent = value;
+      el.classList.remove('empty');
+    } else {
+      el.textContent = el.dataset.placeholder;
+      el.classList.add('empty');
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function positionToolbar(ri) {
+    var rowEl = bodyEl.querySelector('tr[data-row="' + ri + '"]');
+    if (!rowEl) { toolbar.hidden = true; return; }
+    toolbar.hidden = false;
+    var wrapRect = wrap.getBoundingClientRect();
+    var rowRect = rowEl.getBoundingClientRect();
+    toolbar.style.top = (rowRect.top - wrapRect.top + wrap.scrollTop + (rowRect.height - 32) / 2) + 'px';
+  }
+
+  /* —— editing —— */
+  function startCellEdit(td) {
+    if (!td || td.classList.contains('col-idx') || td.classList.contains('col-add')) return;
+    if (td.querySelector('input.cell-input')) return;
+    var ri = +td.dataset.row;
+    var ci = +td.dataset.col;
+    var current = ci < 0 ? state.rows[ri].label : state.rows[ri].cells[ci];
+    var input = document.createElement('input');
+    input.className = 'cell-input';
+    input.value = current || '';
+    td.innerHTML = '';
+    td.appendChild(input);
+    input.focus();
+    input.select();
+
+    function commit() {
+      var v = input.value;
+      if (ci < 0) state.rows[ri].label = v;
+      else state.rows[ri].cells[ci] = v;
+      if (state.rows[ri].badges && ci < 0) state.rows[ri].badges = false;
+      render();
+    }
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = current || ''; input.blur(); }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        input.blur();
+        var nextCol = ci + (e.shiftKey ? -1 : 1);
+        var nextRow = ri;
+        if (nextCol < -1) { nextCol = state.columns.length - 1; nextRow--; }
+        if (nextCol >= state.columns.length) { nextCol = -1; nextRow++; }
+        if (nextRow >= 0 && nextRow < state.rows.length) {
+          var sel = nextCol < 0
+            ? 'td.col-label[data-row="' + nextRow + '"]'
+            : 'td.col-data[data-row="' + nextRow + '"][data-col="' + nextCol + '"]';
+          var next = bodyEl.querySelector(sel);
+          if (next) setTimeout(function () { startCellEdit(next); }, 0);
+        }
+      }
+    });
+  }
+
+  function startHeaderEdit(th) {
+    var ci = +th.dataset.col;
+    if (isNaN(ci)) return;
+    var span = th.querySelector('.th-text');
+    if (!span || th.querySelector('input')) return;
+    var current = state.columns[ci];
+    var input = document.createElement('input');
+    input.className = 'cell-input';
+    input.value = current;
+    th.innerHTML = '';
+    th.appendChild(input);
+    input.focus();
+    input.select();
+    function commit() {
+      state.columns[ci] = input.value || 'New Column';
+      render();
+    }
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = current; input.blur(); }
+    });
+  }
+
+  function startTextEdit(el, getVal, setVal) {
+    if (el.querySelector('input, textarea')) return;
+    var isBlock = el.classList.contains('block-value') || el.classList.contains('sheet-subtitle');
+    var current = getVal() || '';
+    var input = document.createElement(isBlock && el.classList.contains('block-value') ? 'textarea' : 'input');
+    input.className = 'inline-edit';
+    input.value = current;
+    var ph = el.dataset.placeholder || '';
+    el.textContent = '';
+    el.classList.remove('empty');
+    el.appendChild(input);
+    input.focus();
+    input.select();
+    function commit() {
+      setVal(input.value.trim());
+      render();
+    }
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && input.tagName === 'INPUT') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = current; input.blur(); }
+    });
+  }
+
+  bodyEl.addEventListener('dblclick', function (e) {
+    var td = e.target.closest('td');
+    if (td) startCellEdit(td);
+  });
+  headEl.addEventListener('dblclick', function (e) {
+    var th = e.target.closest('th.col-data');
+    if (th) startHeaderEdit(th);
+  });
+
+  document.getElementById('shellTitle').addEventListener('dblclick', function () {
+    startTextEdit(this, function () { return state.title; }, function (v) { state.title = v; });
+  });
+  document.getElementById('shellSubtitle').addEventListener('dblclick', function () {
+    startTextEdit(this, function () { return state.subtitle; }, function (v) { state.subtitle = v; });
+  });
+  document.querySelectorAll('.sheet-block').forEach(function (block) {
+    block.addEventListener('dblclick', function () {
+      var field = block.dataset.field;
+      var valEl = block.querySelector('.block-value');
+      startTextEdit(valEl, function () { return state[field]; }, function (v) { state[field] = v; });
+    });
+  });
+
+  /* —— row selection + toolbar —— */
+  bodyEl.addEventListener('mouseover', function (e) {
+    var tr = e.target.closest('tr.sheet-row');
+    if (!tr) return;
+    var ri = +tr.dataset.row;
+    if (state.activeRow !== ri) {
+      state.activeRow = ri;
+      bodyEl.querySelectorAll('tr.selected').forEach(function (r) { r.classList.remove('selected'); });
+      tr.classList.add('selected');
+      positionToolbar(ri);
+    }
+  });
+  wrap.addEventListener('mouseleave', function () {
+    /* keep selection visible briefly; hide when leaving grid */
+  });
+
+  toolbar.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]');
+    if (!b || state.activeRow < 0) return;
+    var ri = state.activeRow;
+    var act = b.dataset.act;
+    if (act === 'indent') indentRow(ri, 1);
+    else if (act === 'outdent') indentRow(ri, -1);
+    else if (act === 'up') moveRow(ri, -1);
+    else if (act === 'down') moveRow(ri, 1);
+    else if (act === 'add') insertRow(ri + 1);
+    else if (act === 'delete') deleteRow(ri);
+  });
+
+  function indentRow(ri, delta) {
+    var row = state.rows[ri];
+    row.indent = Math.max(0, Math.min(6, (row.indent || 0) + delta));
+    render();
+  }
+  function moveRow(ri, delta) {
+    var ni = ri + delta;
+    if (ni < 0 || ni >= state.rows.length) return;
+    var tmp = state.rows[ri];
+    state.rows[ri] = state.rows[ni];
+    state.rows[ni] = tmp;
+    state.activeRow = ni;
+    render();
+  }
+  function insertRow(at) {
+    var blank = { indent: 0, label: '', cells: state.columns.map(function () { return ''; }) };
+    state.rows.splice(at, 0, blank);
+    state.activeRow = at;
+    render();
+  }
+  function deleteRow(ri) {
+    if (state.rows.length <= 1) return;
+    state.rows.splice(ri, 1);
+    state.activeRow = Math.min(ri, state.rows.length - 1);
+    render();
+  }
+  function insertCol(at) {
+    state.columns.splice(at, 0, 'New Column');
+    state.rows.forEach(function (r) { r.cells.splice(at, 0, ''); });
+    render();
+  }
+  function deleteCol(ci) {
+    if (state.columns.length <= 1) return;
+    state.columns.splice(ci, 1);
+    state.rows.forEach(function (r) { r.cells.splice(ci, 1); });
+    render();
+  }
+
+  document.getElementById('btnAddRow').addEventListener('click', function () {
+    insertRow(state.rows.length);
+  });
+  headEl.addEventListener('click', function (e) {
+    if (e.target.closest('#btnAddCol') || e.target.closest('.col-add-btn')) {
+      insertCol(state.columns.length);
+    }
+  });
+
+  /* —— context menu —— */
+  function hideCtx() { ctxMenu.hidden = true; }
+  function showCtx(x, y, ri, ci) {
+    state.ctx = { row: ri, col: ci };
+    ctxMenu.hidden = false;
+    ctxMenu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+    ctxMenu.style.top = Math.min(y, window.innerHeight - 320) + 'px';
+  }
+  wrap.addEventListener('contextmenu', function (e) {
+    var td = e.target.closest('td, th');
+    if (!td) return;
+    e.preventDefault();
+    var ri = td.dataset.row != null ? +td.dataset.row : state.activeRow;
+    var ci = td.dataset.col != null ? +td.dataset.col : -1;
+    if (td.tagName === 'TH' && td.classList.contains('col-data')) {
+      ri = -1; ci = +td.dataset.col;
+    }
+    if (ri >= 0) {
+      state.activeRow = ri;
+      bodyEl.querySelectorAll('tr.selected').forEach(function (r) { r.classList.remove('selected'); });
+      var tr = bodyEl.querySelector('tr[data-row="' + ri + '"]');
+      if (tr) tr.classList.add('selected');
+      positionToolbar(ri);
+    }
+    showCtx(e.clientX, e.clientY, ri, ci);
+  });
+  document.addEventListener('click', function (e) {
+    if (!ctxMenu.contains(e.target)) hideCtx();
+  });
+  ctxMenu.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-cmd]');
+    if (!b) return;
+    var cmd = b.dataset.cmd;
+    var ri = state.ctx.row;
+    var ci = state.ctx.col;
+    hideCtx();
+    if (cmd === 'insert-row-above' && ri >= 0) insertRow(ri);
+    else if (cmd === 'insert-row-below' && ri >= 0) insertRow(ri + 1);
+    else if (cmd === 'delete-row' && ri >= 0) deleteRow(ri);
+    else if (cmd === 'insert-col-left' && ci >= 0) insertCol(ci);
+    else if (cmd === 'insert-col-right' && ci >= 0) insertCol(ci + 1);
+    else if (cmd === 'delete-col' && ci >= 0) deleteCol(ci);
+    else if (cmd === 'indent' && ri >= 0) indentRow(ri, 1);
+    else if (cmd === 'outdent' && ri >= 0) indentRow(ri, -1);
+    else if (cmd === 'clear' && ri >= 0) {
+      if (ci < 0) state.rows[ri].label = '';
+      else if (ci >= 0) state.rows[ri].cells[ci] = '';
+      render();
+    }
+  });
+
+  /* —— catalog selection —— */
+  var catalogBody = document.getElementById('catalogBody');
+  catalogBody.addEventListener('click', function (e) {
+    var tr = e.target.closest('tr');
+    if (!tr) return;
+    catalogBody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected'); });
+    tr.classList.add('selected');
+    var id = tr.dataset.id;
+    document.getElementById('metaNumber').value = id === 'adhoc-1' ? 'Adhoc 1' : id;
+    document.getElementById('metaType').value = tr.dataset.type || 'Table';
+    document.getElementById('typeMenuBtn').childNodes[0].nodeValue = (tr.dataset.type || 'Table') + ' ';
+    if (id === '14.1.1') {
+      Object.assign(state, JSON.parse(JSON.stringify(demogPreset)));
+      state.activeRow = 0;
+    } else if (id === 'adhoc-1') {
+      state.title = '{Adhoc Shell 1}';
+      state.subtitle = '';
+      state.columns = ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'];
+      state.rows = [
+        { indent: 0, label: 'indent 1', cells: ['', '', '', '', ''] },
+        { indent: 1, label: 'Indent 2', cells: ['', '', '', '', ''] },
+        { indent: 2, label: 'indent 3', cells: ['', '', '', '', ''] },
+        { indent: 3, label: '111 indent 413', cells: ['', '', '', '', ''], badges: true },
+        { indent: 0, label: '', cells: ['', '', '', '', ''] },
+        { indent: 0, label: '', cells: ['', '', '', '', ''] },
+        { indent: 0, label: '', cells: ['', '', '', '', ''] },
+        { indent: 0, label: '', cells: ['', '', '', '', ''] }
+      ];
+      state.footnotes = '';
+      state.notes = '';
+      state.program = '';
+      state.activeRow = 3;
+    } else {
+      var titleCell = tr.cells[2] ? tr.cells[2].textContent.trim() : 'Shell';
+      state.title = titleCell;
+      state.subtitle = '';
+      state.columns = ['Treatment A', 'Treatment B', 'Total'];
+      state.rows = [
+        { indent: 0, label: 'Parameter', cells: ['', '', ''] },
+        { indent: 1, label: 'n', cells: ['', '', ''] },
+        { indent: 1, label: 'Mean (SD)', cells: ['', '', ''] },
+        { indent: 0, label: '', cells: ['', '', ''] }
+      ];
+      state.footnotes = '';
+      state.notes = '';
+      state.program = '';
+      state.activeRow = 0;
+    }
+    render();
+  });
+
+  document.getElementById('catalogSearch').addEventListener('input', function () {
+    var q = this.value.toLowerCase();
+    catalogBody.querySelectorAll('tr').forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
+    });
+  });
+  document.getElementById('catalogFilter').addEventListener('change', function () {
+    var t = this.value;
+    catalogBody.querySelectorAll('tr').forEach(function (tr) {
+      var match = t === 'All types' || tr.dataset.type === t;
+      tr.style.display = match ? '' : 'none';
+    });
+  });
+
+  document.getElementById('typeMenuBtn').addEventListener('click', function () {
+    var types = ['Table', 'Listing', 'Figure'];
+    var cur = document.getElementById('metaType').value;
+    var next = types[(types.indexOf(cur) + 1) % types.length];
+    document.getElementById('metaType').value = next;
+    this.childNodes[0].nodeValue = next + ' ';
+  });
+
+  document.getElementById('btnSaveDraft').addEventListener('click', function () {
+    this.textContent = 'Saved';
+    var b = this;
+    setTimeout(function () { b.textContent = 'Save draft'; }, 1200);
+  });
+  document.getElementById('btnGenerate').addEventListener('click', function () {
+    alert('Prototype: would generate shell Word/RTF from this sheet.');
+  });
+  document.getElementById('btnLock').addEventListener('click', function () {
+    if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze.)')) {
+      document.getElementById('metaStatus').value = 'Locked';
+    }
+  });
+  document.getElementById('btnAddShell').addEventListener('click', function () {
+    var tr = catalogBody.querySelector('[data-id="adhoc-1"]');
+    if (tr) tr.click();
+  });
+
+  /* start on adhoc to match reference look */
+  var adhoc = catalogBody.querySelector('[data-id="adhoc-1"]');
+  if (adhoc) {
+    catalogBody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected'); });
+    adhoc.classList.add('selected');
+    document.getElementById('metaNumber').value = 'Adhoc 1';
+  }
+  render();
 })();
 </script>
 </body>
