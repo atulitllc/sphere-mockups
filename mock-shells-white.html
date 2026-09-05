@@ -93,7 +93,26 @@
     <div class="content">
       <div class="page-intro">
         <h1 class="page-title">Mock Shells</h1>
-        <p class="page-sub">Edit TLF shells as a sheet — double-click cells, indent rows, add columns. <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
+        <p class="page-sub">Edit TLF shells as a sheet — double-click cells, indent rows, add columns. <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only. <strong>Copy to study</strong> creates a new draft in another study you can open (same tenant); lock/QC/approve and generated outputs are never copied.</p>
+      </div>
+
+      <div class="copy-success-banner" id="copySuccessBanner" role="status">
+        <div>
+          <strong id="copySuccessText">Copied</strong>
+          <div class="hint" style="margin-top:4px" id="copySuccessHint">Audit trail (source → target) will be recorded in a later release.</div>
+        </div>
+        <div class="banner-actions">
+          <button class="btn sm" type="button" id="btnDismissCopyBanner">Dismiss</button>
+        </div>
+      </div>
+      <div class="warn-banner" id="templateWarnBanner" role="status">
+        <div>
+          <strong>Template not available in this study</strong>
+          <div class="hint" style="margin-top:4px">Shell type set to <strong>Custom</strong>. Choose a local template later or keep Custom.</div>
+        </div>
+        <div class="banner-actions" style="margin-left:auto">
+          <button class="btn sm" type="button" id="btnDismissTemplateWarn">Dismiss</button>
+        </div>
       </div>
 
       <div class="workspace shell-workspace">
@@ -104,10 +123,16 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
               Shell catalog
             </span>
-            <button class="btn primary btn-sm" type="button" id="btnAddShell">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-              Add
-            </button>
+            <span class="shell-catalog-actions">
+              <button class="btn btn-sm" type="button" id="btnCopyShellCatalog" title="Copy selected shell to another study">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                Copy…
+              </button>
+              <button class="btn primary btn-sm" type="button" id="btnAddShell">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                Add
+              </button>
+            </span>
           </div>
           <div class="shell-catalog-tools">
             <div class="search-wrap">
@@ -207,6 +232,10 @@
               </label>
             </div>
             <div class="shell-actions">
+              <button class="btn" type="button" id="btnCopyShell" title="Copy this shell to another study as a new draft">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                Copy to study…
+              </button>
               <button class="btn" type="button" id="btnSaveDraft">Save draft</button>
               <button class="btn primary" type="button" id="btnGenerate">Save &amp; generate</button>
               <button class="btn" type="button" id="btnLock">
@@ -272,7 +301,11 @@
               </div>
               <div class="sheet-block" data-field="program">
                 <span class="block-label">Program Name:</span>
-                <span class="block-value empty" data-placeholder="Double-click to edit">Double-click to edit</span>
+                <span class="block-value empty" data-placeholder="Editable text only — not bound to a source file">Editable text only — not bound to a source file</span>
+              </div>
+              <div class="sheet-block" data-field="sapRef">
+                <span class="block-label">SAP / aCRF refs:</span>
+                <span class="block-value empty" data-placeholder="None linked">None linked</span>
               </div>
             </div>
           </div>
@@ -281,6 +314,73 @@
     </div>
   </section>
 </div>
+
+<!-- Copy to study modal -->
+<div class="modal-backdrop" id="copyModal" hidden role="dialog" aria-modal="true" aria-labelledby="copyTitle">
+  <div class="modal copy-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="copyTitle">Copy to study…</h2>
+        <div class="hint">Creates a <strong>new draft</strong> in the target study. Same tenant only. Lock, QC, approve, and generated Word/RTF are never copied.</div>
+      </div>
+      <button class="btn ghost sm" type="button" id="copyClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="copy-rules">
+        <strong>What copies</strong>
+        <ul>
+          <li>Grid layout (rows / cols / indent), title, type, analysis set, footnotes, programming notes</li>
+          <li>Program name as <span class="muted">editable text only</span> (not bound to the source file)</li>
+        </ul>
+        <strong style="display:block;margin-top:8px">What does not</strong>
+        <ul>
+          <li class="muted">Lock / QC / approve state · generated .docx / .rtf (Generate again in target) · programs &amp; files · cross-tenant studies</li>
+        </ul>
+      </div>
+
+      <div class="copy-field">
+        <span>Target study <span class="muted">(open + create permission · same tenant)</span></span>
+        <ul class="study-pick-list" id="copyStudyList" role="radiogroup" aria-label="Target study"></ul>
+        <span class="field-hint">Only studies you can open in Acme Biometrics are listed. Cross-tenant copy is not allowed.</span>
+      </div>
+
+      <div class="modal-inline-warn" id="copyTemplateWarn">
+        <strong>Template missing in target.</strong> Shell will be saved as <strong>Custom</strong> with a warning banner in the target study.
+      </div>
+
+      <div class="copy-field">
+        <label for="copyNumber">New shell number <span class="muted">(optional override)</span></label>
+        <input type="text" id="copyNumber" autocomplete="off" />
+        <span class="field-hint">Always assigned a new draft id in the target catalog — never reuses lock/QC ids.</span>
+      </div>
+
+      <div class="copy-field">
+        <label for="copyTitleInput">New title <span class="muted">(optional override)</span></label>
+        <input type="text" id="copyTitleInput" autocomplete="off" />
+      </div>
+
+      <div class="copy-field">
+        <label for="copyProgram">Program name <span class="muted">(editable text)</span></label>
+        <input type="text" id="copyProgram" autocomplete="off" placeholder="e.g. t_14_1_1_demog.sas" />
+        <span class="field-hint">Copied as text only — not linked to the source study file. Clear if you want a blank name.</span>
+      </div>
+
+      <div class="copy-field">
+        <span>SAP / aCRF references</span>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-weight:500;color:var(--text);font-size:13px;cursor:pointer">
+          <input type="checkbox" id="copyClearRefs" checked style="width:auto;margin-top:3px;accent-color:var(--accent)" />
+          <span>Clear refs in target <span class="muted">(default — no invented paths; otherwise mark “ref not linked in target”)</span></span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="copyCancel">Cancel</button>
+      <button class="btn primary" type="button" id="copyConfirm">Copy as draft</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
 
 <!-- Context menu -->
 <div class="sheet-ctx" id="ctxMenu" hidden role="menu">
@@ -387,26 +487,28 @@
 
 
   /* —— sheet model —— */
-  var state = {
-    title: '{Adhoc Shell 1}',
-    subtitle: '',
-    columns: ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'],
-    rows: [
-      { indent: 0, label: 'indent 1', cells: ['', '', '', '', ''] },
-      { indent: 1, label: 'Indent 2', cells: ['', '', '', '', ''] },
-      { indent: 2, label: 'indent 3', cells: ['', '', '', '', ''] },
-      { indent: 3, label: '111 indent 413', cells: ['', '', '', '', ''], badges: true },
-      { indent: 0, label: '', cells: ['', '', '', '', ''] },
-      { indent: 0, label: '', cells: ['', '', '', '', ''] },
-      { indent: 0, label: '', cells: ['', '', '', '', ''] },
-      { indent: 0, label: '', cells: ['', '', '', '', ''] }
-    ],
-    footnotes: '',
-    notes: '',
-    program: '',
-    activeRow: -1,
-    ctx: { row: -1, col: -1 }
-  };
+  var CURRENT_STUDY = 'ONC-204-301';
+  var CURRENT_TENANT = 'Acme Biometrics';
+
+  /* Same-tenant studies the user can open; create permission required on target */
+  var STUDY_DIRECTORY = [
+    { id: 'ONC-204-301', title: 'Metastatic NSCLC', tenant: 'Acme Biometrics', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Primary endpoint — ORR', 'Adverse events — overview', 'Kaplan–Meier overall survival'] },
+    { id: 'ONC-118-402', title: 'HER2+ breast cancer', tenant: 'Acme Biometrics', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Adverse events — overview'] },
+    { id: 'VAC-302-011', title: 'RSV vaccine — adults ≥60', tenant: 'Acme Biometrics', canOpen: true, canCreate: true, templates: ['Demographics', 'Adverse events — overview'] },
+    { id: 'HEM-220-015', title: 'Relapsed / refractory AML', tenant: 'Acme Biometrics', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics'] },
+    /* cross-tenant / no-access stubs — never shown in picker */
+    { id: 'EXT-990-001', title: 'External partner study', tenant: 'OtherCo Pharma', canOpen: false, canCreate: false, templates: [] },
+    { id: 'ONC-050-100', title: 'Archived oncology', tenant: 'Acme Biometrics', canOpen: false, canCreate: false, templates: ['Demographics'] }
+  ];
+
+  function studyMeta(id) {
+    for (var i = 0; i < STUDY_DIRECTORY.length; i++) {
+      if (STUDY_DIRECTORY[i].id === id) return STUDY_DIRECTORY[i];
+    }
+    return null;
+  }
+
+  function cloneData(x) { return JSON.parse(JSON.stringify(x)); }
 
   var demogPreset = {
     title: 'Table 14.1.1 Demographics',
@@ -424,7 +526,116 @@
     ],
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Age calculated at informed consent.',
     notes: '',
-    program: 't_14_1_1_demog.sas'
+    program: 't_14_1_1_demog.sas',
+    sapRef: 'SAP §10.1 Demographics; aCRF DM',
+    templateKey: 'Demographics',
+    custom: false
+  };
+
+  var adhocPreset = {
+    title: '{Adhoc Shell 1}',
+    subtitle: '',
+    columns: ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'],
+    rows: [
+      { indent: 0, label: 'indent 1', cells: ['', '', '', '', ''] },
+      { indent: 1, label: 'Indent 2', cells: ['', '', '', '', ''] },
+      { indent: 2, label: 'indent 3', cells: ['', '', '', '', ''] },
+      { indent: 3, label: '111 indent 413', cells: ['', '', '', '', ''], badges: true },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] },
+      { indent: 0, label: '', cells: ['', '', '', '', ''] }
+    ],
+    footnotes: '',
+    notes: '',
+    program: '',
+    sapRef: '',
+    templateKey: '',
+    custom: true
+  };
+
+  function blankLayout(title) {
+    return {
+      title: title || 'Shell',
+      subtitle: '',
+      columns: ['Treatment A', 'Treatment B', 'Total'],
+      rows: [
+        { indent: 0, label: 'Parameter', cells: ['', '', ''] },
+        { indent: 1, label: 'n', cells: ['', '', ''] },
+        { indent: 1, label: 'Mean (SD)', cells: ['', '', ''] },
+        { indent: 0, label: '', cells: ['', '', ''] }
+      ],
+      footnotes: '',
+      notes: '',
+      program: '',
+      sapRef: '',
+      templateKey: title || '',
+      custom: false
+    };
+  }
+
+  function makeShell(opts) {
+    var layout = opts.layout || blankLayout(opts.title);
+    return {
+      id: opts.id,
+      number: opts.number || opts.id,
+      type: opts.type || 'Table',
+      title: opts.title || layout.title,
+      status: opts.status || 'Draft',
+      analysisSet: opts.analysisSet || 'Safety',
+      locked: !!opts.locked,
+      qc: opts.qc || null,
+      approved: !!opts.approved,
+      custom: opts.custom != null ? opts.custom : !!layout.custom,
+      templateKey: opts.templateKey != null ? opts.templateKey : (layout.templateKey || ''),
+      templateMissing: !!opts.templateMissing,
+      layout: cloneData(layout),
+      copiedFrom: opts.copiedFrom || null
+    };
+  }
+
+  function seedCatalog(studyId) {
+    if (studyId === 'ONC-204-301') {
+      return [
+        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', layout: demogPreset, templateKey: 'Demographics' }),
+        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', templateKey: 'Baseline characteristics' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', templateKey: 'Primary endpoint — ORR' }),
+        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Listing', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', templateKey: 'Adverse events — overview' }),
+        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', templateKey: 'Kaplan–Meier overall survival' }),
+        makeShell({ id: 'adhoc-1', number: 'Adhoc 1', type: 'Table', title: '{Adhoc Shell 1}', status: 'Draft', analysisSet: 'Safety', layout: adhocPreset, custom: true, templateKey: '' })
+      ];
+    }
+    /* other studies start with a light catalog so copy result is visible */
+    var meta = studyMeta(studyId);
+    var shells = [];
+    if (meta && meta.templates.indexOf('Demographics') >= 0) {
+      shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', layout: demogPreset, templateKey: 'Demographics' }));
+    }
+    return shells;
+  }
+
+  var studyStore = {};
+  STUDY_DIRECTORY.forEach(function (s) {
+    if (s.tenant === CURRENT_TENANT && s.canOpen) {
+      studyStore[s.id] = { shells: seedCatalog(s.id), selectedId: null };
+    }
+  });
+  studyStore['ONC-204-301'].selectedId = 'adhoc-1';
+
+  var state = {
+    title: '{Adhoc Shell 1}',
+    subtitle: '',
+    columns: ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'],
+    rows: cloneData(adhocPreset.rows),
+    footnotes: '',
+    notes: '',
+    program: '',
+    sapRef: '',
+    templateKey: '',
+    custom: true,
+    templateMissing: false,
+    activeRow: -1,
+    ctx: { row: -1, col: -1 }
   };
 
   var headEl = document.getElementById('sheetHead');
@@ -432,6 +643,156 @@
   var toolbar = document.getElementById('rowToolbar');
   var ctxMenu = document.getElementById('ctxMenu');
   var wrap = document.getElementById('sheetGridWrap');
+  var catalogBody = document.getElementById('catalogBody');
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2800);
+  }
+
+  function updateStudyChrome() {
+    var crumb = document.querySelector('.crumb');
+    if (crumb) crumb.innerHTML = 'Studies / <strong>' + CURRENT_STUDY + '</strong> / Mock Shells';
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = CURRENT_STUDY + ' · Phase 3';
+  }
+
+  function statusBadge(status) {
+    var cls = 'draft';
+    if (status === 'Locked') cls = 'locked';
+    else if (status === 'In review') cls = 'review';
+    return '<span class="badge ' + cls + '">' + escapeHtml(status) + '</span>';
+  }
+
+  function typeBadge(type) {
+    var cls = (type || 'Table').toLowerCase();
+    return '<span class="badge ' + cls + '">' + escapeHtml(type) + '</span>';
+  }
+
+  function currentShells() {
+    return studyStore[CURRENT_STUDY].shells;
+  }
+
+  function findShell(id) {
+    var shells = currentShells();
+    for (var i = 0; i < shells.length; i++) if (shells[i].id === id) return shells[i];
+    return null;
+  }
+
+  function selectedShell() {
+    return findShell(studyStore[CURRENT_STUDY].selectedId);
+  }
+
+  function persistEditorToSelected() {
+    var sh = selectedShell();
+    if (!sh) return;
+    sh.number = document.getElementById('metaNumber').value.trim() || sh.number;
+    sh.type = document.getElementById('metaType').value;
+    sh.analysisSet = document.getElementById('metaSet').value;
+    sh.status = document.getElementById('metaStatus').value;
+    sh.locked = sh.status === 'Locked';
+    if (sh.status === 'In review') sh.qc = 'In review';
+    else if (sh.status === 'Draft') sh.qc = null;
+    sh.title = state.title || sh.title;
+    sh.custom = !!state.custom;
+    sh.templateKey = state.templateKey || '';
+    sh.templateMissing = !!state.templateMissing;
+    sh.layout = {
+      title: state.title,
+      subtitle: state.subtitle,
+      columns: cloneData(state.columns),
+      rows: cloneData(state.rows),
+      footnotes: state.footnotes,
+      notes: state.notes,
+      program: state.program,
+      sapRef: state.sapRef,
+      templateKey: state.templateKey,
+      custom: state.custom
+    };
+  }
+
+  function loadShellIntoEditor(sh) {
+    if (!sh) return;
+    var lay = sh.layout || blankLayout(sh.title);
+    state.title = lay.title || sh.title;
+    state.subtitle = lay.subtitle || '';
+    state.columns = cloneData(lay.columns || ['Treatment A', 'Treatment B', 'Total']);
+    state.rows = cloneData(lay.rows || []);
+    state.footnotes = lay.footnotes || '';
+    state.notes = lay.notes || '';
+    state.program = lay.program || '';
+    state.sapRef = lay.sapRef || '';
+    state.templateKey = sh.templateKey || lay.templateKey || '';
+    state.custom = sh.custom != null ? sh.custom : !!lay.custom;
+    state.templateMissing = !!sh.templateMissing;
+    state.activeRow = state.rows.length ? 0 : -1;
+
+    document.getElementById('metaNumber').value = sh.number;
+    document.getElementById('metaType').value = sh.type;
+    document.getElementById('typeMenuLabel').textContent = sh.type;
+    document.getElementById('metaSet').value = sh.analysisSet || 'Safety';
+    document.getElementById('metaStatus').value = sh.status || 'Draft';
+
+    var pill = document.querySelector('.sheet-custom-pill');
+    if (pill) pill.style.display = state.custom ? '' : 'none';
+
+    var warn = document.getElementById('templateWarnBanner');
+    if (warn) {
+      if (state.templateMissing) warn.classList.add('show');
+      else warn.classList.remove('show');
+    }
+    render();
+  }
+
+  function renderCatalog() {
+    var shells = currentShells();
+    var selectedId = studyStore[CURRENT_STUDY].selectedId;
+    var html = '';
+    shells.forEach(function (sh) {
+      var sel = sh.id === selectedId ? ' selected' : '';
+      html += '<tr class="' + sel.trim() + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '">';
+      html += '<td class="num">' + escapeHtml(sh.number) + '</td>';
+      html += '<td>' + typeBadge(sh.type) + '</td>';
+      html += '<td>' + escapeHtml(sh.title);
+      if (sh.copiedFrom) {
+        html += ' <span class="sub" style="color:var(--muted);font-size:11px">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
+      }
+      html += '</td>';
+      html += '<td>' + statusBadge(sh.status) + '</td></tr>';
+    });
+    catalogBody.innerHTML = html || '<tr><td colspan="4" style="color:var(--muted);padding:16px">No shells in this study yet.</td></tr>';
+  }
+
+  function selectShell(id, skipPersist) {
+    if (!skipPersist) persistEditorToSelected();
+    if (!findShell(id) && currentShells().length) id = currentShells()[0].id;
+    studyStore[CURRENT_STUDY].selectedId = id;
+    renderCatalog();
+    var sh = findShell(id);
+    if (sh) loadShellIntoEditor(sh);
+  }
+
+  function switchStudy(studyId) {
+    if (!studyStore[studyId]) return;
+    persistEditorToSelected();
+    CURRENT_STUDY = studyId;
+    updateStudyChrome();
+    var store = studyStore[studyId];
+    if (!store.selectedId && store.shells.length) store.selectedId = store.shells[0].id;
+    renderCatalog();
+    if (store.selectedId) loadShellIntoEditor(findShell(store.selectedId));
+    else {
+      state.title = '';
+      state.rows = [];
+      state.columns = [];
+      render();
+    }
+  }
 
   function ensureRowCells(row) {
     while (row.cells.length < state.columns.length) row.cells.push('');
@@ -482,6 +843,10 @@
     setBlock('footnotes', state.footnotes);
     setBlock('notes', state.notes);
     setBlock('program', state.program);
+    setBlock('sapRef', state.sapRef);
+
+    var pill = document.querySelector('.sheet-custom-pill');
+    if (pill) pill.style.display = state.custom ? '' : 'none';
 
     if (state.activeRow >= 0) positionToolbar(state.activeRow);
     else toolbar.hidden = true;
@@ -493,9 +858,11 @@
     if (value) {
       el.textContent = value;
       el.classList.remove('empty');
+      el.classList.toggle('ref-cleared', field === 'sapRef' && /not linked/i.test(value));
     } else {
       el.textContent = el.dataset.placeholder;
       el.classList.add('empty');
+      el.classList.remove('ref-cleared');
     }
   }
 
@@ -588,7 +955,6 @@
     var input = document.createElement(isBlock && el.classList.contains('block-value') ? 'textarea' : 'input');
     input.className = 'inline-edit';
     input.value = current;
-    var ph = el.dataset.placeholder || '';
     el.textContent = '';
     el.classList.remove('empty');
     el.appendChild(input);
@@ -639,9 +1005,6 @@
       tr.classList.add('selected');
       positionToolbar(ri);
     }
-  });
-  wrap.addEventListener('mouseleave', function () {
-    /* keep selection visible briefly; hide when leaving grid */
   });
 
   toolbar.addEventListener('click', function (e) {
@@ -734,7 +1097,10 @@
     if (!ctxMenu.contains(e.target)) hideCtx();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') hideCtx();
+    if (e.key === 'Escape') {
+      hideCtx();
+      closeCopyModal();
+    }
   });
   ctxMenu.addEventListener('click', function (e) {
     var b = e.target.closest('button[data-cmd]');
@@ -759,65 +1125,21 @@
   });
 
   /* —— catalog selection —— */
-  var catalogBody = document.getElementById('catalogBody');
   catalogBody.addEventListener('click', function (e) {
-    var tr = e.target.closest('tr');
+    var tr = e.target.closest('tr[data-id]');
     if (!tr) return;
-    catalogBody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected'); });
-    tr.classList.add('selected');
-    var id = tr.dataset.id;
-    document.getElementById('metaNumber').value = id === 'adhoc-1' ? 'Adhoc 1' : id;
-    document.getElementById('metaType').value = tr.dataset.type || 'Table';
-    document.getElementById('typeMenuLabel').textContent = tr.dataset.type || 'Table';
-    if (id === '14.1.1') {
-      Object.assign(state, JSON.parse(JSON.stringify(demogPreset)));
-      state.activeRow = 0;
-    } else if (id === 'adhoc-1') {
-      state.title = '{Adhoc Shell 1}';
-      state.subtitle = '';
-      state.columns = ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'];
-      state.rows = [
-        { indent: 0, label: 'indent 1', cells: ['', '', '', '', ''] },
-        { indent: 1, label: 'Indent 2', cells: ['', '', '', '', ''] },
-        { indent: 2, label: 'indent 3', cells: ['', '', '', '', ''] },
-        { indent: 3, label: '111 indent 413', cells: ['', '', '', '', ''], badges: true },
-        { indent: 0, label: '', cells: ['', '', '', '', ''] },
-        { indent: 0, label: '', cells: ['', '', '', '', ''] },
-        { indent: 0, label: '', cells: ['', '', '', '', ''] },
-        { indent: 0, label: '', cells: ['', '', '', '', ''] }
-      ];
-      state.footnotes = '';
-      state.notes = '';
-      state.program = '';
-      state.activeRow = 3;
-    } else {
-      var titleCell = tr.cells[2] ? tr.cells[2].textContent.trim() : 'Shell';
-      state.title = titleCell;
-      state.subtitle = '';
-      state.columns = ['Treatment A', 'Treatment B', 'Total'];
-      state.rows = [
-        { indent: 0, label: 'Parameter', cells: ['', '', ''] },
-        { indent: 1, label: 'n', cells: ['', '', ''] },
-        { indent: 1, label: 'Mean (SD)', cells: ['', '', ''] },
-        { indent: 0, label: '', cells: ['', '', ''] }
-      ];
-      state.footnotes = '';
-      state.notes = '';
-      state.program = '';
-      state.activeRow = 0;
-    }
-    render();
+    selectShell(tr.dataset.id);
   });
 
   document.getElementById('catalogSearch').addEventListener('input', function () {
     var q = this.value.toLowerCase();
-    catalogBody.querySelectorAll('tr').forEach(function (tr) {
+    catalogBody.querySelectorAll('tr[data-id]').forEach(function (tr) {
       tr.style.display = tr.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
     });
   });
   document.getElementById('catalogFilter').addEventListener('change', function () {
     var t = this.value;
-    catalogBody.querySelectorAll('tr').forEach(function (tr) {
+    catalogBody.querySelectorAll('tr[data-id]').forEach(function (tr) {
       var match = t === 'All types' || tr.dataset.type === t;
       tr.style.display = match ? '' : 'none';
     });
@@ -832,31 +1154,232 @@
   });
 
   document.getElementById('btnSaveDraft').addEventListener('click', function () {
+    persistEditorToSelected();
+    var sh = selectedShell();
+    if (sh) {
+      sh.status = 'Draft';
+      sh.locked = false;
+      sh.qc = null;
+      sh.approved = false;
+      document.getElementById('metaStatus').value = 'Draft';
+      renderCatalog();
+    }
     this.textContent = 'Saved';
     var b = this;
     setTimeout(function () { b.textContent = 'Save draft'; }, 1200);
   });
   document.getElementById('btnGenerate').addEventListener('click', function () {
-    alert('Prototype: would generate shell Word/RTF from this sheet.');
+    alert('Prototype: would generate shell Word/RTF from this sheet in the current study only. Copied shells need Generate again in the target.');
   });
   document.getElementById('btnLock').addEventListener('click', function () {
-    if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze.)')) {
+    if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze. Lock is shell/spec only — copy never carries lock/QC.)')) {
       document.getElementById('metaStatus').value = 'Locked';
+      persistEditorToSelected();
+      renderCatalog();
     }
   });
   document.getElementById('btnAddShell').addEventListener('click', function () {
-    var tr = catalogBody.querySelector('[data-id="adhoc-1"]');
-    if (tr) tr.click();
+    persistEditorToSelected();
+    var id = 'adhoc-' + Date.now().toString(36).slice(-5);
+    var shell = makeShell({
+      id: id,
+      number: 'Adhoc ' + (currentShells().length + 1),
+      type: 'Table',
+      title: '{Adhoc Shell ' + (currentShells().length + 1) + '}',
+      status: 'Draft',
+      layout: cloneData(adhocPreset),
+      custom: true,
+      templateKey: ''
+    });
+    shell.layout.title = shell.title;
+    currentShells().push(shell);
+    selectShell(id, true);
   });
 
-  /* start on adhoc to match reference look */
-  var adhoc = catalogBody.querySelector('[data-id="adhoc-1"]');
-  if (adhoc) {
-    catalogBody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected'); });
-    adhoc.classList.add('selected');
-    document.getElementById('metaNumber').value = 'Adhoc 1';
+  /* —— Copy to study —— */
+  var copyModal = document.getElementById('copyModal');
+  var copyStudyList = document.getElementById('copyStudyList');
+  var copyTemplateWarn = document.getElementById('copyTemplateWarn');
+
+  function eligibleTargets() {
+    return STUDY_DIRECTORY.filter(function (s) {
+      return s.id !== CURRENT_STUDY
+        && s.tenant === CURRENT_TENANT
+        && s.canOpen
+        && s.canCreate;
+    });
   }
-  render();
+
+  function targetHasTemplate(targetId, templateKey) {
+    if (!templateKey) return true; /* Custom / blank — no template required */
+    var meta = studyMeta(targetId);
+    return !!(meta && meta.templates.indexOf(templateKey) >= 0);
+  }
+
+  function refreshTemplateWarn() {
+    var checked = copyStudyList.querySelector('input[name="copyStudy"]:checked');
+    var src = selectedShell();
+    var key = (src && (src.templateKey || state.templateKey)) || '';
+    if (!checked || !key || state.custom) {
+      copyTemplateWarn.classList.remove('show');
+      return;
+    }
+    if (!targetHasTemplate(checked.value, key)) copyTemplateWarn.classList.add('show');
+    else copyTemplateWarn.classList.remove('show');
+  }
+
+  function openCopyModal() {
+    persistEditorToSelected();
+    var src = selectedShell();
+    if (!src) {
+      showToast('Select a shell to copy');
+      return;
+    }
+    var targets = eligibleTargets();
+    if (!targets.length) {
+      showToast('No eligible target studies (need open + create, same tenant)');
+      return;
+    }
+    copyStudyList.innerHTML = targets.map(function (s, i) {
+      return '<li><label><input type="radio" name="copyStudy" value="' + escapeHtml(s.id) + '"' +
+        (i === 0 ? ' checked' : '') + ' />' +
+        '<span class="study-pick-meta"><span class="study-pick-id">' + escapeHtml(s.id) + '</span>' +
+        '<span class="study-pick-title">' + escapeHtml(s.title) + '</span>' +
+        '<span class="study-pick-perm">Open · Create draft · ' + escapeHtml(s.tenant) + '</span></span></label></li>';
+    }).join('');
+    document.getElementById('copyNumber').value = src.number;
+    document.getElementById('copyTitleInput').value = src.title;
+    document.getElementById('copyProgram').value = state.program || (src.layout && src.layout.program) || '';
+    document.getElementById('copyClearRefs').checked = true;
+    copyStudyList.querySelectorAll('input[name="copyStudy"]').forEach(function (r) {
+      r.addEventListener('change', refreshTemplateWarn);
+    });
+    refreshTemplateWarn();
+    copyModal.removeAttribute('hidden');
+  }
+
+  function closeCopyModal() {
+    if (copyModal) copyModal.setAttribute('hidden', '');
+  }
+
+  function nextDraftId(targetId, preferredNumber) {
+    var shells = studyStore[targetId].shells;
+    var base = (preferredNumber || 'copy').toString().trim() || 'copy';
+    var id = base;
+    var n = 2;
+    function taken(x) {
+      return shells.some(function (s) { return s.id === x || s.number === x; });
+    }
+    while (taken(id)) {
+      id = base + '-c' + n;
+      n++;
+    }
+    /* always a fresh catalog id even if number matches visually */
+    var unique = 'draft-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+    return { id: unique, number: id };
+  }
+
+  function performCopy() {
+    var checked = copyStudyList.querySelector('input[name="copyStudy"]:checked');
+    if (!checked) {
+      showToast('Choose a target study');
+      return;
+    }
+    var targetId = checked.value;
+    var target = studyMeta(targetId);
+    if (!target || target.tenant !== CURRENT_TENANT || !target.canOpen || !target.canCreate) {
+      showToast('Target not allowed (permissions / tenant)');
+      return;
+    }
+    persistEditorToSelected();
+    var src = selectedShell();
+    if (!src) return;
+
+    var numOverride = document.getElementById('copyNumber').value.trim();
+    var titleOverride = document.getElementById('copyTitleInput').value.trim();
+    var programText = document.getElementById('copyProgram').value.trim();
+    var clearRefs = document.getElementById('copyClearRefs').checked;
+
+    var ids = nextDraftId(targetId, numOverride || src.number);
+    var templateKey = src.templateKey || state.templateKey || '';
+    var missing = !src.custom && !!templateKey && !targetHasTemplate(targetId, templateKey);
+
+    var layout = {
+      title: titleOverride || state.title || src.title,
+      subtitle: state.subtitle,
+      columns: cloneData(state.columns),
+      rows: cloneData(state.rows),
+      footnotes: state.footnotes,
+      notes: state.notes,
+      program: programText, /* editable text only — not bound to source file */
+      sapRef: clearRefs
+        ? ''
+        : ((state.sapRef || (src.layout && src.layout.sapRef) || '')
+          ? 'Ref not linked in target'
+          : ''),
+      templateKey: missing ? '' : templateKey,
+      custom: missing ? true : !!src.custom
+    };
+
+    var draft = makeShell({
+      id: ids.id,
+      number: ids.number,
+      type: src.type || document.getElementById('metaType').value || 'Table',
+      title: titleOverride || src.title,
+      status: 'Draft', /* NEVER copy lock/QC/approve */
+      analysisSet: document.getElementById('metaSet').value || src.analysisSet || 'Safety',
+      locked: false,
+      qc: null,
+      approved: false,
+      custom: layout.custom,
+      templateKey: layout.templateKey,
+      templateMissing: missing,
+      layout: layout,
+      copiedFrom: { study: CURRENT_STUDY, shellId: src.id, shellNumber: src.number }
+    });
+    /* Explicit: no generated outputs accompany the copy */
+    draft.generatedOutputs = [];
+
+    studyStore[targetId].shells.push(draft);
+    studyStore[targetId].selectedId = draft.id;
+
+    closeCopyModal();
+
+    var msg = 'Copied to ' + targetId + ' as draft';
+    showToast(msg);
+
+    var banner = document.getElementById('copySuccessBanner');
+    var text = document.getElementById('copySuccessText');
+    var hint = document.getElementById('copySuccessHint');
+    if (text) text.textContent = msg;
+    if (hint) {
+      hint.textContent = 'New draft ' + draft.number + ' · layout/title/type/analysis set/footnotes/notes copied. Lock/QC/approve and .docx/.rtf not copied — Generate again in target. Audit (source → target) later.';
+    }
+    if (banner) banner.classList.add('show');
+
+    /* Switch into target so the draft is immediately tryable */
+    switchStudy(targetId);
+  }
+
+  document.getElementById('btnCopyShell').addEventListener('click', openCopyModal);
+  document.getElementById('btnCopyShellCatalog').addEventListener('click', openCopyModal);
+  document.getElementById('copyClose').addEventListener('click', closeCopyModal);
+  document.getElementById('copyCancel').addEventListener('click', closeCopyModal);
+  document.getElementById('copyConfirm').addEventListener('click', performCopy);
+  copyModal.addEventListener('click', function (e) {
+    if (e.target === copyModal) closeCopyModal();
+  });
+  document.getElementById('btnDismissCopyBanner').addEventListener('click', function () {
+    document.getElementById('copySuccessBanner').classList.remove('show');
+  });
+  document.getElementById('btnDismissTemplateWarn').addEventListener('click', function () {
+    document.getElementById('templateWarnBanner').classList.remove('show');
+  });
+
+  /* boot */
+  updateStudyChrome();
+  renderCatalog();
+  selectShell('adhoc-1', true);
 })();
 </script>
 </body>
