@@ -1448,12 +1448,7 @@ label .req::after { content: " *"; color: var(--danger); }
   min-width: min(100%, 320px);
   max-width: none;
 }
-.tracker-toolbar-check {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px 4px;
-}
+.tracker-toolbar-check { display: none; }
 .check-all-label {
   display: inline-flex;
   align-items: center;
@@ -1468,15 +1463,46 @@ label .req::after { content: " *"; color: var(--danger); }
   accent-color: var(--accent);
   cursor: pointer;
 }
+.check-all-in-head {
+  margin: 0;
+  font-size: 0;
+  gap: 0;
+  justify-content: center;
+  width: 100%;
+}
+.tracker-tools-only {
+  margin-bottom: 6px;
+  padding-bottom: 0;
+}
+.tracker-tools-only .list-tools {
+  width: 100%;
+}
+.tracker-section > .section-head.tracker-tools-only {
+  align-items: center;
+}
+.tracker-section .tracker-col-head {
+  margin-top: 0;
+}
+.tracker-section .bulk-bar {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+.tracker-section .sap-section-head {
+  padding: 6px 4px 4px;
+}
+.tracker-section .artifact-row {
+  padding: 8px 8px 8px 4px;
+}
 
 
-/* Tracker column header — once at top, light accent (compact) */
+/* Tracker column header — once at top, light accent */
 .tracker-col-head {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   gap: 0 8px;
-  padding: 4px 8px 4px 4px;
-  margin: 0 0 4px;
+  padding: 9px 8px 9px 4px;
+  margin: 0 0 2px;
+  min-height: 40px;
   align-items: center;
   position: sticky;
   top: 0;
@@ -1496,13 +1522,13 @@ label .req::after { content: " *"; color: var(--danger); }
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--accent);
-  line-height: 1.15;
+  line-height: 1.2;
 }
 .tracker-col-head .artifact-meta .meta-cell {
   display: flex;
   align-items: center;
   min-height: 0;
-  padding: 2px 0;
+  padding: 0;
 }
 .tracker-col-head .artifact-meta .row-actions,
 .tracker-col-head .meta-cell:last-child {
@@ -1661,9 +1687,11 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .artifact-meta {
   display: grid;
-  grid-template-columns: minmax(120px, 1.2fr) repeat(6, minmax(64px, 1fr)) minmax(140px, auto);
-  gap: 10px 16px;
-  align-items: start;
+  /* Fixed middle + actions tracks so columns align across rows */
+  grid-template-columns: minmax(110px, 1fr) 72px 88px 120px 72px 72px 80px 200px;
+  gap: 8px 12px;
+  align-items: center;
+  width: 100%;
 }
 .artifact-meta .meta-cell { min-width: 0; }
 .artifact-meta .row-actions {

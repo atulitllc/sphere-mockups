@@ -147,8 +147,7 @@
       </div>
 
       <section class="section tracker-section">
-        <div class="section-head">
-          <h2 class="section-heading">Tracker grid</h2>
+        <div class="section-head tracker-tools-only">
           <div class="list-tools">
             <input class="search" id="searchInput" placeholder="Search ID or title…" aria-label="Search tracker" />
             <select id="filterType" style="width:120px" aria-label="Filter by type">
@@ -185,10 +184,6 @@
           </div>
         </div>
 
-        <div class="tracker-toolbar-check">
-          <label class="check-all-label"><input type="checkbox" id="checkAll" aria-label="Select all visible" /> Select all visible</label>
-        </div>
-
         <div class="bulk-bar" id="bulkBar" aria-live="polite">
           <div class="bulk-left">
             <span class="sel-count" id="selCount">0 selected</span>
@@ -215,9 +210,12 @@
         </div>
 
         <div class="tracker-col-head" role="row">
-          <div class="col-check" aria-hidden="true"></div>
+          <div class="col-check">
+            <label class="check-all-label check-all-in-head" title="Select all visible">
+              <input type="checkbox" id="checkAll" aria-label="Select all visible" />
+            </label>
+          </div>
           <div class="artifact-main">
-            <div class="artifact-title-band col-head-title-spacer" aria-hidden="true"></div>
             <div class="artifact-meta">
               <div class="meta-cell col-head-program-spacer" aria-hidden="true"></div>
               <div class="meta-cell"><span class="col-head-label">Type</span></div>
