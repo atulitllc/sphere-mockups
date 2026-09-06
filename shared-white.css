@@ -656,6 +656,54 @@ body.nav-collapsed {
   align-items: start;
 }
 
+
+/* Compact page help toggle (Mock Shells) */
+.page-intro-compact { margin-bottom: 10px; }
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-intro-compact .page-title { margin: 0; }
+.page-help-toggle {
+  width: 28px;
+  height: 28px;
+}
+.page-help-toggle svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.page-help-toggle.is-open {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.page-help-text[hidden] { display: none !important; }
+.page-help-text {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+.page-help-collapse {
+  display: inline-block;
+  margin-left: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.page-help-collapse:hover { color: var(--accent-hover); }
+
 .page-intro {
   width: 100%;
   max-width: none;
