@@ -546,7 +546,7 @@
   }
 
   function catalogGripHtml() {
-    return '<span class="catalog-grip" title="Drag to reorder" draggable="true" aria-hidden="true">' +
+    return '<span class="catalog-grip" title="Drag to reorder" aria-hidden="true">' +
       '<svg viewBox="0 0 12 16" focusable="false"><circle cx="3.5" cy="3" r="1.15"/><circle cx="8.5" cy="3" r="1.15"/>' +
       '<circle cx="3.5" cy="8" r="1.15"/><circle cx="8.5" cy="8" r="1.15"/>' +
       '<circle cx="3.5" cy="13" r="1.15"/><circle cx="8.5" cy="13" r="1.15"/></svg></span>';
@@ -1750,70 +1750,79 @@
   document.getElementById('catalogSearch').addEventListener('input', applyCatalogFilters);
   document.getElementById('catalogFilter').addEventListener('change', applyCatalogFilters);
 
-  catalogBody.addEventListener('dragstart', function (e) {
-    var grip = e.target.closest && e.target.closest('.catalog-grip');
-    var tr = e.target.closest && e.target.closest('tr[data-id]');
-    if (!grip || !tr) {
-      e.preventDefault();
-      return;
+  function catalogTargetAt(clientX, clientY, dragId) {
+    var el = document.elementFromPoint(clientX, clientY);
+    if (!el || !catalogBody.contains(el)) return null;
+    var tr = el.closest('tr[data-id]');
+    var sec = el.closest('.sap-section');
+    if (tr && tr.getAttribute('data-id') === dragId) {
+      tr = null;
     }
-    catalogJustDragged = false;
-    e.dataTransfer.setData('text/plain', tr.getAttribute('data-id'));
-    e.dataTransfer.effectAllowed = 'move';
-    tr.classList.add('is-dragging');
-    try { e.dataTransfer.setDragImage(tr, 16, 12); } catch (err) {}
-  });
-  catalogBody.addEventListener('dragend', function () {
-    catalogBody.querySelectorAll('tr.is-dragging').forEach(function (tr) {
-      tr.classList.remove('is-dragging');
-    });
-    clearCatalogDropMarks();
-  });
-  catalogBody.addEventListener('dragover', function (e) {
-    var sec = e.target.closest && e.target.closest('.sap-section');
-    if (!sec) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    clearCatalogDropMarks();
-    var tr = e.target.closest('tr[data-id]');
-    if (tr && !tr.classList.contains('is-dragging')) {
-      var rect = tr.getBoundingClientRect();
-      if (e.clientY < rect.top + rect.height / 2) tr.classList.add('drop-before');
-      else tr.classList.add('drop-after');
-    } else {
-      sec.classList.add('drop-target');
-    }
-  });
-  catalogBody.addEventListener('dragleave', function (e) {
-    if (!catalogBody.contains(e.relatedTarget)) clearCatalogDropMarks();
-  });
-  catalogBody.addEventListener('drop', function (e) {
-    e.preventDefault();
-    var dragId = e.dataTransfer.getData('text/plain');
-    clearCatalogDropMarks();
-    markCatalogDragConsumed();
-    if (!dragId) return;
-    var tr = e.target.closest('tr[data-id]');
-    var sec = e.target.closest('.sap-section');
-    var destSap;
-    var beforeId = null;
-    if (tr && tr.getAttribute('data-id') === dragId) return;
     if (tr) {
-      destSap = tr.getAttribute('data-sap');
       var rect = tr.getBoundingClientRect();
-      if (e.clientY < rect.top + rect.height / 2) {
+      var beforeId;
+      if (clientY < rect.top + rect.height / 2) {
         beforeId = tr.getAttribute('data-id');
       } else {
         var next = tr.nextElementSibling;
-        while (next && !next.getAttribute('data-id')) next = next.nextElementSibling;
+        while (next && (!next.getAttribute('data-id') || next.getAttribute('data-id') === dragId)) {
+          next = next.nextElementSibling;
+        }
         beforeId = next ? next.getAttribute('data-id') : null;
       }
-    } else if (sec) {
-      destSap = sec.getAttribute('data-sap-group');
-    } else {
-      return;
+      return { destSap: tr.getAttribute('data-sap'), beforeId: beforeId, row: tr, sec: tr.closest('.sap-section'), place: clientY < rect.top + rect.height / 2 ? 'before' : 'after' };
     }
-    moveShellInCatalog(dragId, destSap, beforeId);
+    if (sec) return { destSap: sec.getAttribute('data-sap-group'), beforeId: null, row: null, sec: sec, place: 'section' };
+    return null;
+  }
+
+  function paintCatalogDrop(hit) {
+    clearCatalogDropMarks();
+    if (!hit) return;
+    if (hit.row && hit.place === 'before') hit.row.classList.add('drop-before');
+    else if (hit.row && hit.place === 'after') hit.row.classList.add('drop-after');
+    else if (hit.sec) hit.sec.classList.add('drop-target');
+  }
+
+  var pointerDrag = null;
+
+  catalogBody.addEventListener('mousedown', function (e) {
+    if (e.button !== 0) return;
+    if (e.target.closest && e.target.closest('.sap-section-head')) return;
+    var tr = e.target.closest && e.target.closest('tr[data-id]');
+    if (!tr) return;
+    pointerDrag = {
+      id: tr.getAttribute('data-id'),
+      startX: e.clientX,
+      startY: e.clientY,
+      active: false
+    };
+  });
+  document.addEventListener('mousemove', function (e) {
+    if (!pointerDrag) return;
+    var dx = e.clientX - pointerDrag.startX;
+    var dy = e.clientY - pointerDrag.startY;
+    if (!pointerDrag.active) {
+      if (dx * dx + dy * dy < 36) return;
+      pointerDrag.active = true;
+      var src = catalogBody.querySelector('tr[data-id="' + pointerDrag.id + '"]');
+      if (src) src.classList.add('is-dragging');
+    }
+    e.preventDefault();
+    paintCatalogDrop(catalogTargetAt(e.clientX, e.clientY, pointerDrag.id));
+  });
+  document.addEventListener('mouseup', function (e) {
+    if (!pointerDrag) return;
+    var drag = pointerDrag;
+    pointerDrag = null;
+    catalogBody.querySelectorAll('tr.is-dragging').forEach(function (row) {
+      row.classList.remove('is-dragging');
+    });
+    var hit = drag.active ? catalogTargetAt(e.clientX, e.clientY, drag.id) : null;
+    clearCatalogDropMarks();
+    if (!drag.active || !hit) return;
+    markCatalogDragConsumed();
+    moveShellInCatalog(drag.id, hit.destSap, hit.beforeId);
   });
 
   document.getElementById('metaType').addEventListener('change', function () {
