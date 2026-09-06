@@ -912,11 +912,20 @@ tbody tr:last-child td { border-bottom: none; }
   height: 28px;
   padding: 0;
   justify-content: center;
-  color: var(--muted);
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
   flex-shrink: 0;
 }
-.btn.icon-btn:hover { color: var(--text); }
-.btn.icon-btn.row-edit svg { width: 14px; height: 14px; }
+.btn.icon-btn:hover {
+  color: var(--accent-hover);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-soft);
+}
+.btn.icon-btn.row-edit {
+  color: var(--accent);
+}
+.btn.icon-btn.row-edit svg { width: 14px; height: 14px; color: inherit; fill: currentColor; }
 .btn.sm.icon-btn { width: 26px; height: 26px; }
 
 /* —— Form —— */
