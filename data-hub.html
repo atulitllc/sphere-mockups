@@ -127,7 +127,7 @@
         <div class="page-title-row">
           <h1 class="page-title">Data Hub</h1>
         </div>
-        <p class="page-sub">Day-one: upload list and snapshot ingest stubs. Mapping Assist is out of scope for day one.</p>
+        <p class="page-sub">Day-one: uploads, snapshots, and connector pulls (demo: eClinical Solutions elluminate → Raw). Mapping Assist stays out of scope.</p>
       </div>
 
       <div class="split">
@@ -135,8 +135,9 @@
           <div class="card-head">
             <span class="title-row">Ingest / snapshot list</span>
             <div class="list-tools">
-              <select style="width:140px">
+              <select style="width:180px" aria-label="Filter by source">
                 <option>All sources</option>
+                <option>eClinical Solutions</option>
                 <option>Rave export</option>
                 <option>Snapshot</option>
                 <option>Manual upload</option>
@@ -157,6 +158,13 @@
             </thead>
             <tbody>
               <tr class="selected">
+                <td>eClinical Solutions</td>
+                <td>elluminate · ONC-204-301 domains (DM, AE, LB)</td>
+                <td>6 Sep 2026 · 11:02 AM ET</td>
+                <td>Raw</td>
+                <td><span class="badge ok">Complete</span></td>
+              </tr>
+              <tr>
                 <td>Rave export</td>
                 <td>EDC cut 2026-08-28</td>
                 <td>28 Aug 2026 · 9:14 AM ET</td>
@@ -198,19 +206,20 @@
 
         <div class="card">
           <div class="card-head">
-            <span class="title-row">Upload stub</span>
+            <span class="title-row">Ingest stub</span>
             <span class="mode-tag">DAY ONE</span>
           </div>
-          <div class="form">
+          <div class="form" id="ingestForm">
             <label><span class="req">Source type</span>
-              <select>
-                <option selected>Rave export</option>
-                <option>Snapshot file</option>
-                <option>Manual upload</option>
+              <select id="ingestSourceType" aria-label="Source type">
+                <option value="eclinical" selected>eClinical Solutions (elluminate)</option>
+                <option value="rave">Rave export</option>
+                <option value="snapshot">Snapshot file</option>
+                <option value="manual">Manual upload</option>
               </select>
             </label>
             <label><span class="req">Label</span>
-              <input placeholder="e.g. EDC cut 2026-09-01" />
+              <input id="ingestLabel" placeholder="e.g. elluminate pull 2026-09-06" value="elluminate · ONC-204-301 raw domains" />
             </label>
             <label>Target library
               <select>
@@ -218,17 +227,51 @@
                 <option>SDTM (derived — usually via programs)</option>
               </select>
             </label>
-            <div class="dropzone">
+
+            <div id="eclinicalFields" class="connector-panel">
+              <div class="hint" style="margin-bottom:10px"><strong>Connector pull (demo).</strong> Uses the client’s elluminate API credentials to copy selected study domains into SPHERE study storage under <code>Raw/</code>. Does not replace elluminate review — this is an ingest into our file share for programming.</div>
+              <label>elluminate tenant URL
+                <input placeholder="https://acme.eclinicalsol.com" value="https://demo.eclinicalsol.com" />
+              </label>
+              <label>Study
+                <select>
+                  <option selected>ONC-204-301</option>
+                  <option>ONC-204-201</option>
+                </select>
+              </label>
+              <label>Schema / datastore
+                <select>
+                  <option selected>Clinical (raw + curated)</option>
+                  <option>Raw only</option>
+                </select>
+              </label>
+              <label>Domains
+                <select multiple size="4" aria-label="Domains to pull" style="min-height:88px">
+                  <option selected>DM</option>
+                  <option selected>AE</option>
+                  <option selected>LB</option>
+                  <option>VS</option>
+                  <option>CM</option>
+                  <option>EX</option>
+                </select>
+              </label>
+              <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
+                <input type="checkbox" checked /> Include attachments / transfer packages when available
+              </label>
+            </div>
+
+            <div id="fileDropFields" class="dropzone" hidden>
               <strong>Drop files here or browse</strong>
               Accepts SAS transport, CSV, Excel, and zip packages from EDC.
               <div style="margin-top:12px"><button class="btn" type="button">Browse files</button></div>
             </div>
-            <div class="hint">Day-one surface is upload / snapshot ingest only. SAP and aCRF live as uploads here (and on Mock Shells) — no mapping-assist UI yet.</div>
+
+            <div class="hint">File upload / snapshot still available via Source type. SAP and aCRF stay as uploads. Mapping Assist is out of scope for day one.</div>
             <div class="form-actions">
               <div class="left-actions"></div>
               <div class="right-actions">
                 <button class="btn" type="button">Cancel</button>
-                <button class="btn primary" type="button">Upload</button>
+                <button class="btn primary" type="button" id="ingestPrimaryBtn">Pull into Raw</button>
               </div>
             </div>
           </div>
@@ -382,6 +425,48 @@
     if (e.key === 'Escape') setOpen(false);
   });
 
+})();
+</script>
+
+<script>
+(function () {
+  var sel = document.getElementById('ingestSourceType');
+  var eclin = document.getElementById('eclinicalFields');
+  var drop = document.getElementById('fileDropFields');
+  var btn = document.getElementById('ingestPrimaryBtn');
+  var label = document.getElementById('ingestLabel');
+  if (!sel) return;
+  function sync() {
+    var isE = sel.value === 'eclinical';
+    if (eclin) eclin.hidden = !isE;
+    if (drop) drop.hidden = isE;
+    if (btn) btn.textContent = isE ? 'Pull into Raw' : 'Upload';
+    if (label && !label.dataset.touched) {
+      label.placeholder = isE ? 'e.g. elluminate pull 2026-09-06' : 'e.g. EDC cut 2026-09-01';
+    }
+  }
+  if (label) {
+    label.addEventListener('input', function () { label.dataset.touched = '1'; });
+  }
+  sel.addEventListener('change', sync);
+  sync();
+  if (btn) {
+    btn.addEventListener('click', function () {
+      if (sel.value !== 'eclinical') return;
+      btn.disabled = true;
+      var prev = btn.textContent;
+      btn.textContent = 'Pulling…';
+      setTimeout(function () {
+        btn.disabled = false;
+        btn.textContent = prev;
+        var toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = 'Demo: pulled DM, AE, LB from elluminate into Raw/ (mock).';
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 3200);
+      }, 900);
+    });
+  }
 })();
 </script>
 <script src="shared-chrome.js"></script>
