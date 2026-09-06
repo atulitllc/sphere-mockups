@@ -2614,8 +2614,10 @@ label .req::after { content: " *"; color: var(--danger); }
   padding: 10px 12px;
   font-size: 13px;
 }
-.shell-catalog #catalogTable {
+.shell-catalog #catalogTable,
+.shell-catalog .catalog-section-table {
   font-size: 11.5px;
+  table-layout: fixed;
 }
 .shell-catalog #catalogTable th {
   padding: 6px 8px;
@@ -2625,17 +2627,77 @@ label .req::after { content: " *"; color: var(--danger); }
   top: 0;
   z-index: 1;
 }
-.shell-catalog #catalogTable td {
+.shell-catalog #catalogTable th:first-child,
+.shell-catalog .catalog-section-table td.num {
+  width: 5.5rem;
+}
+.shell-catalog .catalog-section-table td {
   padding: 5px 8px;
   line-height: 1.35;
   font-size: 11.5px;
 }
-.shell-catalog #catalogTable td.num {
-  width: 4.5rem;
+.shell-catalog .catalog-section-table td.num {
   white-space: nowrap;
   font-size: 11.5px;
 }
-.shell-catalog #catalogTable .sub { font-size: 10.5px; }
+.shell-catalog .catalog-section-table .sub { font-size: 10.5px; }
+.shell-catalog .catalog-board {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+.shell-catalog .catalog-empty {
+  margin: 0;
+  padding: 12px 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.shell-catalog .sap-section-head {
+  padding: 8px 8px 6px;
+  gap: 8px;
+}
+.shell-catalog .sap-section-body {
+  padding: 0 0 4px;
+}
+.shell-catalog .sap-section:last-child { border-bottom: none; }
+.shell-catalog .catalog-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  margin-right: 5px;
+  color: var(--muted);
+  vertical-align: -2px;
+  cursor: grab;
+  opacity: 0.5;
+}
+.shell-catalog tr[data-id]:hover .catalog-grip { opacity: 1; }
+.shell-catalog .catalog-grip svg {
+  width: 10px;
+  height: 14px;
+  fill: currentColor;
+}
+.shell-catalog tr[data-id] { cursor: grab; user-select: none; }
+.shell-catalog tr[data-id].is-dragging { cursor: grabbing; }
+.shell-catalog tr.is-dragging {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.shell-catalog tr.is-filtered-out { display: none; }
+.shell-catalog tr.drop-before td {
+  box-shadow: inset 0 2px 0 0 var(--accent);
+}
+.shell-catalog tr.drop-after td {
+  box-shadow: inset 0 -2px 0 0 var(--accent);
+}
+.shell-catalog .sap-section.drop-target > .sap-section-head {
+  background: var(--accent-soft);
+}
+.shell-catalog tr.catalog-drop-pad { cursor: default; }
+.shell-catalog tr.catalog-drop-pad td {
+  padding: 10px 8px;
+  border-bottom: none;
+}
 .btn-sm {
   padding: 5px 10px;
   font-size: 12.5px;
