@@ -2762,6 +2762,8 @@ label .req::after { content: " *"; color: var(--danger); }
   gap: 8px;
   flex-shrink: 0;
 }
+.sheet-type-btn[hidden],
+#typeMenuBtn[hidden] { display: none !important; }
 .sheet-type-btn {
   display: inline-flex;
   align-items: center;
