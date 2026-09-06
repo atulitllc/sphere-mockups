@@ -213,12 +213,9 @@
         <div class="tracker-col-head" role="row">
           <div class="col-check" aria-hidden="true"></div>
           <div class="artifact-main">
-            <div class="artifact-title-band">
-              <div class="col-head-label">Title</div>
-              <div class="col-head-label col-head-tags">Tags</div>
-            </div>
+            <div class="artifact-title-band col-head-title-spacer" aria-hidden="true"></div>
             <div class="artifact-meta">
-              <div class="meta-cell"><span class="col-head-label">Program</span></div>
+              <div class="meta-cell col-head-program-spacer" aria-hidden="true"></div>
               <div class="meta-cell"><span class="col-head-label">Type</span></div>
               <div class="meta-cell"><span class="col-head-label">Status</span></div>
               <div class="meta-cell"><span class="col-head-label">Checkout</span></div>
@@ -253,7 +250,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="meta-v">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm primary" type="button">Send to QC</button></div></div>
                 </div>
               </div>
             </article>
@@ -272,7 +269,7 @@
                   <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Freeze</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm" type="button">Freeze</button></div></div>
                 </div>
               </div>
             </article>
@@ -291,7 +288,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm disabled" type="button" disabled title="Frozen — no edit">Frozen</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm disabled" type="button" disabled title="Frozen — no edit">Frozen</button></div></div>
                 </div>
               </div>
             </article>
@@ -319,7 +316,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Queued</span></div>
                   <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
                 </div>
               </div>
             </article>
@@ -338,7 +335,7 @@
                   <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
                   <div class="meta-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm primary" type="button">Check out</button></div></div>
                 </div>
               </div>
             </article>
@@ -357,7 +354,7 @@
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
                   <div class="meta-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm primary" type="button">Check out</button></div></div>
                 </div>
               </div>
             </article>
@@ -385,7 +382,7 @@
                   <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v" style="color:var(--accent)">Running</span></div>
                   <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
                 </div>
               </div>
             </article>
@@ -404,7 +401,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
                 </div>
               </div>
             </article>
@@ -423,7 +420,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Freeze</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm" type="button">Freeze</button></div></div>
                 </div>
               </div>
             </article>
@@ -451,7 +448,7 @@
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
                   <div class="meta-cell"><span class="meta-v">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm primary" type="button">Send to QC</button></div></div>
                 </div>
               </div>
             </article>
@@ -552,6 +549,76 @@
       <button class="btn" type="button" id="btnCancelImport">Cancel</button>
       <button class="btn primary" type="button" id="btnConfirmImport">Create tracker records</button>
     </div>
+  </div>
+</div>
+
+
+<!-- Row editor (floating, draggable) -->
+<div class="float-editor" id="rowEditor" hidden role="dialog" aria-modal="true" aria-labelledby="rowEditorTitle">
+  <div class="float-editor-head" id="rowEditorDrag">
+    <h2 id="rowEditorTitle">Edit tracker row</h2>
+    <button class="btn ghost icon-btn" type="button" id="btnCloseRowEditor" aria-label="Close" title="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <form class="float-editor-body" id="rowEditorForm">
+    <label>Title<input type="text" id="reTitle" name="title" required autocomplete="off" /></label>
+    <label>Program filename<input type="text" id="reProgram" name="program" placeholder="e.g. tfl_14_1_1_demog.R" autocomplete="off" /></label>
+    <div class="grid2">
+      <label>Type
+        <select id="reType" name="type">
+          <option>Table</option>
+          <option>Listing</option>
+          <option>Figure</option>
+          <option>Dataset</option>
+        </select>
+      </label>
+      <label>Status
+        <select id="reStatus" name="status">
+          <option>Not started</option>
+          <option>In dev</option>
+          <option>In QC</option>
+          <option>Approved</option>
+          <option>Frozen</option>
+        </select>
+      </label>
+    </div>
+    <div class="grid2">
+      <label>SAP section
+        <select id="reSap" name="sap">
+          <option>Demographics</option>
+          <option>Efficacy</option>
+          <option>Safety TLFs</option>
+          <option>Labs</option>
+        </select>
+      </label>
+      <label>Shell
+        <select id="reShell" name="shell">
+          <option>Locked</option>
+          <option>Available</option>
+          <option>n/a</option>
+          <option>—</option>
+        </select>
+      </label>
+    </div>
+    <label>Tags <span class="hint" style="display:inline;margin:0">(comma-separated)</span>
+      <input type="text" id="reTags" name="tags" placeholder="First look, DMC" autocomplete="off" />
+    </label>
+    <div class="grid2">
+      <label>Checkout owner<input type="text" id="reCheckoutOwner" name="checkoutOwner" placeholder="e.g. J. Patel" autocomplete="off" /></label>
+      <label>Checkout state
+        <select id="reCheckoutState" name="checkoutState">
+          <option value="">—</option>
+          <option value="out">Checked out</option>
+          <option value="qc">In QC</option>
+          <option value="released">Released</option>
+        </select>
+      </label>
+    </div>
+  </form>
+  <div class="float-editor-foot">
+    <button class="btn" type="button" id="btnCancelRowEditor">Cancel</button>
+    <button class="btn primary" type="button" id="btnSaveRowEditor">Save</button>
   </div>
 </div>
 
@@ -936,10 +1003,180 @@
     if (e.target === importModal) closeImport();
   });
 
+  /* Row editor (floating / draggable) */
+  var rowEditor = document.getElementById('rowEditor');
+  var rowEditorDrag = document.getElementById('rowEditorDrag');
+  var editingRow = null;
+  var dragState = null;
+
+  function checkoutLabel(state) {
+    if (state === 'out') return 'Checked out';
+    if (state === 'qc') return 'In QC (owner)';
+    if (state === 'released') return 'Released';
+    return '—';
+  }
+
+  function metaCells(row) {
+    return row.querySelectorAll('.artifact-meta > .meta-cell');
+  }
+
+  function openRowEditor(row) {
+    editingRow = row;
+    var cells = metaCells(row);
+    document.getElementById('reTitle').value = (row.querySelector('.artifact-title') || {}).textContent || '';
+    document.getElementById('reProgram').value = row.getAttribute('data-program') || '';
+    document.getElementById('reType').value = row.getAttribute('data-type') || 'Table';
+    document.getElementById('reStatus').value = row.getAttribute('data-status') || 'Not started';
+    document.getElementById('reSap').value = row.getAttribute('data-sap') || 'Demographics';
+    var shellTxt = cells[4] ? (cells[4].textContent || '').trim() : 'n/a';
+    var shellSel = document.getElementById('reShell');
+    shellSel.value = shellTxt;
+    if (shellSel.value !== shellTxt) {
+      // allow freeform shell values already in DOM
+      var opt = document.createElement('option');
+      opt.value = shellTxt;
+      opt.textContent = shellTxt;
+      shellSel.appendChild(opt);
+      shellSel.value = shellTxt;
+    }
+    document.getElementById('reTags').value = row.getAttribute('data-tags') || '';
+    var ownerEl = cells[3] ? cells[3].querySelector('strong') : null;
+    document.getElementById('reCheckoutOwner').value = ownerEl ? ownerEl.textContent.trim() : '';
+    document.getElementById('reCheckoutState').value = row.getAttribute('data-checkout') || '';
+    if (!rowEditor.style.left && !rowEditor.style.top) {
+      rowEditor.style.left = Math.max(24, (window.innerWidth - 420) / 2) + 'px';
+      rowEditor.style.top = Math.max(24, window.scrollY + 80) + 'px';
+    }
+    rowEditor.removeAttribute('hidden');
+    document.getElementById('reTitle').focus();
+  }
+
+  function closeRowEditor() {
+    rowEditor.setAttribute('hidden', '');
+    editingRow = null;
+    dragState = null;
+  }
+
+  function saveRowEditor() {
+    if (!editingRow) return;
+    var row = editingRow;
+    var title = document.getElementById('reTitle').value.trim();
+    var program = document.getElementById('reProgram').value.trim();
+    var type = document.getElementById('reType').value;
+    var status = document.getElementById('reStatus').value;
+    var sap = document.getElementById('reSap').value;
+    var shell = document.getElementById('reShell').value;
+    var tagsRaw = document.getElementById('reTags').value;
+    var tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var owner = document.getElementById('reCheckoutOwner').value.trim();
+    var coState = document.getElementById('reCheckoutState').value;
+
+    row.setAttribute('data-type', type);
+    row.setAttribute('data-status', status);
+    row.setAttribute('data-program', program);
+    row.setAttribute('data-checkout', coState);
+    row.setAttribute('data-tags', tags.join(','));
+
+    var titleEl = row.querySelector('.artifact-title');
+    if (titleEl) titleEl.textContent = title || 'Untitled';
+
+    renderTagChips(row, tags);
+
+    var cells = metaCells(row);
+    // Program
+    if (cells[0]) {
+      cells[0].innerHTML = program
+        ? '<span class="meta-v program-name">' + program.split('/').pop() + '</span>'
+        : '<span class="meta-v muted program-name">—</span>';
+    }
+    // Type
+    if (cells[1]) cells[1].innerHTML = '<span class="meta-v">' + type + '</span>';
+    // Status
+    if (cells[2]) cells[2].innerHTML = '<span class="meta-v">' + status + '</span>';
+    // Checkout
+    if (cells[3]) {
+      if (owner || coState) {
+        var sub = checkoutLabel(coState);
+        cells[3].innerHTML = '<div class="cell-stack"><strong style="font-size:13px">' +
+          (owner || '—') + '</strong><span class="sub">' + sub + '</span></div>';
+      } else {
+        cells[3].innerHTML = '<span class="meta-v muted">—</span>';
+      }
+    }
+    // Shell
+    if (cells[4]) {
+      if (!shell || shell === '—') cells[4].innerHTML = '<span class="meta-v muted">—</span>';
+      else if (shell === 'n/a') cells[4].innerHTML = '<span class="meta-v muted">n/a</span>';
+      else cells[4].innerHTML = '<span class="meta-v">' + shell + '</span>';
+    }
+
+    var check = row.querySelector('.row-check');
+    if (check) check.setAttribute('aria-label', 'Select ' + (title || 'row'));
+
+    if (sap && row.getAttribute('data-sap') !== sap) {
+      moveRowToSap(row, sap);
+    } else {
+      row.setAttribute('data-sap', sap);
+    }
+    syncSectionCounts();
+    applyFilters();
+    closeRowEditor();
+    showToast('Row updated');
+  }
+
+  board.addEventListener('click', function (e) {
+    var btn = e.target.closest('.row-edit');
+    if (!btn) return;
+    var row = btn.closest('.artifact-row');
+    if (row) openRowEditor(row);
+  });
+
+  document.getElementById('btnCloseRowEditor').addEventListener('click', closeRowEditor);
+  document.getElementById('btnCancelRowEditor').addEventListener('click', closeRowEditor);
+  document.getElementById('btnSaveRowEditor').addEventListener('click', saveRowEditor);
+  document.getElementById('rowEditorForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    saveRowEditor();
+  });
+
+  rowEditorDrag.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0) return;
+    if (e.target.closest('button')) return;
+    var rect = rowEditor.getBoundingClientRect();
+    dragState = {
+      ox: e.clientX - rect.left,
+      oy: e.clientY - rect.top,
+      pid: e.pointerId
+    };
+    rowEditorDrag.setPointerCapture(e.pointerId);
+    rowEditor.classList.add('is-dragging');
+    e.preventDefault();
+  });
+  rowEditorDrag.addEventListener('pointermove', function (e) {
+    if (!dragState || e.pointerId !== dragState.pid) return;
+    var x = e.clientX - dragState.ox;
+    var y = e.clientY - dragState.oy;
+    x = Math.min(Math.max(8, x), window.innerWidth - 80);
+    y = Math.min(Math.max(8, y), window.innerHeight - 40);
+    rowEditor.style.left = x + 'px';
+    rowEditor.style.top = y + 'px';
+  });
+  function endDrag(e) {
+    if (!dragState) return;
+    if (e && dragState.pid != null) {
+      try { rowEditorDrag.releasePointerCapture(dragState.pid); } catch (err) {}
+    }
+    dragState = null;
+    rowEditor.classList.remove('is-dragging');
+  }
+  rowEditorDrag.addEventListener('pointerup', endDrag);
+  rowEditorDrag.addEventListener('pointercancel', endDrag);
+
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       setOpen(false);
       closeImport();
+      closeRowEditor();
     }
   });
 
@@ -976,7 +1213,7 @@
           '<div class="meta-cell"><span class="meta-v muted">n/a</span></div>' +
           '<div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>' +
           '<div class="meta-cell"><span class="meta-v muted">—</span></div>' +
-          '<div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></div>' +
+          '<div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn sm primary" type="button">Check out</button></div></div>' +
         '</div>' +
       '</div>';
     return row;
