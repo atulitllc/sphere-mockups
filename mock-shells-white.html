@@ -223,7 +223,35 @@
         <!-- Sheet editor -->
         <div class="card shell-editor">
           <div class="shell-action-bar">
-            <div class="shell-meta-strip">
+            <div class="shell-actions">
+              <button class="btn" type="button" id="btnCopyShell" title="Copy this shell to another study as a new draft">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                Copy to study…
+              </button>
+              <button class="btn" type="button" id="btnSaveDraft">Save draft</button>
+              <button class="btn primary" type="button" id="btnGenerate">Save &amp; generate</button>
+              <button class="btn" type="button" id="btnLock">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                Lock
+              </button>
+            </div>
+          </div>
+
+          <div class="sheet-canvas">
+            <div class="sheet-title-row">
+              <div class="sheet-titles">
+                <div class="sheet-title" id="shellTitle" data-placeholder="{Adhoc Shell 1}" contenteditable="false" title="Double-click to edit">{Adhoc Shell 1}</div>
+                <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
+              </div>
+              <div class="sheet-type-controls">
+                <span class="sheet-custom-pill">Custom</span>
+                <button class="sheet-type-btn" type="button" id="typeMenuBtn" aria-haspopup="listbox" aria-expanded="false" hidden>
+                  <span id="typeMenuLabel">Table</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="shell-props" aria-label="Shell properties">
               <label class="meta-field">Shell
                 <input id="metaNumber" value="14.1.1" />
               </label>
@@ -249,34 +277,6 @@
                   <option>Locked</option>
                 </select>
               </label>
-            </div>
-            <div class="shell-actions">
-              <button class="btn" type="button" id="btnCopyShell" title="Copy this shell to another study as a new draft">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-                Copy to study…
-              </button>
-              <button class="btn" type="button" id="btnSaveDraft">Save draft</button>
-              <button class="btn primary" type="button" id="btnGenerate">Save &amp; generate</button>
-              <button class="btn" type="button" id="btnLock">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-                Lock
-              </button>
-            </div>
-          </div>
-
-          <div class="sheet-canvas">
-            <div class="sheet-title-row">
-              <div class="sheet-titles">
-                <div class="sheet-title" id="shellTitle" data-placeholder="{Adhoc Shell 1}" contenteditable="false" title="Double-click to edit">{Adhoc Shell 1}</div>
-                <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
-              </div>
-              <div class="sheet-type-controls">
-                <button class="sheet-type-btn" type="button" id="typeMenuBtn" aria-haspopup="listbox" aria-expanded="false">
-                  <span id="typeMenuLabel">Table</span>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <span class="sheet-custom-pill">Custom</span>
-              </div>
             </div>
 
             <div class="sheet-grid-wrap" id="sheetGridWrap">
@@ -1162,6 +1162,11 @@
       var match = t === 'All types' || tr.dataset.type === t;
       tr.style.display = match ? '' : 'none';
     });
+  });
+
+  document.getElementById('metaType').addEventListener('change', function () {
+    var lab = document.getElementById('typeMenuLabel');
+    if (lab) lab.textContent = this.value;
   });
 
   document.getElementById('typeMenuBtn').addEventListener('click', function () {

@@ -2562,19 +2562,25 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .shell-action-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface);
 }
-.shell-meta-strip {
+.shell-meta-strip,
+.shell-props {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: flex-end;
+}
+.shell-props {
+  margin: 0 0 14px;
+  padding: 8px 0 10px;
+  border-bottom: 1px solid var(--border);
 }
 .meta-field {
   display: flex;
@@ -2599,6 +2605,22 @@ label .req::after { content: " *"; color: var(--danger); }
   height: 30px;
 }
 .meta-field input { width: 88px; }
+.shell-props .meta-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.shell-props .meta-field input,
+.shell-props .meta-field select {
+  height: 28px;
+  font-size: 12.5px;
+  min-width: 0;
+}
+.shell-props .meta-field input { width: 72px; }
+.shell-props .meta-field select { width: auto; }
 .shell-actions {
   display: flex;
   gap: 8px;
@@ -2693,7 +2715,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .sheet-grid-wrap {
   position: relative;
   overflow: auto;
-  margin-left: 40px;
+  margin-left: 0;
   border: 1px solid var(--border);
   border-radius: 2px;
   background: var(--surface);
@@ -2859,16 +2881,16 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .row-float-toolbar {
   position: absolute;
-  left: -38px;
+  left: 4px;
   z-index: 5;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1px;
   padding: 2px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
 }
 .row-float-toolbar button {
   width: 28px;
@@ -2897,7 +2919,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 .sheet-add-row {
-  margin: 10px 0 0 40px;
+  margin: 10px 0 0 0;
   font: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -2914,7 +2936,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 .sheet-blocks {
-  margin: 20px 0 0 40px;
+  margin: 20px 0 0 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
