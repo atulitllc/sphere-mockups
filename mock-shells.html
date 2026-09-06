@@ -129,7 +129,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Edit TLF shells as a sheet. <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
+        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
       </div>
 
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
@@ -218,10 +218,6 @@
                   <td class="num">14.3.2</td>
                   <td>Kaplan–Meier overall survival</td>
                 </tr>
-                <tr data-id="adhoc-1" data-type="Table">
-                  <td class="num">Adhoc 1</td>
-                  <td>{Adhoc Shell 1}</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -238,7 +234,7 @@
           <div class="sheet-canvas">
             <div class="sheet-title-row">
               <div class="sheet-titles">
-                <div class="sheet-title" id="shellTitle" data-placeholder="{Adhoc Shell 1}" contenteditable="false" title="Double-click to edit">{Adhoc Shell 1}</div>
+                <div class="sheet-title" id="shellTitle" data-placeholder="Demographics" contenteditable="false" title="Double-click to edit">Demographics</div>
                 <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
               </div>
               <div class="sheet-type-controls">
@@ -307,6 +303,13 @@
                 <button type="button" data-act="delete" title="Delete row" aria-label="Delete row" class="danger">
                   <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
                 </button>
+              </div>
+
+              <div class="col-select-toolbar" id="colToolbar" hidden>
+                <span class="col-sel-label" id="colSelLabel">Columns selected</span>
+                <button type="button" class="btn sm" id="btnGroupCols" title="Group selected columns under a parent header">Group columns…</button>
+                <button type="button" class="btn sm" id="btnUngroupCols" hidden title="Remove selected group header">Ungroup</button>
+                <button type="button" class="btn sm" id="btnClearColSel" title="Clear column selection">Clear</button>
               </div>
 
               <table class="sheet-grid" id="sheetGrid" aria-label="Shell layout grid">
@@ -418,6 +421,9 @@
   <button type="button" data-cmd="insert-col-left" role="menuitem">Insert column left</button>
   <button type="button" data-cmd="insert-col-right" role="menuitem">Insert column right</button>
   <button type="button" data-cmd="delete-col" role="menuitem">Delete column</button>
+  <div class="ctx-sep"></div>
+  <button type="button" data-cmd="group-cols" role="menuitem">Group columns…</button>
+  <button type="button" data-cmd="ungroup-cols" role="menuitem">Ungroup</button>
   <div class="ctx-sep"></div>
   <button type="button" data-cmd="indent" role="menuitem">Indent</button>
   <button type="button" data-cmd="outdent" role="menuitem">Outdent</button>
@@ -543,6 +549,7 @@
     title: 'Table 14.1.1 Demographics',
     subtitle: 'Safety Analysis Set',
     columns: ['Placebo', 'Drug X 100mg', 'Total'],
+    colGroups: [],
     rows: [
       { indent: 0, label: 'Age (years)', cells: ['', '', ''] },
       { indent: 1, label: 'n', cells: ['xx', 'xx', 'xx'] },
@@ -564,7 +571,8 @@
   var adhocPreset = {
     title: '{Adhoc Shell 1}',
     subtitle: '',
-    columns: ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'],
+    columns: ['Column 1', 'Column 2', 'New Column', 'New Column', 'New Column'],
+    colGroups: [],
     rows: [
       { indent: 0, label: 'indent 1', cells: ['', '', '', '', ''] },
       { indent: 1, label: 'Indent 2', cells: ['', '', '', '', ''] },
@@ -588,6 +596,7 @@
       title: title || 'Shell',
       subtitle: '',
       columns: ['Treatment A', 'Treatment B', 'Total'],
+    colGroups: [],
       rows: [
         { indent: 0, label: 'Parameter', cells: ['', '', ''] },
         { indent: 1, label: 'n', cells: ['', '', ''] },
@@ -630,8 +639,7 @@
         makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', templateKey: 'Baseline characteristics' }),
         makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', templateKey: 'Primary endpoint — ORR' }),
         makeShell({ id: '14.3.1', number: '14.3.1', type: 'Listing', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', templateKey: 'Adverse events — overview' }),
-        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', templateKey: 'Kaplan–Meier overall survival' }),
-        makeShell({ id: 'adhoc-1', number: 'Adhoc 1', type: 'Table', title: '{Adhoc Shell 1}', status: 'Draft', analysisSet: 'Safety', layout: adhocPreset, custom: true, templateKey: '' })
+        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', templateKey: 'Kaplan–Meier overall survival' })
       ];
     }
     /* other studies start with a light catalog so copy result is visible */
@@ -649,27 +657,31 @@
       studyStore[s.id] = { shells: seedCatalog(s.id), selectedId: null };
     }
   });
-  studyStore['ONC-204-301'].selectedId = 'adhoc-1';
+  studyStore['ONC-204-301'].selectedId = '14.1.1';
 
   var state = {
-    title: '{Adhoc Shell 1}',
+    title: 'Demographics',
     subtitle: '',
-    columns: ['BIIB01', 'BIIB02', 'New Column', 'New Column', 'New Column'],
-    rows: cloneData(adhocPreset.rows),
+    columns: cloneData(demogPreset.columns),
+    rows: cloneData(demogPreset.rows),
     footnotes: '',
     notes: '',
     program: '',
     sapRef: '',
-    templateKey: '',
-    custom: true,
+    templateKey: 'Demographics',
+    custom: false,
     templateMissing: false,
     activeRow: -1,
+    selectedCols: [],
+    selectedGroupId: null,
+    lastSelectedCol: null,
     ctx: { row: -1, col: -1 }
   };
 
   var headEl = document.getElementById('sheetHead');
   var bodyEl = document.getElementById('sheetBody');
   var toolbar = document.getElementById('rowToolbar');
+  var colToolbar = document.getElementById('colToolbar');
   var ctxMenu = document.getElementById('ctxMenu');
   var wrap = document.getElementById('sheetGridWrap');
   var catalogBody = document.getElementById('catalogBody');
@@ -1496,7 +1508,7 @@
   /* boot */
   updateStudyChrome();
   renderCatalog();
-  selectShell('adhoc-1', true);
+  selectShell('14.1.1', true);
 
 
 })();
