@@ -1470,14 +1470,14 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 
-/* Tracker column header — once at top, light accent */
+/* Tracker column header — once at top, light accent (compact) */
 .tracker-col-head {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   gap: 0 8px;
-  padding: 10px 8px 10px 4px;
+  padding: 4px 8px 4px 4px;
   margin: 0 0 4px;
-  align-items: end;
+  align-items: center;
   position: sticky;
   top: 0;
   z-index: 25;
@@ -1485,20 +1485,24 @@ label .req::after { content: " *"; color: var(--danger); }
   border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
   border-radius: var(--radius);
 }
-.tracker-col-head .artifact-main { gap: 8px; }
-.tracker-col-head .artifact-title-band { min-height: 0; }
+.tracker-col-head .artifact-main { gap: 0; }
+.tracker-col-head .artifact-title-band,
+.tracker-col-head .col-head-title-spacer {
+  display: none; /* title/tags headers removed — don't reserve empty band height */
+}
 .col-head-label {
   font-size: 10.5px;
   font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--accent);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 .tracker-col-head .artifact-meta .meta-cell {
   display: flex;
-  align-items: flex-end;
-  min-height: 1.2em;
+  align-items: center;
+  min-height: 0;
+  padding: 2px 0;
 }
 .tracker-col-head .artifact-meta .row-actions,
 .tracker-col-head .meta-cell:last-child {
@@ -1647,22 +1651,9 @@ label .req::after { content: " *"; color: var(--danger); }
   font-size: 12.5px;
   font-weight: 500;
 }
-.tracker-col-head .artifact-title-band {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
 .tracker-col-head .col-head-tags { margin-left: 0; }
-.tracker-col-head .col-head-title-spacer {
-  min-height: 1.2em;
-  /* empty title/tags band — keeps meta columns aligned with rows */
-}
 .tracker-col-head .col-head-program-spacer {
-  min-height: 1.2em;
-}
-.tracker-col-head .artifact-title-band:empty,
-.tracker-col-head .col-head-title-spacer {
-  min-height: 1.2em;
+  min-height: 0;
 }
 
 .artifact-path,
