@@ -530,6 +530,7 @@
   var lastUsedSap = 'Demographics';
   var collapsedSap = {};
   var catalogJustDragged = false;
+  var catalogDragClickUntil = 0;
 
   function normalizeSap(sap) {
     var s = (sap || '').toString().trim();
@@ -545,7 +546,7 @@
   }
 
   function catalogGripHtml() {
-    return '<span class="catalog-grip" title="Drag to reorder" aria-hidden="true">' +
+    return '<span class="catalog-grip" title="Drag to reorder" draggable="true" aria-hidden="true">' +
       '<svg viewBox="0 0 12 16" focusable="false"><circle cx="3.5" cy="3" r="1.15"/><circle cx="8.5" cy="3" r="1.15"/>' +
       '<circle cx="3.5" cy="8" r="1.15"/><circle cx="8.5" cy="8" r="1.15"/>' +
       '<circle cx="3.5" cy="13" r="1.15"/><circle cx="8.5" cy="13" r="1.15"/></svg></span>';
@@ -897,7 +898,7 @@
       }
       list.forEach(function (sh) {
         var sel = sh.id === selectedId ? ' selected' : '';
-        html += '<tr class="' + sel.trim() + '" draggable="true" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '" data-sap="' + escapeHtml(normalizeSap(sh.sap)) + '">';
+        html += '<tr class="' + sel.trim() + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '" data-sap="' + escapeHtml(normalizeSap(sh.sap)) + '">';
         html += '<td class="num">' + catalogGripHtml() + escapeHtml(sh.number) + '</td>';
         html += '<td>' + escapeHtml(sh.title);
         if (sh.copiedFrom) {
@@ -1709,6 +1710,15 @@
   });
 
   /* —— catalog selection, SAP collapse, search/filter, drag-and-drop —— */
+  function markCatalogDragConsumed() {
+    catalogJustDragged = true;
+    catalogDragClickUntil = Date.now() + 200;
+    setTimeout(function () {
+      catalogJustDragged = false;
+      catalogDragClickUntil = 0;
+    }, 200);
+  }
+
   catalogBody.addEventListener('click', function (e) {
     var head = e.target.closest && e.target.closest('.sap-section-head');
     if (head) {
@@ -1727,8 +1737,9 @@
       }
       return;
     }
-    if (catalogJustDragged) {
+    if (catalogJustDragged || Date.now() < catalogDragClickUntil) {
       catalogJustDragged = false;
+      catalogDragClickUntil = 0;
       return;
     }
     var tr = e.target.closest('tr[data-id]');
@@ -1740,8 +1751,9 @@
   document.getElementById('catalogFilter').addEventListener('change', applyCatalogFilters);
 
   catalogBody.addEventListener('dragstart', function (e) {
+    var grip = e.target.closest && e.target.closest('.catalog-grip');
     var tr = e.target.closest && e.target.closest('tr[data-id]');
-    if (!tr) {
+    if (!grip || !tr) {
       e.preventDefault();
       return;
     }
@@ -1779,7 +1791,7 @@
     e.preventDefault();
     var dragId = e.dataTransfer.getData('text/plain');
     clearCatalogDropMarks();
-    catalogJustDragged = true;
+    markCatalogDragConsumed();
     if (!dragId) return;
     var tr = e.target.closest('tr[data-id]');
     var sec = e.target.closest('.sap-section');

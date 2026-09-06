@@ -2658,8 +2658,7 @@ label .req::after { content: " *"; color: var(--danger); }
   height: 14px;
   fill: currentColor;
 }
-.shell-catalog tr[data-id] { cursor: grab; user-select: none; }
-.shell-catalog tr[data-id]:active,
+.shell-catalog tr[data-id] { cursor: pointer; }
 .shell-catalog tr[data-id].is-dragging { cursor: grabbing; }
 .shell-catalog tr.is-dragging { opacity: 0.4; }
 .shell-catalog tr.is-filtered-out { display: none; }
