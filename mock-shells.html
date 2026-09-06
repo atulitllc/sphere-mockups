@@ -222,20 +222,10 @@
 
         <!-- Sheet editor -->
         <div class="card shell-editor">
-          <div class="shell-action-bar">
-            <div class="shell-actions">
-              <button class="btn" type="button" id="btnCopyShell" title="Copy this shell to another study as a new draft">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-                Copy to study…
-              </button>
-              <button class="btn" type="button" id="btnSaveDraft">Save draft</button>
-              <button class="btn primary" type="button" id="btnGenerate">Save &amp; generate</button>
-              <button class="btn" type="button" id="btnLock">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-                Lock
-              </button>
-            </div>
-          </div>
+          <input type="hidden" id="metaNumber" value="14.1.1" />
+          <button class="sheet-type-btn" type="button" id="typeMenuBtn" aria-haspopup="listbox" aria-expanded="false" hidden>
+            <span id="typeMenuLabel">Table</span>
+          </button>
 
           <div class="sheet-canvas">
             <div class="sheet-title-row">
@@ -245,38 +235,48 @@
               </div>
               <div class="sheet-type-controls">
                 <span class="sheet-custom-pill">Custom</span>
-                <button class="sheet-type-btn" type="button" id="typeMenuBtn" aria-haspopup="listbox" aria-expanded="false" hidden>
-                  <span id="typeMenuLabel">Table</span>
-                </button>
               </div>
             </div>
 
             <div class="shell-props" aria-label="Shell properties">
-              <label class="meta-field">Shell
-                <input id="metaNumber" value="14.1.1" />
-              </label>
-              <label class="meta-field">Type
-                <select id="metaType">
-                  <option selected>Table</option>
-                  <option>Listing</option>
-                  <option>Figure</option>
-                </select>
-              </label>
-              <label class="meta-field">Analysis set
-                <select id="metaSet">
-                  <option selected>Safety</option>
-                  <option>ITT</option>
-                  <option>mITT</option>
-                  <option>PP</option>
-                </select>
-              </label>
-              <label class="meta-field">Status
-                <select id="metaStatus">
-                  <option selected>Draft</option>
-                  <option>In review</option>
-                  <option>Locked</option>
-                </select>
-              </label>
+              <div class="shell-props-fields">
+                <label class="meta-field">Type
+                  <select id="metaType">
+                    <option selected>Table</option>
+                    <option>Listing</option>
+                    <option>Figure</option>
+                  </select>
+                </label>
+                <label class="meta-field">Analysis set
+                  <select id="metaSet">
+                    <option selected>Safety</option>
+                    <option>ITT</option>
+                    <option>mITT</option>
+                    <option>PP</option>
+                  </select>
+                </label>
+                <label class="meta-field">Status
+                  <select id="metaStatus">
+                    <option selected>Draft</option>
+                    <option>In review</option>
+                    <option>Locked</option>
+                  </select>
+                </label>
+              </div>
+              <div class="shell-actions shell-actions-icons">
+                <button class="btn icon-btn accent-icon" type="button" id="btnCopyShell" title="Copy to study" aria-label="Copy to study">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                </button>
+                <button class="btn icon-btn accent-icon" type="button" id="btnSaveDraft" title="Save draft" aria-label="Save draft">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                </button>
+                <button class="btn icon-btn accent-icon accent-icon-primary" type="button" id="btnGenerate" title="Save &amp; generate" aria-label="Save and generate">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/><path d="M5 19h4"/></svg>
+                </button>
+                <button class="btn icon-btn accent-icon" type="button" id="btnLock" title="Lock" aria-label="Lock">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                </button>
+              </div>
             </div>
 
             <div class="sheet-grid-wrap" id="sheetGridWrap">
