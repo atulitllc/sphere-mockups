@@ -588,7 +588,7 @@
       title: title || 'Shell',
       subtitle: '',
       columns: ['Treatment A', 'Treatment B', 'Total'],
-    colGroups: [],
+      colGroups: [],
       rows: [
         { indent: 0, label: 'Parameter', cells: ['', '', ''] },
         { indent: 1, label: 'n', cells: ['', '', ''] },
@@ -655,6 +655,7 @@
     title: 'Demographics',
     subtitle: '',
     columns: cloneData(demogPreset.columns),
+    colGroups: cloneData(demogPreset.colGroups || []),
     rows: cloneData(demogPreset.rows),
     footnotes: '',
     notes: '',
