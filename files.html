@@ -85,13 +85,33 @@
         <div class="crumb"><a href="studies.html">Studies</a> / <strong>ONC-204-301</strong> / Files</div>
       </div>
       <div class="top-right">
-        <div class="accent-picker" id="accentPicker" role="group" aria-label="Accent theme">
-          <span class="accent-picker-label">Theme</span>
-          <button type="button" class="accent-swatch" data-accent-value="blue" title="Blue" aria-label="Blue accent" style="--swatch:#2563EB"></button>
-          <button type="button" class="accent-swatch" data-accent-value="teal" title="Teal" aria-label="Teal accent" style="--swatch:#0d9488"></button>
-          <button type="button" class="accent-swatch" data-accent-value="indigo" title="Indigo" aria-label="Indigo accent" style="--swatch:#4f46e5"></button>
-          <button type="button" class="accent-swatch" data-accent-value="emerald" title="Emerald" aria-label="Emerald accent" style="--swatch:#059669"></button>
-          <button type="button" class="accent-swatch" data-accent-value="slate" title="Slate" aria-label="Slate accent" style="--swatch:#475569"></button>
+        <div class="accent-picker" id="accentPicker">
+          <button type="button" class="accent-picker-trigger" id="accentPickerBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="accentMenu" title="Accent theme" aria-label="Accent theme">
+            <span class="accent-swatch accent-swatch-current" id="accentCurrentSwatch" style="--swatch:#2563EB" aria-hidden="true"></span>
+            <svg class="accent-picker-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="accent-menu" id="accentMenu" role="listbox" aria-label="Accent theme" hidden>
+            <button type="button" class="accent-menu-item" role="option" data-accent-value="blue" aria-selected="false">
+              <span class="accent-swatch" style="--swatch:#2563EB" aria-hidden="true"></span>
+              <span class="accent-menu-label">Blue</span>
+            </button>
+            <button type="button" class="accent-menu-item" role="option" data-accent-value="teal" aria-selected="false">
+              <span class="accent-swatch" style="--swatch:#0d9488" aria-hidden="true"></span>
+              <span class="accent-menu-label">Teal</span>
+            </button>
+            <button type="button" class="accent-menu-item" role="option" data-accent-value="indigo" aria-selected="false">
+              <span class="accent-swatch" style="--swatch:#4f46e5" aria-hidden="true"></span>
+              <span class="accent-menu-label">Indigo</span>
+            </button>
+            <button type="button" class="accent-menu-item" role="option" data-accent-value="emerald" aria-selected="false">
+              <span class="accent-swatch" style="--swatch:#059669" aria-hidden="true"></span>
+              <span class="accent-menu-label">Emerald</span>
+            </button>
+            <button type="button" class="accent-menu-item" role="option" data-accent-value="slate" aria-selected="false">
+              <span class="accent-swatch" style="--swatch:#475569" aria-hidden="true"></span>
+              <span class="accent-menu-label">Slate</span>
+            </button>
+          </div>
         </div>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
           <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
@@ -252,27 +272,6 @@
   }
 
 
-  var ACCENTS = ['blue', 'teal', 'indigo', 'emerald', 'slate'];
-  function currentAccent() {
-    var a = root.getAttribute('data-accent');
-    return ACCENTS.indexOf(a) >= 0 ? a : 'blue';
-  }
-  function applyAccent(accent) {
-    if (ACCENTS.indexOf(accent) < 0) accent = 'blue';
-    root.setAttribute('data-accent', accent);
-    try { localStorage.setItem('sphere-accent', accent); } catch (e) {}
-    document.querySelectorAll('.accent-swatch').forEach(function (b) {
-      var on = b.getAttribute('data-accent-value') === accent;
-      b.classList.toggle('is-active', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-  }
-  document.querySelectorAll('.accent-swatch').forEach(function (b) {
-    b.addEventListener('click', function () {
-      applyAccent(b.getAttribute('data-accent-value'));
-    });
-  });
-  applyAccent(currentAccent());
 
   function isMobileNav() { return window.innerWidth <= 860; }
 
@@ -771,5 +770,6 @@
   render('programs');
 })();
 </script>
+<script src="shared-chrome.js"></script>
 </body>
 </html>

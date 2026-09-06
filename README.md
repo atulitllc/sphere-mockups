@@ -1,6 +1,6 @@
 # SPHERE mockups (public)
 
-Interactive UI previews for **SPHERE**. Colored left-nav chrome (default **blue** accent) with a Theme swatch picker, light/dark mode toggle, and a desktop-collapsible left nav (icons-only rail). Preferences: `sphere-theme`, `sphere-accent`, `sphere-nav-collapsed` in `localStorage`.
+Interactive UI previews for **SPHERE**. Colored left-nav chrome (default **blue** accent) with a compact accent dropdown (Blue / Teal / Indigo / Emerald / Slate), light/dark mode toggle, and a desktop-collapsible left nav (icons-only rail). Open page sections (meta grids, library chips) avoid card-inside-card; reserve bordered cards/panels for complex widgets. Preferences: `sphere-theme`, `sphere-accent`, `sphere-nav-collapsed` in `localStorage`.
 
 - **Entry:** `studies.html` — pick a study, then open the in-study workspace
 - **Style lock:** `mock-shells.html` (+ `shared-white.css`) — spreadsheet-like shell editor (double-click cells, row indent toolbar, footnotes blocks); **Copy to study…** creates a new Draft in another same-tenant study (layout/title/type/analysis set/footnotes/notes only — never lock/QC/approve or generated Word/RTF); build the React app against this look
