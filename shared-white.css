@@ -1530,19 +1530,19 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .bulk-bar {
   position: sticky;
-  bottom: 0;
+  top: 0;
   z-index: 30;
   display: none;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 12px;
+  margin: 0 0 12px;
   padding: 12px 14px;
   border-radius: var(--radius);
   border: 1px solid var(--blue-border);
   background: var(--surface);
-  box-shadow: 0 -4px 24px var(--nav-shadow);
+  box-shadow: 0 4px 24px var(--nav-shadow);
 }
 .bulk-bar.visible { display: flex; }
 .bulk-bar .bulk-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

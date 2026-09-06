@@ -185,6 +185,31 @@
           <label class="check-all-label"><input type="checkbox" id="checkAll" aria-label="Select all visible" /> Select all visible</label>
         </div>
 
+        <div class="bulk-bar" id="bulkBar" aria-live="polite">
+          <div class="bulk-left">
+            <span class="sel-count" id="selCount">0 selected</span>
+            <span class="muted" style="font-size:12px">Run uses checked-out or allowed programs (demo)</span>
+          </div>
+          <div class="bulk-right">
+            <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
+            <select id="bulkTag" style="width:140px" aria-label="Assign tag">
+              <option value="">Edit tags…</option>
+              <option value="First look">+ First look</option>
+              <option value="Second wave">+ Second wave</option>
+              <option value="DMC">+ DMC</option>
+              <option value="CSR">+ CSR</option>
+            </select>
+            <select id="bulkSap" style="width:150px" aria-label="Assign SAP section">
+              <option value="">Assign SAP…</option>
+              <option>Demographics</option>
+              <option>Efficacy</option>
+              <option>Safety TLFs</option>
+              <option>Labs</option>
+            </select>
+            <button class="btn ghost" type="button" id="btnClearSel">Clear</button>
+          </div>
+        </div>
+
         <div class="tracker-board" id="trackerBoard">
           <section class="sap-section" data-sap-group="Demographics">
             <button type="button" class="sap-section-head" aria-expanded="true">
@@ -424,30 +449,6 @@
           </section>
         </div>
 
-        <div class="bulk-bar" id="bulkBar" aria-live="polite">
-          <div class="bulk-left">
-            <span class="sel-count" id="selCount">0 selected</span>
-            <span class="muted" style="font-size:12px">Run uses checked-out or allowed programs (demo)</span>
-          </div>
-          <div class="bulk-right">
-            <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
-            <select id="bulkTag" style="width:140px" aria-label="Assign tag">
-              <option value="">Edit tags…</option>
-              <option value="First look">+ First look</option>
-              <option value="Second wave">+ Second wave</option>
-              <option value="DMC">+ DMC</option>
-              <option value="CSR">+ CSR</option>
-            </select>
-            <select id="bulkSap" style="width:150px" aria-label="Assign SAP section">
-              <option value="">Assign SAP…</option>
-              <option>Demographics</option>
-              <option>Efficacy</option>
-              <option>Safety TLFs</option>
-              <option>Labs</option>
-            </select>
-            <button class="btn ghost" type="button" id="btnClearSel">Clear</button>
-          </div>
-        </div>
       </section>
 
       <section class="section job-panel-wrap" id="jobPanel">
