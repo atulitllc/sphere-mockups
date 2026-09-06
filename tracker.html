@@ -210,6 +210,25 @@
           </div>
         </div>
 
+        <div class="tracker-col-head" role="row">
+          <div class="col-check" aria-hidden="true"></div>
+          <div class="artifact-main">
+            <div class="artifact-title-band">
+              <div class="col-head-label">Program</div>
+            </div>
+            <div class="artifact-meta">
+              <div class="meta-cell"><span class="col-head-label">Type</span></div>
+              <div class="meta-cell"><span class="col-head-label">Tags</span></div>
+              <div class="meta-cell"><span class="col-head-label">Status</span></div>
+              <div class="meta-cell"><span class="col-head-label">Checkout</span></div>
+              <div class="meta-cell"><span class="col-head-label">Shell</span></div>
+              <div class="meta-cell"><span class="col-head-label">Job</span></div>
+              <div class="meta-cell"><span class="col-head-label">Files</span></div>
+              <div class="meta-cell"><span class="col-head-label">Actions</span></div>
+            </div>
+          </div>
+        </div>
+
         <div class="tracker-board" id="trackerBoard">
           <section class="sap-section" data-sap-group="Demographics">
             <button type="button" class="sap-section-head" aria-expanded="true">
@@ -227,13 +246,13 @@
                   <div class="artifact-note">shell locked, program still In dev</div>
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Table</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">In dev</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">Checked out</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Locked</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="meta-v">Editable</span></div>
+                  <div class="meta-cell"><span class="meta-v">Table</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In dev</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">Checked out</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Locked</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
+                  <div class="meta-cell"><span class="meta-v">Editable</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button></div></div>
                 </div>
               </div>
@@ -247,13 +266,13 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Dataset</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">Approved</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">Released</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v muted">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Dataset</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Approved</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">Released</span></div></div>
+                  <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
+                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Freeze</button></div></div>
                 </div>
               </div>
@@ -267,13 +286,13 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Table</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">DMC</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">Frozen</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">M. Chen</strong><span class="sub">Released</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Locked</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Table</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">DMC</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Frozen</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">M. Chen</strong><span class="sub">Released</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Locked</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
+                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm disabled" type="button" disabled title="Frozen — no edit">Frozen</button></div></div>
                 </div>
               </div>
@@ -296,13 +315,13 @@
                   <div class="artifact-note">checked in · awaiting QC</div>
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Table</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">Second wave</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">In QC</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">R. Nguyen</strong><span class="sub">In QC (owner)</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Locked</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v">Queued</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Table</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">Second wave</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">R. Nguyen</strong><span class="sub">In QC (owner)</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Locked</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Queued</span></div>
+                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
                 </div>
               </div>
@@ -316,13 +335,13 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Dataset</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">Not started</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v muted">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">Dataset</span></div>
+                  <div class="meta-cell artifact-tags"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">Not started</span></div>
+                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></div>
                 </div>
               </div>
@@ -336,13 +355,13 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Figure</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">Not started</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">Figure</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Not started</span></div>
+                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">Draft</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></div>
                 </div>
               </div>
@@ -365,13 +384,13 @@
                   <div class="artifact-note">Send to QC froze program files</div>
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Dataset</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">In QC</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">In QC (owner)</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v muted">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v" style="color:var(--accent)">Running</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Dataset</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">In QC (owner)</span></div></div>
+                  <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v" style="color:var(--accent)">Running</span></div>
+                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
                 </div>
               </div>
@@ -385,13 +404,13 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Listing</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">DMC</span><span class="tag-chip">First look</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">In QC</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">In QC (owner)</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Locked</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Listing</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">DMC</span><span class="tag-chip">First look</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">J. Patel</strong><span class="sub">In QC (owner)</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Locked</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
+                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button></div></div>
                 </div>
               </div>
@@ -405,13 +424,13 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Table</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">Approved</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">S. Ortiz</strong><span class="sub">Released</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Locked</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Table</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Approved</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">S. Ortiz</strong><span class="sub">Released</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Locked</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
+                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Freeze</button></div></div>
                 </div>
               </div>
@@ -434,13 +453,13 @@
                   <div class="artifact-note">draft shell · program claimed</div>
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">Table</span></div>
-                  <div class="meta-cell artifact-tags"><span class="meta-k">Tags</span><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">In dev</span></div>
-                  <div class="meta-cell"><span class="meta-k">Checkout</span><div class="cell-stack"><strong style="font-size:13px">S. Ortiz</strong><span class="sub">Checked out</span></div></div>
-                  <div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-k">Files</span><span class="meta-v">Editable</span></div>
+                  <div class="meta-cell"><span class="meta-v">Table</span></div>
+                  <div class="meta-cell artifact-tags"><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In dev</span></div>
+                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">S. Ortiz</strong><span class="sub">Checked out</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Draft</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">Editable</span></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button></div></div>
                 </div>
               </div>
@@ -680,15 +699,15 @@
       /* queued muted */
     }
     if (!state) {
-      cell.innerHTML = '<span class="meta-k">Job</span><span class="meta-v muted">—</span>';
+      cell.innerHTML = '<span class="meta-v muted">—</span>';
       return;
     }
     if (state === 'running') {
-      cell.innerHTML = '<span class="meta-k">Job</span><span class="meta-v" style="color:var(--accent)">Running</span>';
+      cell.innerHTML = '<span class="meta-v" style="color:var(--accent)">Running</span>';
     } else if (state === 'queued') {
-      cell.innerHTML = '<span class="meta-k">Job</span><span class="meta-v muted">Queued</span>';
+      cell.innerHTML = '<span class="meta-v muted">Queued</span>';
     } else {
-      cell.innerHTML = '<span class="meta-k">Job</span><span class="meta-v">' + label + '</span>';
+      cell.innerHTML = '<span class="meta-v">' + label + '</span>';
     }
   }
 
@@ -782,10 +801,10 @@
     var cell = row.querySelector('.artifact-tags');
     if (!cell) return;
     if (!tags.length) {
-      cell.innerHTML = '<span class="meta-k">Tags</span><span class="meta-v muted">—</span>';
+      cell.innerHTML = '<span class="meta-v muted">—</span>';
       return;
     }
-    cell.innerHTML = '<span class="meta-k">Tags</span><div class="chip-row">' + tags.map(function (t) {
+    cell.innerHTML = '<div class="chip-row">' + tags.map(function (t) {
       return '<span class="tag-chip">' + t + '</span>';
     }).join('') + '</div>';
   }
@@ -939,13 +958,13 @@
           (opts.note ? '<div class="artifact-note">' + opts.note + '</div>' : '') +
         '</div>' +
         '<div class="artifact-meta">' +
-          '<div class="meta-cell"><span class="meta-k">Type</span><span class="meta-v">' + opts.type + '</span></div>' +
-          '<div class="meta-cell artifact-tags"><span class="meta-k">Tags</span>' + tagsHtml + '</div>' +
-          '<div class="meta-cell"><span class="meta-k">Status</span><span class="meta-v">' + (opts.status || 'Not started') + '</span></div>' +
-          '<div class="meta-cell"><span class="meta-k">Checkout</span><span class="meta-v muted">—</span></div>' +
-          '<div class="meta-cell"><span class="meta-k">Shell</span><span class="meta-v muted">n/a</span></div>' +
-          '<div class="meta-cell job-cell"><span class="meta-k">Job</span><span class="meta-v muted">—</span></div>' +
-          '<div class="meta-cell"><span class="meta-k">Files</span><span class="meta-v muted">—</span></div>' +
+          '<div class="meta-cell"><span class="meta-v">' + opts.type + '</span></div>' +
+          '<div class="meta-cell artifact-tags">' + tagsHtml + '</div>' +
+          '<div class="meta-cell"><span class="meta-v">' + (opts.status || 'Not started') + '</span></div>' +
+          '<div class="meta-cell"><span class="meta-v muted">—</span></div>' +
+          '<div class="meta-cell"><span class="meta-v muted">n/a</span></div>' +
+          '<div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>' +
+          '<div class="meta-cell"><span class="meta-v muted">—</span></div>' +
           '<div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button></div></div>' +
         '</div>' +
       '</div>';
