@@ -238,7 +238,7 @@
                 <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
               </div>
               <div class="sheet-type-controls">
-                <span class="sheet-custom-pill">Custom</span>
+                <span class="sheet-custom-pill" hidden>Custom</span>
               </div>
             </div>
 
@@ -747,6 +747,7 @@
       title: state.title,
       subtitle: state.subtitle,
       columns: cloneData(state.columns),
+      colGroups: cloneData(state.colGroups || []),
       rows: cloneData(state.rows),
       footnotes: state.footnotes,
       notes: state.notes,
@@ -763,6 +764,10 @@
     state.title = lay.title || sh.title;
     state.subtitle = lay.subtitle || '';
     state.columns = cloneData(lay.columns || ['Treatment A', 'Treatment B', 'Total']);
+    state.colGroups = cloneData(lay.colGroups || []);
+    state.selectedCols = [];
+    state.selectedGroupId = null;
+    state.lastSelectedCol = null;
     state.rows = cloneData(lay.rows || []);
     state.footnotes = lay.footnotes || '';
     state.notes = lay.notes || '';
@@ -829,6 +834,8 @@
       state.title = '';
       state.rows = [];
       state.columns = [];
+      state.colGroups = [];
+      clearColSelection();
       render();
     }
   }
@@ -838,16 +845,153 @@
     if (row.cells.length > state.columns.length) row.cells.length = state.columns.length;
   }
 
+  function groupsAtLevel(level) {
+    return (state.colGroups || []).filter(function (g) { return g.level === level; });
+  }
+
+  function groupContaining(ci, level) {
+    var list = state.colGroups || [];
+    for (var i = 0; i < list.length; i++) {
+      var g = list[i];
+      if (g.level === level && ci >= g.start && ci <= g.end) return g;
+    }
+    return null;
+  }
+
+  function findGroup(id) {
+    var list = state.colGroups || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+
+  function nextGroupId() {
+    return 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  }
+
+  function clearColSelection() {
+    state.selectedCols = [];
+    state.selectedGroupId = null;
+    state.lastSelectedCol = null;
+  }
+
+  function updateColToolbar() {
+    if (!colToolbar) return;
+    var hasCols = state.selectedCols.length > 0;
+    var hasGroup = !!state.selectedGroupId;
+    if (!hasCols && !hasGroup) {
+      colToolbar.hidden = true;
+      return;
+    }
+    colToolbar.hidden = false;
+    var label = document.getElementById('colSelLabel');
+    var btnGroup = document.getElementById('btnGroupCols');
+    var btnUngroup = document.getElementById('btnUngroupCols');
+    if (hasGroup) {
+      var g = findGroup(state.selectedGroupId);
+      if (label) label.textContent = g ? ('Group: ' + g.label) : 'Group selected';
+      if (btnGroup) btnGroup.hidden = true;
+      if (btnUngroup) btnUngroup.hidden = false;
+    } else {
+      if (label) label.textContent = state.selectedCols.length + ' column' + (state.selectedCols.length === 1 ? '' : 's') + ' selected';
+      if (btnGroup) btnGroup.hidden = state.selectedCols.length < 2;
+      if (btnUngroup) btnUngroup.hidden = true;
+    }
+  }
+
+  function renderHeadHtml() {
+    var n = state.columns.length;
+    var hasL1 = groupsAtLevel(1).length > 0;
+    var hasL2 = groupsAtLevel(2).length > 0;
+    var rowCount = 1 + (hasL1 ? 1 : 0) + (hasL2 ? 1 : 0);
+    var covered = {};
+    var html = '';
+
+    function colSelected(i) {
+      return state.selectedCols.indexOf(i) >= 0;
+    }
+    function leafTh(i, rowspan) {
+      var sel = colSelected(i) ? ' selected' : '';
+      return '<th class="col-data' + sel + '" data-col="' + i + '"' +
+        (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') +
+        '><span class="th-text" data-col="' + i + '">' + escapeHtml(state.columns[i]) + '</span></th>';
+    }
+    function groupTh(g) {
+      var sel = state.selectedGroupId === g.id ? ' selected' : '';
+      return '<th class="col-group level-' + g.level + sel + '" data-group="' + g.id +
+        '" data-level="' + g.level + '" colspan="' + (g.end - g.start + 1) +
+        '"><span class="th-text th-group-text" data-group="' + g.id + '">' +
+        escapeHtml(g.label) + '</span></th>';
+    }
+    function addCornerAndAdd(rowspan, include) {
+      var s = '';
+      if (include) {
+        s += '<th class="col-idx"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '>#</th>';
+        s += '<th class="col-label"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '></th>';
+      }
+      return s;
+    }
+    function addColBtn(rowspan, include) {
+      if (!include) return '';
+      return '<th class="col-add"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') +
+        '><button type="button" class="col-add-btn" id="btnAddCol" title="Add column" aria-label="Add column">+</button></th>';
+    }
+
+    if (hasL1) {
+      html += '<tr class="head-groups head-l1">';
+      html += addCornerAndAdd(rowCount, true);
+      var i = 0;
+      while (i < n) {
+        var g1 = groupContaining(i, 1);
+        if (g1 && g1.start === i) {
+          html += groupTh(g1);
+          i = g1.end + 1;
+        } else {
+          html += leafTh(i, rowCount);
+          covered[i] = true;
+          i++;
+        }
+      }
+      html += addColBtn(rowCount, true);
+      html += '</tr>';
+    }
+
+    if (hasL2) {
+      html += '<tr class="head-groups head-l2">';
+      html += addCornerAndAdd(rowCount, !hasL1);
+      i = 0;
+      while (i < n) {
+        if (covered[i]) { i++; continue; }
+        var g2 = groupContaining(i, 2);
+        if (g2 && g2.start === i) {
+          html += groupTh(g2);
+          i = g2.end + 1;
+        } else {
+          /* under L1 but no L2 — leaf spans L2 + leaf rows */
+          html += leafTh(i, hasL1 ? 2 : rowCount);
+          covered[i] = true;
+          i++;
+        }
+      }
+      html += addColBtn(rowCount, !hasL1);
+      html += '</tr>';
+    }
+
+    html += '<tr class="head-leaves">';
+    html += addCornerAndAdd(1, !hasL1 && !hasL2);
+    for (i = 0; i < n; i++) {
+      if (covered[i]) continue;
+      html += leafTh(i, 1);
+    }
+    html += addColBtn(1, !hasL1 && !hasL2);
+    html += '</tr>';
+    return html;
+  }
+
   function render() {
     state.rows.forEach(ensureRowCells);
+    if (!state.colGroups) state.colGroups = [];
 
-    var hr = '<tr><th class="col-idx">#</th><th class="col-label"></th>';
-    state.columns.forEach(function (c, i) {
-      hr += '<th class="col-data" data-col="' + i + '"><span class="th-text" data-col="' + i + '">' +
-        escapeHtml(c) + '</span></th>';
-    });
-    hr += '<th class="col-add"><button type="button" class="col-add-btn" id="btnAddCol" title="Add column" aria-label="Add column">+</button></th></tr>';
-    headEl.innerHTML = hr;
+    headEl.innerHTML = renderHeadHtml();
 
     var html = '';
     state.rows.forEach(function (row, ri) {
@@ -889,6 +1033,7 @@
 
     if (state.activeRow >= 0) positionToolbar(state.activeRow);
     else toolbar.hidden = true;
+    updateColToolbar();
   }
 
   function setBlock(field, value) {
@@ -1352,6 +1497,7 @@
       title: titleOverride || state.title || src.title,
       subtitle: state.subtitle,
       columns: cloneData(state.columns),
+      colGroups: cloneData(state.colGroups || []),
       rows: cloneData(state.rows),
       footnotes: state.footnotes,
       notes: state.notes,
