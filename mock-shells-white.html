@@ -185,52 +185,40 @@
               <thead>
                 <tr>
                   <th>Number</th>
-                  <th>Type</th>
                   <th>Title</th>
-                  <th>Status</th>
                 </tr>
               </thead>
               <tbody id="catalogBody">
                 <tr class="selected" data-id="14.1.1" data-type="Table">
                   <td class="num">14.1.1</td>
-                  <td><span class="badge table">Table</span></td>
                   <td>Demographics</td>
-                  <td><span class="badge draft">Draft</span></td>
                 </tr>
                 <tr data-id="14.1.2" data-type="Table">
                   <td class="num">14.1.2</td>
-                  <td><span class="badge table">Table</span></td>
                   <td>Baseline characteristics</td>
-                  <td><span class="badge locked">Locked</span></td>
                 </tr>
                 <tr data-id="14.2.1" data-type="Table">
                   <td class="num">14.2.1</td>
-                  <td><span class="badge table">Table</span></td>
                   <td>Primary endpoint — ORR</td>
-                  <td><span class="badge review">In review</span></td>
                 </tr>
                 <tr data-id="14.3.1" data-type="Listing">
                   <td class="num">14.3.1</td>
-                  <td><span class="badge listing">Listing</span></td>
                   <td>Adverse events — overview</td>
-                  <td><span class="badge draft">Draft</span></td>
                 </tr>
                 <tr data-id="14.3.2" data-type="Figure">
                   <td class="num">14.3.2</td>
-                  <td><span class="badge figure">Figure</span></td>
                   <td>Kaplan–Meier overall survival</td>
-                  <td><span class="badge draft">Draft</span></td>
                 </tr>
                 <tr data-id="adhoc-1" data-type="Table">
                   <td class="num">Adhoc 1</td>
-                  <td><span class="badge table">Table</span></td>
                   <td>{Adhoc Shell 1}</td>
-                  <td><span class="badge draft">Draft</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
+
+        <div class="shell-split-handle" id="shellSplitHandle" role="separator" aria-orientation="vertical" aria-label="Resize shell catalog" tabindex="0"></div>
 
         <!-- Sheet editor -->
         <div class="card shell-editor">
@@ -790,15 +778,13 @@
       var sel = sh.id === selectedId ? ' selected' : '';
       html += '<tr class="' + sel.trim() + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '">';
       html += '<td class="num">' + escapeHtml(sh.number) + '</td>';
-      html += '<td>' + typeBadge(sh.type) + '</td>';
       html += '<td>' + escapeHtml(sh.title);
       if (sh.copiedFrom) {
-        html += ' <span class="sub" style="color:var(--muted);font-size:11px">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
+        html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
       }
-      html += '</td>';
-      html += '<td>' + statusBadge(sh.status) + '</td></tr>';
+      html += '</td></tr>';
     });
-    catalogBody.innerHTML = html || '<tr><td colspan="4" style="color:var(--muted);padding:16px">No shells in this study yet.</td></tr>';
+    catalogBody.innerHTML = html || '<tr><td colspan="2" style="color:var(--muted);padding:12px 8px">No shells in this study yet.</td></tr>';
   }
 
   function selectShell(id, skipPersist) {
@@ -1408,6 +1394,91 @@
   document.getElementById('btnDismissTemplateWarn').addEventListener('click', function () {
     document.getElementById('templateWarnBanner').classList.remove('show');
   });
+
+  /* —— resizable TOC / editor split —— */
+  (function initShellSplitter() {
+    var workspace = document.querySelector('.shell-workspace');
+    var catalog = document.querySelector('.shell-catalog');
+    var handle = document.getElementById('shellSplitHandle');
+    if (!workspace || !catalog || !handle) return;
+
+    var STORAGE_KEY = 'sphere-shell-toc-width';
+    var MIN_W = 160;
+    var dragging = false;
+
+    function maxWidth() {
+      return Math.floor(workspace.getBoundingClientRect().width * 0.5);
+    }
+
+    function applyWidth(px) {
+      var max = maxWidth();
+      var w = Math.max(MIN_W, Math.min(max, Math.round(px)));
+      workspace.style.setProperty('--shell-toc-width', w + 'px');
+      return w;
+    }
+
+    function loadWidth() {
+      try {
+        var saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+        if (!isNaN(saved)) applyWidth(saved);
+      } catch (e) {}
+    }
+
+    function persistWidth(w) {
+      try { localStorage.setItem(STORAGE_KEY, String(w)); } catch (e) {}
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      var left = workspace.getBoundingClientRect().left;
+      applyWidth(e.clientX - left);
+    }
+
+    function onPointerUp(e) {
+      if (!dragging) return;
+      dragging = false;
+      workspace.classList.remove('is-resizing');
+      try { handle.releasePointerCapture(e.pointerId); } catch (err) {}
+      var w = parseInt(getComputedStyle(workspace).getPropertyValue('--shell-toc-width'), 10);
+      if (!isNaN(w)) persistWidth(w);
+    }
+
+    handle.addEventListener('pointerdown', function (e) {
+      if (e.button != null && e.button !== 0) return;
+      dragging = true;
+      workspace.classList.add('is-resizing');
+      handle.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    handle.addEventListener('pointermove', onPointerMove);
+    handle.addEventListener('pointerup', onPointerUp);
+    handle.addEventListener('pointercancel', onPointerUp);
+
+    handle.addEventListener('keydown', function (e) {
+      var cur = parseInt(getComputedStyle(workspace).getPropertyValue('--shell-toc-width'), 10) || 280;
+      var step = e.shiftKey ? 40 : 16;
+      if (e.key === 'ArrowLeft') {
+        persistWidth(applyWidth(cur - step));
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight') {
+        persistWidth(applyWidth(cur + step));
+        e.preventDefault();
+      } else if (e.key === 'Home') {
+        persistWidth(applyWidth(MIN_W));
+        e.preventDefault();
+      } else if (e.key === 'End') {
+        persistWidth(applyWidth(maxWidth()));
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      var cur = parseInt(getComputedStyle(workspace).getPropertyValue('--shell-toc-width'), 10);
+      if (!isNaN(cur)) applyWidth(cur);
+    });
+
+    loadWidth();
+  })();
 
   /* boot */
   updateStudyChrome();
