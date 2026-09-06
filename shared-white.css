@@ -1484,7 +1484,17 @@ label .req::after { content: " *"; color: var(--danger); }
   gap: 0;
   padding: 0 0 8px;
 }
-.sap-section.collapsed .sap-section-body { display: none; }
+.sap-section.collapsed > .sap-section-body,
+.sap-section.collapsed .sap-section-body,
+.sap-section-body[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
 .sap-section.is-empty { display: none; }
 
 .artifact-row {

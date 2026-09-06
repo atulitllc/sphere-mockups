@@ -231,12 +231,12 @@
 
         <div class="tracker-board" id="trackerBoard">
           <section class="sap-section" data-sap-group="Demographics">
-            <button type="button" class="sap-section-head" aria-expanded="true">
+            <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-demographics">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Demographics</span>
               <span class="sap-section-count">3</span>
             </button>
-            <div class="sap-section-body">
+            <div class="sap-section-body" id="sap-body-demographics">
             <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R" data-checkout="out">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Demographics" /></div>
               <div class="artifact-main">
@@ -300,12 +300,12 @@
             </div>
           </section>
           <section class="sap-section" data-sap-group="Efficacy">
-            <button type="button" class="sap-section-head" aria-expanded="true">
+            <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-efficacy">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Efficacy</span>
               <span class="sap-section-count">3</span>
             </button>
-            <div class="sap-section-body">
+            <div class="sap-section-body" id="sap-body-efficacy">
             <article class="artifact-row" data-type="Table" data-status="In QC" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R" data-checkout="qc">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
@@ -369,12 +369,12 @@
             </div>
           </section>
           <section class="sap-section" data-sap-group="Safety TLFs">
-            <button type="button" class="sap-section-head" aria-expanded="true">
+            <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-safety-tlfs">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Safety TLFs</span>
               <span class="sap-section-count">3</span>
             </button>
-            <div class="sap-section-body">
+            <div class="sap-section-body" id="sap-body-safety-tlfs">
             <article class="artifact-row" data-type="Dataset" data-status="In QC" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.R" data-checkout="qc">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADAE" /></div>
               <div class="artifact-main">
@@ -438,12 +438,12 @@
             </div>
           </section>
           <section class="sap-section" data-sap-group="Labs">
-            <button type="button" class="sap-section-head" aria-expanded="true">
+            <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-labs">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Labs</span>
               <span class="sap-section-count">1</span>
             </button>
-            <div class="sap-section-body">
+            <div class="sap-section-body" id="sap-body-labs">
             <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="Second wave" data-sap="Labs" data-job="" data-program="tfl_14_3_5_lb.R" data-checkout="out">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry" /></div>
               <div class="artifact-main">
@@ -786,10 +786,17 @@
   board.addEventListener('click', function (e) {
     var head = e.target.closest && e.target.closest('.sap-section-head');
     if (!head) return;
+    e.preventDefault();
     var sec = head.closest('.sap-section');
     if (!sec) return;
     var collapsed = sec.classList.toggle('collapsed');
     head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    var bodyEl = sec.querySelector(':scope > .sap-section-body') || sec.querySelector('.sap-section-body');
+    if (bodyEl) {
+      if (collapsed) bodyEl.setAttribute('hidden', '');
+      else bodyEl.removeAttribute('hidden');
+      bodyEl.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+    }
   });
 
   document.getElementById('btnClearSel').addEventListener('click', function () {
@@ -809,18 +816,23 @@
     }).join('') + '</div>';
   }
 
+  function sapBodyId(sap) {
+    return 'sap-body-' + String(sap || 'section').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
   function ensureSapSection(sap) {
     var sec = board.querySelector('.sap-section[data-sap-group="' + sap + '"]');
     if (sec) return sec;
+    var bid = sapBodyId(sap);
     sec = document.createElement('section');
     sec.className = 'sap-section';
     sec.setAttribute('data-sap-group', sap);
     sec.innerHTML =
-      '<button type="button" class="sap-section-head" aria-expanded="true">' +
+      '<button type="button" class="sap-section-head" aria-expanded="true" aria-controls="' + bid + '">' +
       '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
       '<span class="sap-section-title">' + sap + '</span>' +
       '<span class="sap-section-count">0</span></button>' +
-      '<div class="sap-section-body"></div>';
+      '<div class="sap-section-body" id="' + bid + '"></div>';
     board.appendChild(sec);
     return sec;
   }
@@ -829,8 +841,14 @@
     row.setAttribute('data-sap', sap);
     var sec = ensureSapSection(sap);
     sec.classList.remove('collapsed', 'is-empty');
-    sec.querySelector('.sap-section-head').setAttribute('aria-expanded', 'true');
-    sec.querySelector('.sap-section-body').appendChild(row);
+    var head = sec.querySelector('.sap-section-head');
+    var bodyEl = sec.querySelector('.sap-section-body');
+    if (head) head.setAttribute('aria-expanded', 'true');
+    if (bodyEl) {
+      bodyEl.removeAttribute('hidden');
+      bodyEl.setAttribute('aria-hidden', 'false');
+      bodyEl.appendChild(row);
+    }
   }
 
   document.getElementById('bulkTag').addEventListener('change', function () {
