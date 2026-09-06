@@ -3481,3 +3481,11 @@ label .req::after { content: " *"; color: var(--danger); }
 .shell-catalog-head {
   justify-content: flex-start;
 }
+
+.connector-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent-soft) 45
