@@ -1688,7 +1688,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .artifact-meta {
   display: grid;
   /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(110px, 1fr) 72px 88px 120px 72px 72px 80px 200px;
+  grid-template-columns: minmax(110px, 1fr) 72px 88px 140px 72px 72px 80px 200px;
   gap: 8px 12px;
   align-items: center;
   width: 100%;
