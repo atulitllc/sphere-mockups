@@ -2856,6 +2856,55 @@ label .req::after { content: " *"; color: var(--danger); }
   color: var(--text);
   text-align: left;
 }
+.sheet-grid thead th.col-group {
+  text-align: center;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.sheet-grid thead th.col-group.level-2 {
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  border-bottom-width: 1px;
+  font-weight: 600;
+}
+.sheet-grid thead th.col-data.selected,
+.sheet-grid thead th.col-group.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+}
+.sheet-grid thead th.col-data {
+  cursor: pointer;
+  user-select: none;
+}
+.sheet-grid thead th.col-group {
+  cursor: pointer;
+  user-select: none;
+}
+.col-select-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  margin: 0 0 6px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.col-select-toolbar[hidden] { display: none !important; }
+.col-select-toolbar .col-sel-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-right: 4px;
+}
+.col-select-toolbar .btn.sm {
+  font-size: 12px;
+  padding: 4px 10px;
+  height: auto;
+}
 .sheet-grid .col-idx {
   width: 40px;
   min-width: 40px;
@@ -3345,4 +3394,9 @@ label .req::after { content: " *"; color: var(--danger); }
   background: var(--surface);
   position: sticky;
   bottom: 0;
+}
+
+/* Mock Shells catalog: Add only, no title row */
+.shell-catalog-head {
+  justify-content: flex-end;
 }

@@ -158,16 +158,8 @@
       <div class="workspace shell-workspace">
         <!-- Catalog -->
         <div class="card shell-catalog">
-          <div class="card-head">
-            <span class="title-row">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
-              Shell catalog
-            </span>
+          <div class="card-head shell-catalog-head">
             <span class="shell-catalog-actions">
-              <button class="btn btn-sm" type="button" id="btnCopyShellCatalog" title="Copy selected shell to another study">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-                Copy…
-              </button>
               <button class="btn primary btn-sm" type="button" id="btnAddShell">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
                 Add
@@ -674,6 +666,7 @@
     activeRow: -1,
     selectedCols: [],
     selectedGroupId: null,
+    selectedGroupIds: [],
     lastSelectedCol: null,
     ctx: { row: -1, col: -1 }
   };
@@ -767,6 +760,7 @@
     state.colGroups = cloneData(lay.colGroups || []);
     state.selectedCols = [];
     state.selectedGroupId = null;
+    state.selectedGroupIds = [];
     state.lastSelectedCol = null;
     state.rows = cloneData(lay.rows || []);
     state.footnotes = lay.footnotes || '';
@@ -871,13 +865,15 @@
   function clearColSelection() {
     state.selectedCols = [];
     state.selectedGroupId = null;
+    state.selectedGroupIds = [];
     state.lastSelectedCol = null;
   }
 
   function updateColToolbar() {
     if (!colToolbar) return;
     var hasCols = state.selectedCols.length > 0;
-    var hasGroup = !!state.selectedGroupId;
+    var gids = state.selectedGroupIds || (state.selectedGroupId ? [state.selectedGroupId] : []);
+    var hasGroup = gids.length > 0;
     if (!hasCols && !hasGroup) {
       colToolbar.hidden = true;
       return;
@@ -887,9 +883,8 @@
     var btnGroup = document.getElementById('btnGroupCols');
     var btnUngroup = document.getElementById('btnUngroupCols');
     if (hasGroup) {
-      var g = findGroup(state.selectedGroupId);
-      if (label) label.textContent = g ? ('Group: ' + g.label) : 'Group selected';
-      if (btnGroup) btnGroup.hidden = true;
+      if (label) label.textContent = gids.length + ' group' + (gids.length === 1 ? '' : 's') + ' selected';
+      if (btnGroup) btnGroup.hidden = !canGroupGroupHeaders();
       if (btnUngroup) btnUngroup.hidden = false;
     } else {
       if (label) label.textContent = state.selectedCols.length + ' column' + (state.selectedCols.length === 1 ? '' : 's') + ' selected';
@@ -916,7 +911,8 @@
         '><span class="th-text" data-col="' + i + '">' + escapeHtml(state.columns[i]) + '</span></th>';
     }
     function groupTh(g) {
-      var sel = state.selectedGroupId === g.id ? ' selected' : '';
+      var ids = state.selectedGroupIds || (state.selectedGroupId ? [state.selectedGroupId] : []);
+      var sel = ids.indexOf(g.id) >= 0 ? ' selected' : '';
       return '<th class="col-group level-' + g.level + sel + '" data-group="' + g.id +
         '" data-level="' + g.level + '" colspan="' + (g.end - g.start + 1) +
         '"><span class="th-text th-group-text" data-group="' + g.id + '">' +
@@ -1109,10 +1105,34 @@
   }
 
   function startHeaderEdit(th) {
+    if (th.querySelector('input')) return;
+    var gid = th.dataset.group;
+    if (gid) {
+      var g = findGroup(gid);
+      if (!g) return;
+      var currentG = g.label;
+      var inputG = document.createElement('input');
+      inputG.className = 'cell-input';
+      inputG.value = currentG;
+      th.innerHTML = '';
+      th.appendChild(inputG);
+      inputG.focus();
+      inputG.select();
+      function commitG() {
+        g.label = inputG.value.trim() || 'Group';
+        render();
+      }
+      inputG.addEventListener('blur', commitG);
+      inputG.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); inputG.blur(); }
+        if (e.key === 'Escape') { inputG.value = currentG; inputG.blur(); }
+      });
+      return;
+    }
     var ci = +th.dataset.col;
     if (isNaN(ci)) return;
     var span = th.querySelector('.th-text');
-    if (!span || th.querySelector('input')) return;
+    if (!span) return;
     var current = state.columns[ci];
     var input = document.createElement('input');
     input.className = 'cell-input';
@@ -1160,7 +1180,7 @@
     if (td) startCellEdit(td);
   });
   headEl.addEventListener('dblclick', function (e) {
-    var th = e.target.closest('th.col-data');
+    var th = e.target.closest('th.col-data, th.col-group');
     if (th) startHeaderEdit(th);
   });
 
@@ -1233,12 +1253,202 @@
   function insertCol(at) {
     state.columns.splice(at, 0, 'New Column');
     state.rows.forEach(function (r) { r.cells.splice(at, 0, ''); });
+    (state.colGroups || []).forEach(function (g) {
+      if (g.start >= at) { g.start++; g.end++; }
+      else if (g.end >= at) { g.end++; }
+    });
+    clearColSelection();
     render();
   }
   function deleteCol(ci) {
     if (state.columns.length <= 1) return;
     state.columns.splice(ci, 1);
     state.rows.forEach(function (r) { r.cells.splice(ci, 1); });
+    var next = [];
+    (state.colGroups || []).forEach(function (g) {
+      if (ci < g.start) { g.start--; g.end--; next.push(g); }
+      else if (ci > g.end) { next.push(g); }
+      else {
+        g.end--;
+        if (g.end >= g.start && (g.end - g.start + 1) >= 2) next.push(g);
+      }
+    });
+    state.colGroups = next;
+    clearColSelection();
+    render();
+  }
+
+  function selectionRange() {
+    if (!state.selectedCols.length) return null;
+    var cols = state.selectedCols.slice().sort(function (a, b) { return a - b; });
+    for (var i = 1; i < cols.length; i++) {
+      if (cols[i] !== cols[i - 1] + 1) return null;
+    }
+    return { start: cols[0], end: cols[cols.length - 1], cols: cols };
+  }
+
+  function canGroupColumns() {
+    var range = selectionRange();
+    if (!range || range.cols.length < 2) return false;
+    var start = range.start, end = range.end;
+    var l1Ids = {};
+    var hasL2 = false;
+    var uncovered = false;
+    for (var i = start; i <= end; i++) {
+      var g1 = groupContaining(i, 1);
+      var g2 = groupContaining(i, 2);
+      if (g2) hasL2 = true;
+      if (g1) l1Ids[g1.id] = g1;
+      else uncovered = true;
+    }
+    var l1Keys = Object.keys(l1Ids);
+    if (hasL2) return false;
+    if (uncovered && l1Keys.length) return false;
+    if (l1Keys.length > 1) return false;
+    if (l1Keys.length === 1) {
+      var parent = l1Ids[l1Keys[0]];
+      if (start < parent.start || end > parent.end) return false;
+      return true; /* create level 2 */
+    }
+    return true; /* create level 1 */
+  }
+
+  function promptGroupTitle(defaultTitle) {
+    var title = window.prompt('Group header title', defaultTitle || 'Group');
+    if (title == null) return null;
+    title = title.trim();
+    return title || 'Group';
+  }
+
+  function canGroupGroupHeaders() {
+    var gids = state.selectedGroupIds || [];
+    if (gids.length < 2) return false;
+    var groups = gids.map(findGroup).filter(Boolean);
+    if (groups.length < 2) return false;
+    var level = groups[0].level;
+    if (level !== 1) return false; /* only wrap L1s into a parent (demote to L2) */
+    if (!groups.every(function (g) { return g.level === 1; })) return false;
+    groups.sort(function (a, b) { return a.start - b.start; });
+    /* must be contiguous block of L1 groups with no gaps / L2 children */
+    for (var i = 0; i < groups.length; i++) {
+      var g = groups[i];
+      var hasL2 = (state.colGroups || []).some(function (x) {
+        return x.level === 2 && x.start >= g.start && x.end <= g.end;
+      });
+      if (hasL2) return false;
+      if (i > 0 && groups[i].start !== groups[i - 1].end + 1) return false;
+    }
+    return true;
+  }
+
+  function groupSelectedColumns() {
+    /* Group adjacent L1 headers → new L1 parent, demote old to L2 */
+    if (canGroupGroupHeaders()) {
+      var gids = state.selectedGroupIds.slice();
+      var groups = gids.map(findGroup).filter(Boolean).sort(function (a, b) { return a.start - b.start; });
+      var start = groups[0].start, end = groups[groups.length - 1].end;
+      var title = promptGroupTitle('Adverse Events');
+      if (title == null) return;
+      groups.forEach(function (g) { g.level = 2; });
+      state.colGroups.push({ id: nextGroupId(), label: title, start: start, end: end, level: 1 });
+      clearColSelection();
+      render();
+      showToast('Grouped under “' + title + '”');
+      return;
+    }
+    if (!canGroupColumns()) {
+      showToast('Select 2+ adjacent columns or L1 groups (max two levels)');
+      return;
+    }
+    var range = selectionRange();
+    var start = range.start, end = range.end;
+    var parentL1 = groupContaining(start, 1);
+    var level = parentL1 ? 2 : 1;
+    var title = promptGroupTitle(level === 1 ? 'Adverse Events' : 'Group');
+    if (title == null) return;
+    var overlap = (state.colGroups || []).some(function (g) {
+      return g.level === level && !(end < g.start || start > g.end);
+    });
+    if (overlap) {
+      showToast('Selection overlaps an existing group');
+      return;
+    }
+    state.colGroups.push({ id: nextGroupId(), label: title, start: start, end: end, level: level });
+    clearColSelection();
+    render();
+    showToast('Grouped under “' + title + '”');
+  }
+
+  function ungroupSelected() {
+    var gids = state.selectedGroupIds && state.selectedGroupIds.length
+      ? state.selectedGroupIds.slice()
+      : (state.selectedGroupId ? [state.selectedGroupId] : []);
+    if (!gids.length) {
+      showToast('Select a group header to ungroup');
+      return;
+    }
+    gids.forEach(function (id) {
+      var g = findGroup(id);
+      if (!g) return;
+      var level = g.level, start = g.start, end = g.end;
+      state.colGroups = (state.colGroups || []).filter(function (x) {
+        if (x.id === id) return false;
+        if (level === 1 && x.level === 2 && x.start >= start && x.end <= end) return false;
+        return true;
+      });
+    });
+    clearColSelection();
+    render();
+    showToast('Ungrouped');
+  }
+
+  function selectLeafCol(ci, ev) {
+    state.selectedGroupId = null;
+    if (ev.shiftKey && state.lastSelectedCol != null) {
+      var a = Math.min(state.lastSelectedCol, ci);
+      var b = Math.max(state.lastSelectedCol, ci);
+      state.selectedCols = [];
+      for (var i = a; i <= b; i++) state.selectedCols.push(i);
+    } else if (ev.metaKey || ev.ctrlKey) {
+      var idx = state.selectedCols.indexOf(ci);
+      if (idx >= 0) state.selectedCols.splice(idx, 1);
+      else state.selectedCols.push(ci);
+      state.lastSelectedCol = ci;
+    } else {
+      state.selectedCols = [ci];
+      state.lastSelectedCol = ci;
+    }
+    render();
+  }
+
+  function selectGroupHeader(gid, ev) {
+    state.selectedCols = [];
+    state.lastSelectedCol = null;
+    var g = findGroup(gid);
+    if (!g) { state.selectedGroupId = null; state.selectedGroupIds = []; render(); return; }
+    if (!state.selectedGroupIds) state.selectedGroupIds = [];
+    if (ev && (ev.metaKey || ev.ctrlKey)) {
+      var ix = state.selectedGroupIds.indexOf(gid);
+      if (ix >= 0) state.selectedGroupIds.splice(ix, 1);
+      else state.selectedGroupIds.push(gid);
+      state.selectedGroupId = state.selectedGroupIds.length === 1 ? state.selectedGroupIds[0]
+        : (state.selectedGroupIds.length ? gid : null);
+    } else if (ev && ev.shiftKey && state.selectedGroupId) {
+      var a = findGroup(state.selectedGroupId);
+      if (a && a.level === g.level) {
+        var lo = Math.min(a.start, g.start), hi = Math.max(a.end, g.end);
+        state.selectedGroupIds = (state.colGroups || []).filter(function (x) {
+          return x.level === g.level && x.start >= lo && x.end <= hi;
+        }).map(function (x) { return x.id; });
+        state.selectedGroupId = gid;
+      } else {
+        state.selectedGroupIds = [gid];
+        state.selectedGroupId = gid;
+      }
+    } else {
+      state.selectedGroupIds = [gid];
+      state.selectedGroupId = gid;
+    }
     render();
   }
 
@@ -1248,8 +1458,28 @@
   headEl.addEventListener('click', function (e) {
     if (e.target.closest('#btnAddCol') || e.target.closest('.col-add-btn')) {
       insertCol(state.columns.length);
+      return;
+    }
+    var gth = e.target.closest('th.col-group');
+    if (gth) {
+      e.preventDefault();
+      selectGroupHeader(gth.dataset.group, e);
+      return;
+    }
+    var th = e.target.closest('th.col-data');
+    if (th && th.dataset.col != null) {
+      e.preventDefault();
+      selectLeafCol(+th.dataset.col, e);
     }
   });
+
+  if (colToolbar) {
+    colToolbar.addEventListener('click', function (e) {
+      if (e.target.closest('#btnGroupCols')) groupSelectedColumns();
+      else if (e.target.closest('#btnUngroupCols')) ungroupSelected();
+      else if (e.target.closest('#btnClearColSel')) { clearColSelection(); render(); }
+    });
+  }
 
   /* —— context menu —— */
   function hideCtx() { ctxMenu.hidden = true; }
@@ -1267,6 +1497,16 @@
     var ci = td.dataset.col != null ? +td.dataset.col : -1;
     if (td.tagName === 'TH' && td.classList.contains('col-data')) {
       ri = -1; ci = +td.dataset.col;
+      if (state.selectedCols.indexOf(ci) < 0) {
+        state.selectedGroupId = null;
+        state.selectedCols = [ci];
+        state.lastSelectedCol = ci;
+        render();
+      }
+    }
+    if (td.tagName === 'TH' && td.classList.contains('col-group')) {
+      ri = -1; ci = -1;
+      selectGroupHeader(td.dataset.group, e);
     }
     if (ri >= 0) {
       state.activeRow = ri;
@@ -1299,6 +1539,15 @@
     else if (cmd === 'insert-col-left' && ci >= 0) insertCol(ci);
     else if (cmd === 'insert-col-right' && ci >= 0) insertCol(ci + 1);
     else if (cmd === 'delete-col' && ci >= 0) deleteCol(ci);
+    else if (cmd === 'group-cols') {
+      if (ci >= 0 && state.selectedCols.indexOf(ci) < 0) {
+        state.selectedGroupId = null;
+        state.selectedCols = [ci];
+        state.lastSelectedCol = ci;
+      }
+      groupSelectedColumns();
+    }
+    else if (cmd === 'ungroup-cols') ungroupSelected();
     else if (cmd === 'indent' && ri >= 0) indentRow(ri, 1);
     else if (cmd === 'outdent' && ri >= 0) indentRow(ri, -1);
     else if (cmd === 'clear' && ri >= 0) {
@@ -1552,7 +1801,6 @@
   }
 
   document.getElementById('btnCopyShell').addEventListener('click', openCopyModal);
-  document.getElementById('btnCopyShellCatalog').addEventListener('click', openCopyModal);
   document.getElementById('copyClose').addEventListener('click', closeCopyModal);
   document.getElementById('copyCancel').addEventListener('click', closeCopyModal);
   document.getElementById('copyConfirm').addEventListener('click', performCopy);
