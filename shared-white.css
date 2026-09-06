@@ -85,6 +85,196 @@
   --radius-sm: 8px;
 }
 
+/* —— Accent themes (data-accent on <html>) ——
+   Colored left-nav chrome + accent for active/buttons/links/focus.
+   Content surfaces stay from data-theme light/dark. Default: blue. */
+:root,
+[data-accent="blue"] {
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-soft: #EFF6FF;
+  --brand: #2563EB;
+  --focus-ring: rgba(37, 99, 235, 0.14);
+  --row-selected: #EFF6FF;
+  --nav-bg: #1e3a8a;
+  --nav-fg: #e8eefc;
+  --nav-muted: #a8b8e0;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.16);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-shadow: rgba(30, 58, 138, 0.35);
+  --top-strip: #2563EB;
+}
+
+[data-theme="dark"][data-accent="blue"],
+[data-accent="blue"][data-theme="dark"] {
+  --accent: #3d8bfd;
+  --accent-hover: #5a9dff;
+  --accent-soft: #1a2740;
+  --brand: #5eead4;
+  --focus-ring: rgba(61, 139, 253, 0.22);
+  --row-selected: #1a2740;
+  --nav-bg: #152a5c;
+  --nav-fg: #e8eefc;
+  --nav-muted: #93a4c9;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(61, 139, 253, 0.28);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-shadow: rgba(0, 0, 0, 0.45);
+  --top-strip: #3d8bfd;
+}
+
+[data-accent="teal"] {
+  --accent: #0d9488;
+  --accent-hover: #0f766e;
+  --accent-soft: #f0fdfa;
+  --brand: #0d9488;
+  --focus-ring: rgba(13, 148, 136, 0.14);
+  --row-selected: #f0fdfa;
+  --nav-bg: #115e59;
+  --nav-fg: #e6fffa;
+  --nav-muted: #99d5cb;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.16);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-shadow: rgba(17, 94, 89, 0.35);
+  --top-strip: #0d9488;
+}
+
+[data-theme="dark"][data-accent="teal"],
+[data-accent="teal"][data-theme="dark"] {
+  --accent: #2dd4bf;
+  --accent-hover: #5eead4;
+  --accent-soft: #12302c;
+  --brand: #5eead4;
+  --focus-ring: rgba(45, 212, 191, 0.22);
+  --row-selected: #12302c;
+  --nav-bg: #0d3f3b;
+  --nav-fg: #e6fffa;
+  --nav-muted: #7ebdb3;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(45, 212, 191, 0.24);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-shadow: rgba(0, 0, 0, 0.45);
+  --top-strip: #2dd4bf;
+}
+
+[data-accent="indigo"] {
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-soft: #eef2ff;
+  --brand: #4f46e5;
+  --focus-ring: rgba(79, 70, 229, 0.14);
+  --row-selected: #eef2ff;
+  --nav-bg: #3730a3;
+  --nav-fg: #eef2ff;
+  --nav-muted: #b4b0e0;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.16);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-shadow: rgba(55, 48, 163, 0.35);
+  --top-strip: #4f46e5;
+}
+
+[data-theme="dark"][data-accent="indigo"],
+[data-accent="indigo"][data-theme="dark"] {
+  --accent: #818cf8;
+  --accent-hover: #a5b4fc;
+  --accent-soft: #1e1b3a;
+  --brand: #a5b4fc;
+  --focus-ring: rgba(129, 140, 248, 0.22);
+  --row-selected: #1e1b3a;
+  --nav-bg: #2a2670;
+  --nav-fg: #eef2ff;
+  --nav-muted: #a09cd0;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(129, 140, 248, 0.28);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-shadow: rgba(0, 0, 0, 0.45);
+  --top-strip: #818cf8;
+}
+
+[data-accent="emerald"] {
+  --accent: #059669;
+  --accent-hover: #047857;
+  --accent-soft: #ecfdf5;
+  --brand: #059669;
+  --focus-ring: rgba(5, 150, 105, 0.14);
+  --row-selected: #ecfdf5;
+  --nav-bg: #065f46;
+  --nav-fg: #ecfdf5;
+  --nav-muted: #8fc9b3;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.16);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-shadow: rgba(6, 95, 70, 0.35);
+  --top-strip: #059669;
+}
+
+[data-theme="dark"][data-accent="emerald"],
+[data-accent="emerald"][data-theme="dark"] {
+  --accent: #34d399;
+  --accent-hover: #6ee7b7;
+  --accent-soft: #132821;
+  --brand: #34d399;
+  --focus-ring: rgba(52, 211, 153, 0.22);
+  --row-selected: #132821;
+  --nav-bg: #044433;
+  --nav-fg: #ecfdf5;
+  --nav-muted: #7ab89c;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(52, 211, 153, 0.24);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-shadow: rgba(0, 0, 0, 0.45);
+  --top-strip: #34d399;
+}
+
+[data-accent="slate"] {
+  --accent: #475569;
+  --accent-hover: #334155;
+  --accent-soft: #f1f5f9;
+  --brand: #475569;
+  --focus-ring: rgba(71, 85, 105, 0.14);
+  --row-selected: #f1f5f9;
+  --nav-bg: #334155;
+  --nav-fg: #f1f5f9;
+  --nav-muted: #a8b4c4;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.14);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-shadow: rgba(51, 65, 85, 0.35);
+  --top-strip: #475569;
+}
+
+[data-theme="dark"][data-accent="slate"],
+[data-accent="slate"][data-theme="dark"] {
+  --accent: #94a3b8;
+  --accent-hover: #cbd5e1;
+  --accent-soft: #1c2430;
+  --brand: #94a3b8;
+  --focus-ring: rgba(148, 163, 184, 0.22);
+  --row-selected: #1c2430;
+  --nav-bg: #1e293b;
+  --nav-fg: #f1f5f9;
+  --nav-muted: #8b9aab;
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(148, 163, 184, 0.22);
+  --nav-active-fg: #ffffff;
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-shadow: rgba(0, 0, 0, 0.45);
+  --top-strip: #94a3b8;
+}
+
+
 * { box-sizing: border-box; }
 
 body {
@@ -107,8 +297,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* —— Nav —— */
 .nav {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
+  background: var(--nav-bg, #1e3a8a);
+  border-right: 1px solid var(--nav-border);
+  box-shadow: 2px 0 12px var(--nav-shadow);
   padding: 18px 12px;
   position: sticky;
   top: 0;
@@ -118,6 +309,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex;
   flex-direction: column;
   gap: 2px;
+  color: var(--nav-fg, #e8eefc);
 }
 
 a.logo { text-decoration: none; color: inherit; display: block; }
@@ -139,9 +331,9 @@ a.logo { text-decoration: none; color: inherit; display: block; }
   width: auto;
   display: block;
 }
-.logo img.logo-dark { display: none; }
-[data-theme="dark"] .logo img.logo-light { display: none; }
-[data-theme="dark"] .logo img.logo-dark { display: block; }
+/* Colored nav chrome: always Remy on-navy / inverse for contrast */
+.logo img.logo-light { display: none; }
+.logo img.logo-dark { display: block; }
 
 
 .nav a {
@@ -150,7 +342,7 @@ a.logo { text-decoration: none; color: inherit; display: block; }
   gap: 10px;
   padding: 9px 12px;
   border-radius: var(--radius-sm);
-  color: var(--muted);
+  color: var(--nav-muted, #a8b8e0);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -167,17 +359,18 @@ a.logo { text-decoration: none; color: inherit; display: block; }
   stroke-linejoin: round;
 }
 
-.nav a:hover { color: var(--text); background: var(--row-hover); }
+.nav a:hover { color: var(--nav-fg); background: var(--nav-hover); }
 .nav a.active {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--nav-active-bg);
+  color: var(--nav-active-fg);
+  font-weight: 600;
 }
 
 .nav-footer {
   margin-top: auto;
   padding: 12px 8px 4px;
-  border-top: 1px solid var(--border);
-  color: var(--muted-2);
+  border-top: 1px solid var(--nav-border);
+  color: var(--nav-muted);
   font-size: 12px;
 }
 
@@ -214,26 +407,14 @@ body.nav-collapsed {
     display: none !important;
   }
 
+  /* Colored chrome: always inverse mark for contrast on navy/teal/etc. */
   body.nav-collapsed .logo img.logo-mark-light,
   html.nav-collapsed body .logo img.logo-mark-light {
-    display: block;
-    width: 28px;
-    height: 28px;
-    max-height: 28px;
+    display: none !important;
   }
 
   body.nav-collapsed .logo img.logo-mark-dark,
   html.nav-collapsed body .logo img.logo-mark-dark {
-    display: none;
-  }
-
-  html[data-theme="dark"].nav-collapsed body .logo img.logo-mark-light,
-  html[data-theme="dark"] body.nav-collapsed .logo img.logo-mark-light {
-    display: none;
-  }
-
-  html[data-theme="dark"].nav-collapsed body .logo img.logo-mark-dark,
-  html[data-theme="dark"] body.nav-collapsed .logo img.logo-mark-dark {
     display: block;
     width: 28px;
     height: 28px;
@@ -279,6 +460,7 @@ body.nav-collapsed {
   position: sticky;
   top: 0;
   z-index: 30;
+  box-shadow: inset 0 3px 0 var(--top-strip, var(--accent));
 }
 
 .top-left {
@@ -353,6 +535,60 @@ body.nav-collapsed {
 .theme-toggle .icon-moon { display: block; }
 [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+
+/* —— Accent theme picker —— */
+.accent-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.accent-picker-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 2px;
+  user-select: none;
+}
+
+.accent-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch, #2563EB);
+  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.accent-swatch:hover {
+  transform: scale(1.08);
+}
+
+.accent-swatch.is-active,
+.accent-swatch[aria-pressed="true"] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--swatch, var(--accent));
+}
+
+.accent-swatch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring), 0 0 0 1px var(--accent);
+}
+
+@media (max-width: 720px) {
+  .accent-picker-label { display: none; }
+}
 
 
 .content {
@@ -1091,7 +1327,7 @@ tr.row-selected { background: var(--row-selected); }
 /* —— Studies selection —— */
 .nav-divider {
   height: 1px;
-  background: var(--border);
+  background: var(--nav-border);
   margin: 10px 8px 12px;
 }
 
