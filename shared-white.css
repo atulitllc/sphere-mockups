@@ -702,7 +702,67 @@ body.nav-collapsed {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
 .page-help-collapse:hover { color: var(--accent-hover); }
+
+/* Collapsible note banners (Tracker, Files, Admin, Define, …) */
+.note-banner.note-collapsible {
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+}
+.note-banner.note-collapsible.is-collapsed {
+  padding: 6px 10px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.note-banner-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.note-banner.note-collapsible.is-collapsed .note-banner-head {
+  width: auto;
+}
+.note-banner.note-collapsible:not(.is-collapsed) .note-banner-head {
+  margin-bottom: 0;
+}
+.note-help-toggle {
+  width: 28px;
+  height: 28px;
+}
+.note-help-toggle svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.note-help-toggle.is-open {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.note-banner-body[hidden] { display: none !important; }
+.note-banner-body {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  min-width: 0;
+}
+.note-banner-body .note-help-collapse {
+  display: inline-block;
+  margin-top: 6px;
+  margin-left: 0;
+}
+.note-banner.note-collapsible.is-collapsed .note-label {
+  padding-top: 0;
+}
+
 
 .page-intro {
   width: 100%;

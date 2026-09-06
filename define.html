@@ -161,14 +161,29 @@
 
     <div class="content">
       <div class="stack">
-        <div class="page-intro">
+        <div class="page-intro page-intro-compact">
+        <div class="page-title-row">
           <h1 class="page-title">Define.xml</h1>
-          <p class="page-sub">CDISC Define-XML for SDTM / ADaM — generated from study metadata and dataset specs in the study tree, not freehand XML. Shell lock (Mock Shells) and Tracker statuses stay separate.</p>
+          <button type="button" class="btn icon-btn accent-icon page-help-toggle" aria-expanded="false" title="Show help" aria-label="Show help">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
         </div>
+        <p class="page-sub page-help-text" hidden>CDISC Define-XML for SDTM / ADaM — generated from study metadata and dataset specs in the study tree, not freehand XML. Shell lock (Mock Shells) and Tracker statuses stay separate.
+          <button type="button" class="page-help-collapse">Collapse help</button>
+        </p>
+      </div>
 
-        <div class="note-banner" role="note">
-          <span class="note-label">Review</span>
-          <div><strong>Assisted generate → human review → lock/approve before publish.</strong> Output is a Define-XML stub built from selected domains and linked specs. It does not auto-publish and is not a shell lock or Tracker freeze.</div>
+        <div class="note-banner note-collapsible is-collapsed" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Review</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div><strong>Assisted generate → human review → lock/approve before publish.</strong> Output is a Define-XML stub built from selected domains and linked specs. It does not auto-publish and is not a shell lock or Tracker freeze.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
         </div>
 
         <div class="define-layout">

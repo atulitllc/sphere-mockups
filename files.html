@@ -123,14 +123,29 @@
 
     <div class="content">
       <div class="stack">
-        <div class="page-intro">
+        <div class="page-intro page-intro-compact">
+        <div class="page-title-row">
           <h1 class="page-title">Files</h1>
-          <p class="page-sub">Study directory tree that programs <code>libname</code> / <code>setwd</code> against — not a second data store. Browse <strong>raw</strong>, <strong>sdtm</strong>, <strong>adam</strong>, <strong>programs</strong>, <strong>tlf</strong>, <strong>logs</strong> (tenant template). Folder ACL is Box/WatchDox-like: <strong>Manage access</strong> on folders (View | Edit); permissions inherit down the study tree.</p>
+          <button type="button" class="btn icon-btn accent-icon page-help-toggle" aria-expanded="false" title="Show help" aria-label="Show help">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
         </div>
+        <p class="page-sub page-help-text" hidden>Study directory tree that programs <code>libname</code> / <code>setwd</code> against — not a second data store. Browse <strong>raw</strong>, <strong>sdtm</strong>, <strong>adam</strong>, <strong>programs</strong>, <strong>tlf</strong>, <strong>logs</strong> (tenant template). Folder ACL is Box/WatchDox-like: <strong>Manage access</strong> on folders (View | Edit); permissions inherit down the study tree.
+          <button type="button" class="page-help-collapse">Collapse help</button>
+        </p>
+      </div>
 
-        <div class="note-banner" role="note">
-          <span class="note-label">Note</span>
-          <div><strong>Share ACL + Tracker stay in sync.</strong> Right-click or ⋯ on a folder → <strong>Manage access</strong> (users &amp; <a href="admin.html?panel=users">teams</a>, View | Edit only for v1). When Tracker <strong>Send to QC</strong> fires, program + related files become <strong>Frozen / View only on share</strong> here too — Edit is removed until <strong>Return to programmer</strong>. See <a href="tracker.html">Tracker</a>.</div>
+        <div class="note-banner note-collapsible is-collapsed" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Note</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div><strong>Share ACL + Tracker stay in sync.</strong> Right-click or ⋯ on a folder → <strong>Manage access</strong> (users &amp; <a href="admin.html?panel=users">teams</a>, View | Edit only for v1). When Tracker <strong>Send to QC</strong> fires, program + related files become <strong>Frozen / View only on share</strong> here too — Edit is removed until <strong>Return to programmer</strong>. See <a href="tracker.html">Tracker</a>.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
         </div>
 
         <div class="files-layout">

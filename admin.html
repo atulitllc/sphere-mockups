@@ -123,14 +123,29 @@
 
     <div class="content">
       <div class="stack">
-        <div class="page-intro">
+        <div class="page-intro page-intro-compact">
+        <div class="page-title-row">
           <h1 class="page-title">Tenant admin</h1>
-          <p class="page-sub">Thin config for this client org — modules, branding, SSO stubs. Do not gold-plate.</p>
+          <button type="button" class="btn icon-btn accent-icon page-help-toggle" aria-expanded="false" title="Show help" aria-label="Show help">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
         </div>
+        <p class="page-sub page-help-text" hidden>Thin config for this client org — modules, branding, SSO stubs. Do not gold-plate.
+          <button type="button" class="page-help-collapse">Collapse help</button>
+        </p>
+      </div>
 
-        <div class="note-banner" role="note">
-          <span class="note-label">Note</span>
-          <div><strong>One SPHERE build; layout is tenant config.</strong> Customization = tenant config + feature flags, not per-client repos. Study folder tree defaults come from this tenant’s Study layout — not a free-form chaos of libs. Spine always on; modules are pick-and-choose.</div>
+        <div class="note-banner note-collapsible is-collapsed" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Note</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div><strong>One SPHERE build; layout is tenant config.</strong> Customization = tenant config + feature flags, not per-client repos. Study folder tree defaults come from this tenant’s Study layout — not a free-form chaos of libs. Spine always on; modules are pick-and-choose.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
         </div>
 
         <div class="admin-layout">
@@ -182,10 +197,18 @@
                   <span class="badge">Feature flags</span>
                 </div>
                 <div class="card-body" style="padding-top:4px;padding-bottom:8px">
-                  <div class="note-banner" role="note" style="margin-bottom:8px">
-                    <span class="note-label">Spine</span>
-                    <div>Tenant, SSO, study, layout map, and Part 11 audit are <strong>always on</strong> — not toggled here.</div>
-                  </div>
+                  <div class="note-banner note-collapsible is-collapsed" style="margin-bottom:8px" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Spine</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div>Tenant, SSO, study, layout map, and Part 11 audit are <strong>always on</strong> — not toggled here.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
+        </div>
 
                   <div class="toggle-row">
                     <div class="toggle-meta">
@@ -328,10 +351,18 @@
                   <span class="badge warn">Stub · not wired</span>
                 </div>
                 <div class="form">
-                  <div class="note-banner" role="note">
-                    <span class="note-label">Stub</span>
-                    <div>Fields for IdP setup only. Day-one auth is local/dev login; SAML/OIDC lands later.</div>
-                  </div>
+                  <div class="note-banner note-collapsible is-collapsed" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Stub</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div>Fields for IdP setup only. Day-one auth is local/dev login; SAML/OIDC lands later.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
+        </div>
                   <label>
                     <span>Protocol</span>
                     <select>
@@ -429,10 +460,18 @@
                   <span class="title-row">Teams</span>
                   <button class="btn primary sm" type="button" disabled title="Demo stub">New team</button>
                 </div>
-                <div class="note-banner" role="note" style="margin:0 16px 12px">
-                  <span class="note-label">ACL</span>
-                  <div>Teams are used for <strong>folder access</strong> on the study file share (Box/WatchDox-like). Grant a team <strong>View</strong> or <strong>Edit</strong> on a folder in <a href="files.html">Files → Manage access</a>; permissions inherit down the tree. v1 = View | Edit only.</div>
-                </div>
+                <div class="note-banner note-collapsible is-collapsed" style="margin:0 16px 12px" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">ACL</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div>Teams are used for <strong>folder access</strong> on the study file share (Box/WatchDox-like). Grant a team <strong>View</strong> or <strong>Edit</strong> on a folder in <a href="files.html">Files → Manage access</a>; permissions inherit down the tree. v1 = View | Edit only.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
+        </div>
                 <div class="table-wrap">
                   <table>
                     <thead>
@@ -480,10 +519,18 @@
                   <span class="badge">Tenant template</span>
                 </div>
                 <div class="form">
-                  <div class="note-banner" role="note">
-                    <span class="note-label">Lock</span>
-                    <div>Base tree is <code>{study}/raw | sdtm | adam | programs | tlf | logs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
-                  </div>
+                  <div class="note-banner note-collapsible is-collapsed" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Lock</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div>Base tree is <code>{study}/raw | sdtm | adam | programs | tlf | logs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
+        </div>
 
                   <label>
                     <span>Standard template subfolders</span>
@@ -586,10 +633,18 @@
                       <div class="hint" style="margin-top:6px">Approve / freeze in Tracker stays human-gated; Part 11 e-sign badge lands after MVP</div>
                     </div>
                   </div>
-                  <div class="note-banner" role="note">
-                    <span class="note-label">Thin</span>
-                    <div>IQ/OQ kit and security questionnaire answers live outside this screen. Admin stays configuration-only.</div>
-                  </div>
+                  <div class="note-banner note-collapsible is-collapsed" role="note">
+          <div class="note-banner-head">
+            <span class="note-label">Thin</span>
+            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
+          </div>
+          <div class="note-banner-body" hidden>
+            <div>IQ/OQ kit and security questionnaire answers live outside this screen. Admin stays configuration-only.</div>
+            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
+          </div>
+        </div>
               </section>
             </div>
           </div>

@@ -124,10 +124,17 @@
     <div class="content">
       <div class="stack">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
-        <div class="page-intro" style="margin-bottom:0">
+        <div class="page-intro page-intro-compact" style="margin-bottom:0">
+        <div class="page-title-row">
           <h1 class="page-title">Governed suggestions</h1>
-          <p class="page-sub">Accept or reject each suggestion. Writes require a human lock — Copilot cannot lock or run programs.</p>
+          <button type="button" class="btn icon-btn accent-icon page-help-toggle" aria-expanded="false" title="Show help" aria-label="Show help">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
+          </button>
         </div>
+        <p class="page-sub page-help-text" hidden>Accept or reject each suggestion. Writes require a human lock — Copilot cannot lock or run programs.
+          <button type="button" class="page-help-collapse">Collapse help</button>
+        </p>
+      </div>
         <div class="list-tools">
           <span class="badge warn">Human lock only · Copilot cannot run programs</span>
         </div>

@@ -1496,24 +1496,6 @@
   renderCatalog();
   selectShell('adhoc-1', true);
 
-  (function () {
-    var btn = document.getElementById('pageHelpToggle');
-    var text = document.getElementById('pageHelpText');
-    var collapse = document.getElementById('pageHelpCollapse');
-    if (!btn || !text) return;
-    function setOpen(open) {
-      if (open) text.removeAttribute('hidden');
-      else text.setAttribute('hidden', '');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.setAttribute('title', open ? 'Hide help' : 'Show help');
-      btn.setAttribute('aria-label', open ? 'Hide help' : 'Show help');
-      btn.classList.toggle('is-open', open);
-    }
-    btn.addEventListener('click', function () {
-      setOpen(text.hasAttribute('hidden'));
-    });
-    if (collapse) collapse.addEventListener('click', function () { setOpen(false); });
-  })();
 
 })();
 </script>
