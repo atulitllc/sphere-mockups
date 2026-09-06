@@ -189,29 +189,8 @@
                   <th>Title</th>
                 </tr>
               </thead>
-              <tbody id="catalogBody">
-                <tr class="selected" data-id="14.1.1" data-type="Table">
-                  <td class="num">14.1.1</td>
-                  <td>Demographics</td>
-                </tr>
-                <tr data-id="14.1.2" data-type="Table">
-                  <td class="num">14.1.2</td>
-                  <td>Baseline characteristics</td>
-                </tr>
-                <tr data-id="14.2.1" data-type="Table">
-                  <td class="num">14.2.1</td>
-                  <td>Primary endpoint — ORR</td>
-                </tr>
-                <tr data-id="14.3.1" data-type="Listing">
-                  <td class="num">14.3.1</td>
-                  <td>Adverse events — overview</td>
-                </tr>
-                <tr data-id="14.3.2" data-type="Figure">
-                  <td class="num">14.3.2</td>
-                  <td>Kaplan–Meier overall survival</td>
-                </tr>
-              </tbody>
             </table>
+            <div id="catalogBody" class="catalog-board"></div>
           </div>
         </div>
 
@@ -256,6 +235,14 @@
                     <option selected>Draft</option>
                     <option>In review</option>
                     <option>Locked</option>
+                  </select>
+                </label>
+                <label class="meta-field">SAP
+                  <select id="metaSap" aria-label="SAP section">
+                    <option>Demographics</option>
+                    <option>Efficacy</option>
+                    <option>Safety TLFs</option>
+                    <option>Unassigned</option>
                   </select>
                 </label>
               </div>
@@ -537,6 +524,33 @@
 
   function cloneData(x) { return JSON.parse(JSON.stringify(x)); }
 
+  /* Tracker-aligned SAP groups. New shells inherit lastUsedSap (selected/last assigned); else Unassigned. */
+  var SAP_ORDER = ['Demographics', 'Efficacy', 'Safety TLFs', 'Unassigned'];
+  var DEFAULT_SAP = 'Unassigned';
+  var lastUsedSap = 'Demographics';
+  var collapsedSap = {};
+  var catalogJustDragged = false;
+
+  function normalizeSap(sap) {
+    var s = (sap || '').toString().trim();
+    return s || DEFAULT_SAP;
+  }
+
+  function sapSlug(sap) {
+    return String(sap || 'section').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function sapBodyId(sap) {
+    return 'catalog-sap-' + sapSlug(sap);
+  }
+
+  function catalogGripHtml() {
+    return '<span class="catalog-grip" title="Drag to reorder" aria-hidden="true">' +
+      '<svg viewBox="0 0 12 16" focusable="false"><circle cx="3.5" cy="3" r="1.15"/><circle cx="8.5" cy="3" r="1.15"/>' +
+      '<circle cx="3.5" cy="8" r="1.15"/><circle cx="8.5" cy="8" r="1.15"/>' +
+      '<circle cx="3.5" cy="13" r="1.15"/><circle cx="8.5" cy="13" r="1.15"/></svg></span>';
+  }
+
   var demogPreset = {
     title: 'Table 14.1.1 Demographics',
     subtitle: 'Safety Analysis Set',
@@ -613,6 +627,7 @@
       title: opts.title || layout.title,
       status: opts.status || 'Draft',
       analysisSet: opts.analysisSet || 'Safety',
+      sap: opts.sap || DEFAULT_SAP,
       locked: !!opts.locked,
       qc: opts.qc || null,
       approved: !!opts.approved,
@@ -627,18 +642,18 @@
   function seedCatalog(studyId) {
     if (studyId === 'ONC-204-301') {
       return [
-        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', layout: demogPreset, templateKey: 'Demographics' }),
-        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', templateKey: 'Baseline characteristics' }),
-        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', templateKey: 'Primary endpoint — ORR' }),
-        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Listing', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', templateKey: 'Adverse events — overview' }),
-        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', templateKey: 'Kaplan–Meier overall survival' })
+        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics' }),
+        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
+        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Listing', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Adverse events — overview' }),
+        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' })
       ];
     }
     /* other studies start with a light catalog so copy result is visible */
     var meta = studyMeta(studyId);
     var shells = [];
     if (meta && meta.templates.indexOf('Demographics') >= 0) {
-      shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', layout: demogPreset, templateKey: 'Demographics' }));
+      shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics' }));
     }
     return shells;
   }
@@ -730,6 +745,8 @@
     sh.type = document.getElementById('metaType').value;
     sh.analysisSet = document.getElementById('metaSet').value;
     sh.status = document.getElementById('metaStatus').value;
+    var sapEl = document.getElementById('metaSap');
+    if (sapEl) sh.sap = normalizeSap(sapEl.value);
     sh.locked = sh.status === 'Locked';
     if (sh.status === 'In review') sh.qc = 'In review';
     else if (sh.status === 'Draft') sh.qc = null;
@@ -778,6 +795,8 @@
     document.getElementById('typeMenuLabel').textContent = sh.type;
     document.getElementById('metaSet').value = sh.analysisSet || 'Safety';
     document.getElementById('metaStatus').value = sh.status || 'Draft';
+    lastUsedSap = normalizeSap(sh.sap);
+    setMetaSapValue(lastUsedSap);
 
     var pill = document.querySelector('.sheet-custom-pill');
     if (pill) pill.style.display = state.custom ? '' : 'none';
@@ -790,21 +809,152 @@
     render();
   }
 
+  function setMetaSapValue(sap) {
+    var el = document.getElementById('metaSap');
+    if (!el) return;
+    sap = normalizeSap(sap);
+    var found = false;
+    Array.prototype.forEach.call(el.options, function (opt) {
+      if (opt.value === sap) found = true;
+    });
+    if (!found) {
+      var opt = document.createElement('option');
+      opt.value = sap;
+      opt.textContent = sap;
+      el.appendChild(opt);
+    }
+    el.value = sap;
+  }
+
+  function catalogSectionOrder() {
+    var seen = {};
+    var order = [];
+    SAP_ORDER.forEach(function (sap) {
+      seen[sap] = true;
+      order.push(sap);
+    });
+    currentShells().forEach(function (sh) {
+      var sap = normalizeSap(sh.sap);
+      if (!seen[sap]) {
+        seen[sap] = true;
+        order.push(sap);
+      }
+    });
+    return order;
+  }
+
+  function applyCatalogFilters() {
+    if (!catalogBody) return;
+    var searchEl = document.getElementById('catalogSearch');
+    var filterEl = document.getElementById('catalogFilter');
+    var q = ((searchEl && searchEl.value) || '').toLowerCase().trim();
+    var t = (filterEl && filterEl.value) || 'All types';
+    var filtering = !!(q || (t && t !== 'All types'));
+    catalogBody.querySelectorAll('.sap-section').forEach(function (sec) {
+      var vis = 0;
+      sec.querySelectorAll('tr[data-id]').forEach(function (tr) {
+        var textOk = !q || tr.textContent.toLowerCase().indexOf(q) >= 0;
+        var typeOk = t === 'All types' || tr.getAttribute('data-type') === t;
+        var ok = textOk && typeOk;
+        tr.classList.toggle('is-filtered-out', !ok);
+        if (ok) vis++;
+      });
+      var countEl = sec.querySelector('.sap-section-count');
+      if (countEl) countEl.textContent = String(vis);
+      sec.classList.toggle('is-empty', filtering && vis === 0);
+    });
+  }
+
   function renderCatalog() {
     var shells = currentShells();
     var selectedId = studyStore[CURRENT_STUDY].selectedId;
-    var html = '';
+    if (!shells.length) {
+      catalogBody.innerHTML = '<p class="catalog-empty">No shells in this study yet.</p>';
+      return;
+    }
+    var groups = {};
+    catalogSectionOrder().forEach(function (sap) { groups[sap] = []; });
     shells.forEach(function (sh) {
-      var sel = sh.id === selectedId ? ' selected' : '';
-      html += '<tr class="' + sel.trim() + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '">';
-      html += '<td class="num">' + escapeHtml(sh.number) + '</td>';
-      html += '<td>' + escapeHtml(sh.title);
-      if (sh.copiedFrom) {
-        html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
-      }
-      html += '</td></tr>';
+      var sap = normalizeSap(sh.sap);
+      if (!groups[sap]) groups[sap] = [];
+      groups[sap].push(sh);
     });
-    catalogBody.innerHTML = html || '<tr><td colspan="2" style="color:var(--muted);padding:12px 8px">No shells in this study yet.</td></tr>';
+    var html = '';
+    catalogSectionOrder().forEach(function (sap) {
+      var list = groups[sap] || [];
+      if (sap === DEFAULT_SAP && !list.length) return;
+      var bid = sapBodyId(sap);
+      var collapsed = !!collapsedSap[sap];
+      html += '<section class="sap-section' + (collapsed ? ' collapsed' : '') + '" data-sap-group="' + escapeHtml(sap) + '">';
+      html += '<button type="button" class="sap-section-head" aria-expanded="' + (collapsed ? 'false' : 'true') + '" aria-controls="' + bid + '">';
+      html += '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+      html += '<span class="sap-section-title">' + escapeHtml(sap) + '</span>';
+      html += '<span class="sap-section-count">' + list.length + '</span></button>';
+      html += '<div class="sap-section-body" id="' + bid + '"' + (collapsed ? ' hidden' : '') + ' aria-hidden="' + (collapsed ? 'true' : 'false') + '">';
+      html += '<table class="catalog-section-table"><tbody>';
+      if (!list.length) {
+        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="2"></td></tr>';
+      }
+      list.forEach(function (sh) {
+        var sel = sh.id === selectedId ? ' selected' : '';
+        html += '<tr class="' + sel.trim() + '" draggable="true" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '" data-sap="' + escapeHtml(normalizeSap(sh.sap)) + '">';
+        html += '<td class="num">' + catalogGripHtml() + escapeHtml(sh.number) + '</td>';
+        html += '<td>' + escapeHtml(sh.title);
+        if (sh.copiedFrom) {
+          html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
+        }
+        html += '</td></tr>';
+      });
+      html += '</tbody></table></div></section>';
+    });
+    catalogBody.innerHTML = html;
+    applyCatalogFilters();
+  }
+
+  function clearCatalogDropMarks() {
+    if (!catalogBody) return;
+    catalogBody.querySelectorAll('.drop-before, .drop-after, .drop-target').forEach(function (el) {
+      el.classList.remove('drop-before', 'drop-after', 'drop-target');
+    });
+  }
+
+  function moveShellInCatalog(dragId, destSap, beforeId) {
+    destSap = normalizeSap(destSap);
+    var shells = currentShells();
+    var dragIdx = -1;
+    var drag = null;
+    var i;
+    for (i = 0; i < shells.length; i++) {
+      if (shells[i].id === dragId) {
+        dragIdx = i;
+        drag = shells[i];
+        break;
+      }
+    }
+    if (!drag) return;
+    if (drag.id === beforeId) return;
+    shells.splice(dragIdx, 1);
+    drag.sap = destSap;
+    lastUsedSap = destSap;
+    var insertAt = shells.length;
+    if (beforeId) {
+      for (i = 0; i < shells.length; i++) {
+        if (shells[i].id === beforeId) {
+          insertAt = i;
+          break;
+        }
+      }
+    } else {
+      var last = -1;
+      for (i = 0; i < shells.length; i++) {
+        if (normalizeSap(shells[i].sap) === destSap) last = i;
+      }
+      insertAt = last >= 0 ? last + 1 : shells.length;
+    }
+    shells.splice(insertAt, 0, drag);
+    var selected = selectedShell();
+    if (selected && selected.id === drag.id) setMetaSapValue(destSap);
+    renderCatalog();
   }
 
   function selectShell(id, skipPersist) {
@@ -1558,25 +1708,100 @@
     }
   });
 
-  /* —— catalog selection —— */
+  /* —— catalog selection, SAP collapse, search/filter, drag-and-drop —— */
   catalogBody.addEventListener('click', function (e) {
+    var head = e.target.closest && e.target.closest('.sap-section-head');
+    if (head) {
+      e.preventDefault();
+      var sec = head.closest('.sap-section');
+      if (!sec) return;
+      var collapsed = sec.classList.toggle('collapsed');
+      var sap = sec.getAttribute('data-sap-group');
+      collapsedSap[sap] = collapsed;
+      head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      var bodyEl = sec.querySelector(':scope > .sap-section-body') || sec.querySelector('.sap-section-body');
+      if (bodyEl) {
+        if (collapsed) bodyEl.setAttribute('hidden', '');
+        else bodyEl.removeAttribute('hidden');
+        bodyEl.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+      }
+      return;
+    }
+    if (catalogJustDragged) {
+      catalogJustDragged = false;
+      return;
+    }
     var tr = e.target.closest('tr[data-id]');
     if (!tr) return;
     selectShell(tr.dataset.id);
   });
 
-  document.getElementById('catalogSearch').addEventListener('input', function () {
-    var q = this.value.toLowerCase();
-    catalogBody.querySelectorAll('tr[data-id]').forEach(function (tr) {
-      tr.style.display = tr.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
-    });
+  document.getElementById('catalogSearch').addEventListener('input', applyCatalogFilters);
+  document.getElementById('catalogFilter').addEventListener('change', applyCatalogFilters);
+
+  catalogBody.addEventListener('dragstart', function (e) {
+    var tr = e.target.closest && e.target.closest('tr[data-id]');
+    if (!tr) {
+      e.preventDefault();
+      return;
+    }
+    catalogJustDragged = false;
+    e.dataTransfer.setData('text/plain', tr.getAttribute('data-id'));
+    e.dataTransfer.effectAllowed = 'move';
+    tr.classList.add('is-dragging');
+    try { e.dataTransfer.setDragImage(tr, 16, 12); } catch (err) {}
   });
-  document.getElementById('catalogFilter').addEventListener('change', function () {
-    var t = this.value;
-    catalogBody.querySelectorAll('tr[data-id]').forEach(function (tr) {
-      var match = t === 'All types' || tr.dataset.type === t;
-      tr.style.display = match ? '' : 'none';
+  catalogBody.addEventListener('dragend', function () {
+    catalogBody.querySelectorAll('tr.is-dragging').forEach(function (tr) {
+      tr.classList.remove('is-dragging');
     });
+    clearCatalogDropMarks();
+  });
+  catalogBody.addEventListener('dragover', function (e) {
+    var sec = e.target.closest && e.target.closest('.sap-section');
+    if (!sec) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    clearCatalogDropMarks();
+    var tr = e.target.closest('tr[data-id]');
+    if (tr && !tr.classList.contains('is-dragging')) {
+      var rect = tr.getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) tr.classList.add('drop-before');
+      else tr.classList.add('drop-after');
+    } else {
+      sec.classList.add('drop-target');
+    }
+  });
+  catalogBody.addEventListener('dragleave', function (e) {
+    if (!catalogBody.contains(e.relatedTarget)) clearCatalogDropMarks();
+  });
+  catalogBody.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var dragId = e.dataTransfer.getData('text/plain');
+    clearCatalogDropMarks();
+    catalogJustDragged = true;
+    if (!dragId) return;
+    var tr = e.target.closest('tr[data-id]');
+    var sec = e.target.closest('.sap-section');
+    var destSap;
+    var beforeId = null;
+    if (tr && tr.getAttribute('data-id') === dragId) return;
+    if (tr) {
+      destSap = tr.getAttribute('data-sap');
+      var rect = tr.getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) {
+        beforeId = tr.getAttribute('data-id');
+      } else {
+        var next = tr.nextElementSibling;
+        while (next && !next.getAttribute('data-id')) next = next.nextElementSibling;
+        beforeId = next ? next.getAttribute('data-id') : null;
+      }
+    } else if (sec) {
+      destSap = sec.getAttribute('data-sap-group');
+    } else {
+      return;
+    }
+    moveShellInCatalog(dragId, destSap, beforeId);
   });
 
   document.getElementById('metaType').addEventListener('change', function () {
@@ -1617,6 +1842,15 @@
       renderCatalog();
     }
   });
+  document.getElementById('metaSap').addEventListener('change', function () {
+    var sh = selectedShell();
+    if (!sh) return;
+    var sap = normalizeSap(this.value);
+    if (normalizeSap(sh.sap) === sap) return;
+    persistEditorToSelected();
+    moveShellInCatalog(sh.id, sap, null);
+  });
+
   document.getElementById('btnAddShell').addEventListener('click', function () {
     persistEditorToSelected();
     var id = 'adhoc-' + Date.now().toString(36).slice(-5);
@@ -1626,6 +1860,7 @@
       type: 'Table',
       title: '{Adhoc Shell ' + (currentShells().length + 1) + '}',
       status: 'Draft',
+      sap: lastUsedSap || DEFAULT_SAP,
       layout: cloneData(adhocPreset),
       custom: true,
       templateKey: ''
@@ -1768,6 +2003,7 @@
       title: titleOverride || src.title,
       status: 'Draft', /* NEVER copy lock/QC/approve */
       analysisSet: document.getElementById('metaSet').value || src.analysisSet || 'Safety',
+      sap: src.sap || DEFAULT_SAP,
       locked: false,
       qc: null,
       approved: false,
