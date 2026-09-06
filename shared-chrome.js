@@ -87,69 +87,42 @@
 })();
 
 
-/* Collapsible page help + note banners */
+/* Page note pull-down: title-row icon toggles .note-banner (page-sub stays visible) */
 (function () {
-  function setToggleOpen(btn, panel, open, showLabel, hideLabel) {
-    if (!btn || !panel) return;
-    if (open) panel.removeAttribute('hidden');
-    else panel.setAttribute('hidden', '');
+  function setOpen(btn, banner, open) {
+    if (!btn || !banner) return;
+    banner.classList.toggle('is-collapsed', !open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.setAttribute('title', open ? hideLabel : showLabel);
-    btn.setAttribute('aria-label', open ? hideLabel : showLabel);
+    btn.setAttribute('title', open ? 'Hide note' : 'Show note');
+    btn.setAttribute('aria-label', open ? 'Hide note' : 'Show note');
     btn.classList.toggle('is-open', !!open);
   }
 
-  function wireToggle(btn, panel, collapseBtn, showLabel, hideLabel, onOpenChange) {
-    if (!btn || !panel || btn.getAttribute('data-help-bound') === '1') return;
-    btn.setAttribute('data-help-bound', '1');
-    function setOpen(open) {
-      setToggleOpen(btn, panel, open, showLabel, hideLabel);
-      if (typeof onOpenChange === 'function') onOpenChange(open);
-    }
-    btn.addEventListener('click', function () {
-      setOpen(panel.hasAttribute('hidden'));
-    });
-    if (collapseBtn) {
-      collapseBtn.addEventListener('click', function () { setOpen(false); });
-    }
-  }
-
-  function initPageHelp() {
-    document.querySelectorAll('.page-intro-compact').forEach(function (intro) {
-      var btn = intro.querySelector('.page-help-toggle');
-      var text = intro.querySelector('.page-help-text');
-      var collapse = intro.querySelector('.page-help-collapse');
-      wireToggle(btn, text, collapse, 'Show help', 'Hide help');
-    });
-  }
-
-  function initNoteBanners() {
-    document.querySelectorAll('.note-banner.note-collapsible').forEach(function (banner) {
-      var btn = banner.querySelector('.note-help-toggle');
-      var body = banner.querySelector('.note-banner-body');
-      var collapse = banner.querySelector('.note-help-collapse');
-      wireToggle(btn, body, collapse, 'Show note', 'Hide note', function (open) {
-        banner.classList.toggle('is-collapsed', !open);
-      });
-      // Ensure default collapsed chrome matches hidden body
-      if (body && body.hasAttribute('hidden')) {
-        banner.classList.add('is-collapsed');
-        if (btn) {
-          btn.setAttribute('aria-expanded', 'false');
-          btn.classList.remove('is-open');
-        }
+  function initPageNotes() {
+    document.querySelectorAll('.page-note-toggle').forEach(function (btn) {
+      if (btn.getAttribute('data-note-bound') === '1') return;
+      btn.setAttribute('data-note-bound', '1');
+      var id = btn.getAttribute('aria-controls');
+      var banner = id ? document.getElementById(id) : null;
+      if (!banner) {
+        var intro = btn.closest('.page-intro');
+        var sib = intro ? intro.nextElementSibling : null;
+        if (sib && sib.classList.contains('note-banner')) banner = sib;
       }
+      if (!banner) {
+        btn.hidden = true;
+        return;
+      }
+      setOpen(btn, banner, false);
+      btn.addEventListener('click', function () {
+        setOpen(btn, banner, banner.classList.contains('is-collapsed'));
+      });
     });
-  }
-
-  function init() {
-    initPageHelp();
-    initNoteBanners();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initPageNotes);
   } else {
-    init();
+    initPageNotes();
   }
 })();

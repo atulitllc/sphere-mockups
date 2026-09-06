@@ -125,13 +125,15 @@
       <div class="page-intro page-intro-compact">
         <div class="page-title-row">
           <h1 class="page-title">Mock Shells</h1>
-          <button type="button" class="btn icon-btn accent-icon page-help-toggle" id="pageHelpToggle" aria-expanded="false" aria-controls="pageHelpText" title="Show help" aria-label="Show help">
+          <button type="button" class="btn icon-btn accent-icon page-note-toggle" aria-expanded="false" aria-controls="pageNoteBanner" title="Show note" aria-label="Show note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub page-help-text" id="pageHelpText" hidden>Edit TLF shells as a sheet — double-click cells, indent rows, add columns. <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only. <strong>Copy to study</strong> creates a new draft in another study you can open (same tenant); lock/QC/approve and generated outputs are never copied.
-          <button type="button" class="page-help-collapse" id="pageHelpCollapse">Collapse help</button>
-        </p>
+        <p class="page-sub">Edit TLF shells as a sheet. <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
+      </div>
+
+      <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
+        <div class="note-banner-inner"><div><strong>Copy to study</strong> creates a new draft in another study you can open (same tenant); lock/QC/approve and generated outputs are never copied. Double-click cells, indent rows, and add columns in the sheet editor.</div></div>
       </div>
 
       <div class="copy-success-banner" id="copySuccessBanner" role="status">

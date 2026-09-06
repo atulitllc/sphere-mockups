@@ -127,13 +127,11 @@
         <div class="page-intro page-intro-compact" style="margin-bottom:0">
         <div class="page-title-row">
           <h1 class="page-title">Tracker — programs, TLFs &amp; datasets</h1>
-          <button type="button" class="btn icon-btn accent-icon page-help-toggle" aria-expanded="false" title="Show help" aria-label="Show help">
+          <button type="button" class="btn icon-btn accent-icon page-note-toggle" aria-expanded="false" aria-controls="pageNoteBanner" title="Show note" aria-label="Show note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub page-help-text" hidden>Home for inventory, tags, SAP sections, check-out / QC, and <strong>Run selected</strong> (R/SAS). Compute run UI lives here.
-          <button type="button" class="page-help-collapse">Collapse help</button>
-        </p>
+        <p class="page-sub">Home for inventory, tags, SAP sections, check-out / QC, and <strong>Run selected</strong> (R/SAS). Compute run UI lives here.</p>
       </div>
         <div class="stat-pills" id="statPills">
           <span class="badge not-started">8 Not started</span>
@@ -144,18 +142,9 @@
         </div>
       </div>
 
-      <div class="note-banner note-collapsible is-collapsed" role="note">
-          <div class="note-banner-head">
-            <span class="note-label">Note</span>
-            <button type="button" class="btn icon-btn accent-icon note-help-toggle" aria-expanded="false" title="Show note" aria-label="Show note">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
-          </button>
-          </div>
-          <div class="note-banner-body" hidden>
-            <div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files and still gates edit. <strong>Run selected</strong> uses checked-out or otherwise allowed programs (demo). <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC — <strong>not UI-only</strong>: it also updates share ACLs on <a href="files.html">Files</a> to View-only (<strong>Frozen / View only on share</strong>). <strong>Return to programmer</strong> restores Edit on the share. App checkout state and file-share permissions stay in sync.</div>
-            <button type="button" class="page-help-collapse note-help-collapse">Collapse note</button>
-          </div>
-        </div>
+      <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
+        <div class="note-banner-inner"><div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files and still gates edit. <strong>Run selected</strong> uses checked-out or otherwise allowed programs (demo). <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC — <strong>not UI-only</strong>: it also updates share ACLs on <a href="files.html">Files</a> to View-only (<strong>Frozen / View only on share</strong>). <strong>Return to programmer</strong> restores Edit on the share. App checkout state and file-share permissions stay in sync.</div></div>
+      </div>
 
       <section class="section tracker-section">
         <div class="section-head">
