@@ -3489,3 +3489,13 @@ label .req::after { content: " *"; color: var(--danger); }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--accent-soft) 45
+/* Mock Shells catalog: larger + on Add */
+.btn.icon-btn.btn-add-shell {
+  width: 32px;
+  height: 32px;
+}
+.btn.icon-btn.btn-add-shell svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
