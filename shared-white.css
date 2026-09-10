@@ -3617,7 +3617,7 @@ html.nav-collapsed .nav-group > a.nav-sub span,
   /* keep icon-only collapse behavior via existing nav rules */
 }
 
-/* Studies view toggle */
+/* Studies view toggle (icon) */
 .studies-view-toggle {
   display: inline-flex;
   border: 1px solid var(--border);
@@ -3628,19 +3628,27 @@ html.nav-collapsed .nav-group > a.nav-sub span,
 .studies-view-toggle button {
   border: 0;
   background: transparent;
-  padding: 6px 10px;
+  width: 34px;
+  height: 32px;
+  padding: 0;
   cursor: pointer;
   color: var(--muted);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font: inherit;
-  font-size: 12.5px;
+  justify-content: center;
+}
+.studies-view-toggle button svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .studies-view-toggle button[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent);
-  font-weight: 600;
 }
 .studies-view-toggle button + button {
   border-left: 1px solid var(--border);
@@ -3649,6 +3657,53 @@ body.studies-view-cards .studies-list-panel { display: none; }
 body.studies-view-list .studies-grid { display: none; }
 body.studies-view-list .studies-list-panel { display: block; }
 body.studies-view-cards .studies-grid { display: grid; }
+
+/* In-screen icon + label actions (Extract data, Publisher) */
+a.btn.icon-text-btn,
+.btn.icon-text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+a.btn.icon-text-btn svg,
+.btn.icon-text-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+a.btn.icon-text-btn.accent-icon,
+.btn.icon-text-btn.accent-icon {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+}
+a.btn.icon-text-btn.accent-icon:hover,
+.btn.icon-text-btn.accent-icon:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+a.btn.icon-text-btn.accent-icon-primary,
+.btn.icon-text-btn.accent-icon-primary {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+a.btn.icon-text-btn.accent-icon-primary:hover,
+.btn.icon-text-btn.accent-icon-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
 
 /* Study home modules collapse */
 .modules-block .modules-toggle {
