@@ -3595,3 +3595,84 @@ label .req::after { content: " *"; color: var(--danger); }
   cursor: not-allowed;
   color: var(--muted);
 }
+
+/* Nested File Explorer / Extract data */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nav-group > a.nav-sub {
+  margin-left: 18px;
+  font-size: 12.5px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  opacity: 0.92;
+}
+.nav.collapsed .nav-group > a.nav-sub {
+  margin-left: 0;
+}
+html.nav-collapsed .nav-group > a.nav-sub span,
+.nav.collapsed .nav-group .nav-sub {
+  /* keep icon-only collapse behavior via existing nav rules */
+}
+
+/* Studies view toggle */
+.studies-view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.studies-view-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 12.5px;
+}
+.studies-view-toggle button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+.studies-view-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+body.studies-view-cards .studies-list-panel { display: none; }
+body.studies-view-list .studies-grid { display: none; }
+body.studies-view-list .studies-list-panel { display: block; }
+body.studies-view-cards .studies-grid { display: grid; }
+
+/* Study home modules collapse */
+.modules-block .modules-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.modules-block .modules-toggle .sap-chevron {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  transition: transform .15s ease;
+}
+.modules-block.is-collapsed .modules-toggle .sap-chevron {
+  transform: rotate(-90deg);
+}
+.modules-block.is-collapsed .module-grid {
+  display: none;
+}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Files</title>
+<title>SPHERE — File Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -37,14 +37,16 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
       Study home
     </a>
-    <a href="data-hub.html">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
-      Data Hub
-    </a>
+        <div class="nav-group is-open" data-nav-group="files">
     <a class="active" href="files.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-      Files
+      File Explorer
     </a>
+    <a class="nav-sub" href="data-hub.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+      Extract data
+    </a>
+    </div>
     <a href="mock-shells.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
       Mock Shells
@@ -56,10 +58,6 @@
     <a href="define.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
       Define
-    </a>
-    <a href="publisher.html">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v4h14v-4"/></svg>
-      Publisher
     </a>
     <a href="copilot.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg>
@@ -82,7 +80,7 @@
         <button class="hamburger" id="hamburger" type="button" aria-label="Collapse navigation" aria-controls="sideNav" aria-expanded="true" title="Collapse navigation">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <div class="crumb"><a href="studies.html">Studies</a> / <strong>ONC-204-301</strong> / Files</div>
+        <div class="crumb"><a href="studies.html">Studies</a> / <strong>ONC-204-301</strong> / File Explorer</div>
       </div>
       <div class="top-right">
         <div class="accent-picker" id="accentPicker">
@@ -125,7 +123,7 @@
       <div class="stack">
         <div class="page-intro page-intro-compact">
         <div class="page-title-row">
-          <h1 class="page-title">Files</h1>
+          <h1 class="page-title">File Explorer</h1>
           <button type="button" class="btn icon-btn accent-icon page-note-toggle" aria-expanded="false" aria-controls="pageNoteBanner" title="Show note" aria-label="Show note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
