@@ -3731,3 +3731,194 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .modules-block.is-collapsed .module-grid {
   display: none;
 }
+
+
+/* Tracker custom lists */
+.tracker-lists-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.list-modal { max-width: 520px; width: min(520px, 94vw); }
+.list-order {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 280px;
+  overflow: auto;
+  background: var(--surface);
+}
+.list-order-item {
+  display: grid;
+  grid-template-columns: 20px 1fr auto 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  cursor: grab;
+  font-size: 13px;
+}
+.list-order-item:last-child { border-bottom: 0; }
+.list-order-item.dragging { opacity: 0.55; background: var(--accent-soft); }
+.list-order-item .drag-handle {
+  color: var(--muted);
+  letter-spacing: -2px;
+  font-size: 12px;
+  user-select: none;
+}
+.list-order-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list-order-prog { font-size: 11px; font-family: ui-monospace, monospace; }
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+/* In-context Copilot panel */
+.copilot-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+}
+.copilot-launch svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.copilot-launch:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.copilot-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.28);
+  z-index: 80;
+}
+.copilot-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(380px, 94vw);
+  height: 100vh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(15, 23, 42, 0.12);
+  z-index: 81;
+  display: flex;
+  flex-direction: column;
+}
+.copilot-panel[hidden],
+.copilot-backdrop[hidden] { display: none !important; }
+.copilot-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.copilot-panel-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.copilot-panel-head .hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.copilot-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.copilot-chip {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text);
+}
+.copilot-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.copilot-thread {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.copilot-msg {
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.copilot-msg.user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  max-width: 90%;
+}
+.copilot-msg.bot {
+  align-self: stretch;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.copilot-msg .badge {
+  margin-bottom: 6px;
+}
+.copilot-compose {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.copilot-compose input {
+  flex: 1;
+  min-width: 0;
+}
+.copilot-panel-foot {
+  padding: 8px 16px 14px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.copilot-panel-foot a { color: var(--accent); }
+
+.list-tools { flex-wrap: wrap; }

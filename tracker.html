@@ -123,7 +123,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Home for inventory, tags, SAP sections, check-out / QC, and <strong>Run selected</strong> (R/SAS). Open <strong>Generated PDF Package</strong> from here to assemble packages.</p>
+        <p class="page-sub">Home for inventory, tags, SAP sections, check-out / QC, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
       </div>
         <div class="stat-pills" id="statPills">
           <span class="badge not-started">8 Not started</span>
@@ -171,11 +171,20 @@
               <option>Safety TLFs</option>
               <option>Labs</option>
             </select>
+                        <div class="tracker-lists-bar" id="trackerListsBar">
+              <label class="sr-only" for="customListSelect">Custom list</label>
+              <select id="customListSelect" style="width:180px" aria-label="Custom list">
+                <option value="">Custom lists…</option>
+              </select>
+              <button class="btn" type="button" id="btnRunList" disabled title="Run programs in this list order">Run list</button>
+              <button class="btn" type="button" id="btnEditList" disabled title="Rename or reorder">Edit list</button>
+              <button class="btn ghost" type="button" id="btnDeleteList" disabled title="Delete list">Delete</button>
+            </div>
             <button class="btn primary" type="button" id="btnImport">Browse / Import programs</button>
             <button class="btn" type="button">Export CSV</button>
-            <a class="btn icon-text-btn accent-icon accent-icon-primary" id="btnPublisher" href="publisher.html" title="Generated PDF Package" aria-label="Generated PDF Package">
+            <a class="btn icon-text-btn accent-icon accent-icon-primary" id="btnPublisher" href="publisher.html" title="Generate PDF Package" aria-label="Generate PDF Package">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v4h14v-4"/></svg>
-              <span>Generated PDF Package</span>
+              <span>Generate PDF Package</span>
             </a>
           </div>
         </div>
@@ -187,6 +196,8 @@
           </div>
           <div class="bulk-right">
             <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
+            <button class="btn" type="button" id="btnSaveList">Save as list…</button>
+            <button class="btn" type="button" id="btnPdfFromSel" title="Open Generate PDF Package with this selection">Generate PDF Package</button>
             <select id="bulkTag" style="width:140px" aria-label="Assign tag">
               <option value="">Edit tags…</option>
               <option value="First look">+ First look</option>
@@ -617,6 +628,31 @@
   <div class="float-editor-foot">
     <button class="btn" type="button" id="btnCancelRowEditor">Cancel</button>
     <button class="btn primary" type="button" id="btnSaveRowEditor">Save</button>
+  </div>
+</div>
+
+
+<div class="modal-backdrop" id="listModal" hidden role="dialog" aria-modal="true" aria-labelledby="listModalTitle">
+  <div class="modal list-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="listModalTitle">Custom list</h2>
+        <div class="hint">Name the list, drag to set run / PDF order. Demo saves in this browser.</div>
+      </div>
+      <button class="btn sm" type="button" id="listModalClose" aria-label="Close">Close</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label" for="listNameInput">List name</label>
+      <input class="search" id="listNameInput" type="text" placeholder="e.g. First look DMC run" maxlength="80" style="width:100%;margin-bottom:12px" />
+      <div class="field-label">Programs <span class="muted" id="listItemCount">(0)</span></div>
+      <ul class="list-order" id="listOrder" aria-label="Reorder programs"></ul>
+      <p class="muted" style="font-size:12px;margin-top:8px">Order is used for <strong>Run list</strong> and <strong>Generate PDF Package</strong>.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="listModalCancel">Cancel</button>
+      <a class="btn" id="listModalPdf" href="publisher.html" style="text-decoration:none">Generate PDF Package</a>
+      <button class="btn primary" type="button" id="listModalSave">Save list</button>
+    </div>
   </div>
 </div>
 
@@ -1245,6 +1281,270 @@
     applyFilters();
     showToast('Created ' + files.length + ' tracker record(s) from programs/');
   });
+
+  
+  /* —— Custom run / PDF lists —— */
+  var LISTS_KEY = 'sphere-tracker-lists';
+  var listModal = document.getElementById('listModal');
+  var listOrder = document.getElementById('listOrder');
+  var listNameInput = document.getElementById('listNameInput');
+  var listItemCount = document.getElementById('listItemCount');
+  var customListSelect = document.getElementById('customListSelect');
+  var btnSaveList = document.getElementById('btnSaveList');
+  var btnRunList = document.getElementById('btnRunList');
+  var btnEditList = document.getElementById('btnEditList');
+  var btnDeleteList = document.getElementById('btnDeleteList');
+  var btnPdfFromSel = document.getElementById('btnPdfFromSel');
+  var listModalPdf = document.getElementById('listModalPdf');
+  var editingListId = null;
+  var draftItems = [];
+
+  function loadLists() {
+    try {
+      var raw = localStorage.getItem(LISTS_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(arr)) arr = [];
+      if (!arr.length) {
+        arr = [{
+          id: 'list-demo-dmc',
+          name: 'First look · DMC',
+          items: [
+            { program: 'tfl_14_1_1_demog.R', title: '14.1.1 · Demographics' },
+            { program: 'tfl_14_1_2_base.R', title: '14.1.2 · Baseline characteristics' },
+            { program: 'tfl_14_2_1_orr.R', title: '14.2.1 · ORR' }
+          ]
+        }];
+        saveLists(arr);
+      }
+      return arr;
+    } catch (e) { return []; }
+  }
+  function saveLists(arr) {
+    try { localStorage.setItem(LISTS_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+  function rowPayload(row) {
+    var titleEl = row.querySelector('.artifact-title');
+    return {
+      program: row.getAttribute('data-program') || '',
+      title: titleEl ? titleEl.textContent.replace(/\s+/g, ' ').trim() : (row.getAttribute('data-program') || 'Item')
+    };
+  }
+  function refreshListSelect() {
+    if (!customListSelect) return;
+    var lists = loadLists();
+    var cur = customListSelect.value;
+    customListSelect.innerHTML = '<option value="">Custom lists…</option>';
+    lists.forEach(function (L) {
+      var opt = document.createElement('option');
+      opt.value = L.id;
+      opt.textContent = L.name + ' (' + (L.items && L.items.length ? L.items.length : 0) + ')';
+      customListSelect.appendChild(opt);
+    });
+    if (cur && lists.some(function (L) { return L.id === cur; })) customListSelect.value = cur;
+    syncListActions();
+  }
+  function syncListActions() {
+    var has = !!(customListSelect && customListSelect.value);
+    if (btnRunList) btnRunList.disabled = !has;
+    if (btnEditList) btnEditList.disabled = !has;
+    if (btnDeleteList) btnDeleteList.disabled = !has;
+  }
+  function renderDraftOrder() {
+    if (!listOrder) return;
+    listOrder.innerHTML = '';
+    draftItems.forEach(function (it, idx) {
+      var li = document.createElement('li');
+      li.className = 'list-order-item';
+      li.draggable = true;
+      li.dataset.idx = String(idx);
+      li.innerHTML =
+        '<span class="drag-handle" aria-hidden="true">⋮⋮</span>' +
+        '<span class="list-order-title">' + (it.title || it.program) + '</span>' +
+        '<span class="list-order-prog muted">' + (it.program || '—') + '</span>' +
+        '<button type="button" class="btn sm ghost list-order-remove" data-rm="' + idx + '" aria-label="Remove">✕</button>';
+      listOrder.appendChild(li);
+    });
+    if (listItemCount) listItemCount.textContent = '(' + draftItems.length + ')';
+    bindOrderDnD();
+  }
+  function bindOrderDnD() {
+    var dragIdx = null;
+    Array.prototype.forEach.call(listOrder.querySelectorAll('.list-order-item'), function (li) {
+      li.addEventListener('dragstart', function () {
+        dragIdx = Number(li.dataset.idx);
+        li.classList.add('dragging');
+      });
+      li.addEventListener('dragend', function () { li.classList.remove('dragging'); dragIdx = null; });
+      li.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        var over = Number(li.dataset.idx);
+        if (dragIdx === null || over === dragIdx) return;
+        var item = draftItems.splice(dragIdx, 1)[0];
+        draftItems.splice(over, 0, item);
+        dragIdx = over;
+        renderDraftOrder();
+      });
+    });
+    Array.prototype.forEach.call(listOrder.querySelectorAll('[data-rm]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var i = Number(btn.getAttribute('data-rm'));
+        draftItems.splice(i, 1);
+        renderDraftOrder();
+      });
+    });
+  }
+  function openListModal(opts) {
+    editingListId = opts && opts.id ? opts.id : null;
+    draftItems = (opts && opts.items ? opts.items.slice() : []).map(function (x) {
+      return { program: x.program || '', title: x.title || x.program || '' };
+    });
+    if (listNameInput) listNameInput.value = (opts && opts.name) || '';
+    if (listModalPdf) {
+      var q = draftItems.map(function (x) { return encodeURIComponent(x.program); }).filter(Boolean).join(',');
+      listModalPdf.href = 'publisher.html' + (q ? ('?list=' + encodeURIComponent((opts && opts.name) || 'Selection') + '&programs=' + q) : '');
+    }
+    renderDraftOrder();
+    if (listModal) listModal.removeAttribute('hidden');
+    if (listNameInput) listNameInput.focus();
+  }
+  function closeListModal() {
+    if (listModal) listModal.setAttribute('hidden', '');
+    editingListId = null;
+    draftItems = [];
+  }
+  function findRowsByPrograms(programs) {
+    var set = {};
+    programs.forEach(function (p) { set[p] = true; });
+    return allRows().filter(function (row) {
+      var p = row.getAttribute('data-program') || '';
+      return set[p];
+    });
+  }
+  function runRowsInOrder(rows) {
+    if (!rows.length) {
+      showToast('No matching programs on Tracker for this list');
+      return;
+    }
+    // select them visually then reuse run logic via click simulation path
+    allRows().forEach(function (row) {
+      var cb = row.querySelector('.row-check');
+      if (cb) cb.checked = false;
+    });
+    rows.forEach(function (row) {
+      var cb = row.querySelector('.row-check');
+      if (cb) cb.checked = true;
+    });
+    syncBulk();
+    document.getElementById('btnRun').click();
+  }
+
+  if (btnSaveList) {
+    btnSaveList.addEventListener('click', function () {
+      var rows = selectedRows();
+      if (!rows.length) return;
+      var items = rows.map(rowPayload).filter(function (x) { return x.program; });
+      if (!items.length) {
+        showToast('Selected rows need a program filename');
+        return;
+      }
+      openListModal({ name: '', items: items });
+    });
+  }
+  if (btnPdfFromSel) {
+    btnPdfFromSel.addEventListener('click', function () {
+      var rows = selectedRows();
+      var items = rows.map(rowPayload).filter(function (x) { return x.program; });
+      var q = items.map(function (x) { return encodeURIComponent(x.program); }).join(',');
+      location.href = 'publisher.html' + (q ? ('?list=' + encodeURIComponent('Selection') + '&programs=' + q) : '');
+    });
+  }
+  document.getElementById('listModalClose') && document.getElementById('listModalClose').addEventListener('click', closeListModal);
+  document.getElementById('listModalCancel') && document.getElementById('listModalCancel').addEventListener('click', closeListModal);
+  document.getElementById('listModalSave') && document.getElementById('listModalSave').addEventListener('click', function () {
+    var name = (listNameInput && listNameInput.value || '').trim();
+    if (!name) {
+      showToast('Give the list a name');
+      if (listNameInput) listNameInput.focus();
+      return;
+    }
+    if (!draftItems.length) {
+      showToast('Add at least one program');
+      return;
+    }
+    var lists = loadLists();
+    if (editingListId) {
+      lists = lists.map(function (L) {
+        if (L.id !== editingListId) return L;
+        return { id: L.id, name: name, items: draftItems.slice() };
+      });
+    } else {
+      lists.push({
+        id: 'list-' + Date.now(),
+        name: name,
+        items: draftItems.slice()
+      });
+    }
+    saveLists(lists);
+    refreshListSelect();
+    if (customListSelect) {
+      customListSelect.value = editingListId || lists[lists.length - 1].id;
+      syncListActions();
+    }
+    closeListModal();
+    showToast('Saved list “' + name + '”');
+  });
+  if (customListSelect) {
+    customListSelect.addEventListener('change', syncListActions);
+  }
+  if (btnEditList) {
+    btnEditList.addEventListener('click', function () {
+      var id = customListSelect && customListSelect.value;
+      var L = loadLists().find(function (x) { return x.id === id; });
+      if (!L) return;
+      openListModal({ id: L.id, name: L.name, items: L.items || [] });
+    });
+  }
+  if (btnDeleteList) {
+    btnDeleteList.addEventListener('click', function () {
+      var id = customListSelect && customListSelect.value;
+      if (!id) return;
+      var lists = loadLists().filter(function (x) { return x.id !== id; });
+      saveLists(lists);
+      refreshListSelect();
+      showToast('List deleted');
+    });
+  }
+  if (btnRunList) {
+    btnRunList.addEventListener('click', function () {
+      var id = customListSelect && customListSelect.value;
+      var L = loadLists().find(function (x) { return x.id === id; });
+      if (!L || !L.items || !L.items.length) return;
+      var programs = L.items.map(function (x) { return x.program; });
+      // order-preserving match
+      var rows = [];
+      programs.forEach(function (prog) {
+        var hit = allRows().find(function (row) { return (row.getAttribute('data-program') || '') === prog; });
+        if (hit) rows.push(hit);
+      });
+      runRowsInOrder(rows);
+    });
+  }
+  // When a list is selected, also offer PDF via publisher button title update
+  var btnPublisher = document.getElementById('btnPublisher');
+  if (btnPublisher && customListSelect) {
+    customListSelect.addEventListener('change', function () {
+      var id = customListSelect.value;
+      var L = loadLists().find(function (x) { return x.id === id; });
+      if (L && L.items && L.items.length) {
+        var q = L.items.map(function (x) { return encodeURIComponent(x.program); }).join(',');
+        btnPublisher.href = 'publisher.html?list=' + encodeURIComponent(L.name) + '&programs=' + q;
+      } else {
+        btnPublisher.href = 'publisher.html';
+      }
+    });
+  }
+  refreshListSelect();
+
 
   syncSectionCounts();
   syncBulk();
