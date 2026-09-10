@@ -3573,26 +3573,21 @@ label .req::after { content: " *"; color: var(--danger); }
 .metadata-grid-actions {
   margin-top: 10px;
 }
-.btn.icon-btn.metadata-del-row {
-  width: 26px;
-  height: 26px;
+.btn.metadata-del-row {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
   color: var(--muted);
   background: transparent;
   border-color: transparent;
 }
-.btn.icon-btn.metadata-del-row:hover {
-  color: var(--danger, #b42318);
-  background: color-mix(in srgb, #b42318 8%, var(--surface));
+.btn.metadata-del-row:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
   border-color: transparent;
-}
-.btn.icon-btn.metadata-del-row svg {
-  width: 13px;
-  height: 13px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 .btn.icon-btn.accent-icon:disabled,
 .btn.icon-btn.accent-icon[aria-disabled="true"] {

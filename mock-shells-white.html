@@ -2107,9 +2107,7 @@
         '<td contenteditable="true" class="meta-cell" data-field="value">' + escapeHtml(r.value || '') + '</td>' +
         '<td contenteditable="true" class="meta-cell" data-field="notes">' + escapeHtml(r.notes || '') + '</td>' +
         '<td class="meta-col-act">' +
-          '<button type="button" class="btn sm icon-btn metadata-del-row" data-act="del-meta-row" title="Delete row" aria-label="Delete row">' +
-            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>' +
-          '</button>' +
+          '<button type="button" class="btn ghost sm metadata-del-row" data-act="del-meta-row" title="Delete row" aria-label="Delete row">×</button>' +
         '</td></tr>';
     }).join('');
   }
@@ -2138,7 +2136,13 @@
       return;
     }
     if (metadataTitleEl) {
-      metadataTitleEl.textContent = 'Metadata — ' + (sh.number || '') + ' ' + (sh.title || '');
+      var num = (sh.number || '').trim();
+      var title = (sh.title || state.title || '').replace(/^Table\s+/i, '').trim();
+      if (num && title.indexOf(num) === 0) {
+        metadataTitleEl.textContent = 'Metadata — ' + title;
+      } else {
+        metadataTitleEl.textContent = 'Metadata — ' + (num ? num + ' ' : '') + title;
+      }
     }
     renderMetadataGrid(metadataRowsFor(sh));
     if (metadataModal) metadataModal.removeAttribute('hidden');
