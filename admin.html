@@ -204,6 +204,16 @@
                   </div>
                   <div class="toggle-row">
                     <div class="toggle-meta">
+                      <strong>Metadata</strong>
+                      <div class="hint">Optional · Mock Shells spreadsheet specs for SAS macro automation (safety tables, etc.). Off = hide Metadata UI for this tenant.</div>
+                    </div>
+                    <label class="switch" title="Metadata module">
+                      <input type="checkbox" id="modMetadata" data-module="metadata" />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="toggle-meta">
                       <strong>Data Hub</strong>
                       <div class="hint">Snapshot ingest, mapping packages, library views</div>
                     </div>
@@ -942,6 +952,41 @@
   var test = document.getElementById('btnTestElluminate');
   if (save) save.addEventListener('click', function () { toast('Demo: elluminate connector saved for tenant (not persisted).'); });
   if (test) test.addEventListener('click', function () { toast('Demo: connection OK · studies visible (mock).'); });
+})();
+</script>
+
+<script>
+(function () {
+  function toast(msg) {
+    var el = document.createElement('div');
+    el.className = 'toast show';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 2600);
+  }
+  function syncModuleToggles() {
+    document.querySelectorAll('input[data-module]').forEach(function (inp) {
+      var id = inp.getAttribute('data-module');
+      if (!id || !window.SPHERE || !SPHERE.getModuleFlag) return;
+      inp.checked = SPHERE.getModuleFlag(id) === 'on';
+    });
+  }
+  document.querySelectorAll('input[data-module]').forEach(function (inp) {
+    inp.addEventListener('change', function () {
+      var id = inp.getAttribute('data-module');
+      if (!id || !window.SPHERE || !SPHERE.setModuleFlag) return;
+      SPHERE.setModuleFlag(id, inp.checked);
+      toast(inp.checked
+        ? 'Demo: Metadata module ON for this tenant'
+        : 'Demo: Metadata module OFF — Mock Shells will hide Metadata');
+    });
+  });
+  // shared-chrome loads after this if we put before it — wait for SPHERE
+  function boot() {
+    if (window.SPHERE && SPHERE.getModuleFlag) syncModuleToggles();
+    else setTimeout(boot, 30);
+  }
+  boot();
 })();
 </script>
 <script src="shared-chrome.js"></script>

@@ -2081,8 +2081,21 @@
     return defaultMetadataFor(sh);
   }
 
+  function metadataModuleOn() {
+    try {
+      return !!(window.SPHERE && SPHERE.isModuleEnabled && SPHERE.isModuleEnabled('metadata'));
+    } catch (e) { return false; }
+  }
+
   function syncMetadataButton(sh) {
     if (!btnMetadata) return;
+    /* Tenant module gate: Admin → Modules → Metadata */
+    if (!metadataModuleOn()) {
+      btnMetadata.hidden = true;
+      btnMetadata.disabled = true;
+      try { closeMetadataModal(); } catch (e) {}
+      return;
+    }
     if (shellIsAutomatable(sh)) {
       btnMetadata.hidden = false;
       btnMetadata.disabled = false;
@@ -2125,6 +2138,7 @@
   }
 
   function openMetadataModal() {
+    if (!metadataModuleOn()) return;
     persistEditorToSelected();
     var sh = selectedShell();
     if (!sh) {
@@ -2164,6 +2178,18 @@
   }
 
   if (btnMetadata) btnMetadata.addEventListener('click', openMetadataModal);
+  window.addEventListener('sphere-module-change', function (e) {
+    if (e.detail && e.detail.id === 'metadata') {
+      var sid = studyStore[CURRENT_STUDY] && studyStore[CURRENT_STUDY].selectedId;
+      syncMetadataButton(sid ? findShell(sid) : null);
+    }
+  });
+  window.addEventListener('storage', function (e) {
+    if (e.key === 'sphere-module-metadata') {
+      var sid = studyStore[CURRENT_STUDY] && studyStore[CURRENT_STUDY].selectedId;
+      syncMetadataButton(sid ? findShell(sid) : null);
+    }
+  });
   var metadataClose = document.getElementById('metadataClose');
   var metadataCancel = document.getElementById('metadataCancel');
   var metadataSave = document.getElementById('metadataSave');

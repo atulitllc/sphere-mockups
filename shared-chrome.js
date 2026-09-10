@@ -9,6 +9,36 @@
   };
   var ACCENT_KEYS = Object.keys(ACCENTS);
 
+  /* Tenant module flags (Admin → Modules). Demo: localStorage sphere-module-<id> = "on"|"off" */
+  var MODULE_DEFAULTS = {
+    metadata: 'off' /* optional; tenants opt in */
+  };
+
+  function getModuleFlag(id) {
+    var def = MODULE_DEFAULTS[id] || 'off';
+    try {
+      var v = localStorage.getItem('sphere-module-' + id);
+      if (v === 'on' || v === 'off') return v;
+    } catch (e) {}
+    return def;
+  }
+
+  function setModuleFlag(id, on) {
+    try { localStorage.setItem('sphere-module-' + id, on ? 'on' : 'off'); } catch (e) {}
+    try {
+      window.dispatchEvent(new CustomEvent('sphere-module-change', { detail: { id: id, on: !!on } }));
+    } catch (e) {}
+  }
+
+  function isModuleEnabled(id) {
+    return getModuleFlag(id) === 'on';
+  }
+
+  window.SPHERE = window.SPHERE || {};
+  window.SPHERE.getModuleFlag = getModuleFlag;
+  window.SPHERE.setModuleFlag = setModuleFlag;
+  window.SPHERE.isModuleEnabled = isModuleEnabled;
+
   function currentAccent() {
     var a = document.documentElement.getAttribute('data-accent');
     return ACCENTS[a] ? a : 'blue';
