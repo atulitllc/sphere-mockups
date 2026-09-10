@@ -130,7 +130,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Thin config for this client org — modules, branding, SSO stubs. Do not gold-plate.</p>
+        <p class="page-sub">Thin config for this client org — modules, branding, SSO, connectors. Do not gold-plate.</p>
       </div>
 
         <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
@@ -143,6 +143,7 @@
             <button type="button" data-panel="modules">Modules</button>
             <button type="button" data-panel="branding">Branding</button>
             <button type="button" data-panel="sso">SSO</button>
+            <button type="button" data-panel="connectors">Connectors</button>
             <button type="button" data-panel="users">Users &amp; roles</button>
             <button type="button" data-panel="defaults">Study layout</button>
             <button type="button" data-panel="compliance">Compliance</button>
@@ -361,6 +362,68 @@
                   <div class="form-actions">
                     <button class="btn primary" type="button" disabled title="Not wired">Save SSO</button>
                     <button class="btn" type="button" disabled>Test connection</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Connectors -->
+            <div class="admin-panel" id="panel-connectors">
+              <div class="card">
+                <div class="card-head">
+                  <span class="title-row">Connectors · elluminate</span>
+                  <span class="badge warn">Stub · demo</span>
+                </div>
+                <div class="form">
+                  <div class="note-banner" role="note">
+                    <span class="note-label">Demo</span>
+                    <div>Connect SPHERE to the customer’s <strong>eClinical Solutions elluminate</strong> tenant. SAS and primary study files stay on elluminate. This stores API credentials and sync mode for Data Hub / Tracker path awareness.</div>
+                  </div>
+                  <label>
+                    <span class="req">Provider</span>
+                    <select>
+                      <option selected>eClinical Solutions · elluminate</option>
+                      <option disabled>Medidata Rave (later)</option>
+                      <option disabled>Other EDC (later)</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span class="req">elluminate tenant URL</span>
+                    <input type="url" value="https://acme.eclinicalsol.com" placeholder="https://customer.eclinicalsol.com" />
+                  </label>
+                  <div class="grid2">
+                    <label>
+                      <span class="req">API key</span>
+                      <input type="password" value="••••••••••••••••" autocomplete="off" />
+                    </label>
+                    <label>
+                      <span class="req">API secret</span>
+                      <input type="password" value="••••••••••••••••" autocomplete="off" />
+                    </label>
+                  </div>
+                  <label>
+                    <span>Sync mode</span>
+                    <select>
+                      <option selected>Reference only — paths &amp; catalog (recommended when SAS/data stay on elluminate)</option>
+                      <option>Copy selected domains into SPHERE Raw/</option>
+                      <option>Hybrid — register all, copy on demand</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Default domains to offer in Data Hub</span>
+                    <input type="text" value="DM, AE, LB, VS, CM, EX" />
+                  </label>
+                  <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
+                    <input type="checkbox" checked /> Enable Data Hub “Pull from elluminate” for this tenant
+                  </label>
+                  <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
+                    <input type="checkbox" /> Allow optional job agent to submit Runs to elluminate-hosted SAS (phase 2)
+                  </label>
+                  <div class="hint">Recommended UX: users open SPHERE in the <strong>browser inside the elluminate remote desktop</strong>, so program paths and SAS stay in that environment. Local laptop browser also works if the network can reach SPHERE HTTPS.</div>
+                  <div class="form-actions">
+                    <button class="btn primary" type="button" id="btnSaveElluminate" title="Demo only">Save connector</button>
+                    <button class="btn" type="button" id="btnTestElluminate">Test connection</button>
                   </div>
                 </div>
               </div>
@@ -863,6 +926,22 @@
 
   refreshPreview();
 
+})();
+</script>
+
+<script>
+(function () {
+  function toast(msg) {
+    var t = document.createElement('div');
+    t.className = 'toast show';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 2800);
+  }
+  var save = document.getElementById('btnSaveElluminate');
+  var test = document.getElementById('btnTestElluminate');
+  if (save) save.addEventListener('click', function () { toast('Demo: elluminate connector saved for tenant (not persisted).'); });
+  if (test) test.addEventListener('click', function () { toast('Demo: connection OK · studies visible (mock).'); });
 })();
 </script>
 <script src="shared-chrome.js"></script>
