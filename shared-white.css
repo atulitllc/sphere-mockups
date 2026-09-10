@@ -3488,7 +3488,8 @@ label .req::after { content: " *"; color: var(--danger); }
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--accent-soft) 45
+  background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
+}
 /* Mock Shells catalog: larger + on Add */
 .btn.icon-btn.btn-add-shell {
   width: 32px;
@@ -3498,4 +3499,99 @@ label .req::after { content: " *"; color: var(--danger); }
   width: 18px;
   height: 18px;
   stroke-width: 2.5;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mock Shells: metadata spreadsheet modal */
+.modal.metadata-modal {
+  width: min(780px, 100%);
+  max-height: min(88vh, 760px);
+}
+.metadata-grid-wrap {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  max-height: min(52vh, 420px);
+}
+.metadata-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+  min-width: 560px;
+}
+.metadata-grid th,
+.metadata-grid td {
+  border: 1px solid var(--border);
+  padding: 0;
+  vertical-align: middle;
+  background: var(--surface);
+}
+.metadata-grid thead th {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  font-weight: 650;
+  font-size: 12px;
+  color: var(--text);
+  text-align: left;
+  padding: 8px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.metadata-grid .meta-col-param { width: 28%; }
+.metadata-grid .meta-col-value { width: 36%; }
+.metadata-grid .meta-col-notes { width: auto; }
+.metadata-grid .meta-col-act {
+  width: 40px;
+  text-align: center;
+  padding: 0;
+}
+.metadata-grid td.meta-cell {
+  padding: 7px 10px;
+  min-height: 34px;
+  outline: none;
+  color: var(--text);
+  word-break: break-word;
+}
+.metadata-grid td.meta-cell:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+.metadata-grid-actions {
+  margin-top: 10px;
+}
+.btn.metadata-del-row {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+.btn.metadata-del-row:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: transparent;
+}
+.btn.icon-btn.accent-icon:disabled,
+.btn.icon-btn.accent-icon[aria-disabled="true"] {
+  opacity: 0.42;
+  cursor: not-allowed;
+  color: var(--muted);
 }

@@ -129,7 +129,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
+        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). Automatable safety tables expose <strong>Metadata</strong> for SAS macro generation (prototype). <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
       </div>
 
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
@@ -246,6 +246,9 @@
                 </label>
               </div>
               <div class="shell-actions shell-actions-icons">
+                <button class="btn icon-btn accent-icon" type="button" id="btnMetadata" title="Metadata" aria-label="Metadata">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 16h18M9 4v16M15 4v16"/></svg>
+                </button>
                 <button class="btn icon-btn accent-icon" type="button" id="btnCopyShell" title="Copy to study" aria-label="Copy to study">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
                 </button>
@@ -321,6 +324,41 @@
       </div>
     </div>
   </section>
+</div>
+
+<!-- Metadata (SAS macro spec) modal -->
+<div class="modal-backdrop" id="metadataModal" hidden role="dialog" aria-modal="true" aria-labelledby="metadataTitle">
+  <div class="modal metadata-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="metadataTitle">Metadata</h2>
+        <div class="hint">Drives standard SAS macro generation (prototype). Editable spreadsheet — not persisted yet.</div>
+      </div>
+      <button class="btn ghost sm" type="button" id="metadataClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="metadata-grid-wrap">
+        <table class="metadata-grid" id="metadataGrid" aria-label="Shell metadata parameters">
+          <thead>
+            <tr>
+              <th class="meta-col-param">Parameter</th>
+              <th class="meta-col-value">Value</th>
+              <th class="meta-col-notes">Notes</th>
+              <th class="meta-col-act"><span class="sr-only">Row actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="metadataBody"></tbody>
+        </table>
+      </div>
+      <div class="metadata-grid-actions">
+        <button class="btn sm" type="button" id="metadataAddRow">+ Add row</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="metadataCancel">Cancel</button>
+      <button class="btn primary" type="button" id="metadataSave">Save metadata</button>
+    </div>
+  </div>
 </div>
 
 <!-- Copy to study modal -->
@@ -551,6 +589,120 @@
       '<circle cx="3.5" cy="13" r="1.15"/><circle cx="8.5" cy="13" r="1.15"/></svg></span>';
   }
 
+  function metaRow(param, value, notes) {
+    return { param: param || '', value: value || '', notes: notes || '' };
+  }
+
+  var AE_OVERVIEW_META = [
+    metaRow('Template / macro key', 'AE_OVERVIEW', 'Standard safety AE overview macro'),
+    metaRow('Input dataset', 'ADAM.ADAE', 'ADaM ADAE'),
+    metaRow('Population / ADSL flag', 'SAFFL=Y', 'Safety analysis set'),
+    metaRow('Treatment variable', 'TRT01A', 'Actual treatment'),
+    metaRow('Subject ID', 'USUBJID', ''),
+    metaRow('Terms / hierarchy', 'AEBODSYS, AEDECOD', 'SOC then preferred term'),
+    metaRow('Serious flag', 'AESER', 'Y/N'),
+    metaRow('Subset / where', '', 'Blank = all TEAEs; e.g. AESER=Y for serious-only'),
+    metaRow('Sort order', 'AEBODSYS AEDECOD', ''),
+    metaRow('Stats', 'n (%)', ''),
+    metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
+    metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
+    metaRow('Missing handling', 'Exclude', ''),
+    metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub — not written in this prototype'),
+    metaRow('Program stub', 'tfl_14_3_1_ae.sas', ''),
+    metaRow('SAP / footnote keys', 'SAP §12.1; AESI footnote [1]', 'Optional')
+  ];
+
+  var DEMOG_META = [
+    metaRow('Template / macro key', 'DM_DEMOG', 'Standard demographics macro'),
+    metaRow('Input dataset', 'ADAM.ADSL', 'Subject-level ADSL'),
+    metaRow('Population / ADSL flag', 'SAFFL=Y', 'Safety analysis set'),
+    metaRow('Treatment variable', 'TRT01A', 'Actual treatment'),
+    metaRow('Subject ID', 'USUBJID', ''),
+    metaRow('Variables', 'AGE, SEX, RACE, ETHNIC', 'Continuous + categorical'),
+    metaRow('Age derivation', 'Age at informed consent', 'SAP §10.1'),
+    metaRow('Stats — continuous', 'n, Mean (SD), Median, Min, Max', ''),
+    metaRow('Stats — categorical', 'n (%)', ''),
+    metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
+    metaRow('Display columns / treatment order', 'Placebo | Drug X 100mg | Total', ''),
+    metaRow('Missing handling', 'Missing category', 'Show Missing for SEX/RACE'),
+    metaRow('Output RTF path', 'tlf/14_1_1_demog.rtf', ''),
+    metaRow('Program stub', 't_14_1_1_demog.sas', ''),
+    metaRow('SAP / footnote keys', 'SAP §10.1 Demographics; aCRF DM', '')
+  ];
+
+  var SAFETY_SUMMARY_META = [
+    metaRow('Template / macro key', 'SAF_AE_SUM', 'Safety overview / TEAE summary'),
+    metaRow('Input dataset', 'ADAM.ADAE', 'Join ADSL for BIG N'),
+    metaRow('Population / ADSL flag', 'SAFFL=Y', ''),
+    metaRow('Treatment variable', 'TRT01A', ''),
+    metaRow('Subject ID', 'USUBJID', ''),
+    metaRow('TEAE flag', 'TRTEMFL=Y', 'Treatment-emergent'),
+    metaRow('Serious flag', 'AESER', ''),
+    metaRow('Death flag', 'AESDTH', ''),
+    metaRow('Discontinuation flag', 'AEACN=DRUG WITHDRAWN', 'Or AEACN=DISCONTINUED'),
+    metaRow('Subset / where', 'TRTEMFL=Y', ''),
+    metaRow('Stats', 'n (%)', 'Subjects with ≥1 event'),
+    metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
+    metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
+    metaRow('Output RTF path', 'tlf/14_3_0_safety_sum.rtf', ''),
+    metaRow('Program stub', 'tfl_14_3_0_saf.sas', ''),
+    metaRow('SAP / footnote keys', 'SAP §12.0 Safety overview', '')
+  ];
+
+  var GENERIC_AUTO_META = [
+    metaRow('Template / macro key', 'STD_TABLE', 'Generic automatable table'),
+    metaRow('Input dataset', 'ADAM.ADSL', ''),
+    metaRow('Population / ADSL flag', 'SAFFL=Y', ''),
+    metaRow('Treatment variable', 'TRT01A', ''),
+    metaRow('Subject ID', 'USUBJID', ''),
+    metaRow('Subset / where', '', ''),
+    metaRow('Sort order', '', ''),
+    metaRow('Stats', 'n (%)', ''),
+    metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
+    metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
+    metaRow('Missing handling', 'Exclude', ''),
+    metaRow('Output RTF path', 'tlf/table.rtf', ''),
+    metaRow('Program stub', 'tfl_table.sas', '')
+  ];
+
+  var safetySummaryPreset = {
+    title: 'Table 14.3.0 Safety summary',
+    subtitle: 'Safety Analysis Set',
+    columns: ['Placebo', 'Drug X', 'Total'],
+    colGroups: [],
+    rows: [
+      { indent: 0, label: 'Subjects with any TEAE', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] },
+      { indent: 0, label: 'Subjects with any serious TEAE', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] },
+      { indent: 0, label: 'Subjects with TEAE leading to discontinuation', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] },
+      { indent: 0, label: 'Subjects with TEAE leading to death', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
+    ],
+    footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Treatment-emergent adverse events (TRTEMFL=Y).',
+    notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.',
+    program: 'tfl_14_3_0_saf.sas',
+    sapRef: 'SAP §12.0 Safety overview',
+    templateKey: 'Safety summary',
+    custom: false
+  };
+
+  var aeOverviewPreset = {
+    title: 'Table 14.3.1 Adverse events — overview',
+    subtitle: 'Safety Analysis Set',
+    columns: ['Placebo', 'Drug X', 'Total'],
+    colGroups: [],
+    rows: [
+      { indent: 0, label: 'Subjects with any AE', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] },
+      { indent: 0, label: 'System organ class', cells: ['', '', ''] },
+      { indent: 1, label: 'Preferred term', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] },
+      { indent: 0, label: 'Subjects with any serious AE', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
+    ],
+    footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] MedDRA hierarchy: AEBODSYS / AEDECOD.',
+    notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.',
+    program: 'tfl_14_3_1_ae.sas',
+    sapRef: 'SAP §12.1 Adverse events',
+    templateKey: 'Adverse events — overview',
+    custom: false
+  };
+
   var demogPreset = {
     title: 'Table 14.1.1 Demographics',
     subtitle: 'Safety Analysis Set',
@@ -634,6 +786,8 @@
       custom: opts.custom != null ? opts.custom : !!layout.custom,
       templateKey: opts.templateKey != null ? opts.templateKey : (layout.templateKey || ''),
       templateMissing: !!opts.templateMissing,
+      automate: !!opts.automate,
+      metadata: cloneData(opts.metadata || []),
       layout: cloneData(layout),
       copiedFrom: opts.copiedFrom || null
     };
@@ -642,10 +796,11 @@
   function seedCatalog(studyId) {
     if (studyId === 'ONC-204-301') {
       return [
-        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics' }),
+        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
         makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
         makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
-        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Listing', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Adverse events — overview' }),
+        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Safety summary', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
+        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
         makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' })
       ];
     }
@@ -653,7 +808,7 @@
     var meta = studyMeta(studyId);
     var shells = [];
     if (meta && meta.templates.indexOf('Demographics') >= 0) {
-      shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics' }));
+      shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }));
     }
     return shells;
   }
@@ -806,6 +961,7 @@
       if (state.templateMissing) warn.classList.add('show');
       else warn.classList.remove('show');
     }
+    syncMetadataButton(sh);
     render();
   }
 
@@ -961,9 +1117,11 @@
     if (!skipPersist) persistEditorToSelected();
     if (!findShell(id) && currentShells().length) id = currentShells()[0].id;
     studyStore[CURRENT_STUDY].selectedId = id;
+    closeMetadataModal();
     renderCatalog();
     var sh = findShell(id);
     if (sh) loadShellIntoEditor(sh);
+    else syncMetadataButton(null);
   }
 
   function switchStudy(studyId) {
@@ -974,6 +1132,7 @@
     var store = studyStore[studyId];
     if (!store.selectedId && store.shells.length) store.selectedId = store.shells[0].id;
     renderCatalog();
+    closeMetadataModal();
     if (store.selectedId) loadShellIntoEditor(findShell(store.selectedId));
     else {
       state.title = '';
@@ -981,6 +1140,7 @@
       state.columns = [];
       state.colGroups = [];
       clearColSelection();
+      syncMetadataButton(null);
       render();
     }
   }
@@ -1675,6 +1835,7 @@
     if (e.key === 'Escape') {
       hideCtx();
       closeCopyModal();
+      closeMetadataModal();
     }
   });
   ctxMenu.addEventListener('click', function (e) {
@@ -1890,6 +2051,155 @@
     selectShell(id, true);
   });
 
+  /* —— Metadata (SAS macro spec prototype) —— */
+  var metadataModal = document.getElementById('metadataModal');
+  var metadataBody = document.getElementById('metadataBody');
+  var metadataTitleEl = document.getElementById('metadataTitle');
+  var btnMetadata = document.getElementById('btnMetadata');
+
+  function shellIsAutomatable(sh) {
+    return !!(sh && sh.automate);
+  }
+
+  function defaultMetadataFor(sh) {
+    if (!sh) return cloneData(GENERIC_AUTO_META);
+    var key = ((sh.templateKey || '') + ' ' + (sh.title || '') + ' ' + (sh.id || '')).toLowerCase();
+    if (key.indexOf('adverse') >= 0 || key.indexOf('ae ') >= 0 || key.indexOf('14.3.1') >= 0) {
+      return cloneData(AE_OVERVIEW_META);
+    }
+    if (key.indexOf('safety summary') >= 0 || key.indexOf('14.3.0') >= 0 || key.indexOf('saf_ae') >= 0) {
+      return cloneData(SAFETY_SUMMARY_META);
+    }
+    if (key.indexOf('demog') >= 0 || key.indexOf('14.1.1') >= 0) {
+      return cloneData(DEMOG_META);
+    }
+    return cloneData(GENERIC_AUTO_META);
+  }
+
+  function metadataRowsFor(sh) {
+    if (sh && sh.metadata && sh.metadata.length) return cloneData(sh.metadata);
+    return defaultMetadataFor(sh);
+  }
+
+  function syncMetadataButton(sh) {
+    if (!btnMetadata) return;
+    if (shellIsAutomatable(sh)) {
+      btnMetadata.hidden = false;
+      btnMetadata.disabled = false;
+      btnMetadata.removeAttribute('aria-disabled');
+      btnMetadata.title = 'Metadata';
+      btnMetadata.setAttribute('aria-label', 'Metadata');
+    } else {
+      btnMetadata.hidden = false;
+      btnMetadata.disabled = true;
+      btnMetadata.setAttribute('aria-disabled', 'true');
+      btnMetadata.title = 'Not available for this shell type';
+      btnMetadata.setAttribute('aria-label', 'Not available for this shell type');
+    }
+  }
+
+  function renderMetadataGrid(rows) {
+    if (!metadataBody) return;
+    if (!rows || !rows.length) rows = [metaRow('', '', '')];
+    metadataBody.innerHTML = rows.map(function (r, i) {
+      return '<tr data-meta-row="' + i + '">' +
+        '<td contenteditable="true" class="meta-cell" data-field="param">' + escapeHtml(r.param || '') + '</td>' +
+        '<td contenteditable="true" class="meta-cell" data-field="value">' + escapeHtml(r.value || '') + '</td>' +
+        '<td contenteditable="true" class="meta-cell" data-field="notes">' + escapeHtml(r.notes || '') + '</td>' +
+        '<td class="meta-col-act">' +
+          '<button type="button" class="btn ghost sm metadata-del-row" data-act="del-meta-row" title="Delete row" aria-label="Delete row">×</button>' +
+        '</td></tr>';
+    }).join('');
+  }
+
+  function readMetadataGrid(keepEmpty) {
+    if (!metadataBody) return [];
+    var rows = [];
+    metadataBody.querySelectorAll('tr').forEach(function (tr) {
+      var param = ((tr.querySelector('[data-field="param"]') || {}).textContent || '').trim();
+      var value = ((tr.querySelector('[data-field="value"]') || {}).textContent || '').trim();
+      var notes = ((tr.querySelector('[data-field="notes"]') || {}).textContent || '').trim();
+      if (keepEmpty || param || value || notes) rows.push(metaRow(param, value, notes));
+    });
+    return rows;
+  }
+
+  function openMetadataModal() {
+    persistEditorToSelected();
+    var sh = selectedShell();
+    if (!sh) {
+      showToast('Select a shell');
+      return;
+    }
+    if (!shellIsAutomatable(sh)) {
+      showToast('Not available for this shell type');
+      return;
+    }
+    if (metadataTitleEl) {
+      var num = (sh.number || '').trim();
+      var title = (sh.title || state.title || '').replace(/^Table\s+/i, '').trim();
+      if (num && title.indexOf(num) === 0) {
+        metadataTitleEl.textContent = 'Metadata — ' + title;
+      } else {
+        metadataTitleEl.textContent = 'Metadata — ' + (num ? num + ' ' : '') + title;
+      }
+    }
+    renderMetadataGrid(metadataRowsFor(sh));
+    if (metadataModal) metadataModal.removeAttribute('hidden');
+  }
+
+  function closeMetadataModal() {
+    if (metadataModal) metadataModal.setAttribute('hidden', '');
+  }
+
+  function saveMetadata() {
+    var sh = selectedShell();
+    if (!sh || !shellIsAutomatable(sh)) {
+      closeMetadataModal();
+      return;
+    }
+    sh.metadata = readMetadataGrid(false);
+    closeMetadataModal();
+    showToast('Demo: metadata saved with shell (not persisted)');
+  }
+
+  if (btnMetadata) btnMetadata.addEventListener('click', openMetadataModal);
+  var metadataClose = document.getElementById('metadataClose');
+  var metadataCancel = document.getElementById('metadataCancel');
+  var metadataSave = document.getElementById('metadataSave');
+  var metadataAddRow = document.getElementById('metadataAddRow');
+  if (metadataClose) metadataClose.addEventListener('click', closeMetadataModal);
+  if (metadataCancel) metadataCancel.addEventListener('click', closeMetadataModal);
+  if (metadataSave) metadataSave.addEventListener('click', saveMetadata);
+  if (metadataAddRow) {
+    metadataAddRow.addEventListener('click', function () {
+      var rows = readMetadataGrid(true);
+      rows.push(metaRow('', '', ''));
+      renderMetadataGrid(rows);
+      var last = metadataBody && metadataBody.querySelector('tr:last-child .meta-cell');
+      if (last) last.focus();
+    });
+  }
+  if (metadataBody) {
+    metadataBody.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+    metadataBody.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-act="del-meta-row"]');
+      if (!btn) return;
+      var tr = btn.closest('tr');
+      if (tr) tr.remove();
+      if (metadataBody && !metadataBody.querySelector('tr')) {
+        renderMetadataGrid([metaRow('', '', '')]);
+      }
+    });
+  }
+  if (metadataModal) {
+    metadataModal.addEventListener('click', function (e) {
+      if (e.target === metadataModal) closeMetadataModal();
+    });
+  }
+
   /* —— Copy to study —— */
   var copyModal = document.getElementById('copyModal');
   var copyStudyList = document.getElementById('copyStudyList');
@@ -2030,6 +2340,8 @@
       custom: layout.custom,
       templateKey: layout.templateKey,
       templateMissing: missing,
+      automate: !!src.automate,
+      metadata: cloneData(src.metadata || []),
       layout: layout,
       copiedFrom: { study: CURRENT_STUDY, shellId: src.id, shellNumber: src.number }
     });
