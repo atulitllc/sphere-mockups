@@ -1440,8 +1440,9 @@ label .req::after { content: " *"; color: var(--danger); }
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
+  margin-bottom: 0;
 }
 .tracker-page-head .page-intro {
   flex: 1 1 320px;
@@ -1471,8 +1472,9 @@ label .req::after { content: " *"; color: var(--danger); }
   width: 100%;
 }
 .tracker-tools-only {
-  margin-bottom: 6px;
-  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 4px;
+  padding: 0;
 }
 .tracker-tools-only .list-tools {
   width: 100%;
@@ -3928,17 +3930,19 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .tracker-toolbar {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
-  margin: 4px 0 12px;
+  margin: 0;
 }
 .tracker-filters.list-tools {
   margin: 0;
   width: 100%;
+  justify-content: flex-end;
 }
 .tracker-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   flex-wrap: wrap;
 }
@@ -4022,4 +4026,28 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .action-icon-btn:disabled {
   opacity: 0.42;
   cursor: not-allowed;
+}
+
+
+/* Tracker: pull main grid up */
+.tracker-section {
+  margin-top: 0;
+}
+.tracker-section > .section-head.tracker-tools-only {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.stack > .note-banner.note-collapsible.is-collapsed {
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+.tracker-page-head + .note-banner {
+  margin-top: 2px;
+}
+.tracker-page-head .page-sub {
+  margin-top: 4px;
+}
+.tracker-page-head .stat-pills {
+  margin: 0;
 }
