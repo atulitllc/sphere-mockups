@@ -1739,14 +1739,14 @@ label .req::after { content: " *"; color: var(--danger); }
   margin: 0 0 12px;
   padding: 12px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--blue-border);
-  background: var(--surface);
-  box-shadow: 0 4px 24px var(--nav-shadow);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 .bulk-bar.visible { display: flex; }
 .bulk-bar .bulk-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .bulk-bar .bulk-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.bulk-bar .sel-count { font-weight: 600; font-size: 13px; }
+.bulk-bar .sel-count { font-weight: 600; font-size: 13px; color: var(--accent); }
 
 .job-panel-wrap { margin-top: 4px; }
 
