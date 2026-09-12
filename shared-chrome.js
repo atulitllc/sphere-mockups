@@ -462,3 +462,114 @@
   window.SPHERE.getProgramVersionControl = getProgramVersionControl;
 })();
 
+
+
+/* SPHERE a11y: font zoom + contrast */
+(function () {
+  var ZOOM_STEPS = [85, 90, 100, 110, 125];
+  var DEFAULT_ZOOM = 100;
+
+  function readZoom() {
+    try {
+      var z = parseInt(localStorage.getItem('sphere-ui-zoom'), 10);
+      if (ZOOM_STEPS.indexOf(z) >= 0) return z;
+    } catch (e) {}
+    return DEFAULT_ZOOM;
+  }
+
+  function readContrast() {
+    try {
+      var c = localStorage.getItem('sphere-contrast');
+      if (c === 'high' || c === 'low' || c === 'normal') return c;
+    } catch (e) {}
+    return 'normal';
+  }
+
+  function applyZoom(z) {
+    if (ZOOM_STEPS.indexOf(z) < 0) z = DEFAULT_ZOOM;
+    document.documentElement.setAttribute('data-ui-zoom', String(z));
+    document.documentElement.style.zoom = String(z / 100);
+    try { localStorage.setItem('sphere-ui-zoom', String(z)); } catch (e) {}
+    var label = document.getElementById('a11yZoomLabel');
+    if (label) label.textContent = z + '%';
+    var out = document.getElementById('a11yZoomOut');
+    var inn = document.getElementById('a11yZoomIn');
+    if (out) out.disabled = z <= ZOOM_STEPS[0];
+    if (inn) inn.disabled = z >= ZOOM_STEPS[ZOOM_STEPS.length - 1];
+  }
+
+  function applyContrast(c) {
+    if (c !== 'high' && c !== 'low') c = 'normal';
+    document.documentElement.setAttribute('data-contrast', c);
+    try { localStorage.setItem('sphere-contrast', c); } catch (e) {}
+    var hi = document.getElementById('a11yContrastHigh');
+    var lo = document.getElementById('a11yContrastLow');
+    if (hi) {
+      hi.classList.toggle('is-active', c === 'high');
+      hi.setAttribute('aria-pressed', c === 'high' ? 'true' : 'false');
+    }
+    if (lo) {
+      lo.classList.toggle('is-active', c === 'low');
+      lo.setAttribute('aria-pressed', c === 'low' ? 'true' : 'false');
+    }
+  }
+
+  /* Apply ASAP (before chrome paints) to limit FOUC */
+  applyZoom(readZoom());
+  applyContrast(readContrast());
+
+  function stepZoom(dir) {
+    var z = readZoom();
+    var i = ZOOM_STEPS.indexOf(z);
+    if (i < 0) i = ZOOM_STEPS.indexOf(DEFAULT_ZOOM);
+    i = Math.max(0, Math.min(ZOOM_STEPS.length - 1, i + dir));
+    applyZoom(ZOOM_STEPS[i]);
+  }
+
+  function initA11yBar() {
+    if (document.getElementById('a11yBar')) return;
+    var themeBtn = document.getElementById('themeToggle');
+    var topRight = document.querySelector('header.top .top-right');
+    if (!topRight || !themeBtn) return;
+
+    var bar = document.createElement('div');
+    bar.className = 'a11y-bar';
+    bar.id = 'a11yBar';
+    bar.setAttribute('role', 'group');
+    bar.setAttribute('aria-label', 'Accessibility');
+    bar.innerHTML =
+      '<button type="button" class="a11y-btn" id="a11yZoomOut" title="Zoom out" aria-label="Zoom out">A−</button>' +
+      '<button type="button" class="a11y-btn a11y-zoom-label" id="a11yZoomReset" title="Reset zoom to 100%" aria-label="Reset zoom">' +
+        '<span id="a11yZoomLabel">100%</span>' +
+      '</button>' +
+      '<button type="button" class="a11y-btn" id="a11yZoomIn" title="Zoom in" aria-label="Zoom in">A+</button>' +
+      '<span class="a11y-sep" aria-hidden="true"></span>' +
+      '<button type="button" class="a11y-btn" id="a11yContrastHigh" title="High contrast" aria-label="High contrast" aria-pressed="false">Hi</button>' +
+      '<button type="button" class="a11y-btn" id="a11yContrastLow" title="Low contrast" aria-label="Low contrast" aria-pressed="false">Lo</button>';
+
+    themeBtn.insertAdjacentElement('afterend', bar);
+
+    document.getElementById('a11yZoomOut').addEventListener('click', function () { stepZoom(-1); });
+    document.getElementById('a11yZoomIn').addEventListener('click', function () { stepZoom(1); });
+    document.getElementById('a11yZoomReset').addEventListener('click', function () { applyZoom(DEFAULT_ZOOM); });
+    document.getElementById('a11yContrastHigh').addEventListener('click', function () {
+      applyContrast(readContrast() === 'high' ? 'normal' : 'high');
+    });
+    document.getElementById('a11yContrastLow').addEventListener('click', function () {
+      applyContrast(readContrast() === 'low' ? 'normal' : 'low');
+    });
+
+    applyZoom(readZoom());
+    applyContrast(readContrast());
+
+    window.SPHERE = window.SPHERE || {};
+    window.SPHERE.setUiZoom = applyZoom;
+    window.SPHERE.setContrast = applyContrast;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initA11yBar);
+  } else {
+    initA11yBar();
+  }
+})();

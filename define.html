@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css" />
+<link rel="stylesheet" href="shared-white.css?v=a11y1" />
 <style>
   .define-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 980px) { .define-layout { grid-template-columns: 1fr; } }
@@ -56,6 +56,16 @@
     document.documentElement.setAttribute('data-accent', allowed[a] ? a : 'blue');
     if (localStorage.getItem('sphere-nav-collapsed') === 'true') {
       document.documentElement.classList.add('nav-collapsed');
+    }
+    var zoomAllowed = { '85': 1, '90': 1, '100': 1, '110': 1, '125': 1 };
+    var z = localStorage.getItem('sphere-ui-zoom');
+    if (zoomAllowed[z]) {
+      document.documentElement.setAttribute('data-ui-zoom', z);
+      document.documentElement.style.zoom = String(parseInt(z, 10) / 100);
+    }
+    var c = localStorage.getItem('sphere-contrast');
+    if (c === 'high' || c === 'low' || c === 'normal') {
+      document.documentElement.setAttribute('data-contrast', c);
     }
   } catch (e) {}
 })();
@@ -768,6 +778,6 @@
   renderCatalog();
 })();
 </script>
-<script src="shared-chrome.js"></script>
+<script src="shared-chrome.js?v=a11y1"></script>
 </body>
 </html>
