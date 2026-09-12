@@ -219,7 +219,6 @@
           <div class="bulk-right">
             <div class="bulk-handoffs" id="bulkHandoffs" role="group" aria-label="Send actions"></div>
             <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
-            <button class="btn" type="button" id="btnSaveList">Save as new list…</button>
             <button class="btn" type="button" id="btnPdfFromSel" title="Open Generate PDF Package with this selection">Generate PDF Package</button>
             <select id="bulkTag" style="width:140px" aria-label="Assign tag">
               <option value="">Edit tags…</option>
@@ -1492,7 +1491,6 @@
   var listNameInput = document.getElementById('listNameInput');
   var listItemCount = document.getElementById('listItemCount');
   var customListSelect = document.getElementById('customListSelect');
-  var btnSaveList = document.getElementById('btnSaveList');
   var btnRunList = document.getElementById('btnRunList');
   var btnEditList = document.getElementById('btnEditList');
   var btnDeleteList = document.getElementById('btnDeleteList');
@@ -1820,18 +1818,7 @@
     document.getElementById('btnRun').click();
   }
 
-  if (btnSaveList) {
-    btnSaveList.addEventListener('click', function () {
-      var rows = selectedRows();
-      if (!rows.length) return;
-      var items = rows.map(rowPayload).filter(function (x) { return x.program; });
-      if (!items.length) {
-        showToast('Selected rows need a program filename');
-        return;
-      }
-      openListModal({ name: '', items: items });
-    });
-  }
+
   if (btnPdfFromSel) {
     btnPdfFromSel.addEventListener('click', function () {
       var rows = selectedRows();
