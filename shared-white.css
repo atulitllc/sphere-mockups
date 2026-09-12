@@ -1436,18 +1436,6 @@ label .req::after { content: " *"; color: var(--danger); }
 .col-check { width: 36px; text-align: center; }
 .col-check input[type="checkbox"] { width: auto; accent-color: var(--accent); cursor: pointer; }
 
-.tracker-col-head .col-check-head {
-  width: 84px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 2px;
-  padding-left: 2px;
-  box-sizing: border-box;
-}
-.tracker-col-head .col-check-head .check-all-label {
-  margin: 0;
-}
 .btn.icon-btn.head-delete {
   width: 26px;
   height: 26px;
@@ -4017,12 +4005,18 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 8px 12px;
   width: 100%;
   min-width: 100%;
   margin: 0;
   box-sizing: border-box;
+}
+.tracker-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
 }
 .tracker-section .tracker-filters.list-tools {
   display: flex;
