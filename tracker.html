@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=progedit1" />
+<link rel="stylesheet" href="shared-white.css?v=histsplit1" />
 <script>
 (function () {
   try {
@@ -743,13 +743,24 @@
         <ul class="ver-list" id="historyVersionList"></ul>
         <div class="ver-preview" id="historyVersionPreview" hidden>
           <div class="ver-preview-head">
-            <strong id="verPreviewTitle">Version</strong>
-            <button type="button" class="btn sm" id="verPreviewClose">Back</button>
+            <div>
+              <strong id="verPreviewTitle">Version</strong>
+              <p class="muted" id="verDiffLegend" style="font-size:12px;margin:4px 0 0"></p>
+            </div>
+            <div class="ver-preview-head-actions">
+              <button type="button" class="btn sm" id="verPreviewClose">Back</button>
+              <button type="button" class="btn sm primary" id="verRestoreBtn">Restore as current</button>
+            </div>
           </div>
-          <p class="muted" id="verDiffLegend" style="font-size:12px;margin:0 0 8px"></p>
-          <div class="ver-diff" id="verPreviewDiff"></div>
-          <div class="ver-preview-foot">
-            <button type="button" class="btn primary" id="verRestoreBtn">Restore as current</button>
+          <div class="ver-split">
+            <section class="ver-pane">
+              <header class="ver-pane-head">Selected version</header>
+              <pre class="ver-code" id="verPreviewCode"></pre>
+            </section>
+            <section class="ver-pane">
+              <header class="ver-pane-head">Diff vs current</header>
+              <div class="ver-diff" id="verPreviewDiff"></div>
+            </section>
           </div>
         </div>
       </div>
@@ -2236,17 +2247,20 @@
     var list = document.getElementById('historyVersionList');
     var preview = document.getElementById('historyVersionPreview');
     var title = document.getElementById('verPreviewTitle');
+    var codeEl = document.getElementById('verPreviewCode');
     var diffEl = document.getElementById('verPreviewDiff');
     var legend = document.getElementById('verDiffLegend');
     var restoreBtn = document.getElementById('verRestoreBtn');
+    var hint = document.getElementById('histVcsHint');
     if (!preview || !list || !list._versions) return;
     var v = list._versions.find(function (x) { return String(x.n) === String(ver); });
     if (!v) return;
     histSelectedVer = v;
     var current = list._versions.find(function (x) { return x.current; }) || list._versions[0];
     if (title) title.textContent = 'v' + v.n + ' · ' + v.at + ' · ' + v.trigger;
+    if (codeEl) codeEl.textContent = String(v.body || '');
     if (v.current) {
-      if (legend) legend.textContent = 'This is the current version (no diff).';
+      if (legend) legend.textContent = 'This is the current version — no differences.';
       if (diffEl) {
         diffEl.innerHTML = String(v.body || '').split('\n').map(function (line) {
           return '<div class="diff-line diff-same"><span class="diff-pref"> </span><code>' + escapeHtml(line) + '</code></div>';
@@ -2254,25 +2268,29 @@
       }
     } else {
       if (legend) {
-        legend.innerHTML = 'Diff vs <strong>current (v' + current.n + ')</strong>: ' +
-          '<span class="diff-leg-del">− selected</span> · <span class="diff-leg-add">+ current</span>';
+        legend.innerHTML = 'Left: selected · Right: changes vs <strong>current (v' + current.n + ')</strong> ' +
+          '(<span class="diff-leg-del">− selected</span> / <span class="diff-leg-add">+ current</span>)';
       }
       if (diffEl) diffEl.innerHTML = renderDiffHtml(v.body, current.body);
     }
+    if (hint) hint.setAttribute('hidden', '');
     list.setAttribute('hidden', '');
     preview.removeAttribute('hidden');
     var editable = canRestoreRow(histActiveRow);
     if (restoreBtn) {
       restoreBtn.disabled = !!v.current || !editable;
       restoreBtn.textContent = v.current ? 'Already current' : 'Restore as current';
+      restoreBtn.title = v.current ? 'Already current' : (!editable ? 'Restore only in In dev / Revise' : 'Restore as new current version');
     }
   }
 
   function closeVersionPreview() {
     var list = document.getElementById('historyVersionList');
     var preview = document.getElementById('historyVersionPreview');
+    var hint = document.getElementById('histVcsHint');
     if (preview) preview.setAttribute('hidden', '');
     if (list) list.removeAttribute('hidden');
+    if (hint) hint.removeAttribute('hidden');
     histSelectedVer = null;
   }
 
