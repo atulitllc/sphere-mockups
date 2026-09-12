@@ -4526,6 +4526,15 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 }
 
 
+.btn.icon-btn.row-history,
+.btn.icon-btn.row-edit {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  box-sizing: border-box;
+}
 .btn.icon-btn.row-history {
   color: var(--muted);
 }
@@ -4533,9 +4542,10 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   color: var(--accent);
   background: var(--accent-soft);
 }
-.btn.icon-btn.row-history svg {
-  width: 14px;
-  height: 14px;
+.btn.icon-btn.row-history svg,
+.btn.icon-btn.row-edit svg {
+  width: 14px !important;
+  height: 14px !important;
   color: inherit;
   fill: currentColor;
 }
