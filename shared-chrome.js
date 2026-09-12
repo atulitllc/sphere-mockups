@@ -464,7 +464,7 @@
 
 
 
-/* SPHERE a11y: font zoom + contrast */
+/* SPHERE a11y: font zoom + contrast (dropdown) */
 (function () {
   var ZOOM_STEPS = [85, 90, 100, 110, 125];
   var DEFAULT_ZOOM = 100;
@@ -485,36 +485,48 @@
     return 'normal';
   }
 
-  function applyZoom(z) {
-    if (ZOOM_STEPS.indexOf(z) < 0) z = DEFAULT_ZOOM;
-    document.documentElement.setAttribute('data-ui-zoom', String(z));
-    document.documentElement.style.zoom = String(z / 100);
-    try { localStorage.setItem('sphere-ui-zoom', String(z)); } catch (e) {}
-    var label = document.getElementById('a11yZoomLabel');
-    if (label) label.textContent = z + '%';
+  function syncMenuState() {
+    var z = readZoom();
+    var c = readContrast();
+    var label = document.getElementById('a11yTriggerLabel');
+    if (label) {
+      var parts = [];
+      if (z !== DEFAULT_ZOOM) parts.push(z + '%');
+      if (c === 'high') parts.push('Hi');
+      if (c === 'low') parts.push('Lo');
+      label.textContent = parts.length ? parts.join(' · ') : 'A11y';
+    }
+    document.querySelectorAll('.a11y-menu [data-zoom]').forEach(function (btn) {
+      var on = parseInt(btn.getAttribute('data-zoom'), 10) === z;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.a11y-menu [data-contrast]').forEach(function (btn) {
+      var on = btn.getAttribute('data-contrast') === c;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
     var out = document.getElementById('a11yZoomOut');
     var inn = document.getElementById('a11yZoomIn');
     if (out) out.disabled = z <= ZOOM_STEPS[0];
     if (inn) inn.disabled = z >= ZOOM_STEPS[ZOOM_STEPS.length - 1];
   }
 
+  function applyZoom(z) {
+    if (ZOOM_STEPS.indexOf(z) < 0) z = DEFAULT_ZOOM;
+    document.documentElement.setAttribute('data-ui-zoom', String(z));
+    document.documentElement.style.zoom = String(z / 100);
+    try { localStorage.setItem('sphere-ui-zoom', String(z)); } catch (e) {}
+    syncMenuState();
+  }
+
   function applyContrast(c) {
     if (c !== 'high' && c !== 'low') c = 'normal';
     document.documentElement.setAttribute('data-contrast', c);
     try { localStorage.setItem('sphere-contrast', c); } catch (e) {}
-    var hi = document.getElementById('a11yContrastHigh');
-    var lo = document.getElementById('a11yContrastLow');
-    if (hi) {
-      hi.classList.toggle('is-active', c === 'high');
-      hi.setAttribute('aria-pressed', c === 'high' ? 'true' : 'false');
-    }
-    if (lo) {
-      lo.classList.toggle('is-active', c === 'low');
-      lo.setAttribute('aria-pressed', c === 'low' ? 'true' : 'false');
-    }
+    syncMenuState();
   }
 
-  /* Apply ASAP (before chrome paints) to limit FOUC */
   applyZoom(readZoom());
   applyContrast(readContrast());
 
@@ -526,50 +538,104 @@
     applyZoom(ZOOM_STEPS[i]);
   }
 
-  function initA11yBar() {
-    if (document.getElementById('a11yBar')) return;
+  function initA11yPicker() {
+    if (document.getElementById('a11yPicker')) return;
     var themeBtn = document.getElementById('themeToggle');
-    var topRight = document.querySelector('header.top .top-right');
-    if (!topRight || !themeBtn) return;
+    if (!themeBtn) return;
 
-    var bar = document.createElement('div');
-    bar.className = 'a11y-bar';
-    bar.id = 'a11yBar';
-    bar.setAttribute('role', 'group');
-    bar.setAttribute('aria-label', 'Accessibility');
-    bar.innerHTML =
-      '<button type="button" class="a11y-btn" id="a11yZoomOut" title="Zoom out" aria-label="Zoom out">A−</button>' +
-      '<button type="button" class="a11y-btn a11y-zoom-label" id="a11yZoomReset" title="Reset zoom to 100%" aria-label="Reset zoom">' +
-        '<span id="a11yZoomLabel">100%</span>' +
+    var picker = document.createElement('div');
+    picker.className = 'a11y-picker';
+    picker.id = 'a11yPicker';
+    picker.innerHTML =
+      '<button type="button" class="a11y-picker-trigger" id="a11yPickerBtn" aria-haspopup="true" aria-expanded="false" aria-controls="a11yMenu" title="Accessibility" aria-label="Accessibility">' +
+        '<span class="a11y-trigger-mark" aria-hidden="true">Aa</span>' +
+        '<span class="a11y-trigger-label" id="a11yTriggerLabel">A11y</span>' +
+        '<svg class="a11y-picker-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
       '</button>' +
-      '<button type="button" class="a11y-btn" id="a11yZoomIn" title="Zoom in" aria-label="Zoom in">A+</button>' +
-      '<span class="a11y-sep" aria-hidden="true"></span>' +
-      '<button type="button" class="a11y-btn" id="a11yContrastHigh" title="High contrast" aria-label="High contrast" aria-pressed="false">Hi</button>' +
-      '<button type="button" class="a11y-btn" id="a11yContrastLow" title="Low contrast" aria-label="Low contrast" aria-pressed="false">Lo</button>';
+      '<div class="a11y-menu" id="a11yMenu" hidden>' +
+        '<div class="a11y-menu-section" role="group" aria-label="Text size">' +
+          '<div class="a11y-menu-heading">Text size</div>' +
+          '<div class="a11y-zoom-row">' +
+            '<button type="button" class="a11y-menu-btn" id="a11yZoomOut" title="Zoom out" aria-label="Zoom out">A−</button>' +
+            '<button type="button" class="a11y-menu-btn a11y-menu-btn-wide" data-zoom="100" role="menuitemradio" aria-checked="false">Reset 100%</button>' +
+            '<button type="button" class="a11y-menu-btn" id="a11yZoomIn" title="Zoom in" aria-label="Zoom in">A+</button>' +
+          '</div>' +
+          '<div class="a11y-zoom-presets" role="radiogroup" aria-label="Zoom level">' +
+            '<button type="button" class="a11y-menu-item" data-zoom="85" role="menuitemradio" aria-checked="false">85%</button>' +
+            '<button type="button" class="a11y-menu-item" data-zoom="90" role="menuitemradio" aria-checked="false">90%</button>' +
+            '<button type="button" class="a11y-menu-item" data-zoom="100" role="menuitemradio" aria-checked="false">100%</button>' +
+            '<button type="button" class="a11y-menu-item" data-zoom="110" role="menuitemradio" aria-checked="false">110%</button>' +
+            '<button type="button" class="a11y-menu-item" data-zoom="125" role="menuitemradio" aria-checked="false">125%</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="a11y-menu-section" role="radiogroup" aria-label="Contrast">' +
+          '<div class="a11y-menu-heading">Contrast</div>' +
+          '<button type="button" class="a11y-menu-item a11y-menu-item-row" data-contrast="normal" role="menuitemradio" aria-checked="false">Default</button>' +
+          '<button type="button" class="a11y-menu-item a11y-menu-item-row" data-contrast="high" role="menuitemradio" aria-checked="false">High contrast</button>' +
+          '<button type="button" class="a11y-menu-item a11y-menu-item-row" data-contrast="low" role="menuitemradio" aria-checked="false">Low contrast</button>' +
+        '</div>' +
+      '</div>';
 
-    themeBtn.insertAdjacentElement('afterend', bar);
+    themeBtn.insertAdjacentElement('afterend', picker);
 
-    document.getElementById('a11yZoomOut').addEventListener('click', function () { stepZoom(-1); });
-    document.getElementById('a11yZoomIn').addEventListener('click', function () { stepZoom(1); });
-    document.getElementById('a11yZoomReset').addEventListener('click', function () { applyZoom(DEFAULT_ZOOM); });
-    document.getElementById('a11yContrastHigh').addEventListener('click', function () {
-      applyContrast(readContrast() === 'high' ? 'normal' : 'high');
+    var btn = document.getElementById('a11yPickerBtn');
+    var menu = document.getElementById('a11yMenu');
+
+    function setOpen(open) {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) menu.removeAttribute('hidden');
+      else menu.setAttribute('hidden', '');
+    }
+    function isOpen() {
+      return btn.getAttribute('aria-expanded') === 'true';
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(!isOpen());
     });
-    document.getElementById('a11yContrastLow').addEventListener('click', function () {
-      applyContrast(readContrast() === 'low' ? 'normal' : 'low');
+
+    document.getElementById('a11yZoomOut').addEventListener('click', function (e) {
+      e.stopPropagation();
+      stepZoom(-1);
+    });
+    document.getElementById('a11yZoomIn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      stepZoom(1);
     });
 
-    applyZoom(readZoom());
-    applyContrast(readContrast());
+    menu.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var zoomBtn = e.target.closest('[data-zoom]');
+      if (zoomBtn) {
+        applyZoom(parseInt(zoomBtn.getAttribute('data-zoom'), 10));
+        return;
+      }
+      var contrastBtn = e.target.closest('[data-contrast]');
+      if (contrastBtn) {
+        applyContrast(contrastBtn.getAttribute('data-contrast'));
+      }
+    });
 
+    document.addEventListener('click', function (e) {
+      if (!picker.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) {
+        setOpen(false);
+        btn.focus();
+      }
+    });
+
+    syncMenuState();
     window.SPHERE = window.SPHERE || {};
     window.SPHERE.setUiZoom = applyZoom;
     window.SPHERE.setContrast = applyContrast;
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initA11yBar);
+    document.addEventListener('DOMContentLoaded', initA11yPicker);
   } else {
-    initA11yBar();
+    initA11yPicker();
   }
 })();
