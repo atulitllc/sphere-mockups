@@ -305,38 +305,62 @@
 (function () {
   /* Tenant Tracker workflow roles. Primary + QC always on; Stats / MW optional. */
   var WF_KEY = 'sphere-tracker-workflow';
-  var WF_DEFAULT = { stats: true, mw: true, programsFolders: 'single' };
+  var WF_DEFAULT = { stats: true, mw: true, programsFolders: 'single', versionControl: 'local' };
   /* programsFolders: 'single' = one programs/ tree with editable+locked files
-     'dev-prod' = programs/dev (editable) + programs/prod (read-only copies) */
+     'dev-qc-prod' = programs/dev (editable) + programs/qc (QC copies) + programs/prod (approved)
+     legacy 'dev-prod' is treated as 'dev-qc-prod'
+     versionControl: 'local' (default) | 'github' (Enterprise GitHub backend stub) */
 
-  function readWorkflowFlags() {
+  function normalizeProgramsFolderMode(mode) {
+    if (mode === 'dev-qc-prod' || mode === 'dev-prod') return 'dev-qc-prod';
+    return 'single';
+  }
+
+  function normalizeVersionControl(v) {
+    return v === 'github' ? 'github' : 'local';
+  }
+
+  function readStoredWorkflow() {
     try {
       var raw = localStorage.getItem(WF_KEY);
-      if (raw) {
-        var o = JSON.parse(raw);
-        var mode = o.programsFolders === 'dev-prod' ? 'dev-prod' : 'single';
-        return {
-          stats: o.stats !== false,
-          mw: o.mw !== false,
-          programsFolders: mode
-        };
-      }
+      if (raw) return JSON.parse(raw) || {};
     } catch (e) {}
+    return {};
+  }
+
+  function readWorkflowFlags() {
+    var o = readStoredWorkflow();
+    var has = Object.keys(o).length > 0;
+    if (has) {
+      return {
+        stats: o.stats !== false,
+        mw: o.mw !== false,
+        programsFolders: normalizeProgramsFolderMode(o.programsFolders),
+        versionControl: normalizeVersionControl(o.versionControl)
+      };
+    }
     return {
       stats: WF_DEFAULT.stats,
       mw: WF_DEFAULT.mw,
-      programsFolders: WF_DEFAULT.programsFolders
+      programsFolders: WF_DEFAULT.programsFolders,
+      versionControl: WF_DEFAULT.versionControl
     };
   }
 
   function writeWorkflowFlags(flags) {
-    var mode = flags && flags.programsFolders === 'dev-prod' ? 'dev-prod' : 'single';
+    var prev = readWorkflowFlags();
+    var next = {
+      stats: flags && flags.stats != null ? !!flags.stats : prev.stats,
+      mw: flags && flags.mw != null ? !!flags.mw : prev.mw,
+      programsFolders: normalizeProgramsFolderMode(
+        flags && flags.programsFolders != null ? flags.programsFolders : prev.programsFolders
+      ),
+      versionControl: normalizeVersionControl(
+        flags && flags.versionControl != null ? flags.versionControl : prev.versionControl
+      )
+    };
     try {
-      localStorage.setItem(WF_KEY, JSON.stringify({
-        stats: !!flags.stats,
-        mw: !!flags.mw,
-        programsFolders: mode
-      }));
+      localStorage.setItem(WF_KEY, JSON.stringify(next));
     } catch (e) {}
     try {
       window.dispatchEvent(new CustomEvent('sphere-workflow-change'));
@@ -347,14 +371,32 @@
     return readWorkflowFlags().programsFolders || 'single';
   }
 
+  function isSplitProgramsFolderMode() {
+    return getProgramsFolderMode() === 'dev-qc-prod';
+  }
+
+  function isQcProgramStatus(status) {
+    return status === 'In QC';
+  }
+
+  /** Subfolder under programs/ in split mode: dev | qc | prod. */
+  function programFolderForStatus(status) {
+    if (isProgramEditable(status)) return 'dev';
+    if (isQcProgramStatus(status)) return 'qc';
+    return 'prod';
+  }
+
   /** Path hint for a program given status + tenant folder mode. */
   function programPathHint(filename, status) {
     var mode = getProgramsFolderMode();
-    var editable = isProgramEditable(status);
-    if (mode === 'dev-prod') {
-      return editable ? ('programs/dev/' + filename) : ('programs/prod/' + filename);
+    if (mode === 'dev-qc-prod') {
+      return 'programs/' + programFolderForStatus(status) + '/' + filename;
     }
     return 'programs/' + filename;
+  }
+
+  function getProgramVersionControl() {
+    return readWorkflowFlags().versionControl || 'local';
   }
 
   /** Ordered review stages after Primary work (In dev / Revise). */
@@ -414,6 +456,9 @@
   window.SPHERE.nextHandoff = nextHandoff;
   window.SPHERE.returnHandoff = returnHandoff;
   window.SPHERE.getProgramsFolderMode = getProgramsFolderMode;
+  window.SPHERE.isSplitProgramsFolderMode = isSplitProgramsFolderMode;
+  window.SPHERE.programFolderForStatus = programFolderForStatus;
   window.SPHERE.programPathHint = programPathHint;
+  window.SPHERE.getProgramVersionControl = getProgramVersionControl;
 })();
 

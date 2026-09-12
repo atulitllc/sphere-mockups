@@ -156,7 +156,7 @@
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
         <div class="note-banner-inner"><div>
           <p style="margin:0 0 8px">Inventory, tags, SAP sections, tenant review flow, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
-          <p style="margin:0"><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional <code>programs/dev</code> + <code>programs/prod</code> layout. Configure in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</p>
+          <p style="margin:0"><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional <code>programs/dev</code> + <code>programs/qc</code> + <code>programs/prod</code> layout. Configure in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</p>
         </div></div>
       </div>
 
@@ -1866,8 +1866,8 @@
     if (!el || !window.SPHERE || !SPHERE.getTrackerWorkflow) return;
     var wf = SPHERE.getTrackerWorkflow();
     var mode = (SPHERE.getProgramsFolderMode && SPHERE.getProgramsFolderMode()) || 'single';
-    var folderHint = mode === 'dev-prod'
-      ? '<span class="muted" style="font-size:11px;margin-left:8px">Folders: programs/dev + programs/prod</span>'
+    var folderHint = (mode === 'dev-qc-prod' || mode === 'dev-prod')
+      ? '<span class="muted" style="font-size:11px;margin-left:8px">Folders: programs/dev + programs/qc + programs/prod</span>'
       : '<span class="muted" style="font-size:11px;margin-left:8px">Folders: single programs/</span>';
     el.innerHTML = '<span class="muted" style="font-size:11px;margin-right:4px">Flow</span>' +
       wf.stages.map(function (s, i) {
@@ -1887,7 +1887,7 @@
       cells[6].innerHTML = editable ? '<span class="badge file-rw">Editable</span>' : '<span class="badge file-ro">Read-only</span>';
     }
     if (cells[7]) {
-      cells[7].innerHTML = '<div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div>';
+      cells[7].innerHTML = '<div class="row-actions"><button class="btn sm" type="button" disabled title="History + restore — same UX for Local or GitHub (Admin → Version control)">History</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div>';
     }
     var prog = row.getAttribute('data-program') || '';
     if (prog && cells[0] && window.SPHERE && SPHERE.programPathHint) cells[0].title = SPHERE.programPathHint(prog, status);
@@ -2046,6 +2046,6 @@
   refreshAllWorkflowUI();
 })();
 </script>
-<script src="shared-chrome.js?v=bulk-send-fix1"></script>
+<script src="shared-chrome.js?v=wf-qc-vcs1"></script>
 </body>
 </html>
