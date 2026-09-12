@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=setlists2" />
+<link rel="stylesheet" href="shared-white.css?v=headrow1" />
 <script>
 (function () {
   try {
@@ -123,30 +123,19 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Inventory, tags, SAP sections, tenant review flow, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
       </div>
-        <div class="stat-pills" id="statPills">
-          <span class="badge not-started">1 Not started</span>
-          <span class="badge in-dev">2 In dev</span>
-          <span class="badge" data-stat="revise">1 Revise</span>
-          <span class="badge qc">2 In QC</span>
-          <span class="badge" data-stat="stats">1 In Stats</span>
-          <span class="badge" data-stat="mw">1 In MW</span>
-          <span class="badge approved">1 Approved</span>
-          <span class="badge frozen">1 Frozen</span>
-        </div>
-      </div>
-
-      <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
-        <div class="note-banner-inner"><div><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional <code>programs/dev</code> + <code>programs/prod</code> layout. Configure in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</div></div>
-      </div>
-
-      <div class="tracker-flow-strip" id="trackerFlowStrip" aria-label="Review flow for this tenant"></div>
-
-      <section class="section tracker-section">
-        <div class="section-head tracker-tools-only">
-          <div class="tracker-toolbar">
-            <div class="tracker-actions" id="trackerListsBar" role="toolbar" aria-label="Tracker actions">
+        <div class="tracker-meta-row">
+          <div class="stat-pills" id="statPills">
+            <span class="badge not-started">1 Not started</span>
+            <span class="badge in-dev">2 In dev</span>
+            <span class="badge" data-stat="revise">1 Revise</span>
+            <span class="badge qc">2 In QC</span>
+            <span class="badge" data-stat="stats">1 In Stats</span>
+            <span class="badge" data-stat="mw">1 In MW</span>
+            <span class="badge approved">1 Approved</span>
+            <span class="badge frozen">1 Frozen</span>
+          </div>
+          <div class="tracker-actions" id="trackerListsBar" role="toolbar" aria-label="Tracker actions">
               <button class="action-icon-btn primary" type="button" id="btnSetLists" title="Set lists" aria-label="Set lists">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
                 <span class="label">Set lists</span>
@@ -165,6 +154,21 @@
                 <span class="label">Generate PDF Package</span>
               </a>
             </div>
+        </div>
+      </div>
+
+      <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
+        <div class="note-banner-inner"><div>
+          <p style="margin:0 0 8px">Inventory, tags, SAP sections, tenant review flow, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
+          <p style="margin:0"><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional <code>programs/dev</code> + <code>programs/prod</code> layout. Configure in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</p>
+        </div></div>
+      </div>
+
+      <div class="tracker-flow-strip" id="trackerFlowStrip" aria-label="Review flow for this tenant"></div>
+
+      <section class="section tracker-section">
+        <div class="section-head tracker-tools-only">
+          <div class="tracker-toolbar">
             <div class="list-tools tracker-filters">
               <input class="search" id="searchInput" placeholder="Search ID or title…" aria-label="Search tracker" />
               <select id="filterType" style="width:120px" aria-label="Filter by type">

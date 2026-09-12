@@ -1438,16 +1438,35 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .tracker-page-head {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
-  flex-wrap: wrap;
   margin-bottom: 0;
 }
 .tracker-page-head .page-intro {
-  flex: 1 1 320px;
-  min-width: min(100%, 320px);
+  flex: 0 0 auto;
+  width: 100%;
   max-width: none;
+  min-width: 0;
+}
+.tracker-meta-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  width: 100%;
+}
+.tracker-meta-row .stat-pills {
+  justify-content: flex-start;
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tracker-meta-row .tracker-actions {
+  margin: 0 0 0 auto;
+  justify-content: flex-end;
 }
 .tracker-toolbar-check { display: none; }
 .check-all-label {
@@ -3940,7 +3959,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px 12px;
   width: 100%;
   min-width: 100%;
@@ -4064,9 +4083,6 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 }
 .tracker-page-head + .note-banner {
   margin-top: 2px;
-}
-.tracker-page-head .page-sub {
-  margin-top: 4px;
 }
 .tracker-page-head .stat-pills {
   margin: 0;
