@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=histlog1" />
+<link rel="stylesheet" href="shared-white.css?v=progedit1" />
 <script>
 (function () {
   try {
@@ -284,7 +284,7 @@
                   <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
+                  <div class="meta-cell"><button type="button" class="badge file-rw file-edit-link" title="Edit program">Editable</button></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -369,7 +369,7 @@
                   <div class="meta-cell"><span class="meta-v">Mei Chen</span></div>
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
-                  <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
+                  <div class="meta-cell"><button type="button" class="badge file-rw file-edit-link" title="Edit program">Editable</button></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -416,7 +416,7 @@
                   <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Running</span></div>
-                  <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
+                  <div class="meta-cell"><button type="button" class="badge file-rw file-edit-link" title="Edit program">Editable</button></div>
                   <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -752,6 +752,30 @@
             <button type="button" class="btn primary" id="verRestoreBtn">Restore as current</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-backdrop" id="programEditModal" hidden role="dialog" aria-modal="true" aria-labelledby="programEditTitle">
+  <div class="modal program-edit-modal" role="document">
+    <div class="modal-head">
+      <div>
+        <h2 id="programEditTitle">Edit program</h2>
+        <div class="hint" id="programEditSub">Editable in In&nbsp;dev / Revise · Save creates a new version (demo)</div>
+      </div>
+      <button class="btn sm" type="button" id="programEditClose" aria-label="Close">Close</button>
+    </div>
+    <div class="modal-body program-edit-body">
+      <label class="sr-only" for="programEditCode">Program source</label>
+      <textarea id="programEditCode" class="program-edit-code" spellcheck="false"></textarea>
+    </div>
+    <div class="program-edit-foot">
+      <span class="muted" id="programEditMeta" style="font-size:12px"></span>
+      <div class="program-edit-actions">
+        <button type="button" class="btn" id="programEditCancel">Cancel</button>
+        <button type="button" class="btn primary" id="programEditSave">Save</button>
       </div>
     </div>
   </div>
@@ -1921,7 +1945,7 @@
     var cells = row.querySelectorAll('.artifact-meta > .meta-cell');
     if (cells[2]) { var st = cells[2].querySelector('.meta-v'); if (st) st.textContent = status; }
     if (cells[6]) {
-      cells[6].innerHTML = editable ? '<span class="badge file-rw">Editable</span>' : '<span class="badge file-ro">Read-only</span>';
+      cells[6].innerHTML = editable ? '<button type="button" class="badge file-rw file-edit-link" title="Edit program">Editable</button>' : '<span class="badge file-ro">Read-only</span>';
     }
     if (cells[7]) {
       cells[7].innerHTML = '<div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div>';
@@ -2316,6 +2340,97 @@
       if (histSelectedVer) restoreVersion(histSelectedVer.n);
     });
   }
+
+
+
+  /* Editable badge → program source popup */
+  var programEditRow = null;
+  function demoProgramSource(row) {
+    var prog = (row && row.getAttribute('data-program')) || 'program.R';
+    var title = ((row && row.querySelector('.artifact-title')) || {}).textContent || prog;
+    return {
+      prog: prog,
+      title: String(title).trim(),
+      body: [
+        '# ' + prog,
+        '# ' + String(title).trim(),
+        'library(tidyverse)',
+        'library(haven)',
+        '',
+        'adsl <- read_sas("adam/adsl.sas7bdat")',
+        'out <- adsl %>%',
+        '  count(TRT01A, SEX) %>%',
+        '  mutate(pct = n / sum(n))',
+        '',
+        'write_csv(out, "tlf/out.csv")',
+        ''
+      ].join('\n')
+    };
+  }
+  function openProgramEditor(row) {
+    var modal = document.getElementById('programEditModal');
+    var code = document.getElementById('programEditCode');
+    var titleEl = document.getElementById('programEditTitle');
+    var sub = document.getElementById('programEditSub');
+    var meta = document.getElementById('programEditMeta');
+    if (!modal || !row) return;
+    var status = row.getAttribute('data-status') || '';
+    var editable = window.SPHERE && SPHERE.isProgramEditable
+      ? SPHERE.isProgramEditable(status)
+      : (status === 'In dev' || status === 'In dev' || status === 'Revise');
+    if (!editable) {
+      showToast('Program is read-only in this stage');
+      return;
+    }
+    programEditRow = row;
+    var src = demoProgramSource(row);
+    if (titleEl) titleEl.textContent = 'Edit — ' + (src.prog || src.title);
+    if (sub) sub.textContent = (src.title || src.prog) + ' · ' + status + ' · Save seals a new version (demo)';
+    if (meta) {
+      var mode = (window.SPHERE && SPHERE.getProgramVersionControl) ? SPHERE.getProgramVersionControl() : 'local';
+      meta.textContent = mode === 'github' ? 'Versions → Enterprise GitHub' : 'Versions → Local history';
+    }
+    if (code) {
+      code.value = src.body;
+      code.readOnly = false;
+    }
+    modal.removeAttribute('hidden');
+    if (code) code.focus();
+  }
+  function closeProgramEditor() {
+    var modal = document.getElementById('programEditModal');
+    if (modal) modal.setAttribute('hidden', '');
+    programEditRow = null;
+  }
+  function saveProgramEditor() {
+    if (!programEditRow) return;
+    var code = document.getElementById('programEditCode');
+    var prog = programEditRow.getAttribute('data-program') || 'program';
+    var len = code ? code.value.length : 0;
+    showToast('Saved ' + prog + ' (' + len + ' chars) · new version sealed (demo)');
+    closeProgramEditor();
+  }
+  document.getElementById('trackerBoard').addEventListener('click', function (e) {
+    var link = e.target.closest('.file-edit-link');
+    if (!link) return;
+    e.preventDefault();
+    var row = link.closest('.artifact-row');
+    if (row) openProgramEditor(row);
+  });
+  (function bindProgramEditorChrome() {
+    var pec = document.getElementById('programEditClose');
+    var pea = document.getElementById('programEditCancel');
+    var pes = document.getElementById('programEditSave');
+    var pem = document.getElementById('programEditModal');
+    if (pec) pec.addEventListener('click', closeProgramEditor);
+    if (pea) pea.addEventListener('click', closeProgramEditor);
+    if (pes) pes.addEventListener('click', saveProgramEditor);
+    if (pem) {
+      pem.addEventListener('click', function (e) {
+        if (e.target === pem) closeProgramEditor();
+      });
+    }
+  })();
 
 
   window.addEventListener('sphere-workflow-change', refreshAllWorkflowUI);
