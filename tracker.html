@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=rowhist4" />
+<link rel="stylesheet" href="shared-white.css?v=histtabs1" />
 <script>
 (function () {
   try {
@@ -726,12 +726,32 @@
     <div class="modal-head">
       <div>
         <h2 id="historyModalTitle">Program history</h2>
-        <div class="hint" id="historyModalSub">Workflow transactions for this program</div>
+        <div class="hint" id="historyModalSub">Workflow and file versions</div>
       </div>
       <button class="btn sm" type="button" id="historyModalClose" aria-label="Close">Close</button>
     </div>
+    <div class="history-tabs" role="tablist" aria-label="History views">
+      <button type="button" class="history-tab is-active" role="tab" id="histTabWorkflow" aria-selected="true" data-hist-tab="workflow">Workflow</button>
+      <button type="button" class="history-tab" role="tab" id="histTabVersions" aria-selected="false" data-hist-tab="versions">Versions</button>
+    </div>
     <div class="modal-body">
-      <ol class="txn-timeline" id="historyTimeline"></ol>
+      <div class="history-panel" id="histPanelWorkflow" role="tabpanel" data-hist-panel="workflow">
+        <ol class="txn-timeline" id="historyTimeline"></ol>
+      </div>
+      <div class="history-panel" id="histPanelVersions" role="tabpanel" data-hist-panel="versions" hidden>
+        <p class="muted hist-vcs-hint" id="histVcsHint" style="font-size:12.5px;margin:0 0 10px"></p>
+        <ul class="ver-list" id="historyVersionList"></ul>
+        <div class="ver-preview" id="historyVersionPreview" hidden>
+          <div class="ver-preview-head">
+            <strong id="verPreviewTitle">Version</strong>
+            <button type="button" class="btn sm" id="verPreviewClose">Back</button>
+          </div>
+          <pre class="ver-preview-code" id="verPreviewCode"></pre>
+          <div class="ver-preview-foot">
+            <button type="button" class="btn primary" id="verRestoreBtn">Restore as current</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1967,13 +1987,15 @@
 
 
 
-  /* Per-row workflow transaction history (demo) */
+  /* Per-row History: Workflow transactions + file Versions (demo) */
+  var histActiveRow = null;
+  var histActiveTab = 'workflow';
+  var histSelectedVer = null;
+
   function demoHistoryForRow(row) {
     var title = (row.querySelector('.artifact-title') || {}).textContent || 'Program';
     var status = row.getAttribute('data-status') || '';
     var owner = '';
-    var cells = row.querySelectorAll('.meta-v');
-    // Owner is typically 4th meta after program,type,status
     var metas = row.querySelectorAll('.artifact-meta .meta-cell .meta-v');
     if (metas.length >= 4) owner = metas[3].textContent.trim();
     var prog = row.getAttribute('data-program') || '';
@@ -2024,17 +2046,63 @@
       ])
     };
     var events = byStatus[status] || base;
-    return { title: title.trim(), program: prog, status: status, events: events };
+    return { title: title.trim(), program: prog, status: status, owner: owner || 'Jordan Patel', events: events };
   }
-  function openHistoryModal(row) {
-    var modal = document.getElementById('historyModal');
-    var tl = document.getElementById('historyTimeline');
-    var sub = document.getElementById('historyModalSub');
-    var titleEl = document.getElementById('historyModalTitle');
-    if (!modal || !tl) return;
+
+  function demoVersionsForRow(row) {
     var data = demoHistoryForRow(row);
-    if (titleEl) titleEl.textContent = 'History — ' + data.title;
-    if (sub) sub.textContent = (data.program ? data.program + ' · ' : '') + 'Current: ' + (data.status || '—') + ' (demo)';
+    var owner = data.owner;
+    var prog = data.program || 'program.R';
+    var stub = [
+      { n: 4, at: '2026-09-10 14:22', trigger: 'save', person: owner, note: 'Saved', current: true,
+        body: '# ' + prog + ' — v4 (current)\\n# Auto-saved in In dev\\nlibrary(tidyverse)\\n# ... demo source ...' },
+      { n: 3, at: '2026-08-20 16:40', trigger: 'handoff', person: owner, note: 'Snapshot on Send to QC', current: false,
+        body: '# ' + prog + ' — v3\\n# Sealed on Send to QC\\nlibrary(tidyverse)\\n# ... prior handoff ...' },
+      { n: 2, at: '2026-08-15 10:05', trigger: 'save', person: owner, note: 'Saved', current: false,
+        body: '# ' + prog + ' — v2\\n# Mid-development save\\nlibrary(tidyverse)\\n# ...' },
+      { n: 1, at: '2026-08-12 09:14', trigger: 'save', person: owner, note: 'Initial', current: false,
+        body: '# ' + prog + ' — v1\\n# Drafted\\n# empty stub' }
+    ];
+    return stub;
+  }
+
+  function histVcsLabel() {
+    var mode = (window.SPHERE && SPHERE.getProgramVersionControl) ? SPHERE.getProgramVersionControl() : 'local';
+    return mode === 'github'
+      ? 'Storage: Enterprise GitHub (tenant Admin). Same list / open / restore UX.'
+      : 'Storage: Local history (tenant Admin). Same list / open / restore UX.';
+  }
+
+  function canRestoreRow(row) {
+    if (!row) return false;
+    var status = row.getAttribute('data-status') || '';
+    if (window.SPHERE && SPHERE.isProgramEditable) return !!SPHERE.isProgramEditable(status);
+    return status === 'In dev' || status === 'In dev' || status === 'Revise';
+  }
+
+  function setHistoryTab(tab) {
+    histActiveTab = tab === 'versions' ? 'versions' : 'workflow';
+    document.querySelectorAll('.history-tab').forEach(function (b) {
+      var on = b.getAttribute('data-hist-tab') === histActiveTab;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.history-panel').forEach(function (p) {
+      var on = p.getAttribute('data-hist-panel') === histActiveTab;
+      if (on) p.removeAttribute('hidden');
+      else p.setAttribute('hidden', '');
+    });
+    var preview = document.getElementById('historyVersionPreview');
+    var list = document.getElementById('historyVersionList');
+    if (histActiveTab === 'workflow') {
+      if (preview) preview.setAttribute('hidden', '');
+      if (list) list.removeAttribute('hidden');
+    }
+  }
+
+  function paintWorkflowTimeline(data) {
+    var tl = document.getElementById('historyTimeline');
+    if (!tl) return;
     tl.innerHTML = data.events.map(function (ev) {
       return '<li class="txn-item">' +
         '<div class="txn-dot" aria-hidden="true"></div>' +
@@ -2044,11 +2112,101 @@
           (ev.note ? ('<div class="txn-note">' + ev.note + '</div>') : '') +
         '</div></li>';
     }).join('');
+  }
+
+  function paintVersionsList(row) {
+    var list = document.getElementById('historyVersionList');
+    var hint = document.getElementById('histVcsHint');
+    var preview = document.getElementById('historyVersionPreview');
+    if (hint) hint.textContent = histVcsLabel();
+    if (preview) preview.setAttribute('hidden', '');
+    if (!list) return;
+    list.removeAttribute('hidden');
+    var versions = demoVersionsForRow(row);
+    var editable = canRestoreRow(row);
+    list.innerHTML = versions.map(function (v) {
+      return '<li class="ver-item' + (v.current ? ' is-current' : '') + '" data-ver="' + v.n + '">' +
+        '<div class="ver-main">' +
+          '<div class="ver-top"><strong>v' + v.n + '</strong>' +
+            (v.current ? '<span class="ver-badge">Current</span>' : '') +
+            '<span class="ver-trigger">' + v.trigger + '</span></div>' +
+          '<div class="ver-meta"><span>' + v.at + '</span><span>' + v.person + '</span></div>' +
+          '<div class="ver-note">' + v.note + '</div>' +
+        '</div>' +
+        '<div class="ver-actions">' +
+          '<button type="button" class="btn sm ver-open" data-ver="' + v.n + '">Open</button>' +
+          '<button type="button" class="btn sm ver-restore" data-ver="' + v.n + '"' +
+            (v.current || !editable ? ' disabled' : '') +
+            ' title="' + (v.current ? 'Already current' : (!editable ? 'Restore only in In dev / Revise' : 'Restore as new current version')) + '">Restore</button>' +
+        '</div></li>';
+    }).join('');
+    list._versions = versions;
+  }
+
+  function openVersionPreview(ver) {
+    var list = document.getElementById('historyVersionList');
+    var preview = document.getElementById('historyVersionPreview');
+    var title = document.getElementById('verPreviewTitle');
+    var code = document.getElementById('verPreviewCode');
+    var restoreBtn = document.getElementById('verRestoreBtn');
+    if (!preview || !list || !list._versions) return;
+    var v = list._versions.find(function (x) { return String(x.n) === String(ver); });
+    if (!v) return;
+    histSelectedVer = v;
+    if (title) title.textContent = 'v' + v.n + ' · ' + v.at + ' · ' + v.trigger;
+    if (code) code.textContent = String(v.body || '').replace(/\\n/g, '\n');
+    list.setAttribute('hidden', '');
+    preview.removeAttribute('hidden');
+    var editable = canRestoreRow(histActiveRow);
+    if (restoreBtn) {
+      restoreBtn.disabled = !!v.current || !editable;
+      restoreBtn.textContent = v.current ? 'Already current' : 'Restore as current';
+    }
+  }
+
+  function closeVersionPreview() {
+    var list = document.getElementById('historyVersionList');
+    var preview = document.getElementById('historyVersionPreview');
+    if (preview) preview.setAttribute('hidden', '');
+    if (list) list.removeAttribute('hidden');
+    histSelectedVer = null;
+  }
+
+  function restoreVersion(ver) {
+    if (!canRestoreRow(histActiveRow)) {
+      showToast('Restore only while In dev or Revise');
+      return;
+    }
+    var list = document.getElementById('historyVersionList');
+    var versions = (list && list._versions) || demoVersionsForRow(histActiveRow);
+    var v = versions.find(function (x) { return String(x.n) === String(ver); });
+    if (!v || v.current) return;
+    showToast('Restored v' + v.n + ' as new current version (demo — history kept)');
+    closeVersionPreview();
+    paintVersionsList(histActiveRow);
+    // bump demo: mark restored as new current conceptually on next open
+  }
+
+  function openHistoryModal(row) {
+    var modal = document.getElementById('historyModal');
+    var sub = document.getElementById('historyModalSub');
+    var titleEl = document.getElementById('historyModalTitle');
+    if (!modal) return;
+    histActiveRow = row;
+    var data = demoHistoryForRow(row);
+    if (titleEl) titleEl.textContent = 'History — ' + data.title;
+    if (sub) sub.textContent = (data.program ? data.program + ' · ' : '') + 'Current: ' + (data.status || '—');
+    paintWorkflowTimeline(data);
+    paintVersionsList(row);
+    closeVersionPreview();
+    setHistoryTab('workflow');
     modal.removeAttribute('hidden');
   }
   function closeHistoryModal() {
     var modal = document.getElementById('historyModal');
     if (modal) modal.setAttribute('hidden', '');
+    histActiveRow = null;
+    closeVersionPreview();
   }
   document.getElementById('trackerBoard').addEventListener('click', function (e) {
     var btn = e.target.closest('.row-history');
@@ -2062,6 +2220,20 @@
   if (historyModal) {
     historyModal.addEventListener('click', function (e) {
       if (e.target === historyModal) closeHistoryModal();
+      var tab = e.target.closest('[data-hist-tab]');
+      if (tab) setHistoryTab(tab.getAttribute('data-hist-tab'));
+      var openBtn = e.target.closest('.ver-open');
+      if (openBtn) openVersionPreview(openBtn.getAttribute('data-ver'));
+      var restBtn = e.target.closest('.ver-restore');
+      if (restBtn && !restBtn.disabled) restoreVersion(restBtn.getAttribute('data-ver'));
+    });
+  }
+  var verPreviewClose = document.getElementById('verPreviewClose');
+  if (verPreviewClose) verPreviewClose.addEventListener('click', closeVersionPreview);
+  var verRestoreBtn = document.getElementById('verRestoreBtn');
+  if (verRestoreBtn) {
+    verRestoreBtn.addEventListener('click', function () {
+      if (histSelectedVer) restoreVersion(histSelectedVer.n);
     });
   }
 
@@ -2162,6 +2334,6 @@
   refreshAllWorkflowUI();
 })();
 </script>
-<script src="shared-chrome.js?v=wf-qc-vcs1"></script>
+<script src="shared-chrome.js?v=histtabs1"></script>
 </body>
 </html>

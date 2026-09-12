@@ -4615,3 +4615,121 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   margin-top: 4px;
   color: var(--text);
 }
+
+
+.history-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.history-tab {
+  border: 0;
+  background: transparent;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.history-tab:hover { color: var(--text); }
+.history-tab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.history-modal {
+  width: min(560px, 96vw);
+  max-height: min(84vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.history-modal .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.ver-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.ver-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.ver-item.is-current {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: var(--accent-soft);
+}
+.ver-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.ver-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.ver-trigger {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.ver-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.ver-note { font-size: 12.5px; margin-top: 4px; }
+.ver-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.ver-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ver-preview-code {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow: auto;
+  max-height: 36vh;
+  white-space: pre-wrap;
+}
+.ver-preview-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
