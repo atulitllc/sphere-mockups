@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=wf-folders2" />
+<link rel="stylesheet" href="shared-white.css?v=bulk-handoff1" />
 <script>
 (function () {
   try {
@@ -218,9 +218,10 @@
         <div class="bulk-bar" id="bulkBar" aria-live="polite">
           <div class="bulk-left">
             <span class="sel-count" id="selCount">0 selected</span>
-            <span class="muted" style="font-size:12px">Run uses checked-out or allowed programs (demo)</span>
+            <span class="muted" style="font-size:12px" id="bulkHint">Select rows for Send / Run</span>
           </div>
           <div class="bulk-right">
+            <div class="bulk-handoffs" id="bulkHandoffs" role="group" aria-label="Send actions"></div>
             <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
             <button class="btn" type="button" id="btnSaveList">Save as list…</button>
             <button class="btn" type="button" id="btnPdfFromSel" title="Open Generate PDF Package with this selection">Generate PDF Package</button>
@@ -285,7 +286,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -304,7 +305,7 @@
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to Stats</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -323,7 +324,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to MW</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -351,7 +352,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Queued</span></div>
                   <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Approve</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -370,7 +371,7 @@
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
                   <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -417,7 +418,7 @@
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Running</span></div>
                   <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -436,7 +437,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -455,7 +456,7 @@
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
                   <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to Stats</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -1288,7 +1289,7 @@
           '<div class="meta-cell"><span class="meta-v muted">n/a</span></div>' +
           '<div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>' +
           '<div class="meta-cell"><span class="meta-v muted">—</span></div>' +
-          '<div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>' +
+          '<div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>' +
         '</div>' +
       '</div>';
     return row;
@@ -1599,13 +1600,7 @@
       cells[6].innerHTML = editable ? '<span class="badge file-rw">Editable</span>' : '<span class="badge file-ro">Read-only</span>';
     }
     if (cells[7]) {
-      var next = window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null;
-      var ret = window.SPHERE && SPHERE.returnHandoff ? SPHERE.returnHandoff(status) : null;
-      var html = '';
-      if (next) html += '<button class="btn sm primary" type="button" data-handoff="next">' + next.label + '</button>';
-      if (ret) html += '<button class="btn sm" type="button" data-handoff="revise">' + ret.label + '</button>';
-      html += '<button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button>';
-      cells[7].innerHTML = '<div class="row-actions">' + html + '</div>';
+      cells[7].innerHTML = '<div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div>';
     }
     var prog = row.getAttribute('data-program') || '';
     if (prog && cells[0] && window.SPHERE && SPHERE.programPathHint) cells[0].title = SPHERE.programPathHint(prog, status);
@@ -1617,22 +1612,85 @@
     document.querySelectorAll('#statPills [data-stat="stats"]').forEach(function (el) { el.hidden = !f.stats; });
     document.querySelectorAll('#statPills [data-stat="mw"]').forEach(function (el) { el.hidden = !f.mw; });
   }
-  if (board) {
-    board.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-handoff]');
-      if (!btn) return;
-      var row = btn.closest('.artifact-row');
-      if (!row) return;
+
+  function handoffKey(hand) {
+    if (!hand) return '';
+    return hand.action + '|' + hand.nextStatus + '|' + hand.label;
+  }
+
+  function paintBulkHandoffs() {
+    var host = document.getElementById('bulkHandoffs');
+    var hint = document.getElementById('bulkHint');
+    if (!host) return;
+    var sel = selectedRows();
+    host.innerHTML = '';
+    if (!sel.length) {
+      if (hint) hint.textContent = 'Select rows for Send / Run';
+      return;
+    }
+    var groups = {}; // key -> { hand, rows: [] }
+    sel.forEach(function (row) {
       var status = row.getAttribute('data-status') || '';
-      var kind = btn.getAttribute('data-handoff');
-      var hand = (kind === 'revise') ? (SPHERE.returnHandoff && SPHERE.returnHandoff(status)) : (SPHERE.nextHandoff && SPHERE.nextHandoff(status));
-      if (!hand) return;
-      row.setAttribute('data-status', hand.nextStatus);
-      refreshRowWorkflowUI(row);
-      var path = (SPHERE.programPathHint ? (' · ' + SPHERE.programPathHint(row.getAttribute('data-program') || 'program.R', hand.nextStatus)) : '');
-      showToast(hand.label + ' → ' + hand.nextStatus + (SPHERE.isProgramEditable(hand.nextStatus) ? ' (editable)' : ' (read-only)') + path);
+      var next = window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null;
+      var ret = window.SPHERE && SPHERE.returnHandoff ? SPHERE.returnHandoff(status) : null;
+      [next, ret].forEach(function (hand) {
+        if (!hand) return;
+        var k = handoffKey(hand);
+        if (!groups[k]) groups[k] = { hand: hand, rows: [] };
+        groups[k].rows.push(row);
+      });
+    });
+    var keys = Object.keys(groups);
+    if (!keys.length) {
+      if (hint) hint.textContent = sel.length + ' selected · no Send actions for these statuses';
+      return;
+    }
+    // Prefer forward sends before revise; stable order
+    keys.sort(function (a, b) {
+      var ha = groups[a].hand;
+      var hb = groups[b].hand;
+      var ra = ha.action === 'revise' ? 1 : 0;
+      var rb = hb.action === 'revise' ? 1 : 0;
+      if (ra !== rb) return ra - rb;
+      return (ha.label || '').localeCompare(hb.label || '');
+    });
+    var statusSet = {};
+    sel.forEach(function (r) { statusSet[r.getAttribute('data-status') || ''] = true; });
+    var statusNames = Object.keys(statusSet);
+    if (hint) {
+      hint.textContent = statusNames.length === 1
+        ? (sel.length + ' selected · all “' + statusNames[0] + '”')
+        : (sel.length + ' selected · mixed statuses (' + statusNames.join(', ') + ')');
+    }
+    keys.forEach(function (k) {
+      var g = groups[k];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = g.hand.action === 'revise' ? 'btn' : 'btn primary';
+      var count = g.rows.length;
+      var label = g.hand.label;
+      if (count !== sel.length) label += ' (' + count + ')';
+      btn.textContent = label;
+      btn.setAttribute('data-bulk-handoff', k);
+      btn.title = count + ' of ' + sel.length + ' row(s) → ' + g.hand.nextStatus;
+      btn.addEventListener('click', function () {
+        g.rows.forEach(function (row) {
+          row.setAttribute('data-status', g.hand.nextStatus);
+          refreshRowWorkflowUI(row);
+        });
+        showToast(g.hand.label + ' → ' + g.hand.nextStatus + ' · ' + g.rows.length + ' row(s)');
+        syncBulk();
+      });
+      host.appendChild(btn);
     });
   }
+
+  var _syncBulkOrig = syncBulk;
+  syncBulk = function () {
+    _syncBulkOrig();
+    paintBulkHandoffs();
+  };
+
   window.addEventListener('sphere-workflow-change', refreshAllWorkflowUI);
   window.addEventListener('storage', function (e) { if (e && e.key === 'sphere-tracker-workflow') refreshAllWorkflowUI(); });
 
