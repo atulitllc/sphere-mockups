@@ -1,3 +1,4 @@
+html { --ui-zoom: 1; }
 :root,
 [data-theme="light"] {
   --bg: #F8FAFC;
@@ -267,6 +268,9 @@
 
 * { box-sizing: border-box; }
 
+html, body {
+  min-height: 100%;
+}
 body {
   margin: 0;
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -282,7 +286,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .app {
   display: grid;
   grid-template-columns: var(--nav-w) 1fr;
-  min-height: 100vh;
+  /* html { zoom } shrinks 100vh visually — stretch so the rail still fills the viewport */
+  min-height: calc(100vh / var(--ui-zoom, 1));
 }
 
 /* —— Nav —— */
@@ -293,7 +298,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   padding: 18px 12px;
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: calc(100vh / var(--ui-zoom, 1));
+  min-height: calc(100vh / var(--ui-zoom, 1));
   overflow-y: auto;
   z-index: 40;
   display: flex;

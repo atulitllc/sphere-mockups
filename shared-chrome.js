@@ -515,6 +515,7 @@
   function applyZoom(z) {
     if (ZOOM_STEPS.indexOf(z) < 0) z = DEFAULT_ZOOM;
     document.documentElement.setAttribute('data-ui-zoom', String(z));
+    document.documentElement.style.setProperty('--ui-zoom', String(z / 100));
     document.documentElement.style.zoom = String(z / 100);
     try { localStorage.setItem('sphere-ui-zoom', String(z)); } catch (e) {}
     syncMenuState();

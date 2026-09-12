@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=a11y3" />
+<link rel="stylesheet" href="shared-white.css?v=a11y4" />
 <script>
 (function () {
   try {
@@ -23,6 +23,7 @@
     var z = localStorage.getItem('sphere-ui-zoom');
     if (zoomAllowed[z]) {
       document.documentElement.setAttribute('data-ui-zoom', z);
+      document.documentElement.style.setProperty('--ui-zoom', String(parseInt(z, 10) / 100));
       document.documentElement.style.zoom = String(parseInt(z, 10) / 100);
     }
     var c = localStorage.getItem('sphere-contrast');
@@ -2504,6 +2505,6 @@
 
 })();
 </script>
-<script src="shared-chrome.js?v=a11y3"></script>
+<script src="shared-chrome.js?v=a11y4"></script>
 </body>
 </html>
