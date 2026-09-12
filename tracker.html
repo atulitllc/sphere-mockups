@@ -210,10 +210,6 @@
           </div>
           <div class="bulk-right">
             <div class="bulk-handoffs" id="bulkHandoffs" role="group" aria-label="Send actions"></div>
-            <label class="sr-only" for="bulkAddToList">Add to list</label>
-            <select id="bulkAddToList" aria-label="Add selected programs to a list" style="min-width:160px">
-              <option value="">Add to list…</option>
-            </select>
             <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
             <button class="btn" type="button" id="btnSaveList">Save as new list…</button>
             <button class="btn" type="button" id="btnPdfFromSel" title="Open Generate PDF Package with this selection">Generate PDF Package</button>
@@ -230,6 +226,10 @@
               <option>Efficacy</option>
               <option>Safety TLFs</option>
               <option>Labs</option>
+            </select>
+                        <label class="sr-only" for="bulkAddToList">Add to list</label>
+            <select id="bulkAddToList" style="width:140px" aria-label="Add selected programs to a list">
+              <option value="">Add to list…</option>
             </select>
             <button class="btn ghost" type="button" id="btnClearSel">Clear</button>
           </div>
