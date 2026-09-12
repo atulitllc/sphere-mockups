@@ -301,3 +301,119 @@
   }
 
 })();
+
+(function () {
+  /* Tenant Tracker workflow roles. Primary + QC always on; Stats / MW optional. */
+  var WF_KEY = 'sphere-tracker-workflow';
+  var WF_DEFAULT = { stats: true, mw: true, programsFolders: 'single' };
+  /* programsFolders: 'single' = one programs/ tree with editable+locked files
+     'dev-prod' = programs/dev (editable) + programs/prod (read-only copies) */
+
+  function readWorkflowFlags() {
+    try {
+      var raw = localStorage.getItem(WF_KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        var mode = o.programsFolders === 'dev-prod' ? 'dev-prod' : 'single';
+        return {
+          stats: o.stats !== false,
+          mw: o.mw !== false,
+          programsFolders: mode
+        };
+      }
+    } catch (e) {}
+    return {
+      stats: WF_DEFAULT.stats,
+      mw: WF_DEFAULT.mw,
+      programsFolders: WF_DEFAULT.programsFolders
+    };
+  }
+
+  function writeWorkflowFlags(flags) {
+    var mode = flags && flags.programsFolders === 'dev-prod' ? 'dev-prod' : 'single';
+    try {
+      localStorage.setItem(WF_KEY, JSON.stringify({
+        stats: !!flags.stats,
+        mw: !!flags.mw,
+        programsFolders: mode
+      }));
+    } catch (e) {}
+    try {
+      window.dispatchEvent(new CustomEvent('sphere-workflow-change'));
+    } catch (e) {}
+  }
+
+  function getProgramsFolderMode() {
+    return readWorkflowFlags().programsFolders || 'single';
+  }
+
+  /** Path hint for a program given status + tenant folder mode. */
+  function programPathHint(filename, status) {
+    var mode = getProgramsFolderMode();
+    var editable = isProgramEditable(status);
+    if (mode === 'dev-prod') {
+      return editable ? ('programs/dev/' + filename) : ('programs/prod/' + filename);
+    }
+    return 'programs/' + filename;
+  }
+
+  /** Ordered review stages after Primary work (In dev / Revise). */
+  function getTrackerWorkflow() {
+    var f = readWorkflowFlags();
+    var stages = [
+      { id: 'primary', label: 'Primary', short: 'Primary', role: 'Production programmer', statuses: ['Not started', 'In dev', 'Revise'] },
+      { id: 'qc', label: 'QC', short: 'QC', role: 'QC programmer', statuses: ['In QC'] }
+    ];
+    if (f.stats) {
+      stages.push({ id: 'stats', label: 'Stats', short: 'Stats', role: 'Statistician', statuses: ['In Stats'] });
+    }
+    if (f.mw) {
+      stages.push({ id: 'mw', label: 'Medical writing', short: 'MW', role: 'Medical writer', statuses: ['In MW'] });
+    }
+    stages.push({ id: 'done', label: 'Approved', short: 'Done', role: '—', statuses: ['Approved', 'Frozen'] });
+    return { flags: f, stages: stages };
+  }
+
+  function isProgramEditable(status) {
+    return status === 'In dev' || status === 'Revise';
+  }
+
+  /** Next handoff from a status given current tenant workflow. */
+  function nextHandoff(status) {
+    var f = readWorkflowFlags();
+    if (status === 'Not started' || status === 'In dev' || status === 'Revise') {
+      return { action: 'to-qc', label: 'Send to QC', nextStatus: 'In QC' };
+    }
+    if (status === 'In QC') {
+      if (f.stats) return { action: 'to-stats', label: 'Send to Stats', nextStatus: 'In Stats' };
+      if (f.mw) return { action: 'to-mw', label: 'Send to MW', nextStatus: 'In MW' };
+      return { action: 'approve', label: 'Approve', nextStatus: 'Approved' };
+    }
+    if (status === 'In Stats') {
+      if (f.mw) return { action: 'to-mw', label: 'Send to MW', nextStatus: 'In MW' };
+      return { action: 'approve', label: 'Approve', nextStatus: 'Approved' };
+    }
+    if (status === 'In MW') {
+      return { action: 'approve', label: 'Approve', nextStatus: 'Approved' };
+    }
+    return null;
+  }
+
+  function returnHandoff(status) {
+    if (status === 'In QC' || status === 'In Stats' || status === 'In MW') {
+      return { action: 'revise', label: 'Return to Revise', nextStatus: 'Revise' };
+    }
+    return null;
+  }
+
+  window.SPHERE = window.SPHERE || {};
+  window.SPHERE.getTrackerWorkflow = getTrackerWorkflow;
+  window.SPHERE.setTrackerWorkflowFlags = writeWorkflowFlags;
+  window.SPHERE.getTrackerWorkflowFlags = readWorkflowFlags;
+  window.SPHERE.isProgramEditable = isProgramEditable;
+  window.SPHERE.nextHandoff = nextHandoff;
+  window.SPHERE.returnHandoff = returnHandoff;
+  window.SPHERE.getProgramsFolderMode = getProgramsFolderMode;
+  window.SPHERE.programPathHint = programPathHint;
+})();
+

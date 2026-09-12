@@ -4174,3 +4174,84 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .list-detail-table .col-more {
   width: 40px;
 }
+
+
+/* Tracker workflow preview (Admin) + strip (Tracker) */
+.wf-preview, .tracker-flow-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.wf-chip, .tracker-flow-strip .wf-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.wf-arrow {
+  color: var(--muted);
+  font-size: 12px;
+}
+.tracker-flow-strip .wf-step .wf-role {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 11px;
+}
+.tracker-flow-strip .wf-step.is-active {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: var(--accent);
+}
+.badge.file-ro {
+  background: color-mix(in srgb, #64748b 14%, var(--surface));
+  color: #475569;
+}
+.badge.file-rw {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+}
+.artifact-row.is-readonly {
+  /* subtle; handoff still allowed */
+}
+
+
+.radio-cards {
+  display: grid;
+  gap: 8px;
+}
+.radio-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.radio-card:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: var(--accent-soft);
+}
+.radio-card input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+.radio-card .hint {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}

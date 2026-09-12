@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css" />
+<link rel="stylesheet" href="shared-white.css?v=wf-folders2" />
 <script>
 (function () {
   try {
@@ -136,6 +136,7 @@
             <button type="button" data-panel="branding">Branding</button>
             <button type="button" data-panel="sso">SSO</button>
             <button type="button" data-panel="connectors">Connectors</button>
+            <button type="button" data-panel="workflow">Tracker workflow</button>
             <button type="button" data-panel="users">Users &amp; roles</button>
             <button type="button" data-panel="defaults">Study layout</button>
             <button type="button" data-panel="compliance">Compliance</button>
@@ -431,7 +432,92 @@
               </div>
             </div>
 
-            <!-- Users & roles -->
+            
+          <!-- Tracker workflow -->
+          <div class="admin-panel" id="panel-workflow" hidden>
+            <div class="card">
+              <div class="card-head">
+                <span class="title-row">Tracker review flow</span>
+                <span class="badge">Per tenant</span>
+              </div>
+              <div class="card-body" style="padding-top:4px">
+                <div class="note-banner" role="note" style="margin-bottom:12px">
+                  <span class="note-label">Order</span>
+                  <div>When optional roles are on, records move <strong>Primary → QC → Stats → Medical writing → Approved</strong>. Primary (production programmer) and QC are always in the path. Program files are <strong>editable only in In&nbsp;dev and Revise</strong>; all other stages are read-only.</div>
+                </div>
+
+                <div class="wf-preview" id="wfPreview" aria-live="polite"></div>
+
+                <div class="toggle-row">
+                  <div class="toggle-meta">
+                    <strong>Production programmer (Primary)</strong>
+                    <div class="hint">Always on · owns In&nbsp;dev and Revise (only editable stages)</div>
+                  </div>
+                  <label class="switch" title="Always enabled">
+                    <input type="checkbox" checked disabled />
+                    <span class="track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-meta">
+                    <strong>QC programmer</strong>
+                    <div class="hint">Always on · In&nbsp;QC review (read-only programs)</div>
+                  </div>
+                  <label class="switch" title="Always enabled">
+                    <input type="checkbox" checked disabled />
+                    <span class="track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-meta">
+                    <strong>Statistician</strong>
+                    <div class="hint">Optional · inserts In&nbsp;Stats after QC</div>
+                  </div>
+                  <label class="switch" title="Statistician in Tracker flow">
+                    <input type="checkbox" id="wfStats" data-wf="stats" />
+                    <span class="track"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-meta">
+                    <strong>Medical writing</strong>
+                    <div class="hint">Optional · inserts In&nbsp;MW after Stats (or after QC if Stats is off)</div>
+                  </div>
+                  <label class="switch" title="Medical writing in Tracker flow">
+                    <input type="checkbox" id="wfMw" data-wf="mw" />
+                    <span class="track"></span>
+                  </label>
+                </div>
+
+                
+                <hr style="border:0;border-top:1px solid var(--border);margin:16px 0" />
+                <div class="section-head" style="margin-bottom:8px">
+                  <h2 class="section-heading" style="font-size:14px">Programs folder layout</h2>
+                </div>
+                <p class="muted" style="font-size:12.5px;margin:0 0 10px">How editable vs read-only program files are stored for this tenant.</p>
+                <div class="radio-cards" id="wfFolderMode" role="radiogroup" aria-label="Programs folder layout">
+                  <label class="radio-card">
+                    <input type="radio" name="programsFolders" value="single" />
+                    <div>
+                      <strong>Single <code>programs/</code> folder</strong>
+                      <div class="hint">One tree. Files stay put; stage locks them (editable only in In&nbsp;dev / Revise).</div>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="programsFolders" value="dev-prod" />
+                    <div>
+                      <strong>Subfolders <code>programs/dev</code> + <code>programs/prod</code></strong>
+                      <div class="hint">Edit in <code>dev/</code>. On handoff past Primary, a read-only copy lives under <code>prod/</code> (common pharma convention).</div>
+                    </div>
+                  </label>
+                </div>
+
+                <p class="muted" style="font-size:12px;margin:12px 0 0">No check-in / check-out. Editability follows stage: Dev &amp; Revise only.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Users & roles -->
             <div class="admin-panel" id="panel-users">
               <div class="card">
                 <div class="card-head">
@@ -552,6 +638,10 @@
                   <div class="note-banner" role="note">
                     <span class="note-label">Lock</span>
                     <div>Base tree is <code>{study}/raw | sdtm | adam | programs | tlf | logs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
+                  </div>
+                  <div class="note-banner" role="note" style="margin-top:8px">
+                    <span class="note-label">Programs</span>
+                    <div>Editable vs read-only program files: choose <strong>single folder</strong> or <strong>dev/prod subfolders</strong> under <a href="admin.html?panel=workflow">Tracker workflow</a>.</div>
                   </div>
 
                   <label>
@@ -981,6 +1071,54 @@
   boot();
 })();
 </script>
-<script src="shared-chrome.js"></script>
+<script src="shared-chrome.js?v=wf-folders2"></script>
+<script>
+
+  /* Tracker workflow flags */
+  (function () {
+    function paintPreview() {
+      var el = document.getElementById('wfPreview');
+      if (!el || !window.SPHERE || !SPHERE.getTrackerWorkflow) return;
+      var wf = SPHERE.getTrackerWorkflow();
+      el.innerHTML = wf.stages.map(function (s, i) {
+        return '<span class="wf-chip">' + s.short + '</span>' +
+          (i < wf.stages.length - 1 ? '<span class="wf-arrow" aria-hidden="true">→</span>' : '');
+      }).join('');
+    }
+    function sync() {
+      var f = (window.SPHERE && SPHERE.getTrackerWorkflowFlags) ? SPHERE.getTrackerWorkflowFlags() : { stats: true, mw: true, programsFolders: 'single' };
+      var st = document.getElementById('wfStats');
+      var mw = document.getElementById('wfMw');
+      if (st) st.checked = !!f.stats;
+      if (mw) mw.checked = !!f.mw;
+      var mode = f.programsFolders === 'dev-prod' ? 'dev-prod' : 'single';
+      document.querySelectorAll('input[name="programsFolders"]').forEach(function (r) {
+        r.checked = r.value === mode;
+      });
+      paintPreview();
+    }
+    function save() {
+      if (!window.SPHERE || !SPHERE.setTrackerWorkflowFlags) return;
+      var modeEl = document.querySelector('input[name="programsFolders"]:checked');
+      SPHERE.setTrackerWorkflowFlags({
+        stats: !!(document.getElementById('wfStats') || {}).checked,
+        mw: !!(document.getElementById('wfMw') || {}).checked,
+        programsFolders: modeEl ? modeEl.value : 'single'
+      });
+      paintPreview();
+      if (typeof showToast === 'function') showToast('Tracker workflow saved for this tenant (demo)');
+    }
+    var st = document.getElementById('wfStats');
+    var mw = document.getElementById('wfMw');
+    if (st) st.addEventListener('change', save);
+    if (mw) mw.addEventListener('change', save);
+    document.querySelectorAll('input[name="programsFolders"]').forEach(function (r) {
+      r.addEventListener('change', save);
+    });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync);
+    else sync();
+  })();
+
+</script>
 </body>
 </html>

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=tracker-toolbar-row2" />
+<link rel="stylesheet" href="shared-white.css?v=wf-folders2" />
 <script>
 (function () {
   try {
@@ -123,20 +123,25 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Home for inventory, tags, SAP sections, check-out / QC, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
+        <p class="page-sub">Inventory, tags, SAP sections, tenant review flow, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
       </div>
         <div class="stat-pills" id="statPills">
-          <span class="badge not-started">8 Not started</span>
-          <span class="badge in-dev">6 In dev</span>
-          <span class="badge qc">14 In QC</span>
-          <span class="badge approved">18 Approved</span>
-          <span class="badge frozen">11 Frozen</span>
+          <span class="badge not-started">1 Not started</span>
+          <span class="badge in-dev">2 In dev</span>
+          <span class="badge" data-stat="revise">1 Revise</span>
+          <span class="badge qc">2 In QC</span>
+          <span class="badge" data-stat="stats">1 In Stats</span>
+          <span class="badge" data-stat="mw">1 In MW</span>
+          <span class="badge approved">1 Approved</span>
+          <span class="badge frozen">1 Frozen</span>
         </div>
       </div>
 
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
-        <div class="note-banner-inner"><div><strong>Shell may be locked while TLF program is still In dev.</strong> Shell lock (Mock Shells) freezes titles/columns/footnotes only — it is not program check-out and not output approve/freeze. <strong>Check out</strong> claims edit on the program + related files and still gates edit. <strong>Run selected</strong> uses checked-out or otherwise allowed programs (demo). <strong>Send to QC</strong> (check-in) sets status In QC and makes program + related files uneditable until returned from QC — <strong>not UI-only</strong>: it also updates share ACLs on <a href="files.html">Files</a> to View-only (<strong>Frozen / View only on share</strong>). <strong>Return to programmer</strong> restores Edit on the share. App checkout state and file-share permissions stay in sync.</div></div>
+        <div class="note-banner-inner"><div><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional <code>programs/dev</code> + <code>programs/prod</code> layout. Configure in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</div></div>
       </div>
+
+      <div class="tracker-flow-strip" id="trackerFlowStrip" aria-label="Review flow for this tenant"></div>
 
       <section class="section tracker-section">
         <div class="section-head tracker-tools-only">
@@ -181,7 +186,10 @@
                 <option value="">All statuses</option>
                 <option>Not started</option>
                 <option>In dev</option>
+                <option>Revise</option>
                 <option>In QC</option>
+                <option>In Stats</option>
+                <option>In MW</option>
                 <option>Approved</option>
                 <option>Frozen</option>
               </select>
@@ -245,7 +253,7 @@
               <div class="meta-cell col-head-program-spacer" aria-hidden="true"></div>
               <div class="meta-cell"><span class="col-head-label">Type</span></div>
               <div class="meta-cell"><span class="col-head-label">Status</span></div>
-              <div class="meta-cell"><span class="col-head-label">Checkout</span></div>
+              <div class="meta-cell"><span class="col-head-label">Owner</span></div>
               <div class="meta-cell"><span class="col-head-label">Shell</span></div>
               <div class="meta-cell"><span class="col-head-label">Job</span></div>
               <div class="meta-cell"><span class="col-head-label">Files</span></div>
@@ -262,7 +270,7 @@
               <span class="sap-section-count">3</span>
             </button>
             <div class="sap-section-body" id="sap-body-demographics">
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R" data-checkout="out">
+            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Demographics" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -273,15 +281,15 @@
                   <div class="meta-cell"><span class="meta-v program-name">tfl_14_1_1_demog.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Table</span></div>
                   <div class="meta-cell"><span class="meta-v">In dev</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">Jordan Patel</strong><span class="sub">Checked out</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="meta-v">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Dataset" data-status="Approved" data-tags="CSR" data-sap="Demographics" data-job="done" data-program="adam_adsl.R" data-checkout="released">
+            <article class="artifact-row is-readonly" data-type="Dataset" data-status="In QC" data-tags="CSR" data-sap="Demographics" data-job="done" data-program="adam_adsl.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADSL" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -291,16 +299,16 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">adam_adsl.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Dataset</span></div>
-                  <div class="meta-cell"><span class="meta-v">Approved</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">Jordan Patel</strong><span class="sub">Released</span></div></div>
-                  <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
+                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
+                  <div class="meta-cell"><span class="meta-v">Mei Chen</span></div>
+                  <div class="meta-cell"><span class="meta-v">n/a</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Freeze</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to Stats</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="Frozen" data-tags="CSR,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_2_base.R" data-checkout="released">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_2_base.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Baseline characteristics" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -310,12 +318,12 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">tfl_14_1_2_base.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Table</span></div>
-                  <div class="meta-cell"><span class="meta-v">Frozen</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">Mei Chen</strong><span class="sub">Released</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In Stats</span></div>
+                  <div class="meta-cell"><span class="meta-v">Riley Nguyen</span></div>
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm disabled" type="button" disabled title="Frozen — no edit">Frozen</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to MW</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -328,7 +336,7 @@
               <span class="sap-section-count">3</span>
             </button>
             <div class="sap-section-body" id="sap-body-efficacy">
-            <article class="artifact-row" data-type="Table" data-status="In QC" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R" data-checkout="qc">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -338,35 +346,35 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">tfl_14_2_1_orr.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Table</span></div>
-                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">Riley Nguyen</strong><span class="sub">In QC (owner)</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In MW</span></div>
+                  <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Queued</span></div>
-                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Approve</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Dataset" data-status="Not started" data-tags="" data-sap="Efficacy" data-job="" data-program="" data-checkout="">
+            <article class="artifact-row" data-type="Dataset" data-status="Revise" data-tags="" data-sap="Efficacy" data-program="">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADTTE" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
                   <div class="artifact-title">ADTTE · Time-to-event</div>
-                  <div class="artifact-tags"><span class="meta-v muted title-tags-empty">—</span></div>
+                  
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-v muted program-name">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">—</span></div>
                   <div class="meta-cell"><span class="meta-v">Dataset</span></div>
-                  <div class="meta-cell"><span class="meta-v">Not started</span></div>
-                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="meta-v">Revise</span></div>
+                  <div class="meta-cell"><span class="meta-v">Mei Chen</span></div>
+                  <div class="meta-cell"><span class="meta-v">n/a</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Figure" data-status="Not started" data-tags="Second wave" data-sap="Efficacy" data-job="" data-program="" data-checkout="">
+            <article class="artifact-row is-readonly" data-type="Figure" data-status="Approved" data-tags="Second wave" data-sap="Efficacy" data-program="">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Kaplan-Meier" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -374,14 +382,14 @@
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-v muted program-name">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">—</span></div>
                   <div class="meta-cell"><span class="meta-v">Figure</span></div>
-                  <div class="meta-cell"><span class="meta-v">Not started</span></div>
-                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">Approved</span></div>
+                  <div class="meta-cell"><span class="meta-v">Riley Nguyen</span></div>
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -394,7 +402,7 @@
               <span class="sap-section-count">3</span>
             </button>
             <div class="sap-section-body" id="sap-body-safety-tlfs">
-            <article class="artifact-row" data-type="Dataset" data-status="In QC" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.R" data-checkout="qc">
+            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADAE" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -404,16 +412,16 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">adam_adae.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Dataset</span></div>
-                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">Jordan Patel</strong><span class="sub">In QC (owner)</span></div></div>
-                  <div class="meta-cell"><span class="meta-v muted">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v" style="color:var(--accent)">Running</span></div>
-                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="meta-v">In dev</span></div>
+                  <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
+                  <div class="meta-cell"><span class="meta-v">n/a</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">Running</span></div>
+                  <div class="meta-cell"><span class="badge file-rw">Editable</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Listing" data-status="In QC" data-tags="DMC,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_ae.R" data-checkout="qc">
+            <article class="artifact-row is-readonly" data-type="Listing" data-status="Not started" data-tags="DMC,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_ae.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select AE overview" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -423,16 +431,16 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">tfl_14_3_1_ae.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Listing</span></div>
-                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">Jordan Patel</strong><span class="sub">In QC (owner)</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Not started</span></div>
+                  <div class="meta-cell"><span class="meta-v">Mei Chen</span></div>
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Return to programmer</button><button class="btn sm ok" type="button">Approve</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="Approved" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_8_cm.R" data-checkout="released">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_8_cm.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Concomitant medications" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -442,12 +450,12 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">tfl_14_3_8_cm.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Table</span></div>
-                  <div class="meta-cell"><span class="meta-v">Approved</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">S. Ortiz</strong><span class="sub">Released</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">In QC</span></div>
+                  <div class="meta-cell"><span class="meta-v">Riley Nguyen</span></div>
                   <div class="meta-cell"><span class="meta-v">Locked</span></div>
                   <div class="meta-cell job-cell"><span class="meta-v">Done</span></div>
-                  <div class="meta-cell"><span class="files-frozen-chip" title="Program + related files uneditable on share (View-only ACL) until Return to programmer">Frozen</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm" type="button">Freeze</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button" data-handoff="next">Send to Stats</button><button class="btn sm" type="button" data-handoff="revise">Return to Revise</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -460,7 +468,7 @@
               <span class="sap-section-count">1</span>
             </button>
             <div class="sap-section-body" id="sap-body-labs">
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="Second wave" data-sap="Labs" data-job="" data-program="tfl_14_3_5_lb.R" data-checkout="out">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="Frozen" data-tags="Second wave" data-sap="Labs" data-program="tfl_14_3_5_lb.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -470,12 +478,12 @@
                 <div class="artifact-meta">
                   <div class="meta-cell"><span class="meta-v program-name">tfl_14_3_5_lb.R</span></div>
                   <div class="meta-cell"><span class="meta-v">Table</span></div>
-                  <div class="meta-cell"><span class="meta-v">In dev</span></div>
-                  <div class="meta-cell"><div class="cell-stack"><strong style="font-size:13px">S. Ortiz</strong><span class="sub">Checked out</span></div></div>
+                  <div class="meta-cell"><span class="meta-v">Frozen</span></div>
+                  <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>
-                  <div class="meta-cell"><span class="meta-v">Editable</span></div>
-                  <div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell"><span class="badge file-ro">Read-only</span></div>
+                  <div class="meta-cell"><div class="row-actions"><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
             </article>
@@ -604,7 +612,10 @@
         <select id="reStatus" name="status">
           <option>Not started</option>
           <option>In dev</option>
+          <option>Revise</option>
           <option>In QC</option>
+          <option>In Stats</option>
+          <option>In MW</option>
           <option>Approved</option>
           <option>Frozen</option>
         </select>
@@ -632,15 +643,6 @@
       <input type="text" id="reTags" name="tags" placeholder="First look, DMC" autocomplete="off" />
     </label>
     <div class="grid2">
-      <label>Checkout owner<input type="text" id="reCheckoutOwner" name="checkoutOwner" placeholder="e.g. Jordan Patel" autocomplete="off" /></label>
-      <label>Checkout state
-        <select id="reCheckoutState" name="checkoutState">
-          <option value="">—</option>
-          <option value="out">Checked out</option>
-          <option value="qc">In QC</option>
-          <option value="released">Released</option>
-        </select>
-      </label>
     </div>
   </form>
   <div class="float-editor-foot">
@@ -1015,16 +1017,13 @@
     var runnable = [];
     var blocked = [];
     rows.forEach(function (row) {
-      var co = row.getAttribute('data-checkout') || '';
+      var co = '';
       var status = row.getAttribute('data-status') || '';
       var prog = row.getAttribute('data-program') || '';
       if (!prog) { blocked.push(row); return; }
-      if (status === 'In QC') { blocked.push(row); return; }
-      if (co === 'out' || co === 'released' || status === 'Approved' || status === 'Frozen' || status === 'In dev') {
-        runnable.push(row);
-      } else {
-        blocked.push(row);
-      }
+      if (status === 'Approved' || status === 'Frozen') { blocked.push(row); return; }
+      if (prog) runnable.push(row);
+      else blocked.push(row);
     });
     if (!runnable.length) {
       showToast('No runnable programs in selection (need check-out or allowed status; demo)');
@@ -1118,9 +1117,7 @@
     }
     document.getElementById('reTags').value = row.getAttribute('data-tags') || '';
     var ownerEl = cells[3] ? cells[3].querySelector('strong') : null;
-    document.getElementById('reCheckoutOwner').value = ownerEl ? ownerEl.textContent.trim() : '';
-    document.getElementById('reCheckoutState').value = row.getAttribute('data-checkout') || '';
-    if (!rowEditor.style.left && !rowEditor.style.top) {
+        if (!rowEditor.style.left && !rowEditor.style.top) {
       rowEditor.style.left = Math.max(24, (window.innerWidth - 420) / 2) + 'px';
       rowEditor.style.top = Math.max(24, window.scrollY + 80) + 'px';
     }
@@ -1145,13 +1142,14 @@
     var shell = document.getElementById('reShell').value;
     var tagsRaw = document.getElementById('reTags').value;
     var tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-    var owner = document.getElementById('reCheckoutOwner').value.trim();
-    var coState = document.getElementById('reCheckoutState').value;
+    var owner = '';
+    var ownerEl2 = null;
+    var coState = (document.getElementById('reCheckoutState')||{value:''}).value;
 
     row.setAttribute('data-type', type);
     row.setAttribute('data-status', status);
     row.setAttribute('data-program', program);
-    row.setAttribute('data-checkout', coState);
+    /* checkout removed */
     row.setAttribute('data-tags', tags.join(','));
 
     var titleEl = row.querySelector('.artifact-title');
@@ -1173,7 +1171,7 @@
     // Checkout
     if (cells[3]) {
       if (owner || coState) {
-        var sub = checkoutLabel(coState);
+        var sub = '';
         cells[3].innerHTML = '<div class="cell-stack"><strong style="font-size:13px">' +
           (owner || '—') + '</strong><span class="sub">' + sub + '</span></div>';
       } else {
@@ -1266,7 +1264,7 @@
     row.setAttribute('data-sap', opts.sap);
     row.setAttribute('data-job', opts.job || '');
     row.setAttribute('data-program', opts.program || '');
-    row.setAttribute('data-checkout', opts.checkout || '');
+    /* checkout removed */
     var tags = (opts.tags || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var tagsHtml = tags.length
       ? '<div class="chip-row">' + tags.map(function (t) { return '<span class="tag-chip">' + t + '</span>'; }).join('') + '</div>'
@@ -1290,7 +1288,7 @@
           '<div class="meta-cell"><span class="meta-v muted">n/a</span></div>' +
           '<div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>' +
           '<div class="meta-cell"><span class="meta-v muted">—</span></div>' +
-          '<div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Check out</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>' +
+          '<div class="meta-cell"><div class="row-actions"><button class="btn sm primary" type="button">Send to QC</button><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>' +
         '</div>' +
       '</div>';
     return row;
@@ -1573,7 +1571,74 @@
       });
     }
     saveLists(lists);
-    refreshListSelect();
+    
+  /* —— Workflow strip + handoffs (no check-out) —— */
+  function paintFlowStrip() {
+    var el = document.getElementById('trackerFlowStrip');
+    if (!el || !window.SPHERE || !SPHERE.getTrackerWorkflow) return;
+    var wf = SPHERE.getTrackerWorkflow();
+    var mode = (SPHERE.getProgramsFolderMode && SPHERE.getProgramsFolderMode()) || 'single';
+    var folderHint = mode === 'dev-prod'
+      ? '<span class="muted" style="font-size:11px;margin-left:8px">Folders: programs/dev + programs/prod</span>'
+      : '<span class="muted" style="font-size:11px;margin-left:8px">Folders: single programs/</span>';
+    el.innerHTML = '<span class="muted" style="font-size:11px;margin-right:4px">Flow</span>' +
+      wf.stages.map(function (s, i) {
+        return '<span class="wf-step" data-stage="' + s.id + '"><span>' + s.short + '</span>' +
+          (s.role && s.role !== '—' ? '<span class="wf-role">' + s.role + '</span>' : '') +
+          '</span>' + (i < wf.stages.length - 1 ? '<span class="wf-arrow" aria-hidden="true">→</span>' : '');
+      }).join('') + folderHint +
+      '<a class="muted" style="font-size:11px;margin-left:8px" href="admin.html?panel=workflow">Configure</a>';
+  }
+  function refreshRowWorkflowUI(row) {
+    var status = row.getAttribute('data-status') || '';
+    var editable = window.SPHERE && SPHERE.isProgramEditable ? SPHERE.isProgramEditable(status) : (status === 'In dev' || status === 'Revise');
+    row.classList.toggle('is-readonly', !editable);
+    var cells = row.querySelectorAll('.artifact-meta > .meta-cell');
+    if (cells[2]) { var st = cells[2].querySelector('.meta-v'); if (st) st.textContent = status; }
+    if (cells[6]) {
+      cells[6].innerHTML = editable ? '<span class="badge file-rw">Editable</span>' : '<span class="badge file-ro">Read-only</span>';
+    }
+    if (cells[7]) {
+      var next = window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null;
+      var ret = window.SPHERE && SPHERE.returnHandoff ? SPHERE.returnHandoff(status) : null;
+      var html = '';
+      if (next) html += '<button class="btn sm primary" type="button" data-handoff="next">' + next.label + '</button>';
+      if (ret) html += '<button class="btn sm" type="button" data-handoff="revise">' + ret.label + '</button>';
+      html += '<button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button>';
+      cells[7].innerHTML = '<div class="row-actions">' + html + '</div>';
+    }
+    var prog = row.getAttribute('data-program') || '';
+    if (prog && cells[0] && window.SPHERE && SPHERE.programPathHint) cells[0].title = SPHERE.programPathHint(prog, status);
+  }
+  function refreshAllWorkflowUI() {
+    paintFlowStrip();
+    allRows().forEach(refreshRowWorkflowUI);
+    var f = (window.SPHERE && SPHERE.getTrackerWorkflowFlags) ? SPHERE.getTrackerWorkflowFlags() : { stats: true, mw: true };
+    document.querySelectorAll('#statPills [data-stat="stats"]').forEach(function (el) { el.hidden = !f.stats; });
+    document.querySelectorAll('#statPills [data-stat="mw"]').forEach(function (el) { el.hidden = !f.mw; });
+  }
+  if (board) {
+    board.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-handoff]');
+      if (!btn) return;
+      var row = btn.closest('.artifact-row');
+      if (!row) return;
+      var status = row.getAttribute('data-status') || '';
+      var kind = btn.getAttribute('data-handoff');
+      var hand = (kind === 'revise') ? (SPHERE.returnHandoff && SPHERE.returnHandoff(status)) : (SPHERE.nextHandoff && SPHERE.nextHandoff(status));
+      if (!hand) return;
+      row.setAttribute('data-status', hand.nextStatus);
+      refreshRowWorkflowUI(row);
+      var path = (SPHERE.programPathHint ? (' · ' + SPHERE.programPathHint(row.getAttribute('data-program') || 'program.R', hand.nextStatus)) : '');
+      showToast(hand.label + ' → ' + hand.nextStatus + (SPHERE.isProgramEditable(hand.nextStatus) ? ' (editable)' : ' (read-only)') + path);
+    });
+  }
+  window.addEventListener('sphere-workflow-change', refreshAllWorkflowUI);
+  window.addEventListener('storage', function (e) { if (e && e.key === 'sphere-tracker-workflow') refreshAllWorkflowUI(); });
+
+
+  refreshListSelect();
+  refreshAllWorkflowUI();
     if (customListSelect) {
       customListSelect.value = editingListId || lists[lists.length - 1].id;
       syncListActions();
@@ -1678,6 +1743,6 @@
   syncBulk();
 })();
 </script>
-<script src="shared-chrome.js"></script>
+<script src="shared-chrome.js?v=wf-folders2"></script>
 </body>
 </html>

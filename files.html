@@ -753,6 +753,64 @@
   render('programs');
 })();
 </script>
-<script src="shared-chrome.js"></script>
+<script src="shared-chrome.js?v=wf-folders2"></script>
+
+<script>
+(function () {
+  function applyProgramsFolderMode() {
+    if (!window.SPHERE || !SPHERE.getProgramsFolderMode) return;
+    var mode = SPHERE.getProgramsFolderMode();
+    var hint = document.getElementById('programsFolderHint');
+    if (!hint) {
+      var sub = document.querySelector('.page-sub');
+      if (sub) {
+        hint = document.createElement('div');
+        hint.id = 'programsFolderHint';
+        hint.className = 'note-banner';
+        hint.style.margin = '0 0 10px';
+        hint.setAttribute('role', 'note');
+        sub.parentNode.insertBefore(hint, sub.nextSibling);
+      }
+    }
+    if (!hint) return;
+    if (mode === 'dev-prod') {
+      hint.innerHTML = '<div class="note-banner-inner"><div><strong>Programs layout:</strong> <code>programs/dev</code> (editable · In&nbsp;dev / Revise) and <code>programs/prod</code> (read-only after handoff). Change in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</div></div>';
+      hint.hidden = false;
+    } else {
+      hint.innerHTML = '<div class="note-banner-inner"><div><strong>Programs layout:</strong> single <code>programs/</code> folder — files stay put; stage lock makes them read-only outside In&nbsp;dev / Revise. <a href="admin.html?panel=workflow">Configure</a>.</div></div>';
+      hint.hidden = false;
+    }
+    // Demo: if tree has programs node, ensure child folders exist in UI list when mode is dev-prod
+    try {
+      if (typeof TREE !== 'undefined' && TREE.programs && mode === 'dev-prod') {
+        var names = TREE.programs.map(function (x) { return x.name; });
+        if (names.indexOf('dev') < 0) {
+          TREE.programs.unshift({ name: 'dev', type: 'dir', size: '—', modified: 'Tenant layout', frozen: false });
+        }
+        if (names.indexOf('prod') < 0) {
+          TREE.programs.splice(1, 0, { name: 'prod', type: 'dir', size: '—', modified: 'Tenant layout', frozen: false });
+        }
+        if (!TREE['programs/dev']) {
+          TREE['programs/dev'] = (TREE.programs || []).filter(function (x) { return x.type !== 'dir'; }).slice(0, 3).map(function (x) {
+            return Object.assign({}, x, { name: x.name });
+          });
+        }
+        if (!TREE['programs/prod']) {
+          TREE['programs/prod'] = (TREE.programs || []).filter(function (x) { return x.type !== 'dir'; }).slice(0, 3).map(function (x) {
+            return Object.assign({}, x, { name: x.name });
+          });
+        }
+        if (typeof renderFolder === 'function') {
+          /* leave current folder */
+        }
+      }
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyProgramsFolderMode);
+  else applyProgramsFolderMode();
+  window.addEventListener('sphere-workflow-change', applyProgramsFolderMode);
+})();
+</script>
+
 </body>
 </html>
