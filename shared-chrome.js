@@ -557,15 +557,8 @@
           '<div class="a11y-menu-heading">Text size</div>' +
           '<div class="a11y-zoom-row">' +
             '<button type="button" class="a11y-menu-btn" id="a11yZoomOut" title="Zoom out" aria-label="Zoom out">A−</button>' +
-            '<button type="button" class="a11y-menu-btn a11y-menu-btn-wide" data-zoom="100" role="menuitemradio" aria-checked="false">Reset 100%</button>' +
+            '<button type="button" class="a11y-menu-btn a11y-menu-btn-reset" id="a11yZoomReset" data-zoom="100" title="Reset zoom" aria-label="Reset zoom to 100%">100%</button>' +
             '<button type="button" class="a11y-menu-btn" id="a11yZoomIn" title="Zoom in" aria-label="Zoom in">A+</button>' +
-          '</div>' +
-          '<div class="a11y-zoom-presets" role="radiogroup" aria-label="Zoom level">' +
-            '<button type="button" class="a11y-menu-item" data-zoom="85" role="menuitemradio" aria-checked="false">85%</button>' +
-            '<button type="button" class="a11y-menu-item" data-zoom="90" role="menuitemradio" aria-checked="false">90%</button>' +
-            '<button type="button" class="a11y-menu-item" data-zoom="100" role="menuitemradio" aria-checked="false">100%</button>' +
-            '<button type="button" class="a11y-menu-item" data-zoom="110" role="menuitemradio" aria-checked="false">110%</button>' +
-            '<button type="button" class="a11y-menu-item" data-zoom="125" role="menuitemradio" aria-checked="false">125%</button>' +
           '</div>' +
         '</div>' +
         '<div class="a11y-menu-section" role="radiogroup" aria-label="Contrast">' +
