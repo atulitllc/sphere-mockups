@@ -4290,44 +4290,51 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 }
 
 
-/* Full-screen Set lists workspace */
+/* Custom Lists — large popup (not fullscreen) */
 .setlist-backdrop {
-  padding: 0 !important;
-  align-items: stretch !important;
-  justify-content: stretch !important;
+  padding: 16px !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .setlist-screen {
-  width: 100vw;
-  max-width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
+  width: min(1100px, 96vw);
+  max-width: 96vw;
+  height: min(86vh, 800px);
+  max-height: min(86vh, 800px);
   margin: 0;
-  border-radius: 0;
-  border: 0;
+  border-radius: 14px;
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  box-shadow: none;
+  background: var(--surface);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+  overflow: hidden;
 }
 .setlist-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
+  gap: 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  flex: 0 0 auto;
 }
-.setlist-head h2 { margin: 0; font-size: 18px; }
+.setlist-head h2 { margin: 0; font-size: 16px; line-height: 1.2; }
+.setlist-head .hint {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.3;
+}
 .setlist-body {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
 }
 .setlist-sidebar {
   border-right: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -4337,13 +4344,13 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
 }
 .setlist-nav {
   list-style: none;
   margin: 0;
-  padding: 8px;
+  padding: 6px;
   overflow: auto;
   flex: 1;
 }
@@ -4357,12 +4364,12 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   border: 0;
   background: transparent;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 7px 9px;
   cursor: pointer;
   font-size: 13px;
   color: var(--text);
 }
-.setlist-nav-item:hover { background: var(--bg); }
+.setlist-nav-item:hover { background: var(--surface); }
 .setlist-nav-item.is-active {
   background: var(--accent-soft);
   color: var(--accent);
@@ -4376,30 +4383,49 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .setlist-main {
   min-width: 0;
   min-height: 0;
-  overflow: auto;
-  padding: 16px 18px 20px;
+  overflow: hidden;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
 }
 .setlist-empty {
   display: grid;
-  place-content: center;
-  min-height: 50vh;
-  text-align: center;
-  gap: 6px;
+  place-content: start;
+  min-height: 0;
+  text-align: left;
+  gap: 4px;
+  padding-top: 4px;
+}
+.setlist-empty p { margin: 0; }
+.setlist-editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+  gap: 8px;
+}
+.setlist-editor .list-modal-toolbar {
+  margin-bottom: 0;
+  flex: 0 0 auto;
 }
 .setlist-table-wrap {
+  flex: 1 1 auto;
+  min-height: 120px;
   max-height: none;
-  min-height: 280px;
-  height: calc(100vh - 300px);
+  height: auto;
+  overflow: auto;
 }
 .setlist-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 0;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
+  flex: 0 0 auto;
 }
 .setlist-foot-right {
   display: flex;
@@ -4420,9 +4446,12 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 @media (max-width: 860px) {
   .setlist-body { grid-template-columns: 1fr; }
   .setlist-sidebar {
-    max-height: 180px;
+    max-height: 140px;
     border-right: 0;
     border-bottom: 1px solid var(--border);
   }
-  .setlist-table-wrap { height: auto; max-height: 50vh; }
+  .setlist-screen {
+    height: min(92vh, 900px);
+    max-height: min(92vh, 900px);
+  }
 }

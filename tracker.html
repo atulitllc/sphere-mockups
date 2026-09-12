@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=headrow1" />
+<link rel="stylesheet" href="shared-white.css?v=customlists1" />
 <script>
 (function () {
   try {
@@ -136,9 +136,9 @@
             <span class="badge frozen">1 Frozen</span>
           </div>
           <div class="tracker-actions" id="trackerListsBar" role="toolbar" aria-label="Tracker actions">
-              <button class="action-icon-btn primary" type="button" id="btnSetLists" title="Set lists" aria-label="Set lists">
+              <button class="action-icon-btn primary" type="button" id="btnSetLists" title="Custom Lists" aria-label="Custom Lists">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                <span class="label">Set lists</span>
+                <span class="label">Custom Lists</span>
               </button>
 <span class="actions-sep" aria-hidden="true"></span>
               <button class="action-icon-btn" type="button" id="btnImport" title="Browse / Import programs" aria-label="Browse / Import programs">
@@ -653,8 +653,8 @@
   <div class="modal setlist-screen" role="document">
     <div class="setlist-head">
       <div>
-        <h2 id="listModalTitle">Set lists</h2>
-        <div class="hint">Manage ordered program lists. Multi-select rows, then drag to reorder as a group. Demo saves in this browser.</div>
+        <h2 id="listModalTitle">Custom Lists</h2>
+        <div class="hint">Ordered program lists for Run and Generate PDF Package. Demo saves in this browser.</div>
       </div>
       <button class="btn sm" type="button" id="listModalClose" aria-label="Close">Close</button>
     </div>
@@ -1899,7 +1899,7 @@
   window.addEventListener('sphere-workflow-change', refreshAllWorkflowUI);
   window.addEventListener('storage', function (e) { if (e && e.key === 'sphere-tracker-workflow') refreshAllWorkflowUI(); });
 
-  /* Set lists workspace controls */
+  /* Custom Lists workspace controls */
   (function bindSetlistChrome() {
     var btnSetLists = document.getElementById('btnSetLists');
     var btnNew = document.getElementById('btnNewSetList');
