@@ -4536,6 +4536,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .btn.icon-btn.row-history svg {
   width: 14px;
   height: 14px;
+  color: inherit;
+  fill: currentColor;
 }
 .history-modal {
   width: min(520px, 96vw);
