@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=headacts1" />
+<link rel="stylesheet" href="shared-white.css?v=headdis1" />
 <script>
 (function () {
   try {
@@ -166,10 +166,10 @@
         <div class="section-head tracker-tools-only">
           <div class="tracker-toolbar">
             <div class="tracker-head-actions" role="group" aria-label="Tracker row actions">
-              <button class="btn icon-btn head-delete" type="button" id="btnDeleteSelected" title="Delete selected" aria-label="Delete selected">
+              <button class="btn icon-btn head-delete" type="button" id="btnDeleteSelected" title="Delete selected" aria-label="Delete selected" disabled>
                 <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 7h14"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M8 7l1 13h6l1-13"/><path d="M10 11v6M14 11v6"/></svg>
               </button>
-              <a class="btn icon-btn head-pdf" id="btnPublisher" href="publisher.html" title="Generate PDF Package" aria-label="Generate PDF Package">
+              <a class="btn icon-btn head-pdf is-disabled" id="btnPublisher" href="publisher.html" title="Generate PDF Package" aria-label="Generate PDF Package" aria-disabled="true" tabindex="-1">
                 <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v4h14v-4"/></svg>
               </a>
             </div>
@@ -970,7 +970,29 @@
     });
     checkAll.checked = allChecked;
     checkAll.indeterminate = !allChecked && sel.length > 0;
-  
+
+    var hasSel = n > 0;
+    var btnDel = document.getElementById('btnDeleteSelected');
+    var btnPdf = document.getElementById('btnPublisher');
+    if (btnDel) {
+      btnDel.disabled = !hasSel;
+      btnDel.title = hasSel ? ('Delete selected (' + n + ')') : 'Select programs to delete';
+    }
+    if (btnPdf) {
+      btnPdf.classList.toggle('is-disabled', !hasSel);
+      btnPdf.setAttribute('aria-disabled', hasSel ? 'false' : 'true');
+      btnPdf.tabIndex = hasSel ? 0 : -1;
+      if (hasSel) {
+        var items = sel.map(rowPayload).filter(function (x) { return x.program; });
+        var q = items.map(function (x) { return encodeURIComponent(x.program); }).join(',');
+        btnPdf.href = 'publisher.html' + (q ? ('?list=' + encodeURIComponent('Selection') + '&programs=' + q) : '');
+        btnPdf.title = 'Generate PDF Package (' + n + ' selected)';
+      } else {
+        btnPdf.href = 'publisher.html';
+        btnPdf.title = 'Select programs to generate a PDF package';
+      }
+    }
+
     paintBulkHandoffs();
   }
 
@@ -1033,6 +1055,17 @@
       if (typeof syncSectionCounts === 'function') syncSectionCounts();
       syncBulk();
       showToast('Deleted ' + n + ' program' + (n === 1 ? '' : 's') + ' (demo)');
+    });
+  }
+
+
+  var btnPublisherGuard = document.getElementById('btnPublisher');
+  if (btnPublisherGuard) {
+    btnPublisherGuard.addEventListener('click', function (e) {
+      if (btnPublisherGuard.getAttribute('aria-disabled') === 'true' || btnPublisherGuard.classList.contains('is-disabled')) {
+        e.preventDefault();
+        showToast('Select programs first');
+      }
     });
   }
 

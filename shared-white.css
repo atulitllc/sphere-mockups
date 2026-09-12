@@ -1482,6 +1482,23 @@ label .req::after { content: " *"; color: var(--danger); }
   stroke-linejoin: round;
 }
 
+.btn.icon-btn.head-delete:disabled,
+.btn.icon-btn.head-pdf.is-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--muted);
+  background: transparent;
+}
+.btn.icon-btn.head-delete:disabled:hover {
+  color: var(--muted);
+  background: transparent;
+}
+.btn.icon-btn.head-pdf.is-disabled:hover {
+  color: var(--muted);
+  background: transparent;
+}
+
 .tracker-page-head {
   display: flex;
   flex-direction: column;
