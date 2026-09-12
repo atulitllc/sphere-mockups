@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-accent="blue">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPHERE — Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared-white.css?v=a11y4" />
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('sphere-theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    var allowed = { blue: 1, teal: 1, indigo: 1, emerald: 1, slate: 1 };
+    var a = localStorage.getItem('sphere-accent');
+    document.documentElement.setAttribute('data-accent', allowed[a] ? a : 'blue');
+  } catch (e) {}
+})();
+</script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .login-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  }
+
+  /* —— Brand panel —— */
+  .login-brand {
+    position: relative;
+    overflow: hidden;
+    color: #e8eefc;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(96, 165, 250, 0.28), transparent 55%),
+      radial-gradient(900px 500px at 90% 110%, rgba(37, 99, 235, 0.35), transparent 50%),
+      linear-gradient(165deg, #0b1b3a 0%, #12306b 42%, #1e3a8a 100%);
+    padding: 40px 48px 36px;
+    display: flex;
+    flex-direction: column;
+  }
+  .login-brand::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 85%);
+    pointer-events: none;
+  }
+  .login-brand-top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .login-brand-logo {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+  .login-env {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(232, 238, 252, 0.72);
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px;
+    padding: 5px 10px;
+  }
+  .login-brand-body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 520px;
+    padding: 48px 0 32px;
+  }
+  .login-kicker {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin: 0 0 14px;
+  }
+  .login-headline {
+    margin: 0 0 14px;
+    font-size: clamp(28px, 3.2vw, 40px);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: #fff;
+  }
+  .login-lead {
+    margin: 0;
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: rgba(232, 238, 252, 0.82);
+    max-width: 42ch;
+  }
+  .login-points {
+    list-style: none;
+    margin: 28px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .login-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: rgba(232, 238, 252, 0.88);
+    line-height: 1.4;
+  }
+  .login-points svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    stroke: #93c5fd;
+    fill: none;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .login-brand-foot {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    align-items: center;
+    font-size: 12px;
+    color: rgba(232, 238, 252, 0.55);
+  }
+  .login-brand-foot strong {
+    color: rgba(232, 238, 252, 0.78);
+    font-weight: 600;
+  }
+
+  /* —— Form panel —— */
+  .login-panel {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    min-height: 100vh;
+  }
+  .login-panel-top {
+    display: flex;
+    justify-content: flex-end;
+    padding: 18px 22px 0;
+  }
+  .login-panel-mid {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 32px 40px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+  }
+  .login-mark {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 18px;
+  }
+  .login-title {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .login-sub {
+    margin: 0 0 28px;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .login-tenant {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 22px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--chip-bg);
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  .login-tenant-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent);
+  }
+  .login-field {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .login-field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .login-field input {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  .login-field input:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--border-strong)); }
+  .login-field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--focus-ring);
+  }
+  .login-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 4px 0 18px;
+  }
+  .login-remember {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+  }
+  .login-remember input {
+    width: auto;
+    margin: 0;
+    accent-color: var(--accent);
+  }
+  .login-link {
+    font-size: 13px;
+    font-weight: 550;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .login-link:hover { text-decoration: underline; }
+  .login-submit {
+    width: 100%;
+    height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12), 0 8px 20px rgba(37, 99, 235, 0.22);
+  }
+  .login-submit:hover { background: var(--accent-hover); }
+  .login-submit:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--focus-ring);
+  }
+  .login-divider {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--muted-2);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .login-divider::before,
+  .login-divider::after {
+    content: "";
+    height: 1px;
+    background: var(--border);
+  }
+  .login-sso {
+    width: 100%;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .login-sso:hover { background: var(--row-hover); }
+  .login-sso svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .login-hint {
+    margin: 18px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  .login-panel-foot {
+    padding: 14px 24px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .login-panel-foot a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .login-panel-foot a:hover { color: var(--text); }
+
+  .login-error {
+    display: none;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--danger-soft);
+    border: 1px solid var(--danger-border);
+    color: var(--danger);
+    font-size: 13px;
+  }
+  .login-error.is-visible { display: block; }
+
+  @media (max-width: 920px) {
+    .login-shell { grid-template-columns: 1fr; }
+    .login-brand {
+      min-height: auto;
+      padding: 28px 24px 32px;
+    }
+    .login-brand-body { padding: 28px 0 8px; }
+    .login-headline { font-size: 28px; }
+    .login-panel { border-left: 0; min-height: auto; }
+    .login-panel-mid { padding: 12px 20px 32px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+  <div class="login-shell">
+    <aside class="login-brand" aria-label="About SPHERE">
+      <div class="login-brand-top">
+        <img class="login-brand-logo" src="brand/sphere-lockup-nav-on-navy.png" alt="SPHERE" />
+        <span class="login-env">Production</span>
+      </div>
+      <div class="login-brand-body">
+        <p class="login-kicker">Statistical computing for regulated studies</p>
+        <h1 class="login-headline">One controlled environment for programs, QC, and delivery.</h1>
+        <p class="login-lead">
+          SPHERE gives biometrics teams a governed workspace for statistical programming —
+          from study setup through Tracker runs and PDF packages.
+        </p>
+        <ul class="login-points">
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Role-based editability with clear Dev → QC → Prod handoffs</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Program history, restore, and audit-ready activity trails</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Tenant SSO, study isolation, and Part&nbsp;11-oriented controls</span>
+          </li>
+        </ul>
+      </div>
+      <div class="login-brand-foot">
+        <span><strong>21 CFR Part 11</strong> ready design</span>
+        <span aria-hidden="true">·</span>
+        <span><strong>SSO</strong> SAML / OIDC</span>
+        <span aria-hidden="true">·</span>
+        <span>© 2026 Atulit</span>
+      </div>
+    </aside>
+
+    <main class="login-panel">
+      <div class="login-panel-top">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+
+      <div class="login-panel-mid">
+        <div class="login-card">
+          <img class="login-mark" src="brand/sphere-mark.svg" alt="" />
+          <h2 class="login-title">Sign in</h2>
+          <p class="login-sub">Access your organization’s SPHERE workspace.</p>
+
+          <div class="login-tenant" title="Active tenant">
+            <span class="login-tenant-dot" aria-hidden="true"></span>
+            <span><strong>Acme Biometrics</strong> · ten_acme_biometrics</span>
+          </div>
+
+          <div class="login-error" id="loginError" role="alert">Enter a work email and password to continue.</div>
+
+          <form id="loginForm" action="studies.html" method="get" novalidate>
+            <div class="login-field">
+              <label for="loginEmail">Work email</label>
+              <input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="you@acmebiometrics.com" required />
+            </div>
+            <div class="login-field">
+              <label for="loginPassword">Password</label>
+              <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+            </div>
+            <div class="login-row">
+              <label class="login-remember">
+                <input type="checkbox" name="remember" checked />
+                Keep me signed in
+              </label>
+              <a class="login-link" href="#" id="forgotLink">Forgot password?</a>
+            </div>
+            <button class="login-submit" type="submit">Sign in</button>
+          </form>
+
+          <div class="login-divider">or</div>
+
+          <button class="login-sso" type="button" id="ssoBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
+            Continue with company SSO
+          </button>
+
+          <p class="login-hint">Demo mock — any email/password signs you in to the Studies workspace. SSO uses the same path.</p>
+        </div>
+      </div>
+
+      <footer class="login-panel-foot">
+        <span>Need access? Contact your SPHERE admin.</span>
+        <span>
+          <a href="index.html">Mockups index</a>
+          ·
+          <a href="#">Privacy</a>
+          ·
+          <a href="#">Status</a>
+        </span>
+      </footer>
+    </main>
+  </div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeToggle');
+  function currentTheme() {
+    return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem('sphere-theme', theme); } catch (e) {}
+    if (themeBtn) {
+      themeBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+  }
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+    });
+    applyTheme(currentTheme());
+  }
+
+  var form = document.getElementById('loginForm');
+  var err = document.getElementById('loginError');
+  function goIn() {
+    try { localStorage.setItem('sphere-signed-in', '1'); } catch (e) {}
+    location.href = 'studies.html';
+  }
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (document.getElementById('loginEmail') || {}).value || '';
+      var pass = (document.getElementById('loginPassword') || {}).value || '';
+      if (!email.trim() || !pass) {
+        if (err) err.classList.add('is-visible');
+        return;
+      }
+      if (err) err.classList.remove('is-visible');
+      goIn();
+    });
+  }
+  var sso = document.getElementById('ssoBtn');
+  if (sso) sso.addEventListener('click', goIn);
+  var forgot = document.getElementById('forgotLink');
+  if (forgot) {
+    forgot.addEventListener('click', function (e) {
+      e.preventDefault();
+      alert('Password reset is stubbed in this mock. Use Sign in or SSO to continue.');
+    });
+  }
+})();
+</script>
+</body>
+</html>
