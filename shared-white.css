@@ -1740,9 +1740,9 @@ label .req::after { content: " *"; color: var(--danger); }
   flex-wrap: nowrap;
 }
 .artifact-title {
-  font-size: 14.5px;
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   color: var(--text);
   line-height: 1.3;
   font-variant-numeric: tabular-nums;
