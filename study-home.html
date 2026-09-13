@@ -7,13 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=a11y4" />
+<link rel="stylesheet" href="shared-white.css?v=accent2" />
 <script>
 (function () {
   try {
     var t = localStorage.getItem('sphere-theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-    var allowed = { blue: 1, teal: 1, indigo: 1, emerald: 1, slate: 1 };
+    var allowed = { blue: 1, teal: 1, indigo: 1, emerald: 1, slate: 1, violet: 1, rose: 1, amber: 1, cyan: 1, fuchsia: 1 };
     var a = localStorage.getItem('sphere-accent');
     document.documentElement.setAttribute('data-accent', allowed[a] ? a : 'blue');
     if (localStorage.getItem('sphere-nav-collapsed') === 'true') {
@@ -470,6 +470,6 @@
   });
 })();
 </script>
-<script src="shared-chrome.js?v=a11y4"></script>
+<script src="shared-chrome.js?v=accent2"></script>
 </body>
 </html>

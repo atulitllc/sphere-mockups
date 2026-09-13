@@ -5,7 +5,12 @@
     teal: '#0d9488',
     indigo: '#4f46e5',
     emerald: '#059669',
-    slate: '#475569'
+    slate: '#475569',
+    violet: '#7c3aed',
+    rose: '#e11d48',
+    amber: '#d97706',
+    cyan: '#0891b2',
+    fuchsia: '#c026d3'
   };
   var ACCENT_KEYS = Object.keys(ACCENTS);
 
@@ -70,6 +75,13 @@
     var btn = document.getElementById('accentPickerBtn');
     var menu = document.getElementById('accentMenu');
     if (!picker || !btn || !menu) return;
+
+    menu.innerHTML = ACCENT_KEYS.map(function (key) {
+      var label = key.charAt(0).toUpperCase() + key.slice(1);
+      return '<button type="button" class="accent-menu-item" role="option" data-accent-value="' + key + '" aria-selected="false">' +
+        '<span class="accent-swatch" style="--swatch:' + ACCENTS[key] + '" aria-hidden="true"></span>' +
+        '<span class="accent-menu-label">' + label + '</span></button>';
+    }).join('');
 
     function setOpen(open) {
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
