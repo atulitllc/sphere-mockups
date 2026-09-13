@@ -5229,3 +5229,19 @@ html[data-contrast="low"][data-theme="dark"] {
   outline: none;
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
+
+
+/* Mock Shells TOC multi-select + catalog context */
+.shell-catalog .catalog-section-table tr.is-multi td {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+.shell-catalog .catalog-section-table tr.selected td,
+.shell-catalog .catalog-section-table tr.selected.is-multi td {
+  background: var(--row-selected);
+}
+.shell-catalog .catalog-section-table tr.is-multi {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.sheet-ctx button.danger {
+  color: var(--danger);
+}

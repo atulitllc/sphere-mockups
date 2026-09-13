@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=a11y4" />
+<link rel="stylesheet" href="shared-white.css?v=shelltoc1" />
 <script>
 (function () {
   try {
@@ -449,6 +449,12 @@
   <button type="button" data-cmd="clear" role="menuitem">Clear cell</button>
 </div>
 
+<!-- Catalog TOC context menu -->
+<div class="sheet-ctx" id="catalogCtxMenu" hidden role="menu">
+  <button type="button" data-cat-cmd="duplicate" role="menuitem">Duplicate</button>
+  <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
+</div>
+
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -852,6 +858,9 @@
   var ctxMenu = document.getElementById('ctxMenu');
   var wrap = document.getElementById('sheetGridWrap');
   var catalogBody = document.getElementById('catalogBody');
+  var catalogCtxMenu = document.getElementById('catalogCtxMenu');
+  var catalogSelectedIds = ['14.1.1'];
+  var catalogAnchorId = '14.1.1';
   var toastEl = document.getElementById('toast');
   var toastTimer = null;
 
@@ -1055,8 +1064,10 @@
         html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="2"></td></tr>';
       }
       list.forEach(function (sh) {
-        var sel = sh.id === selectedId ? ' selected' : '';
-        html += '<tr class="' + sel.trim() + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '" data-sap="' + escapeHtml(normalizeSap(sh.sap)) + '">';
+        var classes = [];
+        if (sh.id === selectedId) classes.push('selected');
+        if (catalogSelectedIds.indexOf(sh.id) >= 0) classes.push('is-multi');
+        html += '<tr class="' + classes.join(' ') + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '" data-sap="' + escapeHtml(normalizeSap(sh.sap)) + '">';
         html += '<td class="num">' + catalogGripHtml() + escapeHtml(sh.number) + '</td>';
         html += '<td>' + escapeHtml(sh.title);
         if (sh.copiedFrom) {
@@ -1116,15 +1127,123 @@
     renderCatalog();
   }
 
-  function selectShell(id, skipPersist) {
+  function selectShell(id, skipPersist, keepMulti) {
     if (!skipPersist) persistEditorToSelected();
     if (!findShell(id) && currentShells().length) id = currentShells()[0].id;
     studyStore[CURRENT_STUDY].selectedId = id;
+    if (!keepMulti) {
+      catalogSelectedIds = id ? [id] : [];
+      catalogAnchorId = id || null;
+    }
     closeMetadataModal();
     renderCatalog();
     var sh = findShell(id);
     if (sh) loadShellIntoEditor(sh);
     else syncMetadataButton(null);
+  }
+
+  function visibleCatalogIds() {
+    if (!catalogBody) return [];
+    return Array.prototype.map.call(
+      catalogBody.querySelectorAll('tr[data-id]:not(.is-filtered-out)'),
+      function (tr) { return tr.getAttribute('data-id'); }
+    );
+  }
+
+  function uniqueShellId(base) {
+    var id = String(base || 'shell') + '-copy-' + Date.now().toString(36).slice(-4);
+    var n = 0;
+    while (findShell(id)) {
+      n += 1;
+      id = String(base || 'shell') + '-copy-' + Date.now().toString(36).slice(-4) + n;
+    }
+    return id;
+  }
+
+  function hideCatalogCtx() {
+    if (catalogCtxMenu) catalogCtxMenu.hidden = true;
+  }
+
+  function showCatalogCtx(x, y) {
+    if (!catalogCtxMenu) return;
+    hideCtx();
+    catalogCtxMenu.hidden = false;
+    catalogCtxMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+    catalogCtxMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px';
+  }
+
+  function catalogTargets() {
+    var ids = catalogSelectedIds.slice();
+    if (!ids.length && studyStore[CURRENT_STUDY].selectedId) {
+      ids = [studyStore[CURRENT_STUDY].selectedId];
+    }
+    return ids.filter(function (id) { return !!findShell(id); });
+  }
+
+  function duplicateCatalogShells(ids) {
+    if (!ids || !ids.length) return;
+    persistEditorToSelected();
+    var shells = currentShells();
+    var positions = ids.map(function (id) {
+      for (var i = 0; i < shells.length; i++) {
+        if (shells[i].id === id) return { id: id, idx: i };
+      }
+      return null;
+    }).filter(Boolean).sort(function (a, b) { return b.idx - a.idx; });
+    var newIds = [];
+    positions.forEach(function (p) {
+      var src = shells[p.idx];
+      var nid = uniqueShellId(src.id);
+      var copy = makeShell({
+        id: nid,
+        number: String(src.number || src.id) + 'a',
+        type: src.type,
+        title: String(src.title || 'Shell') + ' (copy)',
+        status: 'Draft',
+        analysisSet: src.analysisSet,
+        sap: src.sap,
+        locked: false,
+        qc: null,
+        approved: false,
+        custom: true,
+        templateKey: src.templateKey || '',
+        automate: !!src.automate,
+        metadata: cloneData(src.metadata || []),
+        layout: cloneData(src.layout || blankLayout(src.title)),
+        copiedFrom: { study: CURRENT_STUDY, id: src.id }
+      });
+      if (copy.layout) copy.layout.title = copy.title;
+      shells.splice(p.idx + 1, 0, copy);
+      newIds.unshift(nid);
+    });
+    catalogSelectedIds = newIds.slice();
+    catalogAnchorId = newIds[0] || null;
+    selectShell(newIds[0], true, true);
+    showToast('Duplicated ' + newIds.length + ' shell' + (newIds.length === 1 ? '' : 's'));
+  }
+
+  function deleteCatalogShells(ids) {
+    if (!ids || !ids.length) return;
+    var label = ids.length === 1
+      ? ('Delete shell “' + ((findShell(ids[0]) || {}).title || ids[0]) + '”?')
+      : ('Delete ' + ids.length + ' shells?');
+    if (!confirm(label)) return;
+    persistEditorToSelected();
+    var kill = {};
+    ids.forEach(function (id) { kill[id] = true; });
+    var store = studyStore[CURRENT_STUDY];
+    store.shells = store.shells.filter(function (s) { return !kill[s.id]; });
+    catalogSelectedIds = [];
+    catalogAnchorId = null;
+    var next = store.shells[0];
+    if (next) {
+      selectShell(next.id, true);
+    } else {
+      store.selectedId = null;
+      renderCatalog();
+      syncMetadataButton(null);
+    }
+    showToast('Deleted ' + ids.length + ' shell' + (ids.length === 1 ? '' : 's'));
   }
 
   function switchStudy(studyId) {
@@ -1907,7 +2026,75 @@
     }
     var tr = e.target.closest('tr[data-id]');
     if (!tr) return;
-    selectShell(tr.dataset.id);
+    var id = tr.getAttribute('data-id');
+    var visible = visibleCatalogIds();
+    if (e.shiftKey && catalogAnchorId) {
+      var a = visible.indexOf(catalogAnchorId);
+      var b = visible.indexOf(id);
+      if (b < 0) return;
+      if (a < 0) a = b;
+      var lo = Math.min(a, b);
+      var hi = Math.max(a, b);
+      catalogSelectedIds = visible.slice(lo, hi + 1);
+      selectShell(id, false, true);
+      return;
+    }
+    if (e.metaKey || e.ctrlKey) {
+      var ix = catalogSelectedIds.indexOf(id);
+      if (ix >= 0) {
+        catalogSelectedIds.splice(ix, 1);
+        catalogAnchorId = id;
+        if (!catalogSelectedIds.length) {
+          catalogSelectedIds = [id];
+          selectShell(id, false, true);
+        } else if (studyStore[CURRENT_STUDY].selectedId === id) {
+          selectShell(catalogSelectedIds[catalogSelectedIds.length - 1], false, true);
+        } else {
+          renderCatalog();
+        }
+      } else {
+        catalogSelectedIds.push(id);
+        catalogAnchorId = id;
+        selectShell(id, false, true);
+      }
+      return;
+    }
+    catalogSelectedIds = [id];
+    catalogAnchorId = id;
+    selectShell(id, false, true);
+  });
+
+  catalogBody.addEventListener('contextmenu', function (e) {
+    var tr = e.target.closest && e.target.closest('tr[data-id]');
+    if (!tr) return;
+    e.preventDefault();
+    var id = tr.getAttribute('data-id');
+    if (catalogSelectedIds.indexOf(id) < 0) {
+      catalogSelectedIds = [id];
+      catalogAnchorId = id;
+      selectShell(id, false, true);
+    } else {
+      renderCatalog();
+    }
+    showCatalogCtx(e.clientX, e.clientY);
+  });
+
+  if (catalogCtxMenu) {
+    catalogCtxMenu.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-cat-cmd]');
+      if (!btn) return;
+      var cmd = btn.getAttribute('data-cat-cmd');
+      var ids = catalogTargets();
+      hideCatalogCtx();
+      if (cmd === 'duplicate') duplicateCatalogShells(ids);
+      else if (cmd === 'delete') deleteCatalogShells(ids);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    if (catalogCtxMenu && !catalogCtxMenu.hidden && !catalogCtxMenu.contains(e.target)) hideCatalogCtx();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hideCatalogCtx();
   });
 
   document.getElementById('catalogSearch').addEventListener('input', applyCatalogFilters);
@@ -1951,6 +2138,7 @@
 
   catalogBody.addEventListener('mousedown', function (e) {
     if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
     if (e.target.closest && e.target.closest('.sap-section-head')) return;
     var tr = e.target.closest && e.target.closest('tr[data-id]');
     if (!tr) return;
@@ -2505,6 +2693,6 @@
 
 })();
 </script>
-<script src="shared-chrome.js?v=a11y4"></script>
+<script src="shared-chrome.js?v=shelltoc1"></script>
 </body>
 </html>
