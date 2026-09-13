@@ -171,15 +171,25 @@
 
 (function () {
 
-  /* In-context Copilot (demo: scripted). Mock Shells + Tracker first. */
+  /* In-context Copilot (demo: scripted). Available on every app screen except login. */
   function initCopilotPanel() {
     var path = (location.pathname || '').split('/').pop() || '';
+    if (/^login\.html$/i.test(path) || path === '' && /login/i.test(location.href)) return;
+
     var page = 'generic';
-    if (/mock-shells/i.test(path)) page = 'mock-shells';
-    else if (/tracker/i.test(path)) page = 'tracker';
-    else if (/publisher/i.test(path)) page = 'publisher';
-    else if (/data-hub|files/i.test(path)) page = 'files';
-    else return; /* only study work screens for v1 demo */
+    var screenLabel = 'this screen';
+    if (/mock-shells/i.test(path)) { page = 'mock-shells'; screenLabel = 'Mock Shells'; }
+    else if (/tracker/i.test(path)) { page = 'tracker'; screenLabel = 'Tracker'; }
+    else if (/publisher/i.test(path)) { page = 'publisher'; screenLabel = 'Generate PDF Package'; }
+    else if (/data-hub|files/i.test(path)) { page = 'files'; screenLabel = 'File Explorer'; }
+    else if (/define/i.test(path)) { page = 'define'; screenLabel = 'Define'; }
+    else if (/study-home/i.test(path)) { page = 'study-home'; screenLabel = 'Study home'; }
+    else if (/studies/i.test(path)) { page = 'studies'; screenLabel = 'Studies'; }
+    else if (/admin/i.test(path)) { page = 'admin'; screenLabel = 'Admin'; }
+    else if (/audit/i.test(path)) { page = 'audit'; screenLabel = 'Audit'; }
+    else if (/compute/i.test(path)) { page = 'compute'; screenLabel = 'Compute'; }
+    else if (/copilot/i.test(path)) { page = 'copilot'; screenLabel = 'Suggestions inbox'; }
+    else if (/index/i.test(path)) { return; }
 
     var topRight = document.querySelector('header.top .top-right');
     if (!topRight || document.getElementById('copilotLaunch')) return;
@@ -188,7 +198,7 @@
     launch.type = 'button';
     launch.id = 'copilotLaunch';
     launch.className = 'copilot-launch';
-    launch.title = 'Ask Copilot';
+    launch.title = 'Ask Copilot — help for ' + screenLabel;
     launch.setAttribute('aria-haspopup', 'dialog');
     launch.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg><span>Ask Copilot</span>';
     topRight.insertBefore(launch, topRight.firstChild);
@@ -198,22 +208,59 @@
     backdrop.id = 'copilotBackdrop';
     backdrop.hidden = true;
 
-    var chips =
-      page === 'mock-shells' ? [
+    var CHIP_MAP = {
+      'mock-shells': [
         { id: 'draft-shell', label: 'Draft shell from SAP' },
         { id: 'fill-meta', label: 'Suggest metadata' },
         { id: 'footnotes', label: 'Propose footnotes' }
-      ] : page === 'tracker' ? [
+      ],
+      tracker: [
         { id: 'explain-fail', label: 'Explain failed job' },
         { id: 'fix-note', label: 'Draft fix note' },
         { id: 'run-order', label: 'Suggest run order' }
-      ] : page === 'publisher' ? [
+      ],
+      publisher: [
         { id: 'bundle-toc', label: 'Order this package' },
         { id: 'missing-out', label: 'Flag missing outputs' }
-      ] : [
+      ],
+      files: [
         { id: 'map-assist', label: 'Suggest a mapping' },
         { id: 'where-file', label: 'Where should this land?' }
-      ];
+      ],
+      define: [
+        { id: 'define-vars', label: 'Check define gaps' },
+        { id: 'define-codelist', label: 'Suggest codelists' }
+      ],
+      'study-home': [
+        { id: 'study-next', label: 'What should I do next?' },
+        { id: 'study-modules', label: 'Which modules for CSR?' }
+      ],
+      studies: [
+        { id: 'studies-find', label: 'Find my active studies' },
+        { id: 'studies-phase', label: 'Filter by phase tip' }
+      ],
+      admin: [
+        { id: 'admin-workflow', label: 'Recommend workflow roles' },
+        { id: 'admin-folders', label: 'programs/ layout tip' }
+      ],
+      audit: [
+        { id: 'audit-filter', label: 'Filter lock events' },
+        { id: 'audit-export', label: 'Export for inspection' }
+      ],
+      compute: [
+        { id: 'compute-queue', label: 'Explain queue status' },
+        { id: 'compute-cost', label: 'Estimate run cost' }
+      ],
+      copilot: [
+        { id: 'inbox-triage', label: 'Triage pending suggestions' },
+        { id: 'inbox-reject', label: 'When to reject' }
+      ],
+      generic: [
+        { id: 'generic-help', label: 'What can I do here?' },
+        { id: 'generic-nav', label: 'Where next?' }
+      ]
+    };
+    var chips = CHIP_MAP[page] || CHIP_MAP.generic;
 
     var replies = {
       'draft-shell': 'Draft suggestion (demo): create shell <strong>14.3.5 Laboratory — chemistry shifts</strong> from SAP §11.4. Columns Placebo / Drug X; rows AST, ALT, ALP, BILI. Status stays <em>Draft</em> until you lock — Copilot cannot lock or run.',
@@ -226,7 +273,23 @@
       'missing-out': 'Demo check: if a list program has no locked output under tlf/, flag it before packaging. Copilot only suggests — it does not assemble the PDF.',
       'map-assist': 'Mapping Assist (demo): LB_CHEM.LBTESTCD = AST → SDTM LB.LBTESTCD = AST with units IU/L. Accept opens as Pending review in Copilot inbox.',
       'where-file': 'Land raw vendor extracts under <code>raw/</code>, derived under <code>sdtm/</code> or <code>adam/</code> per the tenant template. Extract data is the pull entry point from File Explorer.',
-      'default': 'I can help with this screen’s tasks as Draft suggestions only. Writes still need a human lock — Copilot cannot lock or run programs. Open the full <a href="copilot.html">Suggestions inbox</a> to accept or reject.'
+      'define-vars': 'Define gap check (demo): ADSL is missing <code>RACE</code> value-level metadata for “Other, specify”. Add a ValueList and link it before freeze.',
+      'define-codelist': 'Codelist tip (demo): reuse tenant list <strong>CL.NY</strong> for Yes/No flags instead of study-local duplicates — keeps Define.xml smaller.',
+      'study-next': 'Next step (demo): open <strong>Tracker</strong> and clear In&nbsp;dev programs for First look, then lock shells on Mock Shells. Copilot only suggests order — it cannot lock.',
+      'study-modules': 'For CSR-ready delivery (demo): enable Mock Shells, Tracker, Define, and Generate PDF Package. File Explorer stays on for raw/SDTM landing.',
+      'studies-find': 'Active studies tip (demo): use the list/grid toggle and filter Phase 3 · Ongoing. Pin ONC-204-301 if it is your daily study.',
+      'studies-phase': 'Phase filter (demo): set Phase = 3 to shrink the portfolio. Status badges on each card show open Tracker jobs.',
+      'admin-workflow': 'Workflow tip (demo): keep Primary + QC on; enable Stats and Medical writer only if those handoffs are in scope. Configure under <strong>Tracker workflow</strong>.',
+      'admin-folders': 'Folder layout (demo): start with a single <code>programs/</code> tree; switch to <code>dev</code> / <code>qc</code> / <code>prod</code> when you need stricter separation.',
+      'audit-filter': 'Audit tip (demo): filter Action = Lock and Object = Program to review Part&nbsp;11-style lock events for this study.',
+      'audit-export': 'Export (demo): use CSV for inspection packages. Copilot cannot alter the append-only trail.',
+      'compute-queue': 'Queue (demo): “Running” jobs hold a session slot; “Queued” wait for concurrency limits. Cancel only from Tracker job actions.',
+      'compute-cost': 'Cost tip (demo): batch First-look list runs overnight to use off-peak capacity. Figures are illustrative only.',
+      'inbox-triage': 'Triage (demo): accept mapping and footnote drafts first; leave run-order suggestions until the custom list is reviewed on Tracker.',
+      'inbox-reject': 'Reject when the suggestion would write outside Draft, change locked outputs, or skip human QC. Rejection is audited.',
+      'generic-help': 'This screen’s Copilot offers Draft suggestions only — never locks, runs, or publishes. Use the chips for common tasks, or ask in the box below.',
+      'generic-nav': 'Typical path (demo): Studies → Study home → Mock Shells / Tracker → Define → Generate PDF Package. Admin is for tenant config.',
+      'default': 'I can help with <strong>' + screenLabel + '</strong> as Draft suggestions only. Writes still need a human lock — Copilot cannot lock or run programs. Open the full <a href="copilot.html">Suggestions inbox</a> to accept or reject.'
     };
 
     var panel = document.createElement('aside');
@@ -237,13 +300,13 @@
     panel.setAttribute('aria-label', 'Ask Copilot');
     panel.innerHTML =
       '<div class="copilot-panel-head">' +
-        '<div><h2>Ask Copilot</h2><p class="hint">Context: this screen · Draft suggestions only</p></div>' +
+        '<div><h2>Ask Copilot</h2><p class="hint">Context: ' + screenLabel + ' · Draft suggestions only</p></div>' +
         '<button type="button" class="btn sm" id="copilotClose" aria-label="Close">Close</button>' +
       '</div>' +
       '<div class="copilot-chips" id="copilotChips"></div>' +
       '<div class="copilot-thread" id="copilotThread"></div>' +
       '<div class="copilot-compose">' +
-        '<input class="search" id="copilotInput" type="text" placeholder="Ask about this screen…" aria-label="Ask Copilot" />' +
+        '<input class="search" id="copilotInput" type="text" placeholder="Ask about ' + screenLabel + '…" aria-label="Ask Copilot" />' +
         '<button type="button" class="btn primary" id="copilotSend">Ask</button>' +
       '</div>' +
       '<div class="copilot-panel-foot">Human lock only · <a href="copilot.html">Open Suggestions inbox</a></div>';
@@ -306,7 +369,11 @@
     });
   }
 
-  /* Ask Copilot header button removed from mock chrome (page kept for inbox demo). */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCopilotPanel);
+  } else {
+    initCopilotPanel();
+  }
 
 })();
 
