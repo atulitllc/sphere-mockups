@@ -5504,16 +5504,30 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 .artifact-meta .meta-cell:has(.row-actions),
 .artifact-meta .meta-cell.actions-cell {
+  display: flex;
+  width: 100%;
   min-width: 140px;
   overflow: visible;
   justify-content: flex-end;
+  align-items: center;
 }
-.artifact-meta .row-actions {
+.artifact-meta .meta-cell.actions-cell .row-actions,
+.artifact-meta .meta-cell:has(.row-actions) .row-actions {
   display: inline-flex;
   flex-wrap: nowrap;
   flex-shrink: 0;
   gap: 6px;
   align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+.tracker-col-head .artifact-meta .meta-cell:last-child {
+  justify-content: flex-end;
+  text-align: right;
+}
+.tracker-col-head .artifact-meta .meta-cell:last-child .col-head-label {
+  width: 100%;
+  text-align: right;
 }
 .row-people-wrap {
   position: relative;
