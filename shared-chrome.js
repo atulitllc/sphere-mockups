@@ -675,11 +675,13 @@
     box.innerHTML =
       '<div class="user-chrome-who" title="' + (u.email || u.name).replace(/"/g, '&quot;') + '">' +
         '<span class="user-chrome-avatar" aria-hidden="true">' +
-          '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="1.75"/></svg>' +
+          '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>' +
         '</span>' +
         '<span class="user-chrome-name">' + u.name.replace(/</g, '&lt;') + '</span>' +
-      '</div>' +
-      '<button type="button" class="user-chrome-logout" id="btnLogout" title="Sign out">Log out</button>';
+        '<button type="button" class="user-chrome-logout" id="btnLogout" title="Sign out" aria-label="Sign out">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" d="M16 17l5-5-5-5"/><path fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" d="M21 12H9"/></svg>' +
+        '</button>' +
+      '</div>';
 
     var tenant = topRight.querySelector('.tenant-pill');
     if (tenant) topRight.insertBefore(box, tenant);

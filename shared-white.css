@@ -657,13 +657,15 @@ body.nav-collapsed {
 .crumb strong { color: var(--text); font-weight: 600; }
 
 .tenant-pill {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 5px 11px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border));
+  padding: 6px 12px;
   border-radius: 999px;
-  color: var(--muted);
+  color: var(--accent);
   white-space: nowrap;
-  font-size: 12.5px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .top-right {
@@ -5445,17 +5447,16 @@ html[data-contrast="low"][data-theme="dark"] {
 .user-chrome {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   flex-shrink: 0;
-  max-width: min(280px, 42vw);
+  max-width: min(240px, 40vw);
 }
 .user-chrome-who {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
-  height: 36px;
-  padding: 0 10px 0 8px;
+  height: 34px;
+  padding: 0 4px 0 8px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
@@ -5463,35 +5464,41 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 .user-chrome-avatar {
   display: inline-flex;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   color: var(--accent);
   flex-shrink: 0;
 }
-.user-chrome-avatar svg { width: 20px; height: 20px; }
+.user-chrome-avatar svg { width: 18px; height: 18px; }
 .user-chrome-name {
   font-size: 12.5px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 120px;
 }
 .user-chrome-logout {
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  font-size: 12.5px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
   cursor: pointer;
   flex-shrink: 0;
 }
+.user-chrome-logout svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
 .user-chrome-logout:hover {
-  background: var(--row-hover);
-  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
   color: var(--danger);
 }
 
