@@ -5187,33 +5187,40 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* SAP section select-all */
+/* SAP section Select control */
 .sap-section-bar {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 0 8px;
+  display: flex;
   align-items: center;
+  gap: 8px;
   min-width: 0;
-}
-.sap-section-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 28px;
-  margin: 0;
-  cursor: pointer;
-}
-.sap-section-check input {
-  width: auto;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
 }
 .sap-section-bar .sap-section-head {
-  width: auto;
+  flex: 1 1 auto;
   min-width: 0;
+  width: auto;
 }
-.tracker-section .sap-section-bar .sap-section-head {
-  padding: 6px 4px 4px;
+.sap-section-select-btn {
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sap-section-select-btn:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+.sap-section-select-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sap-section-select-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }

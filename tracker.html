@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=sapchk1" />
+<link rel="stylesheet" href="shared-white.css?v=sapsel1" />
 <script>
 (function () {
   try {
@@ -276,14 +276,12 @@
         <div class="tracker-board" id="trackerBoard">
           <section class="sap-section" data-sap-group="Demographics">
             <div class="sap-section-bar">
-              <label class="sap-section-check" title="Select all in Demographics">
-                <input type="checkbox" class="sap-section-select" aria-label="Select all in Demographics" />
-              </label>
               <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-demographics">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Demographics</span>
               <span class="sap-section-count">3</span>
             </button>
+              <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Demographics" aria-label="Select all in Demographics">Select</button>
             </div>
             <div class="sap-section-body" id="sap-body-demographics">
             <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R">
@@ -347,14 +345,12 @@
           </section>
           <section class="sap-section" data-sap-group="Efficacy">
             <div class="sap-section-bar">
-              <label class="sap-section-check" title="Select all in Efficacy">
-                <input type="checkbox" class="sap-section-select" aria-label="Select all in Efficacy" />
-              </label>
               <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-efficacy">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Efficacy</span>
               <span class="sap-section-count">3</span>
             </button>
+              <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Efficacy" aria-label="Select all in Efficacy">Select</button>
             </div>
             <div class="sap-section-body" id="sap-body-efficacy">
             <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R">
@@ -418,14 +414,12 @@
           </section>
           <section class="sap-section" data-sap-group="Safety TLFs">
             <div class="sap-section-bar">
-              <label class="sap-section-check" title="Select all in Safety TLFs">
-                <input type="checkbox" class="sap-section-select" aria-label="Select all in Safety TLFs" />
-              </label>
               <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-safety-tlfs">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Safety TLFs</span>
               <span class="sap-section-count">3</span>
             </button>
+              <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Safety TLFs" aria-label="Select all in Safety TLFs">Select</button>
             </div>
             <div class="sap-section-body" id="sap-body-safety-tlfs">
             <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.R">
@@ -489,14 +483,12 @@
           </section>
           <section class="sap-section" data-sap-group="Labs">
             <div class="sap-section-bar">
-              <label class="sap-section-check" title="Select all in Labs">
-                <input type="checkbox" class="sap-section-select" aria-label="Select all in Labs" />
-              </label>
               <button type="button" class="sap-section-head" aria-expanded="true" aria-controls="sap-body-labs">
               <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               <span class="sap-section-title">Labs</span>
               <span class="sap-section-count">1</span>
             </button>
+              <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Labs" aria-label="Select all in Labs">Select</button>
             </div>
             <div class="sap-section-body" id="sap-body-labs">
             <article class="artifact-row is-readonly" data-type="Table" data-status="Frozen" data-tags="Second wave" data-sap="Labs" data-program="tfl_14_3_5_lb.R">
@@ -1081,7 +1073,19 @@
     });
     checkAll.checked = allChecked;
     checkAll.indeterminate = !allChecked && sel.length > 0;
-    syncSapSectionSelects();
+    Array.prototype.forEach.call(board.querySelectorAll('.sap-section'), function (sec) {
+      var btn = sec.querySelector('[data-sap-select]');
+      if (!btn) return;
+      var rows = Array.prototype.slice.call(sec.querySelectorAll('.artifact-row')).filter(function (row) {
+        return !row.classList.contains('is-filtered-out') && !row.hasAttribute('hidden');
+      });
+      var checked = rows.filter(function (row) {
+        var cb = row.querySelector('.row-check');
+        return cb && cb.checked;
+      }).length;
+      btn.textContent = (rows.length > 0 && checked === rows.length) ? 'Clear' : 'Select';
+      btn.disabled = rows.length === 0;
+    });
 
     var hasSel = n > 0;
     var btnDel = document.getElementById('btnDeleteSelected');
@@ -1182,28 +1186,6 @@
   }
 
 
-  function sectionVisibleRows(sec) {
-    return Array.prototype.slice.call(sec.querySelectorAll('.artifact-row')).filter(function (row) {
-      return !row.classList.contains('is-filtered-out') && !row.hasAttribute('hidden');
-    });
-  }
-
-  function syncSapSectionSelects() {
-    Array.prototype.forEach.call(board.querySelectorAll('.sap-section'), function (sec) {
-      var box = sec.querySelector('.sap-section-select');
-      if (!box) return;
-      var rows = sectionVisibleRows(sec);
-      var checked = 0;
-      rows.forEach(function (row) {
-        var cb = row.querySelector('.row-check');
-        if (cb && cb.checked) checked += 1;
-      });
-      box.checked = rows.length > 0 && checked === rows.length;
-      box.indeterminate = checked > 0 && checked < rows.length;
-      box.disabled = rows.length === 0;
-    });
-  }
-
   checkAll.addEventListener('change', function () {
     visibleRows().forEach(function (row) {
       var cb = row.querySelector('.row-check');
@@ -1213,24 +1195,32 @@
   });
 
   board.addEventListener('change', function (e) {
-    var t = e.target;
-    if (!t) return;
-    if (t.classList.contains('sap-section-select')) {
-      var sec = t.closest('.sap-section');
-      if (!sec) return;
-      var on = t.checked;
-      sectionVisibleRows(sec).forEach(function (row) {
-        var cb = row.querySelector('.row-check');
-        if (cb) cb.checked = on;
-      });
-      syncBulk();
-      return;
-    }
-    if (t.classList.contains('row-check')) syncBulk();
+    if (e.target && e.target.classList.contains('row-check')) syncBulk();
   });
 
   board.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('.sap-section-check')) return;
+    var selBtn = e.target.closest && e.target.closest('[data-sap-select]');
+    if (selBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var sec = selBtn.closest('.sap-section');
+      if (!sec) return;
+      var rows = Array.prototype.slice.call(sec.querySelectorAll('.artifact-row')).filter(function (row) {
+        return !row.classList.contains('is-filtered-out') && !row.hasAttribute('hidden');
+      });
+      var allOn = rows.length > 0 && rows.every(function (row) {
+        var cb = row.querySelector('.row-check');
+        return cb && cb.checked;
+      });
+      var next = !allOn;
+      rows.forEach(function (row) {
+        var cb = row.querySelector('.row-check');
+        if (cb) cb.checked = next;
+      });
+      selBtn.textContent = next ? 'Clear' : 'Select';
+      syncBulk();
+      return;
+    }
     var head = e.target.closest && e.target.closest('.sap-section-head');
     if (!head) return;
     e.preventDefault();
@@ -1276,12 +1266,12 @@
     sec.setAttribute('data-sap-group', sap);
     sec.innerHTML =
       '<div class="sap-section-bar">' +
-      '<label class="sap-section-check" title="Select all in ' + sap + '">' +
-      '<input type="checkbox" class="sap-section-select" aria-label="Select all in ' + sap + '" /></label>' +
       '<button type="button" class="sap-section-head" aria-expanded="true" aria-controls="' + bid + '">' +
       '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
       '<span class="sap-section-title">' + sap + '</span>' +
-      '<span class="sap-section-count">0</span></button></div>' +
+      '<span class="sap-section-count">0</span></button>' +
+      '<button type="button" class="sap-section-select-btn" data-sap-select title="Select all in ' + sap + '" aria-label="Select all in ' + sap + '">Select</button>' +
+      '</div>' +
       '<div class="sap-section-body" id="' + bid + '"></div>';
     board.appendChild(sec);
     return sec;
