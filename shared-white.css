@@ -5429,3 +5429,119 @@ html[data-contrast="low"][data-theme="dark"] {
 .sheet-ctx button.danger {
   color: var(--danger);
 }
+
+
+/* Signed-in user + logout */
+.user-chrome {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  max-width: min(280px, 42vw);
+}
+.user-chrome-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+}
+.user-chrome-avatar {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.user-chrome-avatar svg { width: 20px; height: 20px; }
+.user-chrome-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+.user-chrome-logout {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.user-chrome-logout:hover {
+  background: var(--row-hover);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  color: var(--danger);
+}
+
+
+/* Tracker row roles (hover tip) */
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.row-people-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.row-people-tip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 40;
+  width: 248px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+}
+.row-people-wrap:hover .row-people-tip,
+.row-people-wrap:focus-within .row-people-tip,
+.row-people-wrap.is-open .row-people-tip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.row-people-tip-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+.row-people-role + .row-people-role {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.row-people-role-label {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.row-people-role-names {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.35;
+}

@@ -306,11 +306,7 @@
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCopilotPanel);
-  } else {
-    initCopilotPanel();
-  }
+  /* Ask Copilot header button removed from mock chrome (page kept for inbox demo). */
 
 })();
 
@@ -643,5 +639,68 @@
     document.addEventListener('DOMContentLoaded', initA11yPicker);
   } else {
     initA11yPicker();
+  }
+})();
+
+
+/* Signed-in user chip + logout (all chrome pages) */
+(function () {
+  function readUser() {
+    var name = '';
+    var email = '';
+    try {
+      name = localStorage.getItem('sphere-user-name') || '';
+      email = localStorage.getItem('sphere-user-email') || '';
+    } catch (e) {}
+    if (!name && !email) {
+      name = 'Jordan Patel';
+      email = 'jordan.patel@acmebiometrics.com';
+    } else if (!name && email) {
+      name = email.split('@')[0];
+    }
+    return { name: name, email: email };
+  }
+
+  function initUserChrome() {
+    if (document.getElementById('userChrome')) return;
+    var topRight = document.querySelector('header.top .top-right');
+    if (!topRight) return;
+    var path = (location.pathname || '').split('/').pop() || '';
+    if (/^login\.html$/i.test(path)) return;
+
+    var u = readUser();
+    var box = document.createElement('div');
+    box.className = 'user-chrome';
+    box.id = 'userChrome';
+    box.innerHTML =
+      '<div class="user-chrome-who" title="' + (u.email || u.name).replace(/"/g, '&quot;') + '">' +
+        '<span class="user-chrome-avatar" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="1.75"/></svg>' +
+        '</span>' +
+        '<span class="user-chrome-name">' + u.name.replace(/</g, '&lt;') + '</span>' +
+      '</div>' +
+      '<button type="button" class="user-chrome-logout" id="btnLogout" title="Sign out">Log out</button>';
+
+    var tenant = topRight.querySelector('.tenant-pill');
+    if (tenant) topRight.insertBefore(box, tenant);
+    else topRight.appendChild(box);
+
+    var btn = document.getElementById('btnLogout');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        try {
+          localStorage.removeItem('sphere-signed-in');
+          localStorage.removeItem('sphere-user-name');
+          localStorage.removeItem('sphere-user-email');
+        } catch (e) {}
+        location.href = 'login.html';
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUserChrome);
+  } else {
+    initUserChrome();
   }
 })();
