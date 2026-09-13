@@ -5185,3 +5185,35 @@ html[data-contrast="low"][data-theme="dark"] {
   --row-hover: #273449;
   --chip-bg: #273449;
 }
+
+
+/* SAP section select-all */
+.sap-section-bar {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 0 8px;
+  align-items: center;
+  min-width: 0;
+}
+.sap-section-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+}
+.sap-section-check input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.sap-section-bar .sap-section-head {
+  width: auto;
+  min-width: 0;
+}
+.tracker-section .sap-section-bar .sap-section-head {
+  padding: 6px 4px 4px;
+}
