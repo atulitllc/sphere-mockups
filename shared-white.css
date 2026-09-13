@@ -5620,3 +5620,86 @@ html[data-contrast="low"][data-theme="dark"] {
   background: var(--accent-soft);
   color: var(--accent);
 }
+
+
+/* Studies — wide table + new study form */
+.studies-table-wide {
+  min-width: 1080px;
+}
+.studies-table-wide th,
+.studies-table-wide td {
+  font-size: 12.5px;
+  vertical-align: middle;
+}
+.study-name-cell {
+  font-weight: 600;
+  color: var(--text);
+}
+.study-sub {
+  font-size: 11.5px;
+  margin-top: 2px;
+}
+.modal.modal-lg {
+  width: min(720px, 96vw);
+  max-width: 96vw;
+}
+.new-study-form {
+  display: grid;
+  gap: 16px;
+}
+.new-study-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+}
+.new-study-grid .field-span-2 {
+  grid-column: 1 / -1;
+}
+.new-study-form .field {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+.new-study-form .field-label {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.new-study-form .field-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.new-study-form .field-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+}
+.new-study-form textarea.field-input {
+  min-height: 64px;
+  resize: vertical;
+}
+.new-study-form .field-input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.new-study-preview {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--row-hover);
+}
+@media (max-width: 720px) {
+  .new-study-grid { grid-template-columns: 1fr; }
+  .new-study-grid .field-span-2 { grid-column: auto; }
+}

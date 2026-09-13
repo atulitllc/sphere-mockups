@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=copilot1" />
+<link rel="stylesheet" href="shared-white.css?v=studies2" />
 <script>
 (function () {
   try {
@@ -163,9 +163,14 @@
             <span class="badge locked">Active</span>
           </div>
           <div class="study-meta-row">
-            <span><span class="k">Sponsor</span> Acme Biometrics</span>
+            <span><span class="k">Type</span> Submission</span>
             <span><span class="k">Phase</span> 3</span>
-            <span><span class="k">Indication</span> NSCLC 2L+</span>
+            <span><span class="k">Statistician</span> Riley Nguyen</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">FPFV</span> 2023-04-12</span>
+            <span><span class="k">LPLV</span> 2025-11-30</span>
+            <span><span class="k">DB lock</span> 2026-03-15</span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v4.1 · SAP v2.0 · 428 subjects</span>
@@ -182,9 +187,14 @@
             <span class="badge locked">Active</span>
           </div>
           <div class="study-meta-row">
-            <span><span class="k">Sponsor</span> Acme Biometrics</span>
+            <span><span class="k">Type</span> DMC</span>
             <span><span class="k">Phase</span> 2</span>
-            <span><span class="k">Indication</span> HER2+ mBC</span>
+            <span><span class="k">Statistician</span> Dana Brooks</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">FPFV</span> 2024-01-08</span>
+            <span><span class="k">LPLV</span> —</span>
+            <span><span class="k">DB lock</span> —</span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v2.0 · SAP draft · 186 subjects</span>
@@ -201,9 +211,14 @@
             <span class="badge running">Startup</span>
           </div>
           <div class="study-meta-row">
-            <span><span class="k">Sponsor</span> Northwind Vaccines</span>
+            <span><span class="k">Type</span> Interim analysis</span>
             <span><span class="k">Phase</span> 3</span>
-            <span><span class="k">Indication</span> RSV prevention</span>
+            <span><span class="k">Statistician</span> Taylor Kim</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">FPFV</span> 2025-09-01</span>
+            <span><span class="k">LPLV</span> —</span>
+            <span><span class="k">DB lock</span> —</span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v1.1 · libraries provisioning</span>
@@ -220,9 +235,14 @@
             <span class="badge not-started">Closed</span>
           </div>
           <div class="study-meta-row">
-            <span><span class="k">Sponsor</span> Summit HemOnc</span>
+            <span><span class="k">Type</span> Regulatory</span>
             <span><span class="k">Phase</span> 1/2</span>
-            <span><span class="k">Indication</span> R/R AML</span>
+            <span><span class="k">Statistician</span> Priya Shah</span>
+          </div>
+          <div class="study-meta-row">
+            <span><span class="k">FPFV</span> 2021-06-20</span>
+            <span><span class="k">LPLV</span> 2024-02-14</span>
+            <span><span class="k">DB lock</span> 2024-05-01</span>
           </div>
           <div class="study-card-foot">
             <span class="muted">CSR delivered · read-only archive</span>
@@ -239,52 +259,79 @@
         </div>
         <div class="table-panel">
         <div class="table-wrap">
-        <table class="studies-table">
+        <table class="studies-table studies-table-wide">
           <thead>
             <tr>
-              <th>Study</th>
-              <th>Title</th>
-              <th>Sponsor</th>
+              <th>Folder</th>
+              <th>Study name</th>
+              <th>Type</th>
+              <th>Statistician</th>
+              <th>FPFV</th>
+              <th>LPLV</th>
+              <th>DB lock</th>
               <th>Phase</th>
-              <th>Indication</th>
               <th>Status</th>
               <th></th>
             </tr>
           </thead>
-          <tbody>
-            <tr class="row-link" data-href="study-home.html?study=ONC-204-301">
+          <tbody id="studiesTableBody">
+            <tr class="row-link" data-href="study-home.html?study=ONC-204-301" data-folder="ONC-204-301">
               <td class="num">ONC-204-301</td>
-              <td>Metastatic NSCLC</td>
-              <td>Acme Biometrics</td>
+              <td>
+                <div class="study-name-cell">Metastatic NSCLC</div>
+                <div class="study-sub muted">Submission · NSCLC 2L+</div>
+              </td>
+              <td><span class="tag-chip">Submission</span></td>
+              <td>Riley Nguyen</td>
+              <td class="num">2023-04-12</td>
+              <td class="num">2025-11-30</td>
+              <td class="num">2026-03-15</td>
               <td>3</td>
-              <td>NSCLC 2L+</td>
               <td><span class="badge locked">Active</span></td>
               <td><a class="btn ghost" href="study-home.html?study=ONC-204-301">Open</a></td>
             </tr>
-            <tr class="row-link" data-href="study-home.html?study=ONC-118-402">
+            <tr class="row-link" data-href="study-home.html?study=ONC-118-402" data-folder="ONC-118-402">
               <td class="num">ONC-118-402</td>
-              <td>HER2+ breast cancer</td>
-              <td>Acme Biometrics</td>
+              <td>
+                <div class="study-name-cell">HER2+ breast cancer</div>
+                <div class="study-sub muted">DMC · HER2+ mBC</div>
+              </td>
+              <td><span class="tag-chip">DMC</span></td>
+              <td>Dana Brooks</td>
+              <td class="num">2024-01-08</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
               <td>2</td>
-              <td>HER2+ mBC</td>
               <td><span class="badge locked">Active</span></td>
               <td><a class="btn ghost" href="study-home.html?study=ONC-118-402">Open</a></td>
             </tr>
-            <tr class="row-link" data-href="study-home.html?study=VAC-302-011">
+            <tr class="row-link" data-href="study-home.html?study=VAC-302-011" data-folder="VAC-302-011">
               <td class="num">VAC-302-011</td>
-              <td>RSV vaccine — adults ≥60</td>
-              <td>Northwind Vaccines</td>
+              <td>
+                <div class="study-name-cell">RSV vaccine — adults ≥60</div>
+                <div class="study-sub muted">Interim analysis · RSV prevention</div>
+              </td>
+              <td><span class="tag-chip">Interim analysis</span></td>
+              <td>Taylor Kim</td>
+              <td class="num">2025-09-01</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
               <td>3</td>
-              <td>RSV prevention</td>
               <td><span class="badge running">Startup</span></td>
               <td><a class="btn ghost" href="study-home.html?study=VAC-302-011">Open</a></td>
             </tr>
-            <tr class="row-link" data-href="study-home.html?study=HEM-220-015">
+            <tr class="row-link" data-href="study-home.html?study=HEM-220-015" data-folder="HEM-220-015">
               <td class="num">HEM-220-015</td>
-              <td>Relapsed / refractory AML</td>
-              <td>Summit HemOnc</td>
+              <td>
+                <div class="study-name-cell">Relapsed / refractory AML</div>
+                <div class="study-sub muted">Regulatory · R/R AML</div>
+              </td>
+              <td><span class="tag-chip">Regulatory</span></td>
+              <td>Priya Shah</td>
+              <td class="num">2021-06-20</td>
+              <td class="num">2024-02-14</td>
+              <td class="num">2024-05-01</td>
               <td>1/2</td>
-              <td>R/R AML</td>
               <td><span class="badge not-started">Closed</span></td>
               <td><a class="btn ghost" href="study-home.html?study=HEM-220-015">Open</a></td>
             </tr>
@@ -299,30 +346,96 @@
   </section>
 
 <div class="modal-backdrop" id="structureModal" hidden role="dialog" aria-modal="true" aria-labelledby="structureTitle">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-head">
       <div>
         <h2 id="structureTitle">New study</h2>
-        <div class="hint">Creates the study and the standard SPHERE folder tree from the tenant template.</div>
+        <div class="hint">Descriptive name and folder id can differ. Creates the tenant folder tree on confirm.</div>
       </div>
       <button class="btn ghost sm" type="button" id="structureClose" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
-      <div class="folder-path" id="structureStudyPath">{study}/</div>
-      <p class="hint" style="margin:0 0 10px">Folders that will be created:</p>
-      <ul class="folder-list" id="structurePreview">
-        <li class="dir"><span class="fname">raw/</span></li>
-        <li class="dir"><span class="fname">sdtm/</span></li>
-        <li class="dir"><span class="fname">adam/</span></li>
-        <li class="dir"><span class="fname">programs/</span></li>
-        <li class="dir"><span class="fname">tlf/</span></li>
-        <li class="dir"><span class="fname">logs/</span></li>
-      </ul>
-      <p class="hint" style="margin-top:12px">Template from Admin → Study layout. Existing folders are left as-is (stub).</p>
+      <form id="newStudyForm" class="new-study-form" autocomplete="off">
+        <div class="new-study-grid">
+          <label class="field">
+            <span class="field-label">Study name</span>
+            <input class="field-input" id="nsName" name="name" type="text" required placeholder="e.g. Metastatic NSCLC — first-line" />
+          </label>
+          <label class="field">
+            <span class="field-label">Folder name</span>
+            <input class="field-input" id="nsFolder" name="folder" type="text" required placeholder="e.g. ONC-204-301" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,48}" title="Letters, numbers, dot, underscore, hyphen" />
+            <span class="field-hint">Path id under the study root — can differ from the display name</span>
+          </label>
+          <label class="field field-span-2">
+            <span class="field-label">Description</span>
+            <textarea class="field-input" id="nsDesc" name="description" rows="2" placeholder="Short study purpose, population, or analysis scope"></textarea>
+          </label>
+          <label class="field">
+            <span class="field-label">Type</span>
+            <select class="field-input" id="nsType" name="type" required>
+              <option value="Submission">Submission</option>
+              <option value="DMC">DMC</option>
+              <option value="Interim analysis">Interim analysis</option>
+              <option value="Regulatory">Regulatory</option>
+              <option value="CSR">CSR</option>
+              <option value="Exploratory">Exploratory</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Phase</span>
+            <select class="field-input" id="nsPhase" name="phase">
+              <option>1</option>
+              <option>1/2</option>
+              <option>2</option>
+              <option selected>3</option>
+              <option>4</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Indication</span>
+            <input class="field-input" id="nsIndication" name="indication" type="text" placeholder="e.g. NSCLC 2L+" />
+          </label>
+          <label class="field">
+            <span class="field-label">Statistician</span>
+            <input class="field-input" id="nsStat" name="statistician" type="text" placeholder="Lead biostatistician" />
+          </label>
+          <label class="field">
+            <span class="field-label">Sponsor</span>
+            <input class="field-input" id="nsSponsor" name="sponsor" type="text" value="Acme Biometrics" />
+          </label>
+          <label class="field">
+            <span class="field-label">FPFV</span>
+            <input class="field-input" id="nsFpfv" name="fpfv" type="date" />
+          </label>
+          <label class="field">
+            <span class="field-label">LPLV</span>
+            <input class="field-input" id="nsLplv" name="lplv" type="date" />
+          </label>
+          <label class="field">
+            <span class="field-label">DB lock (planned)</span>
+            <input class="field-input" id="nsDblock" name="dblock" type="date" />
+          </label>
+        </div>
+        <div class="new-study-preview">
+          <div class="folder-path" id="structureStudyPath">folder/</div>
+          <p class="hint" style="margin:8px 0 6px">Folders that will be created:</p>
+          <ul class="folder-list" id="structurePreview">
+            <li class="dir"><span class="fname">raw/</span></li>
+            <li class="dir"><span class="fname">sdtm/</span></li>
+            <li class="dir"><span class="fname">adam/</span></li>
+            <li class="dir"><span class="fname">programs/</span></li>
+            <li class="dir"><span class="fname">tlf/</span></li>
+            <li class="dir"><span class="fname">logs/</span></li>
+          </ul>
+          <p class="hint" style="margin-top:10px">Template from Admin → Study layout.</p>
+        </div>
+      </form>
     </div>
     <div class="modal-foot">
       <button class="btn" type="button" id="structureCancel">Cancel</button>
-      <button class="btn primary" type="button" id="structureConfirm">Create folders</button>
+      <button class="btn primary" type="submit" form="newStudyForm" id="structureConfirm">Create study</button>
     </div>
   </div>
 </div>
@@ -426,10 +539,7 @@
   var newStudyBtn = document.getElementById('newStudyBtn');
   if (newStudyBtn) {
     newStudyBtn.addEventListener('click', function () {
-      var modal = document.getElementById('structureModal');
-      var pathEl = document.getElementById('structureStudyPath');
-      if (pathEl) pathEl.textContent = 'NEW-STUDY/';
-      if (modal) modal.removeAttribute('hidden');
+      if (window.openNewStudyModal) window.openNewStudyModal();
     });
   }
 
@@ -442,18 +552,17 @@
   });
 })();
 
-  /* Create study structure modal */
+    /* Create study structure modal */
   (function () {
     var modal = document.getElementById('structureModal');
     if (!modal) return;
-    var openBtns = document.querySelectorAll('[data-open-structure]');
     var closeBtn = document.getElementById('structureClose');
     var cancelBtn = document.getElementById('structureCancel');
-    var confirmBtn = document.getElementById('structureConfirm');
+    var form = document.getElementById('newStudyForm');
     var pathEl = document.getElementById('structureStudyPath');
     var toast = document.getElementById('toast');
     var toastTimer = null;
-    var currentStudy = 'ONC-204-301';
+    var success = document.getElementById('structureSuccess');
 
     function showToast(msg) {
       if (!toast) return;
@@ -463,35 +572,166 @@
       toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2800);
     }
 
-    function open(study) {
-      currentStudy = study || 'ONC-204-301';
-      if (pathEl) pathEl.textContent = currentStudy + '/';
-      modal.removeAttribute('hidden');
+    function slugFolder(name) {
+      return String(name || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 32) || 'NEW-STUDY';
     }
-    function close() { modal.setAttribute('hidden', ''); }
 
-    openBtns.forEach(function (b) {
-      b.addEventListener('click', function () {
-        open(b.getAttribute('data-study') || currentStudy);
+    function syncPath() {
+      var folder = (document.getElementById('nsFolder') || {}).value || '';
+      folder = folder.trim() || 'folder';
+      if (pathEl) pathEl.textContent = folder + '/';
+    }
+
+    function resetForm() {
+      if (!form) return;
+      form.reset();
+      var sponsor = document.getElementById('nsSponsor');
+      if (sponsor) sponsor.value = 'Acme Biometrics';
+      var folder = document.getElementById('nsFolder');
+      if (folder) folder.value = '';
+      syncPath();
+    }
+
+    function openNewStudyModal() {
+      resetForm();
+      modal.removeAttribute('hidden');
+      var name = document.getElementById('nsName');
+      if (name) setTimeout(function () { name.focus(); }, 40);
+    }
+    window.openNewStudyModal = openNewStudyModal;
+
+    function close() {
+      modal.setAttribute('hidden', '');
+    }
+
+    function fmtDate(v) {
+      return v ? v : '—';
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+
+    function addStudy(data) {
+      var tbody = document.getElementById('studiesTableBody');
+      if (tbody) {
+        var tr = document.createElement('tr');
+        tr.className = 'row-link';
+        tr.setAttribute('data-href', 'study-home.html?study=' + encodeURIComponent(data.folder));
+        tr.setAttribute('data-folder', data.folder);
+        tr.innerHTML =
+          '<td class="num">' + esc(data.folder) + '</td>' +
+          '<td><div class="study-name-cell">' + esc(data.name) + '</div>' +
+          '<div class="study-sub muted">' + esc(data.type) + (data.indication ? ' · ' + esc(data.indication) : '') + '</div></td>' +
+          '<td><span class="tag-chip">' + esc(data.type) + '</span></td>' +
+          '<td>' + esc(data.statistician || '—') + '</td>' +
+          '<td class="num">' + esc(fmtDate(data.fpfv)) + '</td>' +
+          '<td class="num">' + esc(fmtDate(data.lplv)) + '</td>' +
+          '<td class="num">' + esc(fmtDate(data.dblock)) + '</td>' +
+          '<td>' + esc(data.phase) + '</td>' +
+          '<td><span class="badge running">Startup</span></td>' +
+          '<td><a class="btn ghost" href="study-home.html?study=' + encodeURIComponent(data.folder) + '">Open</a></td>';
+        tbody.insertBefore(tr, tbody.firstChild);
+        tr.addEventListener('click', function (e) {
+          if (e.target.closest('a,button')) return;
+          location.href = tr.getAttribute('data-href');
+        });
+      }
+
+      var cards = document.getElementById('studiesCards');
+      if (cards) {
+        var a = document.createElement('a');
+        a.className = 'study-card';
+        a.href = 'study-home.html?study=' + encodeURIComponent(data.folder);
+        a.innerHTML =
+          '<div class="study-card-top"><div>' +
+          '<div class="study-id">' + esc(data.folder) + '</div>' +
+          '<div class="study-title">' + esc(data.name) + '</div></div>' +
+          '<span class="badge running">Startup</span></div>' +
+          '<div class="study-meta-row">' +
+          '<span><span class="k">Type</span> ' + esc(data.type) + '</span>' +
+          '<span><span class="k">Phase</span> ' + esc(data.phase) + '</span>' +
+          '<span><span class="k">Statistician</span> ' + esc(data.statistician || '—') + '</span></div>' +
+          '<div class="study-meta-row">' +
+          '<span><span class="k">FPFV</span> ' + esc(fmtDate(data.fpfv)) + '</span>' +
+          '<span><span class="k">LPLV</span> ' + esc(fmtDate(data.lplv)) + '</span>' +
+          '<span><span class="k">DB lock</span> ' + esc(fmtDate(data.dblock)) + '</span></div>' +
+          '<div class="study-card-foot"><span class="muted">' + esc(data.description || 'New study') + '</span>' +
+          '<span class="open-link">Open workspace →</span></div>';
+        cards.insertBefore(a, cards.firstChild);
+      }
+
+      if (success) {
+        var span = success.querySelector('[data-study-name]');
+        if (span) span.textContent = data.folder;
+        success.classList.add('show');
+        setTimeout(function () { success.classList.remove('show'); }, 5000);
+      }
+    }
+
+    ['nsFolder', 'nsName'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function () {
+        if (id === 'nsName') {
+          var folder = document.getElementById('nsFolder');
+          if (folder && !folder.dataset.touched) {
+            folder.value = slugFolder(el.value);
+          }
+        }
+        if (id === 'nsFolder') {
+          el.dataset.touched = '1';
+        }
+        syncPath();
       });
     });
+
     if (closeBtn) closeBtn.addEventListener('click', close);
     if (cancelBtn) cancelBtn.addEventListener('click', close);
     modal.addEventListener('click', function (e) {
       if (e.target === modal) close();
     });
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', function () {
-        close();
-        var banner = document.getElementById('structureSuccess');
-        if (banner) {
-          banner.classList.add('show');
-          banner.querySelector('[data-study-name]') && (banner.querySelector('[data-study-name]').textContent = currentStudy);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hasAttribute('hidden')) close();
+    });
+
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var folder = (document.getElementById('nsFolder').value || '').trim();
+        var name = (document.getElementById('nsName').value || '').trim();
+        if (!folder || !name) {
+          showToast('Study name and folder name are required');
+          return;
         }
-        showToast('Created standard folder tree under ' + currentStudy + ' (stub)');
+        if (document.querySelector('tr[data-folder="' + folder.replace(/"/g, '') + '"]')) {
+          showToast('Folder name already exists');
+          return;
+        }
+        addStudy({
+          folder: folder,
+          name: name,
+          description: (document.getElementById('nsDesc').value || '').trim(),
+          type: document.getElementById('nsType').value,
+          phase: document.getElementById('nsPhase').value,
+          indication: (document.getElementById('nsIndication').value || '').trim(),
+          statistician: (document.getElementById('nsStat').value || '').trim(),
+          sponsor: (document.getElementById('nsSponsor').value || '').trim(),
+          fpfv: document.getElementById('nsFpfv').value,
+          lplv: document.getElementById('nsLplv').value,
+          dblock: document.getElementById('nsDblock').value
+        });
+        close();
+        showToast('Created ' + folder + ' with standard folders');
       });
     }
   })();
+
 
 </script>
 
@@ -517,6 +757,6 @@
   if (cardBtn) cardBtn.addEventListener('click', function () { apply('cards'); });
 })();
 </script>
-<script src="shared-chrome.js?v=copilot1"></script>
+<script src="shared-chrome.js?v=studies2"></script>
 </body>
 </html>
