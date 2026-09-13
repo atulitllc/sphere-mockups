@@ -1725,7 +1725,7 @@ label .req::after { content: " *"; color: var(--danger); }
   background: var(--surface);
 }
 .sap-section-body > .artifact-row:nth-child(even) {
-  background: color-mix(in srgb, var(--accent) 4.5%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 2%, var(--surface));
 }
 .sap-section-body > .artifact-row:hover { background: var(--row-hover); }
 .sap-section-body > .artifact-row.row-selected {
