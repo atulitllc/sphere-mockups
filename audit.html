@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=roles2" />
+<link rel="stylesheet" href="shared-white.css?v=roles4" />
 <script>
 (function () {
   try {
@@ -77,7 +77,7 @@
         <button class="hamburger" id="hamburger" type="button" aria-label="Collapse navigation" aria-controls="sideNav" aria-expanded="true" title="Collapse navigation">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <div class="crumb">Studies / <strong>ONC-204-301</strong> / Audit</div>
+        <div class="crumb"><a href="studies.html">Studies</a> / <a href="admin.html">Admin</a> / <strong>Audit</strong></div>
       </div>
       <div class="top-right">
         <div class="accent-picker" id="accentPicker">
@@ -116,7 +116,27 @@
       </div>
     </header>
 
-    <div class="content">
+          <div class="page-head" style="padding:0 0 8px">
+        <div class="page-title">Admin</div>
+        <div class="page-sub">Tenant settings</div>
+      </div>
+      <div class="admin-layout">
+          <nav class="admin-subnav" aria-label="Admin sections">
+            <a class="admin-nav-ext" href="admin.html?panel=overview">Overview</a>
+            <a class="admin-nav-ext" href="admin.html?panel=modules">Modules</a>
+            <a class="admin-nav-ext" href="admin.html?panel=branding">Branding</a>
+            <a class="admin-nav-ext" href="admin.html?panel=sso">SSO</a>
+            <a class="admin-nav-ext" href="admin.html?panel=connectors">Connectors</a>
+            <a class="admin-nav-ext" href="admin.html?panel=workflow">Tracker workflow</a>
+            <a class="admin-nav-ext" href="admin.html?panel=version-control">Version control</a>
+            <a class="admin-nav-ext" href="admin.html?panel=users">Users &amp; roles</a>
+            <a class="admin-nav-ext" href="admin.html?panel=defaults">Study layout</a>
+            <a class="admin-nav-ext" href="admin.html?panel=compliance">Compliance</a>
+            <a class="admin-nav-ext active" href="audit.html" aria-current="page">Audit</a>
+          </nav>
+        <div class="admin-panels">
+          <div class="admin-panel active" id="panel-audit">
+<div class="content">
       <div class="stack">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
         <div class="page-intro page-intro-compact" style="margin-bottom:0">
@@ -233,6 +253,9 @@
       </div>
       </div>
     </div>
+          </div>
+        </div>
+      </div>
   </section>
 </div>
 
@@ -332,6 +355,6 @@
 
 })();
 </script>
-<script src="shared-chrome.js?v=roles2"></script>
+<script src="shared-chrome.js?v=roles4"></script>
 </body>
 </html>
