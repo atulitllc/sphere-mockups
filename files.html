@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=copilot1" />
+<link rel="stylesheet" href="shared-white.css?v=files1" />
 <script>
 (function () {
   try {
@@ -117,7 +117,7 @@
     </header>
 
     <div class="content">
-      <div class="stack">
+      <div class="stack files-stack">
         <div class="page-intro page-intro-compact">
         <div class="page-title-row">
           <h1 class="page-title">File Explorer</h1>
@@ -765,7 +765,7 @@
   };
 })();
 </script>
-<script src="shared-chrome.js?v=copilot1"></script>
+<script src="shared-chrome.js?v=files1"></script>
 
 <script>
 (function () {
@@ -777,14 +777,17 @@
     var mode = SPHERE.getProgramsFolderMode();
     var hint = document.getElementById('programsFolderHint');
     if (!hint) {
-      var sub = document.querySelector('.page-sub');
-      if (sub) {
-        hint = document.createElement('div');
-        hint.id = 'programsFolderHint';
-        hint.className = 'note-banner';
-        hint.style.margin = '0 0 10px';
-        hint.setAttribute('role', 'note');
-        sub.parentNode.insertBefore(hint, sub.nextSibling);
+      hint = document.createElement('div');
+      hint.id = 'programsFolderHint';
+      hint.className = 'note-banner';
+      hint.style.margin = '0';
+      hint.setAttribute('role', 'note');
+      var layout = document.querySelector('.files-layout');
+      if (layout && layout.parentNode) {
+        layout.parentNode.insertBefore(hint, layout);
+      } else {
+        var sub = document.querySelector('.page-sub');
+        if (sub) sub.parentNode.insertBefore(hint, sub.nextSibling);
       }
     }
     if (!hint) return;

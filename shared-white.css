@@ -872,27 +872,21 @@ body.nav-collapsed {
 
 /* Collapsed = zero-height; expanded = pull-down (max-height/opacity) */
 .note-banner.note-collapsible {
-  display: block;
+  display: none; /* out of flow when collapsed — no stack gap */
   overflow: hidden;
   max-height: 0;
   opacity: 0;
   padding: 0;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
   border-width: 0;
   pointer-events: none;
-  transition:
-    max-height 0.3s ease,
-    opacity 0.22s ease,
-    padding 0.28s ease,
-    margin 0.28s ease,
-    border-width 0.28s ease;
 }
 .note-banner.note-collapsible:not(.is-collapsed) {
+  display: block;
   max-height: 640px;
   opacity: 1;
   padding: 12px 14px;
-  margin-bottom: 14px;
+  margin: 0 0 10px;
   border-width: 1px;
   pointer-events: auto;
 }
@@ -5702,4 +5696,22 @@ html[data-contrast="low"][data-theme="dark"] {
 @media (max-width: 720px) {
   .new-study-grid { grid-template-columns: 1fr; }
   .new-study-grid .field-span-2 { grid-column: auto; }
+}
+
+
+/* File Explorer: pull tree/list up under intro + programs hint */
+.page-intro-compact + .note-banner.note-collapsible.is-collapsed + .files-layout,
+.page-intro-compact + .files-layout {
+  margin-top: 0;
+}
+.content.stack.files-stack,
+.stack.files-stack {
+  gap: 10px;
+}
+#programsFolderHint.note-banner {
+  margin: 8px 0 0 !important;
+  padding: 8px 12px;
+}
+.page-intro-compact:has(#programsFolderHint) {
+  margin-bottom: 0;
 }
