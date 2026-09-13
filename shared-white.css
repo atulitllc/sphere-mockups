@@ -1365,7 +1365,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .badge.shell-na { color: var(--muted); background: var(--chip-bg); border-color: var(--border); }
 
 .btn.sm { padding: 5px 9px; font-size: 12px; border-radius: 7px; }
-.row-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.row-actions { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; }
 
 .note-banner {
   display: flex;
@@ -1962,7 +1962,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .artifact-meta {
   display: grid;
   /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(110px, 1fr) 72px 88px 140px 72px 72px 80px 200px;
+  grid-template-columns: minmax(110px, 1fr) 72px 88px 140px 72px 72px 88px 118px;
   gap: 8px 12px;
   align-items: center;
   width: 100%;
@@ -5495,31 +5495,42 @@ html[data-contrast="low"][data-theme="dark"] {
 .row-people-wrap {
   position: relative;
   display: inline-flex;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+}
+.row-people-wrap > .row-people {
+  /* button fills the wrap hit target */
+}
+.artifact-meta .meta-cell:has(.row-actions) {
+  min-width: 118px;
+  overflow: visible;
+}
+.artifact-meta .row-actions {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 .row-people-tip {
+  display: none;
   position: absolute;
   right: 0;
   bottom: calc(100% + 6px);
-  z-index: 40;
+  z-index: 60;
   width: 248px;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
-  opacity: 0;
-  visibility: hidden;
   pointer-events: none;
-  transform: translateY(4px);
-  transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
 }
 .row-people-wrap:hover .row-people-tip,
 .row-people-wrap:focus-within .row-people-tip,
 .row-people-wrap.is-open .row-people-tip {
-  opacity: 1;
-  visibility: visible;
+  display: block;
   pointer-events: auto;
-  transform: translateY(0);
 }
 .row-people-tip-title {
   font-size: 11px;
@@ -5544,4 +5555,27 @@ html[data-contrast="low"][data-theme="dark"] {
   font-size: 12.5px;
   color: var(--text);
   line-height: 1.35;
+}
+
+
+/* Admin subnav: Audit opens audit.html */
+.admin-subnav a.admin-nav-ext {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 500;
+  font-size: 13.5px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+.admin-subnav a.admin-nav-ext:hover {
+  color: var(--text);
+  background: var(--row-hover);
 }
