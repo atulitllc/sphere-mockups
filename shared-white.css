@@ -3761,14 +3761,33 @@ label .req::after { content: " *"; color: var(--danger); }
   background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
 }
 /* Mock Shells catalog: larger + on Add */
-.btn.icon-btn.btn-add-shell {
-  width: 32px;
+.btn.icon-btn.btn-add-shell.btn.icon-text-btn,
+.btn.icon-text-btn.btn-add-shell {
   height: 32px;
+  min-height: 32px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
 }
-.btn.icon-btn.btn-add-shell svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.5;
+.btn-add-shell.btn.icon-text-btn:hover,
+.btn.icon-text-btn.btn-add-shell:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+.btn.icon-text-btn.btn-add-shell svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
 }
 
 .sr-only {
