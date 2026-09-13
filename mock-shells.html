@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=shelltoc1" />
+<link rel="stylesheet" href="shared-white.css?v=seed1" />
 <script>
 (function () {
   try {
@@ -805,12 +805,24 @@
   function seedCatalog(studyId) {
     if (studyId === 'ONC-204-301') {
       return [
-        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
-        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
-        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
-        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Safety summary', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
-        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
-        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' })
+        makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics and baseline characteristics of the Safety analysis set', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
+        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline disease characteristics and prior anticancer therapies (ITT)', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
+        makeShell({ id: '14.2.3', number: '14.2.3', type: 'Table', title: 'Duration of response and time to response among confirmed responders (FAS)', status: 'Draft', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Duration of response' }),
+        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary — treatment-emergent adverse events (Safety analysis set)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
+        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview of TEAE, SAE, Grade ≥3, and discontinuations', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
+        makeShell({ id: '14.3.1.1', number: '14.3.1.1', type: 'Table', title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by SOC/PT', automate: true, metadata: AE_OVERVIEW_META }),
+        makeShell({ id: '14.3.1.2', number: '14.3.1.2', type: 'Table', title: 'Serious adverse events by SOC/PT and relationship to study drug', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE by relationship' }),
+        makeShell({ id: '14.3.1.3', number: '14.3.1.3', type: 'Table', title: 'Adverse events leading to permanent discontinuation of study treatment by Preferred Term', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE discontinuation' }),
+        makeShell({ id: '14.3.1.4', number: '14.3.1.4', type: 'Table', title: 'Grade 3 or higher treatment-emergent adverse events by System Organ Class and Preferred Term', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE Grade 3+' }),
+        makeShell({ id: '14.3.1.5', number: '14.3.1.5', type: 'Table', title: 'Adverse events of special interest: immune-mediated events, infusion reactions, and hepatic toxicity', status: 'Locked', locked: true, analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AESI' }),
+        makeShell({ id: '14.3.1.6', number: '14.3.1.6', type: 'Figure', title: 'Time to first Grade ≥3 treatment-emergent adverse event — Kaplan–Meier (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE time-to-event' }),
+        makeShell({ id: '14.3.2.1', number: '14.3.2.1', type: 'Listing', title: 'Listing of serious adverse events with onset, duration, outcome, and action taken', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE listing' }),
+        makeShell({ id: '14.3.2.2', number: '14.3.2.2', type: 'Listing', title: 'Listing of deaths and adverse events with fatal outcome including primary cause of death', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Death listing' }),
+        makeShell({ id: '14.3.3', number: '14.3.3', type: 'Table', title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by severity' }),
+        makeShell({ id: '14.3.4', number: '14.3.4', type: 'Table', title: 'Common adverse events (≥5% in any arm) by Preferred Term — descending frequency', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Common AEs' }),
+        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival — full analysis set with landmark rates at 12 and 24 months', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' }),
+        makeShell({ id: '14.3.5.1', number: '14.3.5.1', type: 'Table', title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Lab chemistry shifts' })
       ];
     }
     /* other studies start with a light catalog so copy result is visible */
@@ -2693,6 +2705,6 @@
 
 })();
 </script>
-<script src="shared-chrome.js?v=shelltoc1"></script>
+<script src="shared-chrome.js?v=seed1"></script>
 </body>
 </html>
