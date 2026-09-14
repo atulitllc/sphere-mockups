@@ -1958,7 +1958,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .artifact-meta {
   display: grid;
   /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(90px, 1fr) 64px 80px 120px 64px 64px 80px 132px;
+  grid-template-columns: minmax(120px, 1.2fr) 70px 86px 120px 70px 70px 84px 152px;
   gap: 8px 12px;
   align-items: center;
   width: 100%;
@@ -1970,16 +1970,21 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 @media (max-width: 1200px) {
+  /* Keep all 8 Tracker columns; scroll horizontally instead of crushing Actions */
   .artifact-meta {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(110px, 1.1fr) 66px 80px 110px 66px 66px 80px 152px;
+    min-width: 820px;
   }
-  .artifact-meta .row-actions {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
+  .artifact-meta .meta-cell.actions-cell .row-actions,
+  .artifact-meta .meta-cell:has(.row-actions) .row-actions {
+    justify-content: flex-end;
   }
 }
 @media (max-width: 720px) {
-  .artifact-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .artifact-meta {
+    grid-template-columns: minmax(100px, 1fr) 60px 72px 96px 60px 60px 72px 152px;
+    min-width: 760px;
+  }
 }
 
 /* Soft status cue without full pill — Frozen only when needed */
@@ -4735,16 +4740,18 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .btn.icon-btn.row-people,
 .btn.icon-btn.row-exec,
 .btn.icon-btn.row-edit {
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  min-height: 26px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   padding: 0;
   box-sizing: border-box;
   flex: 0 0 auto;
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 .btn.icon-btn.row-history,
 .btn.icon-btn.row-people,
@@ -5530,7 +5537,7 @@ html[data-contrast="low"][data-theme="dark"] {
 .artifact-meta .meta-cell.actions-cell {
   display: flex;
   width: 100%;
-  min-width: 132px;
+  min-width: 152px;
   overflow: visible;
   justify-content: flex-end;
   align-items: center;
@@ -5789,14 +5796,18 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* Keep Tracker Actions on-screen */
+/* Keep Tracker Actions on-screen — parent .content uses overflow-x: clip */
+.content:has(.tracker-board) {
+  overflow-x: auto;
+}
 .tracker-board {
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
+  min-width: 0;
 }
-.artifact-row,
-.tracker-col-head {
-  min-width: 980px;
+.tracker-col-head .artifact-meta,
+.artifact-row .artifact-meta {
+  min-width: 820px;
 }
 
 /* Bulk run split control */
