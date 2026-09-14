@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=exec1" />
+<link rel="stylesheet" href="shared-white.css?v=exec2" />
 <script>
 (function () {
   try {
@@ -220,7 +220,17 @@
           </div>
           <div class="bulk-right">
             <div class="bulk-handoffs" id="bulkHandoffs" role="group" aria-label="Send actions"></div>
-            <button class="btn primary" type="button" id="btnRun">Run selected (R/SAS)</button>
+            <div class="bulk-run-wrap" id="bulkRunWrap">
+              <button class="btn primary" type="button" id="btnRun" title="Run production programs for selection">Run Prod</button>
+              <button class="btn primary bulk-run-caret" type="button" id="btnRunMenu" aria-haspopup="menu" aria-expanded="false" title="More run options" aria-label="More run options">
+                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+              </button>
+              <div class="bulk-run-menu" id="bulkRunMenu" role="menu" hidden>
+                <button type="button" role="menuitem" data-bulk-exec="prod">Production programs</button>
+                <button type="button" role="menuitem" data-bulk-exec="qc">QC programs only</button>
+                <button type="button" role="menuitem" data-bulk-exec="both">Both (QC then Prod)</button>
+              </div>
+            </div>
             <button class="btn" type="button" id="btnPdfFromSel" title="Open Generate PDF Package with this selection">Generate PDF Package</button>
             <select id="bulkTag" style="width:140px" aria-label="Assign tag">
               <option value="">Edit tags…</option>
@@ -1555,27 +1565,31 @@
     this.value = '';
   });
 
-  document.getElementById('btnRun').addEventListener('click', function () {
+  function runSelectedPrograms(mode) {
+    mode = mode || 'prod';
     var rows = selectedRows();
     if (!rows.length) return;
     var runnable = [];
     var blocked = [];
     rows.forEach(function (row) {
-      var co = '';
       var status = row.getAttribute('data-status') || '';
       var prog = row.getAttribute('data-program') || '';
       if (!prog) { blocked.push(row); return; }
-      if (status === 'Approved' || status === 'Frozen') { blocked.push(row); return; }
-      if (prog) runnable.push(row);
-      else blocked.push(row);
+      // Prod can run approved; QC/both skip Frozen only
+      if (mode === 'prod') {
+        if (status === 'Frozen') { blocked.push(row); return; }
+      } else if (status === 'Frozen') {
+        blocked.push(row); return;
+      }
+      runnable.push(row);
     });
     if (!runnable.length) {
-      showToast('No runnable programs in selection (need check-out or allowed status; demo)');
+      showToast('No runnable programs in selection');
       return;
     }
     jobSeq += 1;
     var jobId = 'JOB-' + jobSeq;
-    var names = runnable.map(function (row) { return row.getAttribute('data-program'); }).join(' · ');
+    var what = mode === 'prod' ? 'Production' : mode === 'qc' ? 'QC' : 'QC then Production';
     runnable.forEach(function (row) {
       row.setAttribute('data-job', 'queued');
       setJobCell(row, 'queued');
@@ -1585,32 +1599,55 @@
         row.setAttribute('data-job', i === 0 ? 'running' : 'queued');
         setJobCell(row, i === 0 ? 'running' : 'queued');
       });
-      if (runnable[0]) {
-        setTimeout(function () {
-          runnable.forEach(function (row) {
-            row.setAttribute('data-job', 'done');
-            setJobCell(row, 'done');
-          });
-          var jobRows = document.getElementById('jobBody').querySelectorAll('tr');
-          if (jobRows[0]) {
-            jobRows[0].querySelector('td:last-child').innerHTML = '<span class="meta-v">Done</span>';
-          }
-          showToast(jobId + ' complete');
-        }, 2200);
-      }
-    }, 600);
-
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + jobId + '</td><td>' + names + '</td><td>Just now</td><td><span class="meta-v muted">Queued</span></td>';
-    document.getElementById('jobBody').insertBefore(tr, document.getElementById('jobBody').firstChild);
+      showToast(what + ' · ' + runnable.length + ' program(s) · ' + jobId);
+    }, 200);
     setTimeout(function () {
-      tr.querySelector('td:last-child').innerHTML = '<span class="meta-v" style="color:var(--accent)">Running</span>';
-    }, 600);
+      runnable.forEach(function (row) {
+        row.setAttribute('data-job', 'done');
+        setJobCell(row, 'done');
+      });
+      showToast(what + ' finished · ' + runnable.length + ' program(s)');
+    }, 1400);
+    if (blocked.length) {
+      showToast(blocked.length + ' row(s) skipped');
+    }
+  }
 
-    var msg = 'Queued ' + runnable.length + ' program(s) as ' + jobId;
-    if (blocked.length) msg += ' · ' + blocked.length + ' skipped (QC / no program)';
-    showToast(msg);
+  document.getElementById('btnRun').addEventListener('click', function () {
+    runSelectedPrograms('prod');
   });
+
+  (function () {
+    var wrap = document.getElementById('bulkRunWrap');
+    var caret = document.getElementById('btnRunMenu');
+    var menu = document.getElementById('bulkRunMenu');
+    if (!wrap || !caret || !menu) return;
+    function closeMenu() {
+      menu.hidden = true;
+      caret.setAttribute('aria-expanded', 'false');
+      wrap.classList.remove('is-open');
+    }
+    function openMenu() {
+      menu.hidden = false;
+      caret.setAttribute('aria-expanded', 'true');
+      wrap.classList.add('is-open');
+    }
+    caret.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (menu.hidden) openMenu(); else closeMenu();
+    });
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest('[data-bulk-exec]');
+      if (!item) return;
+      e.preventDefault();
+      closeMenu();
+      runSelectedPrograms(item.getAttribute('data-bulk-exec'));
+    });
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target)) closeMenu();
+    });
+  })();
 
   /* Import modal */
   var importModal = document.getElementById('importModal');
@@ -3040,6 +3077,6 @@
   refreshAllWorkflowUI();
 })();
 </script>
-<script src="shared-chrome.js?v=exec1"></script>
+<script src="shared-chrome.js?v=exec2"></script>
 </body>
 </html>
