@@ -5865,3 +5865,90 @@ html[data-contrast="low"][data-theme="dark"] {
   background: var(--accent-soft);
   color: var(--accent);
 }
+
+
+/* Study home — darker accordion card for label + meta (Feedback #12) */
+.study-hero {
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 12%, transparent);
+  overflow: hidden;
+}
+html[data-theme="dark"] .study-hero {
+  background: color-mix(in srgb, var(--accent) 18%, #0f172a);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+.study-hero-toggle {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.study-hero-toggle:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.study-hero-heading { min-width: 0; flex: 1 1 auto; }
+.study-hero-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.study-hero-title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.study-hero-sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+.study-hero-chevron {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  transition: transform .18s ease;
+}
+.study-hero-chevron svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.study-hero.is-open .study-hero-chevron {
+  transform: rotate(180deg);
+}
+.study-hero-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border));
+}
+.study-hero.is-open .study-hero-body {
+  display: block;
+}
+.study-hero-meta {
+  margin-top: 12px;
+}
+.study-hero-meta .meta-item {
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}

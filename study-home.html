@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=exec3" />
+<link rel="stylesheet" href="shared-white.css?v=home1" />
 <script>
 (function () {
   try {
@@ -123,27 +123,30 @@
         <div><strong>Folder tree created</strong> for <span data-study-name>ONC-204-301</span> — raw, sdtm, adam, programs, tlf, logs.</div>
       </div>
 
-      <div class="page-intro page-intro-compact">
-        <div class="page-title-row">
-          <h1 class="page-title">ONC-204-301 — Metastatic NSCLC</h1>
-        </div>
-        <p class="page-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
-      </div>
-
-      <section class="section">
-        <div class="section-head">
-          <h2 class="section-heading">Study meta</h2>
-          <span class="badge locked">Active</span>
-        </div>
-        <div class="meta-grid">
-          <div class="meta-item"><div class="k">Sponsor</div><div class="v">Acme Biometrics</div></div>
-          <div class="meta-item"><div class="k">Indication</div><div class="v">NSCLC 2L+</div></div>
-          <div class="meta-item"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
-          <div class="meta-item"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
-          <div class="meta-item"><div class="k">Lead programmer</div><div class="v">J. Patel</div></div>
-          <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
-          <div class="meta-item"><div class="k">SAP status</div><div class="v">Locked</div></div>
-          <div class="meta-item"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+      <section class="study-hero is-open" id="studyHero" aria-label="Study summary">
+        <button type="button" class="study-hero-toggle" id="studyHeroToggle" aria-expanded="true" aria-controls="studyHeroBody">
+          <div class="study-hero-heading">
+            <div class="study-hero-title-row">
+              <h1 class="page-title study-hero-title">ONC-204-301 — Metastatic NSCLC</h1>
+              <span class="badge locked">Active</span>
+            </div>
+            <p class="page-sub study-hero-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
+          </div>
+          <span class="study-hero-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </button>
+        <div class="study-hero-body" id="studyHeroBody">
+          <div class="meta-grid study-hero-meta">
+            <div class="meta-item"><div class="k">Sponsor</div><div class="v">X Pharma</div></div>
+            <div class="meta-item"><div class="k">Indication</div><div class="v">NSCLC 2L+</div></div>
+            <div class="meta-item"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
+            <div class="meta-item"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
+            <div class="meta-item"><div class="k">Lead programmer</div><div class="v">J. Patel</div></div>
+            <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
+            <div class="meta-item"><div class="k">SAP status</div><div class="v">Locked</div></div>
+            <div class="meta-item"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+          </div>
         </div>
       </section>
 
@@ -458,6 +461,19 @@
   });
 })();
 </script>
-<script src="shared-chrome.js?v=copilot1"></script>
+<script src="shared-chrome.js?v=home1"></script>
+
+<script>
+(function () {
+  var hero = document.getElementById('studyHero');
+  var btn = document.getElementById('studyHeroToggle');
+  if (!hero || !btn) return;
+  btn.addEventListener('click', function () {
+    var open = hero.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+
 </body>
 </html>
