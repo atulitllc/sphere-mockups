@@ -5947,8 +5947,9 @@ html[data-theme="dark"] .study-hero {
   margin-top: 12px;
 }
 .study-hero-meta .meta-item {
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 2px 0;
+  box-shadow: none;
 }
