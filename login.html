@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=home2" />
+<link rel="stylesheet" href="shared-white.css?v=xph1" />
 <script>
 (function () {
   try {
@@ -432,7 +432,7 @@
 
           <div class="login-tenant" title="Active tenant">
             <span class="login-tenant-dot" aria-hidden="true"></span>
-            <span><strong>Acme Biometrics</strong> · ten_acme_biometrics</span>
+            <span><strong>X Pharma</strong> · ten_x_pharma</span>
           </div>
 
           <div class="login-error" id="loginError" role="alert">Enter a work email and password to continue.</div>
@@ -440,7 +440,7 @@
           <form id="loginForm" action="studies.html" method="get" novalidate>
             <div class="login-field">
               <label for="loginEmail">Work email</label>
-              <input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="you@acmebiometrics.com" value="jordan.patel@acmebiometrics.com" required />
+              <input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="you@xpharma.com" value="jordan.patel@xpharma.com" required />
             </div>
             <div class="login-field">
               <label for="loginPassword">Password</label>
@@ -505,7 +505,7 @@
   var err = document.getElementById('loginError');
   function goIn() {
     var emailEl = document.getElementById('loginEmail');
-    var email = ((emailEl && emailEl.value) || '').trim() || 'jordan.patel@acmebiometrics.com';
+    var email = ((emailEl && emailEl.value) || '').trim() || 'jordan.patel@xpharma.com';
     var local = email.split('@')[0] || 'user';
     var name = local.split(/[._-]+/).filter(Boolean).map(function (p) {
       return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
