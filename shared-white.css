@@ -5953,3 +5953,9 @@ html[data-theme="dark"] .study-hero {
   padding: 2px 0;
   box-shadow: none;
 }
+
+/* New study form: keep fields top-aligned; hints must not stretch sibling inputs */
+.new-study-grid { align-items: start; }
+.new-study-form .field { align-content: start; grid-auto-rows: max-content; }
+.new-study-form input.field-input,
+.new-study-form select.field-input { height: 38px; }
