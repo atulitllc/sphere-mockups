@@ -6131,96 +6131,9 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 }
 
 
-/* ===== Tracker: floating bulk action bar (bottom-centre, shown while rows are selected) ===== */
-.bulk-bar,
-.tracker-section .bulk-bar {
-  position: fixed;
-  top: auto;
-  bottom: 18px;
-  left: calc(var(--nav-w) + 24px);
-  right: 24px;
-  width: fit-content;
-  margin: 0 auto;
-  z-index: 72; /* above table/header (30) and bg jobs (70) so the upward menu is never covered; below modals (80) + toast (90) */
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 8px 14px;
-  padding: 9px 12px 9px 9px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.20), 0 3px 10px rgba(15, 23, 42, 0.10);
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(16px);
-  pointer-events: none;
-  transition: opacity .18s ease, transform .22s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .22s;
-}
-.bulk-bar.visible,
-.tracker-section .bulk-bar.visible {
-  display: flex;
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-  transition-delay: 0s;
-}
-[data-theme="dark"] .bulk-bar { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 3px 10px rgba(0, 0, 0, 0.35); }
-.bulk-bar,
-.tracker-section .bulk-bar { flex-wrap: nowrap; align-items: center; }
-.bulk-bar .bulk-left {
-  display: grid;
-  grid-template-columns: 28px auto;
-  grid-template-rows: auto auto;
-  column-gap: 8px;
-  row-gap: 0;
-  align-items: center;
-  flex: 0 0 auto;
-  min-width: 0;
-  max-width: 220px;
-}
-.bulk-bar .bulk-clear { grid-row: 1 / span 2; }
-.bulk-bar .sel-count { white-space: nowrap; line-height: 1.2; }
-.bulk-bar #bulkHint { font-size: 11px !important; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.bulk-bar .bulk-right { flex: 1 1 auto; min-width: 0; gap: 6px; justify-content: flex-start; padding-left: 12px; border-left: 1px solid var(--border); }
-.bulk-bar .bulk-right .btn { min-height: 0; height: 30px; padding-top: 0; padding-bottom: 0; font-size: 12.5px; }
-.bulk-bar .bulk-right .btn:not(.bulk-run-caret):not(#btnRun) { padding-left: 10px; padding-right: 10px; }
-.bulk-bar .bulk-right select { height: 30px; padding-top: 0; padding-bottom: 0; line-height: 28px; font-size: 12.5px; width: 124px !important; }
 /* Long program names: ellipsis instead of spilling into the Type column (visible at larger UI zoom) */
 .artifact-row .artifact-meta .program-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bulk-clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-}
-.bulk-clear:hover { color: var(--text); background: var(--row-hover); border-color: var(--border-strong); }
-.bulk-clear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-/* Caret menu opens upward from the floating bar */
-.bulk-bar .bulk-run-menu { top: auto; bottom: calc(100% + 8px); }
-/* Keep last rows reachable and avoid collisions while the bar is up */
-body.has-bulkbar .content { padding-bottom: calc(var(--bulkbar-h, 64px) + 48px); }
-.bgjobs { transition: bottom .22s ease; }
-body.has-bulkbar .bgjobs { bottom: calc(var(--bulkbar-h, 64px) + 30px); }
-body.has-bulkbar .toast { bottom: calc(var(--bulkbar-h, 64px) + 32px); }
-body.has-bulkbar.has-bgjobs .toast { bottom: calc(var(--bulkbar-h, 64px) + var(--bgjobs-h, 48px) + 42px); }
-@media (max-width: 860px) {
-  .bulk-bar,
-  .tracker-section .bulk-bar { left: 12px; right: 12px; bottom: 12px; }
-  body.has-bulkbar .bgjobs { bottom: calc(var(--bulkbar-h, 64px) + 22px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bulk-bar, .tracker-section .bulk-bar, .bgjobs { transition: none; transform: none; }
-}
+
 /* Largest UI zoom: tighter Tracker tracks so Actions stay on screen */
 html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta {
@@ -6228,3 +6141,16 @@ html[data-ui-zoom="125"] .artifact-row .artifact-meta {
   column-gap: 10px;
   min-width: 800px;
 }
+
+/* Tracker bulk bar: pinned under the app header while rows are selected and the page is scrolled */
+.bulk-bar-spacer { height: 0; }
+.bulk-bar.is-pinned {
+  position: fixed;
+  z-index: 25; /* above rows/table; below the app header (30) and its menus, bg jobs, modals */
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+[data-theme="dark"] .bulk-bar.is-pinned { box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3); }

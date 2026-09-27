@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=float1" />
+<link rel="stylesheet" href="shared-white.css?v=sticky1" />
 <script>
 (function () {
   try {
@@ -213,12 +213,9 @@
           </div>
         </div>
 
-        <div class="bulk-bar" id="bulkBar" role="region" aria-label="Bulk actions for selected programs">
+        <div class="bulk-bar" id="bulkBar" aria-live="polite">
           <div class="bulk-left">
-            <button class="bulk-clear" type="button" id="btnClearSel" title="Clear selection" aria-label="Clear selection">
-              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-            </button>
-            <span class="sel-count" id="selCount" aria-live="polite">0 selected</span>
+            <span class="sel-count" id="selCount">0 selected</span>
             <span class="muted" style="font-size:12px" id="bulkHint">Select rows for Send / Run</span>
           </div>
           <div class="bulk-right">
@@ -253,6 +250,7 @@
             <select id="bulkAddToList" style="width:140px" aria-label="Add selected programs to a list">
               <option value="">Add to list…</option>
             </select>
+            <button class="btn ghost" type="button" id="btnClearSel">Clear</button>
           </div>
         </div>
 
@@ -1357,8 +1355,7 @@
     var n = sel.length;
     selCount.textContent = n + ' selected';
     bulkBar.classList.toggle('visible', n > 0);
-    body.classList.toggle('has-bulkbar', n > 0);
-    body.style.setProperty('--bulkbar-h', bulkBar.offsetHeight + 'px');
+    if (typeof updateBulkPin === 'function') updateBulkPin();
     visibleRows().forEach(function (row) {
       var cb = row.querySelector('.row-check');
       row.classList.toggle('row-selected', !!(cb && cb.checked));
@@ -2443,12 +2440,43 @@
   });
   updateJobTableRow({ tr: null, jobs: [] });
 
-  /* Floating bulk bar: keep its height available for page padding / panel offset */
-  if (window.ResizeObserver) {
-    new ResizeObserver(function () {
-      if (bulkBar.offsetHeight) body.style.setProperty('--bulkbar-h', bulkBar.offsetHeight + 'px');
-    }).observe(bulkBar);
+  /* Bulk bar: stays in its place above the table, pins under the app header while scrolling
+     (fixed-on-scroll + spacer; .content is a horizontal scroll container so CSS sticky can't engage) */
+  var bulkSpacer = document.createElement('div');
+  bulkSpacer.className = 'bulk-bar-spacer';
+  bulkSpacer.setAttribute('aria-hidden', 'true');
+  bulkBar.parentNode.insertBefore(bulkSpacer, bulkBar);
+  var bulkPinned = false;
+  function updateBulkPin() {
+    if (!bulkSpacer.parentNode) return;
+    var header = document.querySelector('.top');
+    var section = bulkBar.closest('.tracker-section') || bulkBar.parentNode;
+    var visible = bulkBar.classList.contains('visible');
+    var sp = bulkSpacer.getBoundingClientRect();
+    var scale = (bulkSpacer.offsetWidth && sp.width) ? sp.width / bulkSpacer.offsetWidth : 1;
+    var headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+    var barH = bulkBar.offsetHeight * scale;
+    var secBottom = section.getBoundingClientRect().bottom;
+    var shouldPin = visible && sp.top < headerBottom && secBottom > headerBottom + barH + 8 * scale;
+    if (shouldPin) {
+      var mb = parseFloat(getComputedStyle(bulkBar).marginBottom) || 0;
+      bulkSpacer.style.height = (bulkBar.offsetHeight + mb) + 'px';
+      bulkBar.style.top = (headerBottom / scale) + 'px';
+      bulkBar.style.left = (sp.left / scale) + 'px';
+      bulkBar.style.width = bulkSpacer.offsetWidth + 'px';
+      if (!bulkPinned) { bulkBar.classList.add('is-pinned'); bulkPinned = true; }
+    } else if (bulkPinned) {
+      bulkBar.classList.remove('is-pinned');
+      bulkBar.style.top = bulkBar.style.left = bulkBar.style.width = '';
+      bulkSpacer.style.height = '';
+      bulkPinned = false;
+    }
   }
+  window.addEventListener('scroll', updateBulkPin, { passive: true });
+  window.addEventListener('resize', updateBulkPin);
+  var contentEl = document.querySelector('.content');
+  if (contentEl) contentEl.addEventListener('scroll', updateBulkPin, { passive: true });
+  if (window.ResizeObserver) new ResizeObserver(updateBulkPin).observe(bulkSpacer.parentNode);
 
   /* Import modal */
   var importModal = document.getElementById('importModal');
@@ -3901,6 +3929,6 @@
   refreshAllWorkflowUI();
 })();
 </script>
-<script src="shared-chrome.js?v=float1"></script>
+<script src="shared-chrome.js?v=sticky1"></script>
 </body>
 </html>
