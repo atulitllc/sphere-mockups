@@ -6533,3 +6533,24 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 .files-infobar code { font-size: 11px; }
 .files-infobar a { color: var(--accent); }
 .files-stack:has(.files-infobar) .page-intro { margin-bottom: 0; }
+.layout-save-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.layout-dirty { color: var(--warn, #b45309); font-weight: 650; }
+.layout-saved-ok { color: var(--ok); font-weight: 650; }
+.layout-save-row a, #layoutLevelSaved a { color: var(--accent); font-weight: 600; }
+.btn.is-dirty { box-shadow: 0 0 0 3px var(--focus-ring); }
+.layout-card-default { margin-left: auto; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--chip-bg); border-radius: 999px; padding: 1px 7px; }
+.layout-card.is-saved .layout-card-title::after { content: ' · saved'; font-weight: 500; color: var(--ok); font-size: 11px; }
+/* Locked shell: muted, read-only editor (flow3) */
+.shell-lock-banner { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--chip-bg); color: var(--text); font-size: 12.5px; }
+.shell-lock-banner svg { width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.shell-lock-banner .btn { margin-left: auto; }
+.shell-editor.is-locked .sheet-titles,
+.shell-editor.is-locked .sheet-grid-wrap,
+.shell-editor.is-locked .sheet-blocks,
+.shell-editor.is-locked .fig-preview { opacity: .6; filter: grayscale(.35); pointer-events: none; user-select: none; }
+.shell-editor.is-locked .sheet-grid-wrap { background: color-mix(in srgb, var(--chip-bg) 60%, transparent); border-radius: 8px; }
+.shell-editor.is-locked #btnAddRow,
+.shell-editor.is-locked .row-float-toolbar,
+.shell-editor.is-locked .col-select-toolbar { display: none !important; }
+.shell-editor.is-locked .shell-props select:not(#metaStatus) { opacity: .6; pointer-events: none; }
+#btnLock.is-active { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }

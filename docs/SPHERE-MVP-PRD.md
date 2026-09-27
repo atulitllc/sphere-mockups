@@ -9,6 +9,7 @@ These are durable product decisions from the client demo flow. The mockups are f
 - Figure shells show axis, legend and number-at-risk placeholders. Listing shells show column headers plus a few placeholder rows.
 - New shells (**+ Add**) start from a clean, SAP-aware template. They are auto-numbered within their SAP section (14.1.x Demographics, 14.2.x Efficacy, 14.3.x Safety) and start as Draft v0.1.
 - **Status dropdown drives the lifecycle** (flow3): a clearly visible, colour-coded **Status** select in the shell header (Draft / In review / Final / Locked). The editor toolbar keeps only **Metadata**, **Copy to study** and **Lock**; Save draft, Save & generate and the Finalize button were removed. Setting Final bumps a pre-1.0 version to v1.0. Edits **autosave** silently to the browser (demo); a neutral version label (e.g. `v1.0 · In Tracker`) sits next to the title.
+- **Locked shells** (Lock button or Status = Locked) render muted and read-only: titles, grid and footnotes greyed (≈0.6 opacity, light tint; dark mode too), no editing, row toolbar and + Add Row hidden, and a "Locked" banner with an **Unlock** action (demo: the lead programmer may unlock). The Lock button toggles to Unlock. Unlocking restores the previous status (default Final) and the normal look.
 - Demo seed: 14.1.3 Subject disposition and 14.3.7 Vital signs start as **Final** (+ usable immediately); 14.3.0 starts In review.
 - The editor pane is sticky-friendly: the TOC list fills the viewport height below the header and stays in view while the editor scrolls (resizes with the window; works at 125% UI zoom; stacks on narrow screens).
 - **Metadata** is enabled for every shell (the tenant module is on by default). It is editable and saved with the shell, and it feeds the Tracker record and the program header. Fields: output ID, title, type, population, analysis datasets, key variables, sort order, footnotes, status, version, and last modified by/at. SAS macro parameters are listed underneath.
@@ -44,17 +45,17 @@ These are durable product decisions from the client demo flow. The mockups are f
 - The "Create study structure" button (and its modal) is removed from Study home. Folder scaffolding is a tenant/Admin concern (Admin → Study layout).
 - Study home shows the study's **Folder path** (linked to File Explorer), plus Compound / Protocol / Deliverable, from the study registry.
 
-### 7. Tenant study layout (flow3)
-- **Admin → Tenant config → Study layout** offers three radio cards, each with a mini folder-tree preview. The choice is stored per tenant (demo: `localStorage` key `sphere-tenant-study-layout`):
-  1. `{compound}/<subfolders>`
-  2. `{compound}/{protocol}/<subfolders>`
-  3. `{compound}/{protocol}/{deliverable}/<subfolders>` (default)
-- The **standard subfolders** list (default `data/raw, sdtm, adam, programs, tlf, logs, docs`) is editable: add (nested names with `/` allowed), rename, remove, reorder, reset. It persists with the layout and drives the card previews and the path preview.
-- Changing the layout affects **new** studies only; existing studies keep their paths.
-- **New study** (Studies → New study) follows the tenant level. It shows only the fields that level needs (Compound; + Protocol; + Deliverable), each as *pick existing* or *+ New…*. Many protocols per compound and many deliverables per protocol are supported; deliverables that already exist under the chosen protocol are disabled, and a duplicate path blocks Create. A hint reads "Tenant layout: … · change in Admin".
-- A live preview shows the resulting path and the nested tenant tree, with the new node and its subfolders highlighted, before Create.
-- After Create, the study is added to the study registry (demo: `sphere-study-registry-v1`), appears in the Studies list/cards with its folder path, in **File Explorer** (a Studies tree grouped compound → protocol → deliverable above Folders; `files.html?path=…` switches the root and breadcrumb; new studies show the template subfolders) and in Study home metadata.
-- Demo seed: `XP-204/ONC-204-301/{CSR,DSUR}`, `XP-204/ONC-204-302/CSR`, `CMP-101/PRO-001/{CSR,DSUR}`, `CMP-101/PRO-002/CSR`, plus the other listed studies under their compounds.
+### 7. Tenant study layout (revised)
+- **Admin → Tenant config → Study layout** offers three radio cards with mini folder-tree previews:
+  1. `{protocol}/{subfolders}` — **default**
+  2. `{protocol}/{deliverable}/{subfolders}`
+  3. `{compound}/{protocol}/{deliverable}/{subfolders}`
+- Picking a card marks the page "Unsaved changes"; **Save layout** (next to the cards and at the bottom of the panel) stores the choice per tenant (demo: `localStorage` `sphere-tenant-study-layout`), shows a "Layout saved" toast and a **View in File Explorer →** link. `?reset=1` resets the layout to option 1 and re-seeds the study registry.
+- The **standard subfolders** list (default `data/raw, sdtm, adam, programs, tlf, logs, docs`) is editable (add with `/` nesting, rename, remove, reorder, reset) and saved with the layout.
+- **Paths are derived, not stored**: every study keeps compound / protocol / deliverable metadata, and its folder path is computed from the saved layout. Saving a new layout immediately re-renders all studies (seeded and user-created) in File Explorer's Studies tree and breadcrumb, the info bar, the Studies list/cards, Study home ("Folder path", layout label) and the New study preview. In layout 1, several deliverables of one protocol share a single protocol folder (Study home lists "Shares folder with").
+- **New study** follows the saved layout: Compound (always captured; marked "metadata · not in path" unless layout 3) and Protocol, each pick-existing or "+ New…"; Deliverable is a folder level in layouts 2–3 (existing ones disabled), and in layout 1 the Deliverable Type is kept as metadata. A duplicate path blocks Create. Hint: "Tenant layout: … · change in Admin". Live path + nested tree preview before Create.
+- The header breadcrumb and sidebar footer show the study currently opened in File Explorer / Study home (e.g. "PRO-001 · CSR"), and the Study home / File Explorer nav links keep that study.
+- Demo seed (metadata): XP-204 / ONC-204-301 / {CSR, DSUR}, XP-204 / ONC-204-302 / CSR, CMP-101 / PRO-001 / {CSR, DSUR}, CMP-101 / PRO-002 / CSR, plus XP-118 / ONC-118-402, XV-302 / VAC-302-011, XH-220 / HEM-220-015 (CSR).
 
 ### 8. Shared SAP sections (flow3)
 - SAP sections (the TOC groups in Mock Shells and the section groups in the Tracker) are **one shared list** (demo: stored in the demo state, `sphere-demo-flow-v1` → `sections`). Seed: Demographics (SAP §14.1), Efficacy (§14.2), Safety TLFs (§14.3), Labs (§14.3.5), so both pages start identical.

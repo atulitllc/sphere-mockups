@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3d" />
+<link rel="stylesheet" href="shared-white.css?v=flow3e" />
 <script>
 (function () {
   try {
@@ -33,7 +33,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3d"></script>
+<script src="study-layout.js?v=flow3e"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -384,15 +384,14 @@
   function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
   var q = new URLSearchParams(location.search);
   var reg = L.registry();
-  var e = (q.get('path') && L.findByPath(q.get('path'))) ||
-    (q.get('study') && reg.filter(function (x) { return L.studyId(x) === q.get('study'); })[0]) ||
+  var e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
     reg.filter(function (x) { return x.current; })[0];
   if (!e) return;
   var path = L.entryPath(e);
   var grid = document.querySelector('.study-hero-meta');
   if (!e.current) {
     var t = document.querySelector('.study-hero-title');
-    if (t) t.textContent = L.studyId(e) + (e.deliverable && (e.level || 3) === 3 ? ' · ' + e.deliverable : '') + ' — ' + (e.name || '');
+    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' — ' + (e.name || '');
     var sub = document.querySelector('.study-hero-sub');
     if (sub) sub.textContent = 'Phase ' + (e.phase || '—') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
     var badge = document.querySelector('.study-hero-title-row .badge');
@@ -404,15 +403,15 @@
     });
   }
   if (grid) {
-    var items = [['Compound', e.compound]];
-    if ((e.level || 3) >= 2) items.push(['Protocol', e.protocol]);
-    if ((e.level || 3) >= 3) items.push(['Deliverable', e.deliverable]);
-    grid.insertAdjacentHTML('afterbegin', '<div class="meta-item meta-item-path" style="grid-column:1/-1"><div class="k">Folder path</div><div class="v"><a class="study-path-line" style="font-size:12.5px" href="files.html?path=' + encodeURIComponent(path) + '">' + esc(path) + '</a> <span class="muted" style="font-size:11.5px">· ' + esc(L.get().subfolders.join(' · ')) + '</span></div></div>' +
+    var items = [['Compound', e.compound], ['Protocol', e.protocol], ['Deliverable', e.deliverable]];
+    var shared = L.samePath(e);
+    if (shared.length > 1) items.push(['Shares folder with', shared.filter(function (x) { return x !== e; }).map(function (x) { return x.protocol + ' · ' + x.deliverable; }).join(', ')]);
+    grid.insertAdjacentHTML('afterbegin', '<div class="meta-item meta-item-path" style="grid-column:1/-1"><div class="k">Folder path</div><div class="v"><a class="study-path-line" style="font-size:12.5px" href="files.html?path=' + encodeURIComponent(path) + '">' + esc(path) + '</a> <span class="muted" style="font-size:11.5px">· layout ' + esc(L.levelLabel()) + ' · ' + esc(L.get().subfolders.join(' · ')) + '</span></div></div>' +
       items.map(function (it) { return '<div class="meta-item"><div class="k">' + it[0] + '</div><div class="v">' + esc(it[1]) + '</div></div>'; }).join(''));
   }
 })();
 </script>
-<script src="shared-chrome.js?v=flow3d"></script>
+<script src="shared-chrome.js?v=flow3e"></script>
 
 <script>
 (function () {

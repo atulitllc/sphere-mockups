@@ -1,13 +1,14 @@
 /* SPHERE tenant study layout + study registry (demo, localStorage).
-   Levels: 1 = {compound}/subfolders · 2 = {compound}/{protocol}/subfolders · 3 = {compound}/{protocol}/{deliverable}/subfolders */
+   Levels: 1 = {protocol}/subfolders (default) · 2 = {protocol}/{deliverable}/subfolders · 3 = {compound}/{protocol}/{deliverable}/subfolders
+   Study paths are always DERIVED from each study's compound/protocol/deliverable metadata + the saved tenant layout. */
 (function () {
   var LAYOUT_KEY = 'sphere-tenant-study-layout';
-  var REG_KEY = 'sphere-study-registry-v1';
+  var REG_KEY = 'sphere-study-registry-v2';
   var SEED_LEVEL = 3;
   var DEFAULT_SUBFOLDERS = ['data/raw', 'sdtm', 'adam', 'programs', 'tlf', 'logs', 'docs'];
   var LEVELS = {
-    1: { id: 1, label: 'Compound', template: '{compound}/', segs: ['compound'] },
-    2: { id: 2, label: 'Compound / Protocol', template: '{compound}/{protocol}/', segs: ['compound', 'protocol'] },
+    1: { id: 1, label: 'Protocol', template: '{protocol}/', segs: ['protocol'] },
+    2: { id: 2, label: 'Protocol / Deliverable', template: '{protocol}/{deliverable}/', segs: ['protocol', 'deliverable'] },
     3: { id: 3, label: 'Compound / Protocol / Deliverable', template: '{compound}/{protocol}/{deliverable}/', segs: ['compound', 'protocol', 'deliverable'] }
   };
   var SEED = [
@@ -22,14 +23,14 @@
     { compound: 'CMP-101', protocol: 'PRO-002', deliverable: 'CSR', name: 'CMP-101 Phase 3 — CSR', phase: '3', created: '2026-08-18' }
   ];
 
-  try { if (/[?&]reset=1\b/.test(location.search)) localStorage.removeItem(REG_KEY); } catch (e) {}
+  try { if (/[?&]reset=1\b/.test(location.search)) { localStorage.removeItem(REG_KEY); localStorage.removeItem(LAYOUT_KEY); } } catch (e) {}
   function readJson(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function writeJson(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
   function getLayout() {
     var l = readJson(LAYOUT_KEY) || {};
     var level = parseInt(l.level, 10);
-    if (!LEVELS[level]) level = 3;
+    if (!LEVELS[level]) level = 1;
     var subs = Array.isArray(l.subfolders) && l.subfolders.length ? l.subfolders : DEFAULT_SUBFOLDERS.slice();
     return { level: level, subfolders: subs };
   }
@@ -43,7 +44,7 @@
   function registry() {
     var r = readJson(REG_KEY);
     if (!Array.isArray(r)) {
-      r = SEED.map(function (e) { var c = Object.assign({ level: SEED_LEVEL, lead: 'Jordan Patel', statistician: 'Riley Nguyen', sponsor: 'X Pharma' }, e); c.path = pathFor(c, SEED_LEVEL); return c; });
+      r = SEED.map(function (e) { return Object.assign({ lead: 'Jordan Patel', statistician: 'Riley Nguyen', sponsor: 'X Pharma' }, e); });
       writeJson(REG_KEY, r);
     }
     return r;
@@ -53,8 +54,8 @@
     return LEVELS[level].segs.map(function (k) { return entry[k] || '{' + k + '}'; });
   }
   function pathFor(entry, level) { return segsFor(entry, level).join('/') + '/'; }
-  function entryPath(e) { return e.path || pathFor(e, e.level || SEED_LEVEL); }
-  function studyId(e) { return (e.level || SEED_LEVEL) === 1 ? e.compound : e.protocol; }
+  function entryPath(e) { return pathFor(e, getLayout().level); }
+  function studyId(e) { return e.protocol || e.compound; }
   function uniq(a) { var o = {}; return a.filter(function (x) { if (!x || o[x]) return false; o[x] = 1; return true; }); }
   function compounds() { return uniq(registry().map(function (e) { return e.compound; })).sort(); }
   function protocols(c) { return uniq(registry().filter(function (e) { return e.compound === c; }).map(function (e) { return e.protocol; })).sort(); }
@@ -66,8 +67,7 @@
   function addStudy(entry) {
     var r = registry();
     entry.created = entry.created || new Date().toISOString().slice(0, 10);
-    entry.level = getLayout().level;
-    entry.path = pathFor(entry, entry.level);
+    entry.createdLevel = getLayout().level;
     r.push(entry);
     writeJson(REG_KEY, r);
     return entry;
@@ -84,7 +84,7 @@
       var segs = e.pending ? segsFor(e, level) : entryPath(e).replace(/\/$/, '').split('/');
       segs.forEach(function (seg, i, arr) {
         node[seg] = node[seg] || { _kids: {}, _pending: false, _entry: null };
-        if (i === arr.length - 1) { node[seg]._entry = e; if (e.pending) node[seg]._pending = true; }
+        if (i === arr.length - 1) { if (!node[seg]._entry || !node[seg]._entry.current || e.pending) node[seg]._entry = e; if (e.pending) node[seg]._pending = true; }
         if (e.pending) node[seg]._touched = true;
         node = node[seg]._kids;
       });
@@ -125,13 +125,45 @@
     function subList() { return '<ul class="lt-tree lt-subs">' + subs.map(function (s) { return '<li class="lt-node lt-sub"><span class="lt-dir">' + esc(s) + '/</span></li>'; }).join('') + more + '</ul>'; }
     function dir(name, inner) { return '<li class="lt-node"><span class="lt-dir">' + esc(name) + '/</span>' + (inner || '') + '</li>'; }
     var body;
-    if (level === 1) body = dir('CMP-101', subList()) + dir('CMP-202', '');
-    else if (level === 2) body = dir('CMP-101', '<ul class="lt-tree">' + dir('PRO-001', subList()) + dir('PRO-002', '') + '</ul>');
+    if (level === 1) body = dir('PRO-001', subList()) + dir('PRO-002', '') + dir('ONC-204-301', '');
+    else if (level === 2) body = dir('PRO-001', '<ul class="lt-tree">' + dir('CSR', subList()) + dir('DSUR', '') + '</ul>') + dir('PRO-002', '<ul class="lt-tree">' + dir('CSR', '') + '</ul>');
     else body = dir('CMP-101', '<ul class="lt-tree">' + dir('PRO-001', '<ul class="lt-tree">' + dir('CSR', subList()) + dir('DSUR', '') + '</ul>') + dir('PRO-002', '<ul class="lt-tree">' + dir('CSR', '') + '</ul>') + '</ul>');
     return '<ul class="lt-tree lt-root">' + body + '</ul>';
   }
 
+  function openedStudy() {
+    try {
+      var q = new URLSearchParams(location.search);
+      var reg = registry();
+      function pick(list) { return list.filter(function (x) { return x.current; })[0] || list[0]; }
+      var e = (q.get('path') && pick(reg.filter(function (x) { return entryPath(x) === q.get('path'); }))) ||
+        (q.get('study') && pick(reg.filter(function (x) { return studyId(x) === q.get('study'); })));
+      if (e) { sessionStorage.setItem('sphere-open-study', JSON.stringify({ c: e.compound, p: e.protocol, d: e.deliverable })); return e; }
+      if (/studies\.html/.test(location.pathname)) return null;
+      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
+      if (saved) return reg.filter(function (x) { return x.compound === saved.c && x.protocol === saved.p && x.deliverable === saved.d; })[0] || null;
+    } catch (err) {}
+    return null;
+  }
+  function paintOpenedStudy() {
+    var e = openedStudy();
+    if (!e || e.current) return;
+    var path = entryPath(e);
+    var label = studyId(e) + (getLayout().level >= 2 && e.deliverable ? ' · ' + e.deliverable : '');
+    var crumb = document.querySelector('.crumb strong');
+    if (crumb) crumb.textContent = label;
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = label + ' · Phase ' + (e.phase || '—');
+    var qs = 'study=' + encodeURIComponent(studyId(e)) + '&path=' + encodeURIComponent(path);
+    document.querySelectorAll('.nav a[href^="study-home.html"], .nav a[href^="files.html"]').forEach(function (a) {
+      a.setAttribute('href', a.getAttribute('href').split('?')[0] + '?' + qs);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintOpenedStudy);
+  else paintOpenedStudy();
+
   window.SPHERE_LAYOUT = {
+    openedStudy: openedStudy,
     LEVELS: LEVELS,
     DEFAULT_SUBFOLDERS: DEFAULT_SUBFOLDERS,
     get: getLayout,
@@ -149,7 +181,9 @@
     treeHtml: treeHtml,
     exampleTreeHtml: exampleTreeHtml,
     levelLabel: function (l) { return LEVELS[l || getLayout().level].label; },
-    findByPath: function (p) { return registry().filter(function (e) { return entryPath(e) === p; })[0] || null; },
+    findByPath: function (p) { var m = registry().filter(function (e) { return entryPath(e) === p; }); return m.filter(function (e) { return e.current; })[0] || m[0] || null; },
+    /* entries whose folder is the same under the current layout (layout 1: several deliverables share one protocol folder) */
+    samePath: function (e) { var p = entryPath(e); return registry().filter(function (x) { return entryPath(x) === p; }); },
     findByProtocol: function (p) { return registry().filter(function (e) { return e.protocol === p || e.compound === p; })[0] || null; },
     reset: function () { try { localStorage.removeItem(REG_KEY); localStorage.removeItem(LAYOUT_KEY); } catch (e) {} }
   };

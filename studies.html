@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3d" />
+<link rel="stylesheet" href="shared-white.css?v=flow3e" />
 <script>
 (function () {
   try {
@@ -33,7 +33,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3d"></script>
+<script src="study-layout.js?v=flow3e"></script>
 </head>
 <body class="studies-view-list">
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -649,17 +649,20 @@
       var lvl = L.get().level;
       document.querySelectorAll('#nsLocation .ns-pick').forEach(function (el) {
         var seg = el.getAttribute('data-seg');
-        el.hidden = (seg === 'protocol' && lvl < 2) || (seg === 'deliverable' && lvl < 3);
+        el.hidden = seg === 'deliverable' && lvl < 2;
       });
+      var cl = document.querySelector('label[for="nsCompoundSel"]');
+      if (cl) cl.innerHTML = lvl >= 3 ? 'Compound' : 'Compound <span style="text-transform:none;font-weight:500">(metadata · not in path)</span>';
       var lab = $('nsLayoutLabel'); if (lab) lab.textContent = L.levelLabel(lvl);
-      var tf = $('nsTypeField'); if (tf) tf.hidden = lvl === 3;
+      var tf = $('nsTypeField'); if (tf) tf.hidden = lvl >= 2;
+      var loc = $('nsLocation'); if (loc) loc.setAttribute('data-level', String(lvl));
     }
     function pendingEntry() {
-      var lvl = L ? L.get().level : 3;
+      var lvl = L ? L.get().level : 1;
       return {
         compound: segVal('Compound') || '{compound}',
-        protocol: lvl >= 2 ? (segVal('Protocol') || '{protocol}') : '',
-        deliverable: lvl >= 3 ? (segVal('Deliverable') || '{deliverable}') : ''
+        protocol: segVal('Protocol') || '{protocol}',
+        deliverable: lvl >= 2 ? (segVal('Deliverable') || '{deliverable}') : (($('nsType') || {}).value || 'CSR')
       };
     }
     function syncPath() {
@@ -668,7 +671,7 @@
       var e = pendingEntry();
       var path = L.pathFor(e);
       if (pathEl) pathEl.textContent = path;
-      var folder = $('nsFolder'); if (folder) folder.value = L.get().level === 1 ? e.compound : e.protocol;
+      var folder = $('nsFolder'); if (folder) folder.value = e.protocol;
       var dup = L.exists(e) && !/\{/.test(path);
       var ex = $('nsExists'); if (ex) ex.hidden = !dup;
       var confirm = $('structureConfirm'); if (confirm) confirm.disabled = dup;
@@ -865,8 +868,8 @@
           showToast(path + ' already exists');
           return;
         }
-        var lvl = L ? L.get().level : 3;
-        var type = lvl === 3 ? entry.deliverable : document.getElementById('nsType').value;
+        var lvl = L ? L.get().level : 1;
+        var type = entry.deliverable;
         var data = {
           folder: folder,
           path: path,
@@ -924,6 +927,6 @@
   if (cardBtn) cardBtn.addEventListener('click', function () { apply('cards'); });
 })();
 </script>
-<script src="shared-chrome.js?v=flow3d"></script>
+<script src="shared-chrome.js?v=flow3e"></script>
 </body>
 </html>

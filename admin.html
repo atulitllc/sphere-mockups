@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3d" />
+<link rel="stylesheet" href="shared-white.css?v=flow3e" />
 <script>
 (function () {
   try {
@@ -33,7 +33,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3d"></script>
+<script src="study-layout.js?v=flow3e"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -695,7 +695,7 @@
                 <div class="form">
                   <div class="note-banner" role="note">
                     <span class="note-label">Lock</span>
-                    <div>Base tree is <code>{study path}/data/raw | sdtm | adam | programs | tlf | logs | docs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
+                    <div>Base tree is <code>{study folder}/data/raw | sdtm | adam | programs | tlf | logs | docs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; in this demo, <strong>Save layout</strong> re-renders every study's folder path from its compound / protocol / deliverable metadata.</div>
                   </div>
                   <div class="note-banner" role="note" style="margin-top:8px">
                     <span class="note-label">Programs</span>
@@ -707,27 +707,30 @@
                     <div class="layout-cards">
                       <label class="layout-card" data-level="1">
                         <input type="radio" name="studyLayoutLevel" value="1" />
-                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">1 · Compound</span></span>
-                        <code class="layout-card-path">{compound}/subfolders</code>
-                        <span class="layout-card-hint">One folder per compound; all work sits directly under it.</span>
+                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">1 · Protocol</span><span class="layout-card-default">Default</span></span>
+                        <code class="layout-card-path">{protocol}/{subfolders}</code>
+                        <span class="layout-card-hint">One folder per protocol; all deliverables share it.</span>
                         <div class="layout-card-tree" data-tree="1"></div>
                       </label>
                       <label class="layout-card" data-level="2">
                         <input type="radio" name="studyLayoutLevel" value="2" />
-                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">2 · Compound / Protocol</span></span>
-                        <code class="layout-card-path">{compound}/{protocol}/subfolders</code>
-                        <span class="layout-card-hint">Many protocols under one compound.</span>
+                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">2 · Protocol / Deliverable</span></span>
+                        <code class="layout-card-path">{protocol}/{deliverable}/{subfolders}</code>
+                        <span class="layout-card-hint">Separate CSR, DSUR, ISS… per protocol.</span>
                         <div class="layout-card-tree" data-tree="2"></div>
                       </label>
                       <label class="layout-card" data-level="3">
                         <input type="radio" name="studyLayoutLevel" value="3" />
                         <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">3 · Compound / Protocol / Deliverable</span></span>
-                        <code class="layout-card-path">{compound}/{protocol}/{deliverable}/subfolders</code>
-                        <span class="layout-card-hint">Separate CSR, DSUR, ISS… per protocol.</span>
+                        <code class="layout-card-path">{compound}/{protocol}/{deliverable}/{subfolders}</code>
+                        <span class="layout-card-hint">Many protocols per compound, many deliverables per protocol.</span>
                         <div class="layout-card-tree" data-tree="3"></div>
                       </label>
                     </div>
-                    <p class="hint" id="layoutLevelSaved" style="margin:2px 0 0" aria-live="polite"></p>
+                    <div class="layout-save-row">
+                      <button class="btn primary" type="button" id="saveLayoutBtnTop">Save layout</button>
+                      <p class="hint" id="layoutLevelSaved" style="margin:0" aria-live="polite"></p>
+                    </div>
                   </div>
 
                   <label>
@@ -1107,18 +1110,31 @@
       '<button class="btn sm ghost" type="button" data-rename>Rename</button>' +
       '<button class="btn sm" type="button" data-remove>Remove</button>';
   }
+  var pendingLevel = LAYOUT ? LAYOUT.get().level : 1;
   function studyPrefix() {
     if (!LAYOUT) return '{study}';
-    return LAYOUT.LEVELS[LAYOUT.get().level].template.replace(/\/$/, '');
+    return LAYOUT.LEVELS[pendingLevel].template.replace(/\/$/, '');
+  }
+  function markDirty() {
+    if (!LAYOUT) return;
+    var cur = LAYOUT.get();
+    var dirty = cur.level !== pendingLevel || cur.subfolders.join('|') !== folderNames().join('|');
+    var msg = document.getElementById('layoutLevelSaved');
+    if (msg && dirty) msg.innerHTML = '<span class="layout-dirty">Unsaved changes</span> · click <strong>Save layout</strong> to apply to File Explorer, Studies and New study.';
+    var btn = document.getElementById('saveLayoutBtn');
+    if (btn) btn.classList.toggle('is-dirty', dirty);
+    var top = document.getElementById('saveLayoutBtnTop');
+    if (top) top.classList.toggle('is-dirty', dirty);
   }
   function renderLevelCards() {
     if (!LAYOUT) return;
-    var cur = LAYOUT.get();
+    var saved = LAYOUT.get().level;
     document.querySelectorAll('#layoutLevel .layout-card').forEach(function (card) {
       var lvl = parseInt(card.getAttribute('data-level'), 10);
       var inp = card.querySelector('input');
-      if (inp) inp.checked = lvl === cur.level;
-      card.classList.toggle('is-selected', lvl === cur.level);
+      if (inp) inp.checked = lvl === pendingLevel;
+      card.classList.toggle('is-selected', lvl === pendingLevel);
+      card.classList.toggle('is-saved', lvl === saved);
       var tree = card.querySelector('[data-tree]');
       if (tree) tree.innerHTML = LAYOUT.exampleTreeHtml(lvl, folderNames());
     });
@@ -1132,7 +1148,7 @@
   }
 
   function refreshPreview() {
-    if (LAYOUT && layoutList) { LAYOUT.set({ subfolders: folderNames() }); renderLevelCards(); }
+    if (LAYOUT && layoutList) { renderLevelCards(); markDirty(); }
     if (!layoutPreview) return;
     var pre = studyPrefix();
     var split = window.SPHERE && SPHERE.isSplitProgramsFolderMode && SPHERE.isSplitProgramsFolderMode();
@@ -1193,11 +1209,9 @@
     document.querySelectorAll('#layoutLevel input[name="studyLayoutLevel"]').forEach(function (inp) {
       inp.addEventListener('change', function () {
         if (!inp.checked) return;
-        LAYOUT.set({ level: parseInt(inp.value, 10) });
+        pendingLevel = parseInt(inp.value, 10);
         renderLevelCards();
         refreshPreview();
-        var msg = document.getElementById('layoutLevelSaved');
-        if (msg) msg.textContent = 'Saved for this tenant · new studies use ' + LAYOUT.LEVELS[LAYOUT.get().level].template + '<subfolders>. Existing studies keep their current paths.';
       });
     });
     renderLevelCards();
@@ -1276,9 +1290,18 @@
   var saveLayoutBtn = document.getElementById('saveLayoutBtn');
   if (saveLayoutBtn) {
     saveLayoutBtn.addEventListener('click', function () {
-      showToast('Study layout saved for new studies (stub)');
+      if (!LAYOUT) { showToast('Layout saved'); return; }
+      LAYOUT.set({ level: pendingLevel, subfolders: folderNames() });
+      renderLevelCards();
+      markDirty();
+      var tpl = LAYOUT.LEVELS[pendingLevel].template;
+      showToast('Layout saved · ' + LAYOUT.levelLabel(pendingLevel));
+      var msg = document.getElementById('layoutLevelSaved');
+      if (msg) msg.innerHTML = '<span class="layout-saved-ok">✓ Layout saved</span> · studies now render as <code>' + tpl + '&lt;subfolders&gt;</code> · <a href="files.html" id="layoutViewFiles">View in File Explorer →</a>';
     });
   }
+  var saveTop = document.getElementById('saveLayoutBtnTop');
+  if (saveTop && saveLayoutBtn) saveTop.addEventListener('click', function () { saveLayoutBtn.click(); });
   var applyLayoutBtn = document.getElementById('applyLayoutBtn');
   if (applyLayoutBtn) {
     applyLayoutBtn.addEventListener('click', function () {
@@ -1341,7 +1364,7 @@
   boot();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3d"></script>
+<script src="shared-chrome.js?v=flow3e"></script>
 <script>
 
   /* Tracker workflow flags + program version control */

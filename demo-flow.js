@@ -33,7 +33,8 @@
     var qs = new URLSearchParams(location.search);
     if (qs.get('reset') === '1') {
       localStorage.removeItem(KEY);
-      localStorage.removeItem('sphere-study-registry-v1');
+      localStorage.removeItem('sphere-study-registry-v2');
+      localStorage.removeItem('sphere-tenant-study-layout');
       justReset = true;
       qs.delete('reset');
       var q = qs.toString();

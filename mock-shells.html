@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3d" />
+<link rel="stylesheet" href="shared-white.css?v=flow3e" />
 <script>
 (function () {
   try {
@@ -477,7 +477,7 @@
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
 
-<script src="demo-flow.js?v=flow3d"></script>
+<script src="demo-flow.js?v=flow3e"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -1057,7 +1057,7 @@
     sh.datasets = sh.datasets || (spec ? spec[0] : 'ADSL');
     sh.keyVars = sh.keyVars || (spec ? spec[1] : 'USUBJID, TRT01A');
     sh.sortOrder = sh.sortOrder || (spec ? spec[2] : 'Per SAP');
-    sh.version = sh.version || (sh.status === 'Locked' ? '1.0' : (sh.status === 'In review' ? '0.3' : '0.2'));
+    sh.version = sh.version || ((sh.status === 'Locked' || sh.status === 'Final') ? '1.0' : (sh.status === 'In review' ? '0.3' : '0.2'));
     sh.modifiedBy = sh.modifiedBy || (sh.status === 'Locked' ? 'Mei Chen' : 'Jordan Patel');
     sh.modifiedAt = sh.modifiedAt || ('2026-09-' + (10 + (String(sh.number).length % 9)) + ' 1' + (String(sh.number).length % 7) + ':2' + (String(sh.number).length % 6));
     return sh;
@@ -2493,7 +2493,10 @@
   });
 
   document.getElementById('btnLock').addEventListener('click', function () {
+    var cur = selectedShell();
+    if (cur && cur.status === 'Locked') { unlockShell(); return; }
     if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze. Lock is shell/spec only — copy never carries lock/QC.)')) {
+      if (cur) cur.prevStatus = cur.status || 'Draft';
       document.getElementById('metaStatus').value = 'Locked';
       persistEditorToSelected();
       renderCatalog();
@@ -2745,7 +2748,60 @@
       ' title="Send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker">' + PLUS_ICON + '</button>';
   }
 
+  var CAN_UNLOCK = true; /* demo: signed-in lead programmer may unlock */
+  function unlockShell() {
+    var sh = selectedShell();
+    if (!sh || sh.status !== 'Locked') return;
+    if (!confirm('Unlock shell ' + sh.number + '? Titles, columns, rows and footnotes become editable again.')) return;
+    var back = sh.prevStatus && sh.prevStatus !== 'Locked' ? sh.prevStatus : 'Final';
+    document.getElementById('metaStatus').value = back;
+    persistEditorToSelected();
+    renderCatalog();
+    paintShellStatus(sh);
+    persistCatalog();
+    showToast('Shell ' + sh.number + ' unlocked · status ' + back);
+  }
+  function paintLockState(sh) {
+    var editor = document.querySelector('.shell-editor');
+    var canvas = editor && editor.querySelector('.sheet-canvas');
+    if (!editor || !canvas) return;
+    var locked = !!(sh && sh.status === 'Locked');
+    editor.classList.toggle('is-locked', locked);
+    var banner = document.getElementById('shellLockBanner');
+    if (locked) {
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'shellLockBanner';
+        banner.className = 'shell-lock-banner';
+        banner.setAttribute('role', 'status');
+        canvas.insertBefore(banner, canvas.firstChild);
+      }
+      banner.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>' +
+        '<span><strong>Locked</strong> · titles, columns, rows and footnotes are read-only' + (sh.modifiedBy ? '' : '') + '.</span>' +
+        (CAN_UNLOCK ? '<button type="button" class="btn sm" id="btnUnlockShell">Unlock</button>' : '<span class="muted">Ask a lead programmer to unlock.</span>');
+      var ub = document.getElementById('btnUnlockShell');
+      if (ub) ub.addEventListener('click', unlockShell);
+      var tb = document.getElementById('rowToolbar'); if (tb) tb.hidden = true;
+      var ct = document.getElementById('colToolbar'); if (ct) ct.hidden = true;
+      if (document.activeElement && editor.contains(document.activeElement) && document.activeElement.isContentEditable) document.activeElement.blur();
+    } else if (banner) banner.remove();
+    var lb = document.getElementById('btnLock');
+    if (lb) { lb.title = locked ? 'Unlock' : 'Lock'; lb.setAttribute('aria-label', locked ? 'Unlock shell' : 'Lock shell'); lb.classList.toggle('is-active', locked); }
+  }
+  (function guardLockedEdits() {
+    var editor = document.querySelector('.shell-editor');
+    if (!editor) return;
+    ['dblclick', 'mousedown', 'keydown', 'paste', 'drop'].forEach(function (ev) {
+      editor.addEventListener(ev, function (e) {
+        if (!editor.classList.contains('is-locked')) return;
+        var t = e.target;
+        if (t.closest && t.closest('.shell-lock-banner, .shell-props, .shell-actions, .modal-backdrop')) return;
+        if (t.closest && t.closest('.sheet-canvas')) { e.stopPropagation(); if (ev !== 'mousedown') e.preventDefault(); }
+      }, true);
+    });
+  })();
   function paintShellStatus(sh) {
+    paintLockState(sh);
     var badge = document.getElementById('shellStatusBadge');
     var stSel = document.getElementById('metaStatus');
     if (stSel && sh) stSel.setAttribute('data-status', (sh.status || 'Draft').toLowerCase().replace(/\s+/g, '-'));
@@ -3419,6 +3475,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow3d"></script>
+<script src="shared-chrome.js?v=flow3e"></script>
 </body>
 </html>

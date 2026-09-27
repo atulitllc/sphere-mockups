@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3d" />
+<link rel="stylesheet" href="shared-white.css?v=flow3e" />
 <script>
 (function () {
   try {
@@ -33,7 +33,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3d"></script>
+<script src="study-layout.js?v=flow3e"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -789,8 +789,7 @@
     function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
     var q = new URLSearchParams(location.search);
     var reg = L.registry();
-    var active = (q.get('path') && L.findByPath(q.get('path'))) ||
-      (q.get('study') && reg.filter(function (e) { return L.studyId(e) === q.get('study'); })[0]) ||
+    var active = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
       reg.filter(function (e) { return e.current; })[0] || reg[0];
     if (!active) return;
     var activePath = L.entryPath(active);
@@ -838,7 +837,7 @@
   };
 })();
 </script>
-<script src="shared-chrome.js?v=flow3d"></script>
+<script src="shared-chrome.js?v=flow3e"></script>
 
 <script>
 (function () {
