@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3" />
+<link rel="stylesheet" href="shared-white.css?v=flow3b" />
 <script>
 (function () {
   try {
@@ -448,7 +448,7 @@
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
 
-<script src="demo-flow.js?v=flow3"></script>
+<script src="demo-flow.js?v=flow3b"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -1025,7 +1025,7 @@
         makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline disease characteristics and prior anticancer therapies (ITT)', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
         makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
         makeShell({ id: '14.2.3', number: '14.2.3', type: 'Table', title: 'Duration of response and time to response among confirmed responders (FAS)', status: 'Draft', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Duration of response' }),
-        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary — treatment-emergent adverse events (Safety analysis set)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
+        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary — treatment-emergent adverse events (Safety analysis set)', status: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
         makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview of TEAE, SAE, Grade ≥3, and discontinuations', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
         makeShell({ id: '14.3.1.1', number: '14.3.1.1', type: 'Table', title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by SOC/PT', automate: true, metadata: AE_OVERVIEW_META }),
         makeShell({ id: '14.3.1.2', number: '14.3.1.2', type: 'Table', title: 'Serious adverse events by SOC/PT and relationship to study drug', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE by relationship' }),
@@ -1040,8 +1040,8 @@
         makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival — full analysis set with landmark rates at 12 and 24 months', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' }),
         makeShell({ id: '14.3.5.1', number: '14.3.5.1', type: 'Table', title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Lab chemistry shifts' }),
         makeShell({ id: '14.3.5.2', number: '14.3.5.2', type: 'Table', title: 'Hematology parameters: change from baseline over time', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Hematology' }),
-        makeShell({ id: '14.1.3', number: '14.1.3', type: 'Table', title: 'Subject disposition', status: 'Draft', analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Disposition' }),
-        makeShell({ id: '14.3.7', number: '14.3.7', type: 'Table', title: 'Vital signs: summary of values and change from baseline by visit', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Vital signs' }),
+        makeShell({ id: '14.1.3', number: '14.1.3', type: 'Table', title: 'Subject disposition', status: 'Final', version: '1.0', analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Disposition' }),
+        makeShell({ id: '14.3.7', number: '14.3.7', type: 'Table', title: 'Vital signs: summary of values and change from baseline by visit', status: 'Final', version: '1.0', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Vital signs' }),
         makeShell({ id: '14.3.8', number: '14.3.8', type: 'Table', title: 'Concomitant medications by ATC class and preferred name', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Con meds' })
       ].map(enrichShell);
     }
@@ -2489,7 +2489,7 @@
     shell.modifiedAt = shell.createdAt;
     currentShells().push(shell);
     selectShell(id, true);
-    showToast('New shell ' + number + ' created · edits autosave · click + in the list to send it to the Tracker');
+    showToast('New shell ' + number + ' created (Draft) · set Status to Final, then click + in the list to send it to the Tracker');
   });
 
   /* —— Demo flow: clean new-shell template, autosave, Send to Tracker (+ in TOC) —— */
@@ -2594,7 +2594,7 @@
   function isLinkedExisting(sh) {
     return CURRENT_STUDY === 'ONC-204-301' && !sh.syncedAt && !sh.autoNumber && TRACKER_LINKED.indexOf(String(sh.number)) >= 0;
   }
-  function isSendable(sh) { return !!sh && !sh.syncedAt; }
+  function isSendable(sh) { return !!sh && !sh.syncedAt && (sh.status === 'Final' || sh.status === 'Locked'); }
 
   var SYNC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/><path d="M9 12.2l2 2 4-4"/></svg>';
   var PLUS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
@@ -2606,12 +2606,18 @@
     if (isLinkedExisting(sh)) {
       return '<button type="button" class="toc-sync is-synced is-linked" data-sync-id="' + escapeHtml(sh.id) + '" title="Synced to Tracker · existing program (click to view)" aria-label="Synced to Tracker, existing program">' + SYNC_ICON + '</button>';
     }
+    if (!isSendable(sh)) {
+      return '<button type="button" class="toc-sync is-disabled" aria-disabled="true" data-sync-id="' + escapeHtml(sh.id) + '"' +
+        ' title="Set status to Final to send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker — set status to Final first">' + PLUS_ICON + '</button>';
+    }
     return '<button type="button" class="toc-sync is-ready" data-sync-id="' + escapeHtml(sh.id) + '"' +
       ' title="Send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker">' + PLUS_ICON + '</button>';
   }
 
   function paintShellStatus(sh) {
     var badge = document.getElementById('shellStatusBadge');
+    var stSel = document.getElementById('metaStatus');
+    if (stSel && sh) stSel.setAttribute('data-status', (sh.status || 'Draft').toLowerCase().replace(/\s+/g, '-'));
     if (badge) {
       var v = 'v' + ((sh && sh.version) || '0.1');
       var locked = sh && sh.status === 'Locked';
@@ -2623,8 +2629,16 @@
 
   document.getElementById('metaStatus').addEventListener('change', function () {
     persistEditorToSelected();
+    var sh = selectedShell();
+    if (sh && sh.status === 'Final' && parseFloat(sh.version || '0') < 1) sh.version = '1.0';
     renderCatalog();
-    paintShellStatus(selectedShell());
+    paintShellStatus(sh);
+    persistCatalog();
+    if (sh && !sh.syncedAt && !isLinkedExisting(sh)) {
+      showToast(sh.status === 'Final' || sh.status === 'Locked'
+        ? 'Shell ' + sh.number + ' is ' + sh.status + ' · click + in the list to send it to the Tracker'
+        : 'Shell ' + sh.number + ' set to ' + sh.status + ' · set Final to send it to the Tracker');
+    }
   });
 
   function showSyncToast(sh, rec) {
@@ -2656,6 +2670,10 @@
     if (btn.classList.contains('is-synced')) {
       var target = sh.syncedAt && sh.recordId ? sh.recordId : 'num:' + sh.number;
       location.href = 'tracker.html?focus=' + encodeURIComponent(target);
+      return;
+    }
+    if (!isSendable(sh)) {
+      showToast('Set status to Final to send shell ' + sh.number + ' to the Tracker');
       return;
     }
     if (btn.classList.contains('is-busy') || !window.SPHERE_DEMO) return;
@@ -3270,6 +3288,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow3"></script>
+<script src="shared-chrome.js?v=flow3b"></script>
 </body>
 </html>

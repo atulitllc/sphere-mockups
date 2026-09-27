@@ -6485,3 +6485,11 @@ html[data-ui-zoom="125"] .artifact-row .artifact-main, html[data-ui-zoom="125"] 
 .toc-sync .toc-spin { pointer-events: none; }
 .shell-status-badge.is-version { color: var(--muted); background: var(--chip-bg); border-color: var(--border); }
 .shell-status-badge.is-version.is-synced { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
+.toc-sync.is-disabled { color: var(--muted-2); border-color: var(--border); background: transparent; opacity: .55; cursor: not-allowed; }
+.toc-sync.is-disabled:hover { opacity: .75; }
+/* Shell Status dropdown: clearly visible, colour-coded */
+#metaStatus { font-weight: 650; border-radius: 999px; padding-left: 10px; border: 1px solid var(--border-strong); }
+#metaStatus[data-status="draft"] { color: var(--muted); background: var(--chip-bg); }
+#metaStatus[data-status="in-review"] { color: var(--warn, #b45309); background: var(--warn-soft, #fff7e6); border-color: var(--warn-border, #f5d49a); }
+#metaStatus[data-status="final"] { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-border); }
+#metaStatus[data-status="locked"] { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
