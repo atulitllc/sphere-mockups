@@ -4255,7 +4255,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   margin: 0 0 0 auto;
   justify-content: flex-end;
 }
-.tracker-actions {
+#trackerListsBar {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -4263,7 +4263,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   flex-wrap: wrap;
   margin: 0;
 }
-.tracker-actions .actions-sep {
+#trackerListsBar .actions-sep {
   width: 1px;
   height: 22px;
   background: var(--border);
@@ -6554,3 +6554,16 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 .shell-editor.is-locked .col-select-toolbar { display: none !important; }
 .shell-editor.is-locked .shell-props select:not(#metaStatus) { opacity: .6; pointer-events: none; }
 #btnLock.is-active { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
+/* Tracker toolbar tidy (flow3e): no separators, uniform buttons; blue = toggle ON / view active only */
+#trackerListsBar { gap: 8px; align-items: center; }
+#trackerListsBar .actions-sep { display: none; }
+#trackerListsBar .my-assign-wrap { display: inline-flex; align-items: center; gap: 6px; }
+#trackerListsBar .action-icon-btn { display: inline-flex; align-items: center; height: 34px; min-height: 34px; padding: 0 12px; gap: 8px; font-size: 13px; font-weight: 600; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text); box-shadow: none; }
+#trackerListsBar .action-icon-btn .label { margin-left: 0 !important; font-weight: 600; }
+#trackerListsBar .action-icon-btn svg { width: 16px; height: 16px; flex: none; }
+#trackerListsBar .action-icon-btn:hover:not(:disabled) { background: var(--row-hover); border-color: var(--border-strong); color: var(--text); box-shadow: none; }
+#trackerListsBar .action-icon-btn.is-active,
+#trackerListsBar .action-icon-btn.is-active:hover:not(:disabled),
+#trackerListsBar .action-icon-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; }
+#trackerListsBar .action-icon-btn .my-assign-count { font-weight: 650; }
+#trackerListsBar .action-icon-btn.is-active .my-assign-count { background: #fff; color: var(--accent); }

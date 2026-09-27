@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3e" />
+<link rel="stylesheet" href="shared-white.css?v=flow3f" />
 <script>
 (function () {
   try {
@@ -141,19 +141,17 @@
           </div>
           <div class="tracker-actions" id="trackerListsBar" role="toolbar" aria-label="Tracker actions">
               <span class="my-assign-wrap">
-              <button class="action-icon-btn my-assign-btn" type="button" id="btnMyAssign" aria-pressed="false" title="Show only records assigned to you or where you hold a role (PR, QC, Stats, MW)">
+              <button class="action-icon-btn toggle-btn my-assign-btn" type="button" id="btnMyAssign" aria-pressed="false" title="Show only records assigned to you or where you hold a role (PR, QC, Stats, MW)">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M3 20c0-3.3 3.1-6 7-6 1.3 0 2.5.3 3.5.8"/><path d="M15 18l2 2 4-4"/></svg>
                 <span class="label">My Assignments</span>
                 <span class="my-assign-count" id="myAssignCount">0</span>
               </button>
               <button class="my-assign-clear" type="button" id="btnMyAssignClear" hidden title="Clear My Assignments filter" aria-label="Clear My Assignments filter">×</button>
               </span>
-<span class="actions-sep" aria-hidden="true"></span>
-              <button class="action-icon-btn primary" type="button" id="btnSetLists" title="Custom Lists" aria-label="Custom Lists">
+              <button class="action-icon-btn toggle-btn" type="button" id="btnSetLists" aria-pressed="false" title="Custom Lists (hidden) · click to show" aria-label="Custom Lists">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
                 <span class="label">Custom Lists</span>
               </button>
-<span class="actions-sep" aria-hidden="true"></span>
               <button class="action-icon-btn" type="button" id="btnImport" title="Browse / Import programs" aria-label="Browse / Import programs">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5 5 5-5"/><path d="M5 21h14"/></svg>
                 <span class="label">Import programs</span>
@@ -1151,7 +1149,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow3e"></script>
+<script src="demo-flow.js?v=flow3f"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -4015,6 +4013,19 @@
   window.addEventListener('sphere-workflow-change', refreshAllWorkflowUI);
   window.addEventListener('storage', function (e) { if (e && e.key === 'sphere-tracker-workflow') refreshAllWorkflowUI(); });
 
+  /* Custom Lists toggle state follows the panel (blue = panel showing) */
+  (function syncSetlistToggle() {
+    var btn = document.getElementById('btnSetLists');
+    if (!btn || !listModal) return;
+    function paint() {
+      var on = !listModal.hasAttribute('hidden');
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.title = on ? 'Custom Lists (showing)' : 'Custom Lists (hidden) · click to show';
+    }
+    new MutationObserver(paint).observe(listModal, { attributes: true, attributeFilter: ['hidden'] });
+    paint();
+  })();
   /* Custom Lists workspace controls */
   (function bindSetlistChrome() {
     var btnSetLists = document.getElementById('btnSetLists');
@@ -4527,6 +4538,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3e"></script>
+<script src="shared-chrome.js?v=flow3f"></script>
 </body>
 </html>
