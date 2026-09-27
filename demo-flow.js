@@ -33,6 +33,7 @@
     var qs = new URLSearchParams(location.search);
     if (qs.get('reset') === '1') {
       localStorage.removeItem(KEY);
+      localStorage.removeItem('sphere-study-registry-v1');
       justReset = true;
       qs.delete('reset');
       var q = qs.toString();
@@ -122,7 +123,7 @@
     if (rec.keyVars) L.push(line('Key variables', rec.keyVars));
     if (rec.sortOrder) L.push(line('Sort order', rec.sortOrder));
     L.push(line('Output file', '/studies/onc-204-301/output/tlf/' + (isQc ? 'qc/' : '') + rec.program.replace(/\.sas$/i, '') + (isQc ? '.sas7bdat' : '.rtf')));
-    L.push(line('Mock shell', 'Mock Shells ' + rec.number + ' v' + (rec.shellVersion || '1.0') + ' (Final) · synced ' + rec.syncedAt));
+    L.push(line('Mock shell', 'Mock Shells ' + rec.number + ' v' + (rec.shellVersion || '0.1') + ' · synced ' + rec.syncedAt));
     if (isQc) {
       L.push(line('Purpose', 'Independent double programming of ' + rec.program));
       L.push(line('Author', rec.roles.qc + ' (QC programmer)'));

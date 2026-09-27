@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow2" />
+<link rel="stylesheet" href="shared-white.css?v=flow3" />
 <script>
 (function () {
   try {
@@ -33,6 +33,7 @@
   } catch (e) {}
 })();
 </script>
+<script src="study-layout.js?v=flow3"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -694,11 +695,39 @@
                 <div class="form">
                   <div class="note-banner" role="note">
                     <span class="note-label">Lock</span>
-                    <div>Base tree is <code>{study}/raw | sdtm | adam | programs | tlf | logs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
+                    <div>Base tree is <code>{study path}/data/raw | sdtm | adam | programs | tlf | logs | docs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; existing studies are not retroactively rewritten unless you run <strong>Apply</strong>.</div>
                   </div>
                   <div class="note-banner" role="note" style="margin-top:8px">
                     <span class="note-label">Programs</span>
                     <div>Editable vs read-only program files: choose <strong>single <code>programs/</code></strong> or <strong>dev / qc / prod subfolders</strong> under <a href="admin.html?panel=workflow">Tracker workflow</a>. Split mode: <code>programs/dev</code> (editable) + <code>programs/qc</code> (QC copies) + <code>programs/prod</code> (approved, read-only).</div>
+                  </div>
+
+                  <div class="layout-level" id="layoutLevel" role="radiogroup" aria-label="Study folder hierarchy">
+                    <span style="font-size:13px;font-weight:600">Study folder hierarchy <span class="layout-card-hint">· applies to every new study in this tenant</span></span>
+                    <div class="layout-cards">
+                      <label class="layout-card" data-level="1">
+                        <input type="radio" name="studyLayoutLevel" value="1" />
+                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">1 · Compound</span></span>
+                        <code class="layout-card-path">{compound}/subfolders</code>
+                        <span class="layout-card-hint">One folder per compound; all work sits directly under it.</span>
+                        <div class="layout-card-tree" data-tree="1"></div>
+                      </label>
+                      <label class="layout-card" data-level="2">
+                        <input type="radio" name="studyLayoutLevel" value="2" />
+                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">2 · Compound / Protocol</span></span>
+                        <code class="layout-card-path">{compound}/{protocol}/subfolders</code>
+                        <span class="layout-card-hint">Many protocols under one compound.</span>
+                        <div class="layout-card-tree" data-tree="2"></div>
+                      </label>
+                      <label class="layout-card" data-level="3">
+                        <input type="radio" name="studyLayoutLevel" value="3" />
+                        <span class="layout-card-head"><span class="layout-card-radio" aria-hidden="true"></span><span class="layout-card-title">3 · Compound / Protocol / Deliverable</span></span>
+                        <code class="layout-card-path">{compound}/{protocol}/{deliverable}/subfolders</code>
+                        <span class="layout-card-hint">Separate CSR, DSUR, ISS… per protocol.</span>
+                        <div class="layout-card-tree" data-tree="3"></div>
+                      </label>
+                    </div>
+                    <p class="hint" id="layoutLevelSaved" style="margin:2px 0 0" aria-live="polite"></p>
                   </div>
 
                   <label>
@@ -1070,7 +1099,30 @@
   /* Study layout template editor */
   var layoutList = document.getElementById('layoutList');
   var layoutPreview = document.getElementById('layoutPreview');
-  var BASE_FOLDERS = ['raw', 'sdtm', 'adam', 'programs', 'tlf', 'logs'];
+  var LAYOUT = window.SPHERE_LAYOUT;
+  var BASE_FOLDERS = LAYOUT ? LAYOUT.DEFAULT_SUBFOLDERS.slice() : ['data/raw', 'sdtm', 'adam', 'programs', 'tlf', 'logs', 'docs'];
+  function layoutItemHtml(name) {
+    return '<span class="grip" title="Drag to reorder" aria-hidden="true">⠿</span>' +
+      '<span class="folder-name"><input type="text" value="' + name.replace(/"/g, '&quot;') + '" aria-label="Folder name" /></span>' +
+      '<button class="btn sm ghost" type="button" data-rename>Rename</button>' +
+      '<button class="btn sm" type="button" data-remove>Remove</button>';
+  }
+  function studyPrefix() {
+    if (!LAYOUT) return '{study}';
+    return LAYOUT.LEVELS[LAYOUT.get().level].template.replace(/\/$/, '');
+  }
+  function renderLevelCards() {
+    if (!LAYOUT) return;
+    var cur = LAYOUT.get();
+    document.querySelectorAll('#layoutLevel .layout-card').forEach(function (card) {
+      var lvl = parseInt(card.getAttribute('data-level'), 10);
+      var inp = card.querySelector('input');
+      if (inp) inp.checked = lvl === cur.level;
+      card.classList.toggle('is-selected', lvl === cur.level);
+      var tree = card.querySelector('[data-tree]');
+      if (tree) tree.innerHTML = LAYOUT.exampleTreeHtml(lvl, folderNames());
+    });
+  }
 
   function folderNames() {
     if (!layoutList) return BASE_FOLDERS.slice();
@@ -1080,15 +1132,17 @@
   }
 
   function refreshPreview() {
+    if (LAYOUT && layoutList) { LAYOUT.set({ subfolders: folderNames() }); renderLevelCards(); }
     if (!layoutPreview) return;
+    var pre = studyPrefix();
     var split = window.SPHERE && SPHERE.isSplitProgramsFolderMode && SPHERE.isSplitProgramsFolderMode();
     layoutPreview.innerHTML = folderNames().map(function (n) {
       if (n === 'programs' && split) {
-        return '<span class="path-chip">{study}/programs/dev</span>' +
-          '<span class="path-chip">{study}/programs/qc</span>' +
-          '<span class="path-chip">{study}/programs/prod</span>';
+        return '<span class="path-chip">' + pre + '/programs/dev</span>' +
+          '<span class="path-chip">' + pre + '/programs/qc</span>' +
+          '<span class="path-chip">' + pre + '/programs/prod</span>';
       }
-      return '<span class="path-chip">{study}/' + n + '</span>';
+      return '<span class="path-chip">' + pre + '/' + n + '</span>';
     }).join('');
   }
   window.SPHERE_refreshLayoutPreview = refreshPreview;
@@ -1125,6 +1179,29 @@
     });
   }
 
+  if (layoutList && LAYOUT) {
+    layoutList.innerHTML = '';
+    LAYOUT.get().subfolders.forEach(function (name) {
+      var li = document.createElement('li');
+      li.setAttribute('draggable', 'true');
+      li.setAttribute('data-folder', name);
+      li.innerHTML = layoutItemHtml(name);
+      layoutList.appendChild(li);
+    });
+  }
+  if (LAYOUT) {
+    document.querySelectorAll('#layoutLevel input[name="studyLayoutLevel"]').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        if (!inp.checked) return;
+        LAYOUT.set({ level: parseInt(inp.value, 10) });
+        renderLevelCards();
+        refreshPreview();
+        var msg = document.getElementById('layoutLevelSaved');
+        if (msg) msg.textContent = 'Saved for this tenant · new studies use ' + LAYOUT.LEVELS[LAYOUT.get().level].template + '<subfolders>. Existing studies keep their current paths.';
+      });
+    });
+    renderLevelCards();
+  }
   if (layoutList) {
     Array.prototype.forEach.call(layoutList.children, wireLayoutItem);
     layoutList.addEventListener('dragover', function (e) {
@@ -1145,9 +1222,9 @@
   var addFolderBtn = document.getElementById('addFolderBtn');
   if (addFolderBtn && layoutList) {
     addFolderBtn.addEventListener('click', function () {
-      var name = prompt('New subfolder name (lowercase, no slashes)', 'data');
+      var name = prompt('New subfolder name (lowercase; use / for nesting, e.g. data/external)', 'data/external');
       if (!name) return;
-      name = name.trim().replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+      name = name.trim().replace(/[^a-zA-Z0-9_\/-]/g, '').replace(/\/+/g, '/').replace(/^\/|\/$/g, '').toLowerCase();
       if (!name) return;
       var li = document.createElement('li');
       li.setAttribute('draggable', 'true');
@@ -1264,7 +1341,7 @@
   boot();
 })();
 </script>
-<script src="shared-chrome.js?v=flow2"></script>
+<script src="shared-chrome.js?v=flow3"></script>
 <script>
 
   /* Tracker workflow flags + program version control */

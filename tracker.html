@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow2" />
+<link rel="stylesheet" href="shared-white.css?v=flow3" />
 <script>
 (function () {
   try {
@@ -273,8 +273,9 @@
             </label>
           </div>
           <div class="artifact-main">
+            <div class="col-head-output"><span class="col-head-label">Output</span><span class="col-head-sub">Roles</span></div>
             <div class="artifact-meta">
-              <div class="meta-cell col-head-program-spacer" aria-hidden="true"></div>
+              <div class="meta-cell col-head-program-spacer"><span class="col-head-label">Programs</span></div>
               <div class="meta-cell"><span class="col-head-label">Type</span></div>
               <div class="meta-cell"><span class="col-head-label">Status</span></div>
               <div class="meta-cell"><span class="col-head-label">Assigned To</span></div>
@@ -1150,7 +1151,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow2"></script>
+<script src="demo-flow.js?v=flow3"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -4194,6 +4195,8 @@
   function paintInlineRoles(row) {
     var band = row.querySelector('.artifact-title-band');
     if (!band) return;
+    var ttl = band.querySelector('.artifact-title');
+    if (ttl) ttl.title = (ttl.textContent || '').trim() + ((row.getAttribute('data-tags') || '') ? ' · ' + row.getAttribute('data-tags').split(',').join(', ') : '');
     var host = band.querySelector('.row-roles-inline');
     if (!host) {
       host = document.createElement('div');
@@ -4401,7 +4404,7 @@
     row.setAttribute('data-orig-status', rec.status);
     var cells = metaCells(row);
     if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml(rec.roles.prod) + '</span>';
-    if (cells[4]) cells[4].innerHTML = '<span class="meta-v">Final</span>';
+    if (cells[4]) cells[4].innerHTML = '<span class="meta-v">Synced</span>';
     if (rec.isNew) {
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
@@ -4453,6 +4456,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow2"></script>
+<script src="shared-chrome.js?v=flow3"></script>
 </body>
 </html>

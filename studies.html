@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow2" />
+<link rel="stylesheet" href="shared-white.css?v=flow3" />
 <script>
 (function () {
   try {
@@ -33,6 +33,7 @@
   } catch (e) {}
 })();
 </script>
+<script src="study-layout.js?v=flow3"></script>
 </head>
 <body class="studies-view-list">
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -354,7 +355,7 @@
     <div class="modal-head">
       <div>
         <h2 id="structureTitle">New study</h2>
-        <div class="hint">Descriptive name and protocol id can differ. Creates the tenant folder tree on confirm.</div>
+        <div class="hint">Descriptive name and folder ids can differ. Creates the folder tree from the tenant layout on confirm.</div>
       </div>
       <button class="btn ghost sm" type="button" id="structureClose" aria-label="Close">✕</button>
     </div>
@@ -365,16 +366,41 @@
             <span class="field-label">Study name</span>
             <input class="field-input" id="nsName" name="name" type="text" required placeholder="e.g. Metastatic NSCLC — first-line" />
           </label>
-          <label class="field">
-            <span class="field-label">Protocol</span>
-            <input class="field-input" id="nsFolder" name="folder" type="text" required placeholder="e.g. ONC-204-301" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,48}" title="Letters, numbers, dot, underscore, hyphen" />
-            <span class="field-hint">Study / protocol id for the folder path — can differ from the display name</span>
-          </label>
+          <input type="hidden" id="nsFolder" name="folder" value="" />
+          <div class="ns-location" id="nsLocation">
+            <div class="ns-location-head">
+              <strong>Folder location</strong>
+              <span class="ns-layout-hint" id="nsLayoutHint">Tenant layout: <b id="nsLayoutLabel">Compound / Protocol / Deliverable</b> · <a href="admin.html?panel=defaults">change in Admin</a></span>
+            </div>
+            <div class="field ns-pick" data-seg="compound">
+              <label class="field-label" for="nsCompoundSel">Compound</label>
+              <select class="field-input" id="nsCompoundSel" aria-label="Compound"></select>
+              <input class="field-input" id="nsCompoundNew" type="text" placeholder="New compound, e.g. CMP-303" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,48}" hidden aria-label="New compound id" />
+            </div>
+            <div class="field ns-pick" data-seg="protocol">
+              <label class="field-label" for="nsProtocolSel">Protocol</label>
+              <select class="field-input" id="nsProtocolSel" aria-label="Protocol"></select>
+              <input class="field-input" id="nsProtocolNew" type="text" placeholder="New protocol, e.g. PRO-003" pattern="[A-Za-z0-9][A-Za-z0-9._-]{1,48}" hidden aria-label="New protocol id" />
+            </div>
+            <div class="field ns-pick" data-seg="deliverable">
+              <label class="field-label" for="nsDeliverableSel">Deliverable</label>
+              <select class="field-input" id="nsDeliverableSel" aria-label="Deliverable"></select>
+              <input class="field-input" id="nsDeliverableNew" type="text" placeholder="Custom deliverable, e.g. ISS" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,48}" hidden aria-label="Custom deliverable" />
+            </div>
+            <div class="ns-exists" id="nsExists" hidden role="alert">This folder already exists — pick another protocol / deliverable.</div>
+          </div>
+          <div class="new-study-preview field-span-2">
+            <p class="hint" style="margin:0 0 6px">Study folder path</p>
+            <div class="ns-path-chip" id="structureStudyPath">folder/</div>
+            <p class="hint" style="margin:10px 0 6px">Preview · tenant tree after Create (<span style="color:var(--ok);font-weight:650">new</span> in green)</p>
+            <div id="structurePreview" aria-live="polite"></div>
+            <p class="hint" style="margin-top:10px">Subfolders from <a href="admin.html?panel=defaults">Admin → Study layout</a>.</p>
+          </div>
           <label class="field field-span-2">
             <span class="field-label">Description</span>
             <textarea class="field-input" id="nsDesc" name="description" rows="2" placeholder="Short study purpose, population, or analysis scope"></textarea>
           </label>
-          <label class="field">
+          <label class="field" id="nsTypeField">
             <span class="field-label">Deliverable Type</span>
             <select class="field-input" id="nsType" name="type" required>
               <option value="Submission">Submission</option>
@@ -425,19 +451,6 @@
             <span class="field-label">DB lock (planned)</span>
             <input class="field-input" id="nsDblock" name="dblock" type="date" />
           </label>
-        </div>
-        <div class="new-study-preview">
-          <div class="folder-path" id="structureStudyPath">folder/</div>
-          <p class="hint" style="margin:8px 0 6px">Folders that will be created:</p>
-          <ul class="folder-list" id="structurePreview">
-            <li class="dir"><span class="fname">raw/</span></li>
-            <li class="dir"><span class="fname">sdtm/</span></li>
-            <li class="dir"><span class="fname">adam/</span></li>
-            <li class="dir"><span class="fname">programs/</span></li>
-            <li class="dir"><span class="fname">tlf/</span></li>
-            <li class="dir"><span class="fname">logs/</span></li>
-          </ul>
-          <p class="hint" style="margin-top:10px">Template from Admin → Study layout.</p>
         </div>
       </form>
     </div>
@@ -589,19 +602,115 @@
         .slice(0, 32) || 'NEW-STUDY';
     }
 
-    function syncPath() {
-      var folder = (document.getElementById('nsFolder') || {}).value || '';
-      folder = folder.trim() || 'folder';
-      if (pathEl) pathEl.textContent = folder + '/';
+    var L = window.SPHERE_LAYOUT;
+    var NEW = '__new__';
+    var DELIVERABLES = ['CSR', 'DSUR', 'IA1', 'DMC', 'ISS', 'ISE', 'PSUR'];
+    function $(id) { return document.getElementById(id); }
+    function opt(v, label, dis) { return '<option value="' + esc(v) + '"' + (dis ? ' disabled' : '') + '>' + esc(label) + '</option>'; }
+    function segVal(seg) {
+      var sel = $('ns' + seg + 'Sel'), inp = $('ns' + seg + 'New');
+      if (!sel) return '';
+      if (sel.value === NEW) return (inp.value || '').trim().toUpperCase().replace(/[^A-Z0-9._-]+/g, '-');
+      return sel.value;
     }
+    function fillCompounds(keep) {
+      var sel = $('nsCompoundSel'); if (!sel || !L) return;
+      var list = L.compounds();
+      sel.innerHTML = list.map(function (c) { return opt(c, c + ' · ' + L.protocols(c).length + ' protocol' + (L.protocols(c).length === 1 ? '' : 's')); }).join('') + opt(NEW, '+ New compound…');
+      sel.value = keep && (list.indexOf(keep) >= 0 || keep === NEW) ? keep : (list[0] || NEW);
+    }
+    function fillProtocols(keep) {
+      var sel = $('nsProtocolSel'); if (!sel || !L) return;
+      var c = segVal('Compound');
+      var list = $('nsCompoundSel').value === NEW ? [] : L.protocols(c);
+      sel.innerHTML = list.map(function (p) { var n = L.deliverables(c, p).length; return opt(p, p + ' · ' + n + ' deliverable' + (n === 1 ? '' : 's')); }).join('') + opt(NEW, '+ New protocol…');
+      sel.value = keep && list.indexOf(keep) >= 0 ? keep : NEW;
+    }
+    function fillDeliverables(keep) {
+      var sel = $('nsDeliverableSel'); if (!sel || !L) return;
+      var c = segVal('Compound'), p = segVal('Protocol');
+      var have = ($('nsProtocolSel').value === NEW || $('nsCompoundSel').value === NEW) ? [] : L.deliverables(c, p);
+      var first = null;
+      sel.innerHTML = DELIVERABLES.map(function (d) {
+        var ex = have.indexOf(d) >= 0;
+        if (!ex && !first) first = d;
+        return opt(d, d + (ex ? ' (exists)' : ''), ex);
+      }).join('') + opt(NEW, 'Custom…');
+      sel.value = keep && DELIVERABLES.indexOf(keep) >= 0 && have.indexOf(keep) < 0 ? keep : (first || NEW);
+    }
+    function toggleNewInputs() {
+      ['Compound', 'Protocol', 'Deliverable'].forEach(function (seg) {
+        var sel = $('ns' + seg + 'Sel'), inp = $('ns' + seg + 'New');
+        if (sel && inp) inp.hidden = sel.value !== NEW;
+      });
+    }
+    function applyLevel() {
+      if (!L) return;
+      var lvl = L.get().level;
+      document.querySelectorAll('#nsLocation .ns-pick').forEach(function (el) {
+        var seg = el.getAttribute('data-seg');
+        el.hidden = (seg === 'protocol' && lvl < 2) || (seg === 'deliverable' && lvl < 3);
+      });
+      var lab = $('nsLayoutLabel'); if (lab) lab.textContent = L.levelLabel(lvl);
+      var tf = $('nsTypeField'); if (tf) tf.hidden = lvl === 3;
+    }
+    function pendingEntry() {
+      var lvl = L ? L.get().level : 3;
+      return {
+        compound: segVal('Compound') || '{compound}',
+        protocol: lvl >= 2 ? (segVal('Protocol') || '{protocol}') : '',
+        deliverable: lvl >= 3 ? (segVal('Deliverable') || '{deliverable}') : ''
+      };
+    }
+    function syncPath() {
+      toggleNewInputs();
+      if (!L) return;
+      var e = pendingEntry();
+      var path = L.pathFor(e);
+      if (pathEl) pathEl.textContent = path;
+      var folder = $('nsFolder'); if (folder) folder.value = L.get().level === 1 ? e.compound : e.protocol;
+      var dup = L.exists(e) && !/\{/.test(path);
+      var ex = $('nsExists'); if (ex) ex.hidden = !dup;
+      var confirm = $('structureConfirm'); if (confirm) confirm.disabled = dup;
+      var prev = $('structurePreview');
+      if (prev) {
+        var focusC = e.compound;
+        var html = L.treeHtml({ pending: e });
+        prev.innerHTML = html;
+        // collapse unrelated compounds to keep preview short
+        prev.querySelectorAll('.lt-root > .lt-node').forEach(function (li) {
+          if (!li.classList.contains('is-path') && !li.classList.contains('is-new')) {
+            var sub = li.querySelector(':scope > .lt-tree'); if (sub) sub.remove();
+          }
+        });
+      }
+    }
+    ['Compound', 'Protocol', 'Deliverable'].forEach(function (seg) {
+      var sel = $('ns' + seg + 'Sel'), inp = $('ns' + seg + 'New');
+      if (sel) sel.addEventListener('change', function () {
+        if (seg === 'Compound') { fillProtocols(); fillDeliverables(); }
+        if (seg === 'Protocol') fillDeliverables();
+        syncPath();
+        if (sel.value === NEW && inp) inp.focus();
+      });
+      if (inp) inp.addEventListener('input', function () {
+        if (seg === 'Compound') { fillProtocols(); fillDeliverables(); }
+        if (seg === 'Protocol') fillDeliverables($('nsDeliverableSel').value);
+        syncPath();
+      });
+    });
 
     function resetForm() {
       if (!form) return;
       form.reset();
       var sponsor = document.getElementById('nsSponsor');
       if (sponsor) sponsor.value = 'X Pharma';
-      var folder = document.getElementById('nsFolder');
-      if (folder) folder.value = '';
+      ['Compound', 'Protocol', 'Deliverable'].forEach(function (seg) { var i = $('ns' + seg + 'New'); if (i) i.value = ''; });
+      applyLevel();
+      var cur = L && L.registry().filter(function (e) { return e.current; })[0];
+      fillCompounds(cur ? cur.compound : null);
+      fillProtocols();
+      fillDeliverables();
       syncPath();
     }
 
@@ -625,17 +734,22 @@
       return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     }
 
-    function addStudy(data) {
+    function studyHref(data) {
+      return 'study-home.html?study=' + encodeURIComponent(data.folder) + (data.path ? '&path=' + encodeURIComponent(data.path) : '');
+    }
+    function addStudy(data, opts) {
+      opts = opts || {};
       var tbody = document.getElementById('studiesTableBody');
       if (tbody) {
         var tr = document.createElement('tr');
         tr.className = 'row-link';
-        tr.setAttribute('data-href', 'study-home.html?study=' + encodeURIComponent(data.folder));
-        tr.setAttribute('data-folder', data.folder);
+        tr.setAttribute('data-href', studyHref(data));
+        tr.setAttribute('data-folder', data.path || data.folder);
         tr.innerHTML =
           '<td class="num">' + esc(data.folder) + '</td>' +
           '<td><div class="study-name-cell">' + esc(data.name) + '</div>' +
-          '<div class="study-sub muted">' + esc(data.type) + (data.indication ? ' · ' + esc(data.indication) : '') + '</div></td>' +
+          '<div class="study-sub muted">' + esc(data.type) + (data.indication ? ' · ' + esc(data.indication) : '') + '</div>' +
+          (data.path ? '<div class="study-path-line" title="Folder path">' + esc(data.path) + '</div>' : '') + '</td>' +
           '<td><span class="tag-chip">' + esc(data.type) + '</span></td>' +
           '<td>' + esc(data.lead || '—') + '</td>' +
           '<td>' + esc(data.statistician || '—') + '</td>' +
@@ -643,9 +757,9 @@
           '<td class="num">' + esc(fmtDate(data.lplv)) + '</td>' +
           '<td class="num">' + esc(fmtDate(data.dblock)) + '</td>' +
           '<td>' + esc(data.phase) + '</td>' +
-          '<td><span class="badge running">Startup</span></td>';
+          '<td><span class="badge ' + (data.status === 'Active' ? 'locked' : 'running') + '">' + esc(data.status || 'Startup') + '</span></td>';
 
-        tbody.insertBefore(tr, tbody.firstChild);
+        if (opts.append) tbody.appendChild(tr); else tbody.insertBefore(tr, tbody.firstChild);
         tr.addEventListener('click', function (e) {
           if (e.target.closest('a,button')) return;
           location.href = tr.getAttribute('data-href');
@@ -656,7 +770,7 @@
       if (cards) {
         var a = document.createElement('a');
         a.className = 'study-card';
-        a.href = 'study-home.html?study=' + encodeURIComponent(data.folder);
+        a.href = studyHref(data);
         a.innerHTML =
           '<div class="study-card-top"><div>' +
           '<div class="study-id">' + esc(data.folder) + '</div>' +
@@ -671,21 +785,23 @@
           '<span><span class="k">FPFV</span> ' + esc(fmtDate(data.fpfv)) + '</span>' +
           '<span><span class="k">LPLV</span> ' + esc(fmtDate(data.lplv)) + '</span>' +
           '<span><span class="k">DB lock</span> ' + esc(fmtDate(data.dblock)) + '</span></div>' +
+          (data.path ? '<div class="study-path-line">' + esc(data.path) + '</div>' : '') +
           '<div class="study-card-foot"><span class="muted">' + esc(data.description || 'New study') + '</span>' +
           '<span class="open-link">Open workspace →</span></div>';
 
-        cards.insertBefore(a, cards.firstChild);
+        if (opts.append) cards.appendChild(a); else cards.insertBefore(a, cards.firstChild);
       }
 
+      if (opts.silent) return;
       if (success) {
         var span = success.querySelector('[data-study-name]');
-        if (span) span.textContent = data.folder;
+        if (span) span.textContent = data.path || data.folder;
         success.classList.add('show');
         setTimeout(function () { success.classList.remove('show'); }, 5000);
       }
     }
 
-    ['nsFolder', 'nsName'].forEach(function (id) {
+    [].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('input', function () {
@@ -702,6 +818,28 @@
       });
     });
 
+    if (L) {
+      L.registry().forEach(function (e) {
+        var path = L.entryPath(e);
+        var id = L.studyId(e);
+        if (e.row) {
+          var tr = document.querySelector('tr[data-folder="' + id + '"]');
+          if (tr) {
+            var cell = tr.children[1];
+            if (cell && !cell.querySelector('.study-path-line')) cell.insertAdjacentHTML('beforeend', '<div class="study-path-line" title="Folder path">' + esc(path) + '</div>');
+          }
+          var card = document.querySelector('.study-card[href="study-home.html?study=' + id + '"] .study-card-foot');
+          if (card && !card.parentNode.querySelector('.study-path-line')) card.insertAdjacentHTML('beforebegin', '<div class="study-path-line">' + esc(path) + '</div>');
+          return;
+        }
+        addStudy({
+          folder: id, path: path, name: e.name, description: e.description, type: e.type || e.deliverable || 'CSR',
+          phase: e.phase || '—', indication: e.indication, lead: e.lead, statistician: e.statistician,
+          fpfv: e.fpfv, lplv: e.lplv, dblock: e.dblock, status: e.seedStatus || (e.created < '2026-09-01' ? 'Active' : 'Startup')
+        }, { append: true, silent: true });
+      });
+    }
+
     if (closeBtn) closeBtn.addEventListener('click', close);
     if (cancelBtn) cancelBtn.addEventListener('click', close);
     modal.addEventListener('click', function (e) {
@@ -714,18 +852,27 @@
     if (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
+        syncPath();
         var folder = (document.getElementById('nsFolder').value || '').trim();
         var name = (document.getElementById('nsName').value || '').trim();
-        if (!folder || !name) {
-          showToast('Study name and protocol are required');
+        var entry = pendingEntry();
+        var path = L ? L.pathFor(entry) : folder + '/';
+        if (!folder || !name || /\{/.test(path)) {
+          showToast('Study name and every folder level are required');
           return;
         }
-        if (document.querySelector('tr[data-folder="' + folder.replace(/"/g, '') + '"]')) {
-          showToast('Protocol already exists');
+        if (L && L.exists(entry)) {
+          showToast(path + ' already exists');
           return;
         }
-        addStudy({
+        var lvl = L ? L.get().level : 3;
+        var type = lvl === 3 ? entry.deliverable : document.getElementById('nsType').value;
+        var data = {
           folder: folder,
+          path: path,
+          compound: entry.compound,
+          protocol: entry.protocol,
+          deliverable: entry.deliverable,
           name: name,
           description: (document.getElementById('nsDesc').value || '').trim(),
           type: document.getElementById('nsType').value,
@@ -737,9 +884,17 @@
           fpfv: document.getElementById('nsFpfv').value,
           lplv: document.getElementById('nsLplv').value,
           dblock: document.getElementById('nsDblock').value
+        };
+        data.type = type;
+        if (L) L.addStudy({
+          compound: entry.compound, protocol: entry.protocol, deliverable: entry.deliverable,
+          name: data.name, description: data.description, phase: data.phase, indication: data.indication,
+          lead: data.lead, statistician: data.statistician, sponsor: data.sponsor, type: type,
+          fpfv: data.fpfv, lplv: data.lplv, dblock: data.dblock
         });
+        addStudy(data);
         close();
-        showToast('Created ' + folder + ' with standard folders');
+        showToast('Created ' + path + ' with ' + (L ? L.get().subfolders.length : 6) + ' standard subfolders');
       });
     }
   })();
@@ -769,6 +924,6 @@
   if (cardBtn) cardBtn.addEventListener('click', function () { apply('cards'); });
 })();
 </script>
-<script src="shared-chrome.js?v=flow2"></script>
+<script src="shared-chrome.js?v=flow3"></script>
 </body>
 </html>

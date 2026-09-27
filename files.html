@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow2" />
+<link rel="stylesheet" href="shared-white.css?v=flow3" />
 <script>
 (function () {
   try {
@@ -33,6 +33,7 @@
   } catch (e) {}
 })();
 </script>
+<script src="study-layout.js?v=flow3"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -757,15 +758,62 @@
     b.addEventListener('click', function () { /* root stub */ });
   });
 
+  /* Tenant study layout: studies tree (compound / protocol / deliverable) + switch root */
+  (function () {
+    var L = window.SPHERE_LAYOUT;
+    if (!L) return;
+    function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+    var q = new URLSearchParams(location.search);
+    var reg = L.registry();
+    var active = (q.get('path') && L.findByPath(q.get('path'))) ||
+      (q.get('study') && reg.filter(function (e) { return L.studyId(e) === q.get('study'); })[0]) ||
+      reg.filter(function (e) { return e.current; })[0] || reg[0];
+    if (!active) return;
+    var activePath = L.entryPath(active);
+    function link(e) { return 'files.html?path=' + encodeURIComponent(L.entryPath(e)); }
+    var box = document.createElement('div');
+    box.className = 'files-studies';
+    box.id = 'filesStudies';
+    box.innerHTML = '<div class="tree-head"><span>Studies</span><a class="badge info" href="admin.html?panel=defaults" title="Tenant layout: ' + L.levelLabel(L.get().level) + ' · change in Admin" style="text-decoration:none">Layout ' + L.get().level + '</a></div>' +
+      '<div style="padding:0 8px 4px">' + L.treeHtml({ link: link, activePath: activePath }) + '</div>';
+    treeRoot.insertBefore(box, treeRoot.firstChild);
+    var folderHead = Array.prototype.filter.call(treeRoot.querySelectorAll(':scope > .tree-head'), function () { return true; })[0];
+    if (folderHead) folderHead.firstElementChild.textContent = 'Folders';
+    var crumb = document.getElementById('filesCrumb');
+    if (crumb) {
+      var rootBtn = crumb.querySelector('[data-goto="root"]');
+      var segs = activePath.replace(/\/$/, '').split('/');
+      if (rootBtn) {
+        var html = segs.map(function (seg, i) {
+          return '<button type="button" data-goto="' + (i === segs.length - 1 ? 'root' : 'up') + '" title="' + esc(segs.slice(0, i + 1).join('/')) + '/">' + esc(seg) + '</button>';
+        }).join('<span class="sep">/</span>');
+        rootBtn.insertAdjacentHTML('beforebegin', html);
+        rootBtn.remove();
+      }
+    }
+    if (!active.current) {
+      var when = active.created || 'today';
+      FOLDERS.length = 0;
+      L.get().subfolders.forEach(function (sf) {
+        FOLDERS.push({ id: sf, count: '0', frozen: false, title: 'Created from tenant template' });
+        TREE[sf] = [{ name: 'README.txt', type: 'txt', size: '1 KB', modified: when + ' · created from tenant template' }];
+      });
+      current = FOLDERS[0] ? FOLDERS[0].id : current;
+      window.SPHERE_filesStartFolder = current;
+      var sub = document.querySelector('.page-sub');
+      if (sub) sub.insertAdjacentHTML('afterend', '<div class="note-banner" role="note" id="filesStudyNote" style="margin:0 0 10px"><div class="note-banner-inner"><div><strong>' + esc(active.name || activePath) + '</strong> · <code>' + esc(activePath) + '</code> — folders created from the tenant study layout on ' + esc(when) + '. <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></div></div></div>');
+    }
+  })();
+
   buildTree();
-  render('programs');
+  render(window.SPHERE_filesStartFolder || 'programs');
   window.SPHERE_filesTree = TREE;
   window.SPHERE_filesRerender = function (folder) {
     render(folder || current);
   };
 })();
 </script>
-<script src="shared-chrome.js?v=flow2"></script>
+<script src="shared-chrome.js?v=flow3"></script>
 
 <script>
 (function () {

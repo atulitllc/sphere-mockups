@@ -4,15 +4,16 @@
 
 These are durable product decisions from the client demo flow. The mockups are front-end only; demo state lives in browser `localStorage` (key `sphere-demo-flow-v1`). To reset it, open any page with `?reset=1` or use **Admin → Reset demo data**.
 
-### 1. Mock Shells: content, metadata and finalize
+### 1. Mock Shells: content, metadata and autosave
 - Every shell follows CDISC / ICH E3 conventions. Each has an output ID (`Table 14.x.x`, `Figure …`, `Listing …`), a title, a population subtitle (Safety / ITT / mITT / PP) and treatment-arm columns with `N=xx` (Placebo, Drug X 10 mg, Total). Rows hold placeholder cells (`xx (xx.x)`, `xx.x (xx.xx)`, median, min–max), followed by footnotes and a `Source: … Program: …` line.
 - Figure shells show axis, legend and number-at-risk placeholders. Listing shells show column headers plus a few placeholder rows.
 - New shells (**+ Add**) start from a clean, SAP-aware template. They are auto-numbered within their SAP section (14.1.x Demographics, 14.2.x Efficacy, 14.3.x Safety) and start as Draft v0.1.
-- Shell lifecycle: **Draft → In review → Final → Locked**. A **Finalize** action (with a confirm) sets Final and v1.0, and a status badge sits next to the title.
+- **No finalize step** (flow3). The editor toolbar has only **Metadata**, **Copy to study** and **Lock**; Save draft, Save & generate and Finalize were removed. Edits **autosave** silently to the browser (demo), and a neutral version label (e.g. `v0.1`, `· In Tracker` once synced) sits next to the title.
+- The editor pane is sticky-friendly: the TOC list fills the viewport height below the header and stays in view while the editor scrolls (resizes with the window; works at 125% UI zoom; stacks on narrow screens).
 - **Metadata** is enabled for every shell (the tenant module is on by default). It is editable and saved with the shell, and it feeds the Tracker record and the program header. Fields: output ID, title, type, population, analysis datasets, key variables, sort order, footnotes, status, version, and last modified by/at. SAS macro parameters are listed underneath.
 
 ### 2. Send to Tracker (sync)
-- Each shell in the Mock Shells list has a subtle **+** button labelled "Send to Tracker". It is enabled only when the shell is Final or Locked; otherwise its tooltip reads "Finalize shell first".
+- Each shell in the Mock Shells list that isn't in the Tracker yet has a **+** button ("Send to Tracker", 26 px with a larger hit area). It is **always enabled** — no finalize gating.
 - On click, a brief spinner runs, then the button becomes a **synced** icon (accent colour, tooltip "Synced to Tracker · time"). A toast appears with a **View in Tracker** link.
 - Shells that already have Tracker rows show as synced (linked).
 - The Tracker record is created in the SAP section that matches the output type. It carries the output ID and title, a program name `t_|f_|l_<number>_<slug>.sas`, SAS as the language, status In dev, and assigned roles. It gets a "New" chip until its first workflow move.
@@ -33,9 +34,23 @@ These are durable product decisions from the client demo flow. The mockups are f
 
 ### 5. Tracker assignment and roles
 - The "Owner" column is renamed **Assigned To** everywhere: the column header, the filter ("All assignees"), the Edit form, tooltips and History.
+- **Row layout (flow3):** the first cell holds the output ID + title (+ tags) on line 1 and the role chips directly underneath on line 2 (compact, muted). The production and QC program names live in their own **Programs** column on the right (after Job, before Files/Actions), stacked: program on top, `QC qc-…` muted below; both open the editor. Actions stay pinned on the right when the board scrolls horizontally (large zoom / narrow screens).
 - All roles are shown inline on every record as compact chips: **PR · QC · Stats · MW**, each with initials or a short name and the full name on hover. The signed-in user's chips are highlighted. The Roles button remains for detail/editing.
 - A **My Assignments** toggle in the toolbar shows only records where the signed-in user is Assigned To or holds any role (PR, QC, Stats or MW). It has a count badge, an active state and a one-click clear (×).
 - Toolbar buttons show their labels by default (My Assignments, Custom Lists, Import programs, Export CSV).
 
 ### 6. Study home
 - The "Create study structure" button (and its modal) is removed from Study home. Folder scaffolding is a tenant/Admin concern (Admin → Study layout).
+- Study home shows the study's **Folder path** (linked to File Explorer), plus Compound / Protocol / Deliverable, from the study registry.
+
+### 7. Tenant study layout (flow3)
+- **Admin → Tenant config → Study layout** offers three radio cards, each with a mini folder-tree preview. The choice is stored per tenant (demo: `localStorage` key `sphere-tenant-study-layout`):
+  1. `{compound}/<subfolders>`
+  2. `{compound}/{protocol}/<subfolders>`
+  3. `{compound}/{protocol}/{deliverable}/<subfolders>` (default)
+- The **standard subfolders** list (default `data/raw, sdtm, adam, programs, tlf, logs, docs`) is editable: add (nested names with `/` allowed), rename, remove, reorder, reset. It persists with the layout and drives the card previews and the path preview.
+- Changing the layout affects **new** studies only; existing studies keep their paths.
+- **New study** (Studies → New study) follows the tenant level. It shows only the fields that level needs (Compound; + Protocol; + Deliverable), each as *pick existing* or *+ New…*. Many protocols per compound and many deliverables per protocol are supported; deliverables that already exist under the chosen protocol are disabled, and a duplicate path blocks Create. A hint reads "Tenant layout: … · change in Admin".
+- A live preview shows the resulting path and the nested tenant tree, with the new node and its subfolders highlighted, before Create.
+- After Create, the study is added to the study registry (demo: `sphere-study-registry-v1`), appears in the Studies list/cards with its folder path, in **File Explorer** (a Studies tree grouped compound → protocol → deliverable above Folders; `files.html?path=…` switches the root and breadcrumb; new studies show the template subfolders) and in Study home metadata.
+- Demo seed: `XP-204/ONC-204-301/{CSR,DSUR}`, `XP-204/ONC-204-302/CSR`, `CMP-101/PRO-001/{CSR,DSUR}`, `CMP-101/PRO-002/CSR`, plus the other listed studies under their compounds.
