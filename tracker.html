@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3h" />
+<link rel="stylesheet" href="shared-white.css?v=flow3i" />
 <script>
 (function () {
   try {
@@ -1150,7 +1150,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow3h"></script>
+<script src="demo-flow.js?v=flow3i"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -4432,15 +4432,32 @@
     }
     var r = rowRoles(row);
     var defs = [['PR', 'Production programmer', r.prod], ['QC', 'QC programmer', r.qc], ['Stats', 'Statistician', r.stats], ['MW', 'Medical writer', r.mw]];
+    var stage = ({ 'In dev': 'PR', 'Revise': 'PR', 'In QC': 'QC', 'In Stats': 'Stats', 'In MW': 'MW' })[row.getAttribute('data-status') || ''] || '';
+    host.setAttribute('data-stage', stage);
     host.innerHTML = defs.map(function (d) {
       var mine = d[2].indexOf(FLOW_ME) >= 0;
       var first = d[2][0] || '—';
       var parts = first.split(' ');
       var short = parts.length > 1 ? parts[0].charAt(0) + '. ' + parts[parts.length - 1] : first;
-      return '<span class="role-chip' + (mine ? ' is-me' : '') + '" title="' + d[1] + ': ' + escapeHtml(d[2].join(', ')) + (mine ? ' (you)' : '') + '">' +
+      var cur = d[0] === stage;
+      var tip = (cur ? 'Currently with ' + d[0] + ' · ' + d[2].map(function (n) { var q = n.split(' '); return q.length > 1 ? q[0].charAt(0) + '. ' + q[q.length - 1] : n; }).join(', ') + ' — ' : '') +
+        d[1] + ': ' + d[2].join(', ') + (mine ? ' (you)' : '');
+      return '<span class="role-chip' + (mine ? ' is-me' : '') + (cur ? ' is-stage' : '') + '"' + (cur ? ' aria-current="step"' : '') + ' title="' + escapeHtml(tip) + '">' +
         '<b>' + d[0] + '</b><span class="role-nm">' + escapeHtml(short) + (d[2].length > 1 ? ' +' + (d[2].length - 1) : '') + '</span></span>';
     }).join('');
   }
+  /* Stage chip follows status live (workflow popover, bulk sends, resets) */
+  (function watchRowStatus() {
+    var board = document.getElementById('trackerBoard');
+    if (!board || !window.MutationObserver) return;
+    new MutationObserver(function (muts) {
+      var seen = [];
+      muts.forEach(function (m) {
+        var row = m.target;
+        if (row.classList && row.classList.contains('artifact-row') && seen.indexOf(row) < 0) { seen.push(row); paintInlineRoles(row); }
+      });
+    }).observe(board, { subtree: true, attributes: true, attributeFilter: ['data-status'] });
+  })();
   function refreshAssignedFilter() {
     var sel = document.getElementById('filterAssigned');
     if (!sel) return;
@@ -4742,6 +4759,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3h"></script>
+<script src="shared-chrome.js?v=flow3i"></script>
 </body>
 </html>
