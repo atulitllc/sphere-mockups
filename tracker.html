@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3f" />
+<link rel="stylesheet" href="shared-white.css?v=flow3g" />
 <script>
 (function () {
   try {
@@ -1149,7 +1149,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow3f"></script>
+<script src="demo-flow.js?v=flow3g"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -4165,11 +4165,10 @@
   function wfPillHtml(status) {
     var steps = flowSteps();
     var idx = flowStepIndex(status, steps);
-    var mini = steps.map(function (s, i) { return '<i class="' + (i <= idx ? 'on' : '') + '"></i>'; }).join('');
     var fin = status === 'In MW';
     return '<button type="button" class="meta-v wf-pill ' + flowStatusClass(status) + (fin ? ' is-released' : '') + '" title="Workflow: ' + flowStatusLabel(status) +
       (fin ? ' · final stage' : ' · click for next step') + '" aria-label="Status ' + flowStatusLabel(status) + ', open workflow">' +
-      '<span class="wf-pill-label">' + (fin ? '<span class="wf-rel-check" aria-hidden="true">✓</span>' : '') + flowStatusLabel(status) + '</span><span class="wf-mini" aria-hidden="true">' + mini + '</span></button>';
+      '<span class="wf-pill-label">' + (fin ? '<span class="wf-rel-check" aria-hidden="true">✓</span>' : '') + flowStatusLabel(status) + '</span></button>';
   }
   function stepperHtml(row, events) {
     var status = row.getAttribute('data-status') || '';
@@ -4538,6 +4537,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3f"></script>
+<script src="shared-chrome.js?v=flow3g"></script>
 </body>
 </html>

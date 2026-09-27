@@ -6567,3 +6567,6 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 #trackerListsBar .action-icon-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; }
 #trackerListsBar .action-icon-btn .my-assign-count { font-weight: 650; }
 #trackerListsBar .action-icon-btn.is-active .my-assign-count { background: #fff; color: var(--accent); }
+/* Tracker Status column: pill only, no mini progress bar (flow3f) */
+.wf-pill { flex-direction: row; align-items: center; padding: 3px 8px; }
+.wf-pill .wf-mini { display: none; }

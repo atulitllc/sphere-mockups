@@ -41,6 +41,7 @@ These are durable product decisions from the client demo flow. The mockups are f
 - A **My Assignments** toggle in the toolbar shows only records where the signed-in user is Assigned To or holds any role (PR, QC, Stats or MW). It has a count badge, an active state and a one-click clear (×).
 - Toolbar buttons show their labels by default (My Assignments, Custom Lists, Import programs, Export CSV).
 - Toolbar styling: no separators, 8px gap, uniform 34px buttons (16px icons, semibold labels). A solid blue fill means only "toggle ON / view active": My Assignments while filtering, Custom Lists while its panel is open (both use `aria-pressed`; the tooltip reads "Custom Lists (showing)"). Action buttons (Import, Export) stay neutral.
+- Status column shows only the status pill (no mini progress bar). The 4-step stepper lives in the status popover and in History.
 
 ### 6. Study home
 - The "Create study structure" button (and its modal) is removed from Study home. Folder scaffolding is a tenant/Admin concern (Admin → Study layout).
