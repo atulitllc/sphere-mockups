@@ -15,6 +15,7 @@
     s.status = s.status || {};      /* program -> status override (existing rows) */
     s.events = s.events || {};      /* program -> [history events] (existing rows) */
     s.sources = s.sources || {};    /* program -> saved source (existing rows) */
+    s.roles = s.roles || {};        /* row key -> {prod,qc,stats,mw} role overrides (Roles editor) */
     return s;
   }
   function write(s) {
@@ -308,6 +309,8 @@
     getStatus: function (prog) { return read().status[prog] || null; },
     setStatus: function (prog, status) { var s = read(); s.status[prog] = status; write(s); },
     getEvents: function (prog) { return read().events[prog] || []; },
+    getRoles: function (key) { return read().roles[key] || null; },
+    setRoles: function (key, roles) { var s = read(); s.roles[key] = roles; write(s); },
     addEvent: function (prog, ev) { var s = read(); (s.events[prog] = s.events[prog] || []).push(ev); write(s); },
     getSource: function (key) { return read().sources[key] || null; },
     setSource: function (key, src) { var s = read(); s.sources[key] = src; write(s); }

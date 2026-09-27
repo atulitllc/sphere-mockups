@@ -42,6 +42,7 @@ These are durable product decisions from the client demo flow. The mockups are f
 - Toolbar buttons show their labels by default (My Assignments, Custom Lists, Import programs, Export CSV).
 - Toolbar styling: no separators, 8px gap, uniform 34px buttons (16px icons, semibold labels). A solid blue fill means only "toggle ON / view active": My Assignments while filtering, Custom Lists while its panel is open (both use `aria-pressed`; the tooltip reads "Custom Lists (showing)"). Action buttons (Import, Export) stay neutral.
 - Status column shows only the status pill (no mini progress bar). The 4-step stepper lives in the status popover and in History.
+- **Roles editor**: the row Roles button opens a body-level popover. It flips up or down to whichever side has room, stays inside the viewport, and scrolls its body while the header and Save/Cancel stay fixed. It has a searchable team dropdown for each role (PR takes multiple people; QC, Stats and MW take one each). Save updates the role chips, the My Assignments count and History ("Roles updated by …") and persists in the demo state (cleared by `?reset=1`). The bulk bar has "Assign roles" for the selected rows; empty roles are left unchanged.
 
 ### 6. Study home
 - The "Create study structure" button (and its modal) is removed from Study home. Folder scaffolding is a tenant/Admin concern (Admin → Study layout).
