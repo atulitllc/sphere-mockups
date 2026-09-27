@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=sticky1" />
+<link rel="stylesheet" href="shared-white.css?v=flow1" />
 <script>
 (function () {
   try {
@@ -200,10 +200,12 @@
           <div class="sheet-canvas">
             <div class="sheet-title-row">
               <div class="sheet-titles">
+                <div class="sheet-outid" id="shellOutId">Table 14.1.1</div>
                 <div class="sheet-title" id="shellTitle" data-placeholder="Demographics" contenteditable="false" title="Double-click to edit">Demographics</div>
                 <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
               </div>
               <div class="sheet-type-controls">
+                <span class="shell-status-badge is-draft" id="shellStatusBadge" title="Shell status">Draft</span>
                 <span class="sheet-custom-pill" hidden>Custom</span>
               </div>
             </div>
@@ -229,6 +231,7 @@
                   <select id="metaStatus">
                     <option selected>Draft</option>
                     <option>In review</option>
+                    <option>Final</option>
                     <option>Locked</option>
                   </select>
                 </label>
@@ -254,12 +257,16 @@
                 <button class="btn icon-btn accent-icon accent-icon-primary" type="button" id="btnGenerate" title="Save &amp; generate" aria-label="Save and generate">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/><path d="M5 19h4"/></svg>
                 </button>
+                <button class="btn icon-text-btn btn-finalize" type="button" id="btnFinalize" title="Finalize shell (Draft → Final)" aria-label="Finalize shell">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16.5 9"/></svg><span class="btn-finalize-label">Finalize</span>
+                </button>
                 <button class="btn icon-btn accent-icon" type="button" id="btnLock" title="Lock" aria-label="Lock">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
                 </button>
               </div>
             </div>
 
+            <div class="fig-preview" id="figPreview" hidden aria-label="Figure layout preview"></div>
             <div class="sheet-grid-wrap" id="sheetGridWrap">
               <div class="row-float-toolbar" id="rowToolbar" hidden>
                 <button type="button" data-act="outdent" title="Outdent" aria-label="Outdent">
@@ -328,11 +335,13 @@
     <div class="modal-head">
       <div>
         <h2 id="metadataTitle">Metadata</h2>
-        <div class="hint">Drives standard SAS macro generation (prototype). Editable spreadsheet — not persisted yet.</div>
+        <div class="hint">Shell metadata + SAS macro parameters · saved with the shell (browser storage) and used for the Tracker record and generated program header.</div>
       </div>
       <button class="btn ghost sm" type="button" id="metadataClose" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
+      <div class="shell-meta-form" id="shellMetaForm"></div>
+      <div class="shell-meta-sub">Macro parameters <span class="muted">(SAS macro spec)</span></div>
       <div class="metadata-grid-wrap">
         <table class="metadata-grid" id="metadataGrid" aria-label="Shell metadata parameters">
           <thead>
@@ -448,6 +457,7 @@
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
 
+<script src="demo-flow.js?v=flow1"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -795,6 +805,228 @@
     };
   }
 
+  /* —— Realistic CDISC / ICH E3-style shell content (flow1) —— */
+  var ARMS = ['Placebo (N=xx)', 'Drug X 10 mg (N=xx)', 'Total (N=xx)'];
+  var ARMS2 = ['Placebo (N=xx)', 'Drug X 10 mg (N=xx)'];
+  var NP = ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'];
+  var NP2 = ['xx (xx.x)', 'xx (xx.x)'];
+  function L(indent, label, cells) { return { indent: indent, label: label, cells: (cells || []).slice() }; }
+  function blankCells(n) { var a = []; for (var i = 0; i < n; i++) a.push(''); return a; }
+  function contRows(label, unit, n) {
+    n = n || 3;
+    function rep(v) { var a = []; for (var i = 0; i < n; i++) a.push(v); return a; }
+    return [
+      L(0, label + (unit ? ' (' + unit + ')' : ''), blankCells(n)),
+      L(1, 'n', rep('xx')),
+      L(1, 'Mean (SD)', rep('xx.x (xx.xx)')),
+      L(1, 'Median', rep('xx.x')),
+      L(1, 'Q1, Q3', rep('xx.x, xx.x')),
+      L(1, 'Min, Max', rep('xx, xx'))
+    ];
+  }
+  function catRows(label, cats, n) {
+    n = n || 3;
+    var cells = n === 2 ? NP2 : NP;
+    return [L(0, label + ', n (%)', blankCells(n))].concat(cats.map(function (c) { return L(1, c, cells); }));
+  }
+  function socRows(n, extraCol) {
+    var cells = n === 2 ? NP2 : NP;
+    var rows = [L(0, 'Subjects with at least one ' + (extraCol || 'TEAE'), cells)];
+    [['Gastrointestinal disorders', ['Diarrhoea', 'Nausea', 'Vomiting']],
+     ['General disorders and administration site conditions', ['Fatigue', 'Pyrexia']],
+     ['Skin and subcutaneous tissue disorders', ['Rash', 'Pruritus']],
+     ['Investigations', ['Alanine aminotransferase increased', 'Aspartate aminotransferase increased']]].forEach(function (s) {
+      rows.push(L(0, s[0], cells));
+      s[1].forEach(function (pt) { rows.push(L(1, pt, cells)); });
+    });
+    return rows;
+  }
+  function listRows(cols, n) {
+    var rows = [];
+    for (var i = 1; i <= (n || 4); i++) {
+      rows.push(L(0, 'xxx-xxxx', cols.slice(1).map(function (c, ci) { return ci === 0 ? (i % 2 ? 'Placebo' : 'Drug X 10 mg') : 'xx'; })));
+    }
+    rows.push(L(0, '…', blankCells(cols.length - 1)));
+    return rows;
+  }
+  function figRows(spec) { return spec.map(function (s) { return L(0, s[0], [s[1]]); }); }
+  function lay(o) {
+    return {
+      title: o.title, subtitle: o.subtitle, columns: o.columns, colGroups: o.colGroups || [], rows: o.rows,
+      footnotes: o.footnotes, notes: o.notes || '', program: o.program || '', sapRef: o.sapRef || '',
+      templateKey: o.templateKey || '', custom: false, labelHeader: o.labelHeader || ''
+    };
+  }
+  var SAF = 'Safety Analysis Set', ITT = 'Intent-to-Treat Analysis Set', MITT = 'Modified Intent-to-Treat Analysis Set', FAS = 'Full Analysis Set';
+  var FOOT_SAF = 'N = number of subjects in the Safety Analysis Set; n (%) = number (percentage) of subjects with at least one event.\nTEAE = treatment-emergent adverse event (TRTEMFL = "Y"). MedDRA v26.1; CTCAE v5.0.\nA subject is counted once per SOC and once per PT.';
+  function srcLine(ds, prog) { return 'Source: ' + ds + '. Program: ' + (prog || '<tbd>') + '.'; }
+
+  var SHELL_CONTENT = {
+    '14.1.1': function () { return lay({ title: 'Demographics and baseline characteristics', subtitle: SAF, columns: ARMS,
+      rows: [].concat(contRows('Age', 'years'), catRows('Age group', ['< 65 years', '≥ 65 years']), catRows('Sex', ['Male', 'Female']),
+        catRows('Race', ['White', 'Black or African American', 'Asian', 'Other']), catRows('Ethnicity', ['Hispanic or Latino', 'Not Hispanic or Latino']),
+        contRows('Weight', 'kg'), catRows('ECOG performance status', ['0', '1'])),
+      footnotes: 'N = number of subjects in the Safety Analysis Set. Percentages are based on N.\nAge is calculated at informed consent.\n' + srcLine('ADSL', 'tfl_14_1_1_demog.R'),
+      program: 'tfl_14_1_1_demog.R', sapRef: 'SAP §10.1 Demographics; aCRF DM', templateKey: 'Demographics' }); },
+    '14.1.2': function () { return lay({ title: 'Baseline disease characteristics and prior anticancer therapies', subtitle: ITT, columns: ARMS,
+      rows: [].concat(contRows('Time since initial diagnosis', 'months'), catRows('Disease stage at study entry', ['Stage IIIB', 'Stage IV']),
+        catRows('PD-L1 expression', ['TPS < 1%', 'TPS 1–49%', 'TPS ≥ 50%']), catRows('Number of prior lines of therapy', ['1', '2', '≥ 3']),
+        catRows('Prior therapy type', ['Platinum-based chemotherapy', 'Immune checkpoint inhibitor', 'Targeted therapy'])),
+      footnotes: 'N = number of subjects in the ITT Analysis Set. Percentages are based on N.\nSubjects may have received more than one prior therapy type.\n' + srcLine('ADSL, ADMH, ADCM', 'tfl_14_1_2_base.R'),
+      program: 'tfl_14_1_2_base.R', sapRef: 'SAP §10.2 Baseline characteristics', templateKey: 'Baseline characteristics' }); },
+    '14.1.3': function () { return lay({ title: 'Subject disposition', subtitle: 'All Randomized Subjects', columns: ARMS,
+      rows: [L(0, 'Randomized', NP), L(0, 'Treated (Safety Analysis Set)', NP), L(0, 'Ongoing study treatment', NP), L(0, 'Discontinued study treatment', NP),
+        L(1, 'Progressive disease', NP), L(1, 'Adverse event', NP), L(1, 'Withdrawal by subject', NP), L(1, 'Physician decision', NP), L(1, 'Death', NP),
+        L(0, 'Discontinued study', NP), L(1, 'Lost to follow-up', NP), L(1, 'Death', NP)],
+      footnotes: 'Percentages are based on the number of randomized subjects.\nPrimary reason for discontinuation as recorded on the End of Treatment CRF.\n' + srcLine('ADSL, ADDS', 't_14_1_3_disp.sas'),
+      program: 't_14_1_3_disp.sas', sapRef: 'SAP §10.0 Subject disposition', templateKey: 'Disposition' }); },
+    '14.2.1': function () { return lay({ title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', subtitle: MITT, columns: ARMS2,
+      rows: [L(0, 'Best overall response, n (%)', ['', '']), L(1, 'Complete response (CR)', NP2), L(1, 'Partial response (PR)', NP2), L(1, 'Stable disease (SD)', NP2),
+        L(1, 'Progressive disease (PD)', NP2), L(1, 'Not evaluable (NE)', NP2), L(0, 'Objective response rate (CR + PR), n (%)', NP2),
+        L(1, '95% CI [a]', ['(xx.x, xx.x)', '(xx.x, xx.x)']), L(0, 'Difference in ORR vs placebo (%)', ['', 'xx.x']), L(1, '95% CI [b]', ['', '(xx.x, xx.x)']), L(1, 'p-value [c]', ['', 'x.xxxx'])],
+      footnotes: 'Response per RECIST v1.1 by blinded independent central review (BICR); confirmation required ≥ 4 weeks after first response.\n[a] Clopper–Pearson exact CI. [b] Miettinen–Nurminen CI stratified by randomization factors. [c] CMH test, two-sided.\n' + srcLine('ADSL, ADRS (PARAMCD = "BOR", BICR)', 'tfl_14_2_1_orr.R'),
+      program: 'tfl_14_2_1_orr.R', sapRef: 'SAP §11.1 Primary efficacy', templateKey: 'Primary endpoint — ORR' }); },
+    '14.2.3': function () { return lay({ title: 'Duration of response and time to response among confirmed responders', subtitle: FAS + ' — confirmed responders', columns: ARMS2,
+      rows: [L(0, 'Number of confirmed responders', ['xx', 'xx']), L(0, 'Duration of response (months) [a]', ['', '']), L(1, 'Events (PD or death), n (%)', NP2), L(1, 'Censored, n (%)', NP2),
+        L(1, 'Median (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']), L(1, '% with DoR ≥ 6 months (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']),
+        L(1, '% with DoR ≥ 12 months (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']), L(0, 'Time to response (months)', ['', '']), L(1, 'Mean (SD)', ['x.x (x.xx)', 'x.x (x.xx)']),
+        L(1, 'Median', ['x.x', 'x.x']), L(1, 'Min, Max', ['x.x, x.x', 'x.x, x.x'])],
+      footnotes: '[a] Kaplan–Meier estimates; CI by Brookmeyer–Crowley method with log-log transformation.\nDoR measured from first documented CR/PR to PD or death.\n' + srcLine('ADSL, ADTTE (PARAMCD = "DOR", "TTR")', 'tfl_14_2_3_orr_dorr.sas'),
+      program: 'tfl_14_2_3_orr_dorr.sas', sapRef: 'SAP §11.3 Secondary efficacy', templateKey: 'Duration of response' }); },
+    '14.3.2': function () { return lay({ title: 'Kaplan–Meier plot of overall survival with landmark rates at 12 and 24 months', subtitle: ITT, labelHeader: 'Figure element', columns: ['Specification'],
+      rows: figRows([['Figure type', 'Kaplan–Meier step curves by treatment arm with censor marks (+)'], ['X-axis', 'Time since randomization (months); 0 to 36 by 3'],
+        ['Y-axis', 'Overall survival probability; 0.0 to 1.0 by 0.2'], ['Legend', 'Placebo (N=xx) — solid; Drug X 10 mg (N=xx) — dashed'],
+        ['Inset statistics', 'Median OS (95% CI) per arm; HR (95% CI) = x.xx (x.xx, x.xx); stratified log-rank p = x.xxxx'],
+        ['Landmark rates', '12-month and 24-month OS rate (95% CI) per arm, dotted vertical reference lines'],
+        ['Number at risk', 'Table below x-axis at each 3-month tick, one line per arm']]),
+      footnotes: 'HR from stratified Cox proportional hazards model; p-value from stratified log-rank test (two-sided).\nSubjects without death are censored at last known alive date.\n' + srcLine('ADSL, ADTTE (PARAMCD = "OS")', 'f_14_3_2_os_km.R'),
+      program: 'f_14_3_2_os_km.R', sapRef: 'SAP §11.4 Overall survival', templateKey: 'Kaplan–Meier overall survival' }); },
+    '14.3.0': function () { return lay({ title: 'Overall summary of treatment-emergent adverse events', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Subjects with any TEAE', NP), L(0, 'Subjects with any treatment-related TEAE', NP), L(0, 'Subjects with any Grade ≥ 3 TEAE', NP), L(0, 'Subjects with any serious TEAE', NP),
+        L(1, 'Treatment-related serious TEAE', NP), L(0, 'TEAE leading to dose interruption', NP), L(0, 'TEAE leading to dose reduction', NP), L(0, 'TEAE leading to permanent discontinuation', NP),
+        L(0, 'TEAE leading to death', NP)],
+      footnotes: FOOT_SAF + '\n' + srcLine('ADSL, ADAE', 't_14_3_0_saf.sas'),
+      notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.', program: 't_14_3_0_saf.sas', sapRef: 'SAP §12.0 Safety overview', templateKey: 'Safety summary' }); },
+    '14.3.1': function () { return lay({ title: 'Adverse events — overview of TEAE, SAE, Grade ≥ 3, and discontinuations', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Number of TEAEs (events)', ['xxx', 'xxx', 'xxx']), L(0, 'Subjects with any TEAE', NP), L(1, 'Maximum grade 1–2', NP), L(1, 'Maximum grade 3', NP), L(1, 'Maximum grade 4', NP),
+        L(1, 'Grade 5 (fatal)', NP), L(0, 'Subjects with any serious TEAE', NP), L(0, 'Subjects with TEAE leading to discontinuation', NP), L(0, 'Subjects with AESI', NP)],
+      footnotes: FOOT_SAF + '\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_ae.R'),
+      notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.', program: 'tfl_14_3_1_ae.R', sapRef: 'SAP §12.1 Adverse events', templateKey: 'Adverse events — overview' }); },
+    '14.3.1.1': function () { return lay({ title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term', subtitle: SAF, columns: ARMS,
+      rows: socRows(3), footnotes: FOOT_SAF + '\nSOCs sorted alphabetically; PTs by descending frequency in the Total column.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_1_ae_soc_pt.R'),
+      program: 'tfl_14_3_1_1_ae_soc_pt.R', sapRef: 'SAP §12.1.1', templateKey: 'AE by SOC/PT' }); },
+    '14.3.1.2': function () { return lay({ title: 'Serious adverse events by SOC/PT and relationship to study drug', subtitle: SAF,
+      columns: ['Placebo Any (N=xx)', 'Placebo Related (N=xx)', 'Drug X Any (N=xx)', 'Drug X Related (N=xx)'],
+      rows: [L(0, 'Subjects with at least one serious TEAE', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Infections and infestations', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
+        L(1, 'Pneumonia', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(1, 'Sepsis', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
+        L(0, 'Respiratory, thoracic and mediastinal disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(1, 'Pneumonitis', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'])],
+      footnotes: FOOT_SAF + '\nRelated = investigator-assessed as possibly, probably, or definitely related (AEREL).\n' + srcLine('ADSL, ADAE (AESER = "Y")', 'tfl_14_3_1_2_sae_rel.R'),
+      program: 'tfl_14_3_1_2_sae_rel.R', sapRef: 'SAP §12.1.2', templateKey: 'SAE by relationship' }); },
+    '14.3.1.3': function () { return lay({ title: 'Adverse events leading to permanent discontinuation of study treatment by Preferred Term', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Subjects with any TEAE leading to discontinuation', NP), L(1, 'Pneumonitis', NP), L(1, 'Alanine aminotransferase increased', NP), L(1, 'Fatigue', NP), L(1, 'Colitis', NP), L(1, 'Infusion related reaction', NP)],
+      footnotes: FOOT_SAF + '\nAction taken with study treatment = "DRUG WITHDRAWN" (AEACN). PTs by descending frequency in Total.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_3_ae_disc.R'),
+      program: 'tfl_14_3_1_3_ae_disc.R', sapRef: 'SAP §12.1.3', templateKey: 'AE discontinuation' }); },
+    '14.3.1.4': function () { return lay({ title: 'Grade 3 or higher treatment-emergent adverse events by System Organ Class and Preferred Term', subtitle: SAF, columns: ARMS,
+      rows: socRows(3, 'Grade ≥ 3 TEAE'), footnotes: FOOT_SAF + '\nGrade ≥ 3 per CTCAE v5.0 (AETOXGR ≥ 3).\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_4_ae_g3.R'),
+      program: 'tfl_14_3_1_4_ae_g3.R', sapRef: 'SAP §12.1.4', templateKey: 'AE Grade 3+' }); },
+    '14.3.1.5': function () { return lay({ title: 'Adverse events of special interest: immune-mediated events, infusion reactions, and hepatic toxicity', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Subjects with any AESI', NP), L(0, 'Immune-mediated adverse events', NP), L(1, 'Pneumonitis', NP), L(1, 'Colitis', NP), L(1, 'Hypothyroidism', NP),
+        L(0, 'Infusion-related reactions', NP), L(0, 'Hepatic toxicity', NP), L(1, 'ALT or AST > 3 × ULN', NP), L(1, "Potential Hy's law", NP)],
+      footnotes: FOOT_SAF + '\nAESI categories defined by sponsor-specified MedDRA search list v3.0.\n' + srcLine('ADSL, ADAE (AESIFL = "Y")', 'tfl_14_3_1_5_aesi.R'),
+      program: 'tfl_14_3_1_5_aesi.R', sapRef: 'SAP §12.1.5', templateKey: 'AESI' }); },
+    '14.3.1.6': function () { return lay({ title: 'Time to first Grade ≥ 3 treatment-emergent adverse event — Kaplan–Meier plot', subtitle: SAF, labelHeader: 'Figure element', columns: ['Specification'],
+      rows: figRows([['Figure type', 'Kaplan–Meier cumulative incidence (1 − KM) by arm with censor marks (+)'], ['X-axis', 'Time since first dose (weeks); 0 to 52 by 4'],
+        ['Y-axis', 'Cumulative probability of first Grade ≥ 3 TEAE; 0.0 to 1.0'], ['Legend', 'Placebo (N=xx) — solid; Drug X 10 mg (N=xx) — dashed'],
+        ['Inset statistics', 'Median time (95% CI) per arm; HR (95% CI) = x.xx (x.xx, x.xx)'], ['Number at risk', 'Table below x-axis every 4 weeks, one line per arm']]),
+      footnotes: 'Subjects without a Grade ≥ 3 TEAE are censored at end of treatment-emergent period.\n' + srcLine('ADSL, ADTTE (PARAMCD = "TTAEG3")', 'tfl_14_3_1_6_ae_ttf.R'),
+      program: 'tfl_14_3_1_6_ae_ttf.R', sapRef: 'SAP §12.1.6', templateKey: 'AE time-to-event' }); },
+    '14.3.2.1': function () {
+      var cols = ['Subject ID', 'Treatment', 'Age/Sex', 'SOC / Preferred Term', 'Onset day', 'Duration (days)', 'Grade', 'Outcome', 'Action taken'];
+      return lay({ labelHeader: 'Subject ID', title: 'Listing of serious adverse events', subtitle: SAF, columns: cols.slice(1), rows: listRows(cols, 4),
+        footnotes: 'Onset day relative to first dose (Day 1). Duration = end date − start date + 1.\n' + srcLine('ADAE (AESER = "Y")', 'tfl_14_3_2_1_sae_list.R'),
+        program: 'tfl_14_3_2_1_sae_list.R', sapRef: 'SAP §12.2', templateKey: 'SAE listing' }); },
+    '14.3.2.2': function () {
+      var cols = ['Subject ID', 'Treatment', 'Age/Sex', 'Date of death (study day)', 'Primary cause of death', 'Related AE (PT)', 'Days since last dose'];
+      return lay({ labelHeader: 'Subject ID', title: 'Listing of deaths and adverse events with fatal outcome', subtitle: SAF, columns: cols.slice(1), rows: listRows(cols, 3),
+        footnotes: 'Includes all deaths during study and within 90 days of last dose.\n' + srcLine('ADSL, ADAE (AEOUT = "FATAL"), ADDS', 'tfl_14_3_2_2_death_list.R'),
+        program: 'tfl_14_3_2_2_death_list.R', sapRef: 'SAP §12.2', templateKey: 'Death listing' }); },
+    '14.3.3': function () { return lay({ title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', subtitle: SAF,
+      columns: ['Placebo Gr 1–2 (N=xx)', 'Placebo Gr ≥ 3 (N=xx)', 'Drug X Gr 1–2 (N=xx)', 'Drug X Gr ≥ 3 (N=xx)'],
+      rows: [L(0, 'Subjects with any TEAE', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Gastrointestinal disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
+        L(0, 'General disorders and administration site conditions', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Investigations', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
+        L(0, 'Skin and subcutaneous tissue disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'])],
+      footnotes: FOOT_SAF + '\nSubjects are counted once per SOC at their maximum grade.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_3_ae_sev.R'),
+      program: 'tfl_14_3_3_ae_sev.R', sapRef: 'SAP §12.1.7', templateKey: 'AE by severity' }); },
+    '14.3.4': function () { return lay({ title: 'Common adverse events (≥ 5% in any arm) by Preferred Term — descending frequency', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Subjects with any common TEAE', NP), L(1, 'Fatigue', NP), L(1, 'Diarrhoea', NP), L(1, 'Nausea', NP), L(1, 'Decreased appetite', NP), L(1, 'Rash', NP), L(1, 'Anaemia', NP), L(1, 'Pruritus', NP)],
+      footnotes: FOOT_SAF + '\nPTs with incidence ≥ 5% in any treatment arm, sorted by descending frequency in Drug X 10 mg.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_4_ae_common.R'),
+      program: 'tfl_14_3_4_ae_common.R', sapRef: 'SAP §12.1.8', templateKey: 'Common AEs' }); },
+    '14.3.5.1': function () { return lay({ title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade', subtitle: SAF,
+      colGroups: [], columns: ['Worst Gr 0', 'Worst Gr 1', 'Worst Gr 2', 'Worst Gr 3', 'Worst Gr 4', 'Total'],
+      rows: [L(0, 'ALT increased — Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
+        L(1, 'Baseline Grade 1', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']), L(1, 'Baseline Grade ≥ 2', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
+        L(0, 'ALT increased — Placebo (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
+        L(0, 'Creatinine increased — Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx'])],
+      footnotes: 'Grades per CTCAE v5.0. Percentages based on subjects with baseline and ≥ 1 post-baseline value.\nWorst post-baseline = highest grade on treatment through 30 days after last dose.\n' + srcLine('ADLB (PARCAT1 = "CHEMISTRY")', 'tfl_14_3_5_1_lb_chem.sas'),
+      program: 'tfl_14_3_5_1_lb_chem.sas', sapRef: 'SAP §12.3 Laboratory', templateKey: 'Lab chemistry shifts' }); },
+    '14.3.5.2': function () { return lay({ title: 'Hematology parameters: change from baseline over time', subtitle: SAF, columns: ARMS2,
+      rows: [].concat([L(0, 'Hemoglobin (g/L)', ['', ''])], [['Baseline', 'xx.x (xx.xx)'], ['Week 6 — change from baseline', 'xx.x (xx.xx)'], ['Week 12 — change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
+        [L(0, 'Platelets (10^9/L)', ['', ''])], [['Baseline', 'xxx.x (xx.xx)'], ['Week 6 — change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
+        [L(0, 'Neutrophils (10^9/L)', ['', ''])], [['Baseline', 'x.xx (x.xxx)'], ['Week 6 — change from baseline', 'x.xx (x.xxx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); })),
+      footnotes: 'Only subjects with a value at both baseline and the visit are included in change from baseline.\n' + srcLine('ADLB (PARCAT1 = "HEMATOLOGY")', 'tfl_14_3_5_2_lb_heme.R'),
+      program: 'tfl_14_3_5_2_lb_heme.R', sapRef: 'SAP §12.3 Laboratory', templateKey: 'Hematology' }); },
+    '14.3.7': function () { return lay({ title: 'Vital signs: summary of values and change from baseline by visit', subtitle: SAF, columns: ARMS2,
+      rows: [].concat(contRows('Systolic blood pressure — Baseline', 'mmHg', 2), contRows('Systolic blood pressure — Week 12 change from baseline', 'mmHg', 2).slice(0, 3),
+        contRows('Heart rate — Baseline', 'beats/min', 2).slice(0, 3), contRows('Body temperature — Baseline', '°C', 2).slice(0, 3)),
+      footnotes: 'Baseline = last non-missing value before first dose.\n' + srcLine('ADVS', 't_14_3_7_vs.sas'),
+      program: 't_14_3_7_vs.sas', sapRef: 'SAP §12.4 Vital signs', templateKey: 'Vital signs' }); },
+    '14.3.8': function () { return lay({ title: 'Concomitant medications by ATC class and preferred name', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Subjects with any concomitant medication', NP), L(0, 'Analgesics', NP), L(1, 'Paracetamol', NP), L(1, 'Oxycodone', NP), L(0, 'Corticosteroids for systemic use', NP),
+        L(1, 'Dexamethasone', NP), L(1, 'Prednisone', NP), L(0, 'Antiemetics and antinauseants', NP), L(1, 'Ondansetron', NP)],
+      footnotes: 'WHO Drug Global B3 Mar 2026. Concomitant = taken on or after first dose. Subjects counted once per ATC class and preferred name.\n' + srcLine('ADSL, ADCM (ONTRTFL = "Y")', 'tfl_14_3_8_cm.sas'),
+      program: 'tfl_14_3_8_cm.sas', sapRef: 'SAP §12.5 Concomitant medications', templateKey: 'Con meds' }); }
+  };
+  var SHELL_SPEC = {
+    '14.1.1': ['ADSL', 'USUBJID, TRT01A, AGE, AGEGR1, SEX, RACE, ETHNIC, WEIGHTBL, ECOGBL', 'Parameter order per SAP; TRT01AN'],
+    '14.1.2': ['ADSL, ADMH, ADCM', 'USUBJID, TRT01P, DIAGDUR, STAGE, PDL1GR, PRLINES', 'Parameter order per SAP; TRT01PN'],
+    '14.1.3': ['ADSL, ADDS', 'USUBJID, TRT01P, RANDFL, SAFFL, EOTSTT, DCTREAS, EOSSTT, DCSREAS', 'Status then reason (descending frequency)'],
+    '14.2.1': ['ADSL, ADRS', 'USUBJID, TRT01P, PARAMCD="BOR", AVALC, MITTFL, STRATA', 'Response category order CR, PR, SD, PD, NE'],
+    '14.2.3': ['ADSL, ADTTE', 'USUBJID, TRT01P, PARAMCD in ("DOR","TTR"), AVAL, CNSR', 'PARAMCD, TRT01PN'],
+    '14.3.2': ['ADSL, ADTTE', 'USUBJID, TRT01P, PARAMCD="OS", AVAL, CNSR, STRATA', 'TRT01PN'],
+    '14.3.0': ['ADSL, ADAE', 'USUBJID, TRT01A, TRTEMFL, AESER, AEREL, AETOXGR, AEACN, AEOUT', 'Category order per SAP'],
+    '14.3.1': ['ADSL, ADAE', 'USUBJID, TRT01A, TRTEMFL, AETOXGR, AESER, AEACN, AESIFL', 'Category order per SAP'],
+    '14.3.1.1': ['ADSL, ADAE', 'USUBJID, TRT01A, TRTEMFL, AEBODSYS, AEDECOD', 'AEBODSYS alphabetical; AEDECOD descending Total frequency'],
+    '14.3.1.2': ['ADSL, ADAE', 'USUBJID, TRT01A, AESER, AEREL, AEBODSYS, AEDECOD', 'AEBODSYS, AEDECOD descending frequency'],
+    '14.3.1.3': ['ADSL, ADAE', 'USUBJID, TRT01A, AEACN, AEDECOD', 'AEDECOD descending Total frequency'],
+    '14.3.1.4': ['ADSL, ADAE', 'USUBJID, TRT01A, AETOXGR, AEBODSYS, AEDECOD', 'AEBODSYS alphabetical; AEDECOD descending frequency'],
+    '14.3.1.5': ['ADSL, ADAE', 'USUBJID, TRT01A, AESIFL, AESICAT, AEDECOD, ALT, AST', 'AESI category order per SAP'],
+    '14.3.1.6': ['ADSL, ADTTE', 'USUBJID, TRT01A, PARAMCD="TTAEG3", AVAL, CNSR', 'TRT01AN'],
+    '14.3.2.1': ['ADAE', 'USUBJID, TRT01A, AGE, SEX, AEBODSYS, AEDECOD, ASTDY, ADURN, AETOXGR, AEOUT, AEACN', 'TRT01AN, USUBJID, ASTDY'],
+    '14.3.2.2': ['ADSL, ADAE, ADDS', 'USUBJID, TRT01A, DTHDT, DTHADY, DTHCAUS, AEDECOD', 'TRT01AN, USUBJID'],
+    '14.3.3': ['ADSL, ADAE', 'USUBJID, TRT01A, AETOXGR, AEBODSYS', 'AEBODSYS alphabetical'],
+    '14.3.4': ['ADSL, ADAE', 'USUBJID, TRT01A, TRTEMFL, AEDECOD', 'AEDECOD descending Drug X frequency'],
+    '14.3.5.1': ['ADSL, ADLB', 'USUBJID, TRT01A, PARAMCD, BTOXGR, ATOXGR, WORSTFL', 'PARAMCD, TRT01AN, BTOXGR'],
+    '14.3.5.2': ['ADSL, ADLB', 'USUBJID, TRT01A, PARAMCD, AVISIT, AVAL, BASE, CHG', 'PARAMCD, AVISITN, TRT01AN'],
+    '14.3.7': ['ADSL, ADVS', 'USUBJID, TRT01A, PARAMCD, AVISIT, AVAL, BASE, CHG', 'PARAMCD, AVISITN, TRT01AN'],
+    '14.3.8': ['ADSL, ADCM', 'USUBJID, TRT01A, ONTRTFL, CMCLAS, CMDECOD', 'CMCLAS alphabetical; CMDECOD descending frequency']
+  };
+  function enrichShell(sh) {
+    var fn = SHELL_CONTENT[sh.number];
+    if (fn) {
+      sh.layout = fn();
+      sh.title = sh.layout.title;
+      sh.custom = false;
+    }
+    var spec = SHELL_SPEC[sh.number];
+    sh.datasets = sh.datasets || (spec ? spec[0] : 'ADSL');
+    sh.keyVars = sh.keyVars || (spec ? spec[1] : 'USUBJID, TRT01A');
+    sh.sortOrder = sh.sortOrder || (spec ? spec[2] : 'Per SAP');
+    sh.version = sh.version || (sh.status === 'Locked' ? '1.0' : (sh.status === 'In review' ? '0.3' : '0.2'));
+    sh.modifiedBy = sh.modifiedBy || (sh.status === 'Locked' ? 'Mei Chen' : 'Jordan Patel');
+    sh.modifiedAt = sh.modifiedAt || ('2026-09-' + (10 + (String(sh.number).length % 9)) + ' 1' + (String(sh.number).length % 7) + ':2' + (String(sh.number).length % 6));
+    return sh;
+  }
+
   function seedCatalog(studyId) {
     if (studyId === 'ONC-204-301') {
       return [
@@ -815,8 +1047,12 @@
         makeShell({ id: '14.3.3', number: '14.3.3', type: 'Table', title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by severity' }),
         makeShell({ id: '14.3.4', number: '14.3.4', type: 'Table', title: 'Common adverse events (≥5% in any arm) by Preferred Term — descending frequency', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Common AEs' }),
         makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival — full analysis set with landmark rates at 12 and 24 months', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' }),
-        makeShell({ id: '14.3.5.1', number: '14.3.5.1', type: 'Table', title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Lab chemistry shifts' })
-      ];
+        makeShell({ id: '14.3.5.1', number: '14.3.5.1', type: 'Table', title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Lab chemistry shifts' }),
+        makeShell({ id: '14.3.5.2', number: '14.3.5.2', type: 'Table', title: 'Hematology parameters: change from baseline over time', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Hematology' }),
+        makeShell({ id: '14.1.3', number: '14.1.3', type: 'Table', title: 'Subject disposition', status: 'Draft', analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Disposition' }),
+        makeShell({ id: '14.3.7', number: '14.3.7', type: 'Table', title: 'Vital signs: summary of values and change from baseline by visit', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Vital signs' }),
+        makeShell({ id: '14.3.8', number: '14.3.8', type: 'Table', title: 'Concomitant medications by ATC class and preferred name', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Con meds' })
+      ].map(enrichShell);
     }
     /* other studies start with a light catalog so copy result is visible */
     var meta = studyMeta(studyId);
@@ -824,7 +1060,7 @@
     if (meta && meta.templates.indexOf('Demographics') >= 0) {
       shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }));
     }
-    return shells;
+    return shells.map(enrichShell);
   }
 
   var studyStore = {};
@@ -834,6 +1070,13 @@
     }
   });
   studyStore['ONC-204-301'].selectedId = '14.1.1';
+  /* Demo flow: restore the catalog saved in localStorage (survives navigation). */
+  if (window.SPHERE_DEMO) {
+    Object.keys(studyStore).forEach(function (sid) {
+      var saved = SPHERE_DEMO.getShells(sid);
+      if (saved && saved.length) studyStore[sid].shells = saved;
+    });
+  }
 
   var state = {
     title: 'Demographics',
@@ -887,6 +1130,7 @@
   function statusBadge(status) {
     var cls = 'draft';
     if (status === 'Locked') cls = 'locked';
+    else if (status === 'Final') cls = 'locked';
     else if (status === 'In review') cls = 'review';
     return '<span class="badge ' + cls + '">' + escapeHtml(status) + '</span>';
   }
@@ -937,7 +1181,8 @@
       program: state.program,
       sapRef: state.sapRef,
       templateKey: state.templateKey,
-      custom: state.custom
+      custom: state.custom,
+      labelHeader: state.labelHeader || ''
     };
   }
 
@@ -958,6 +1203,7 @@
     state.program = lay.program || '';
     state.sapRef = lay.sapRef || '';
     state.templateKey = sh.templateKey || lay.templateKey || '';
+    state.labelHeader = lay.labelHeader || '';
     state.custom = sh.custom != null ? sh.custom : !!lay.custom;
     state.templateMissing = !!sh.templateMissing;
     state.activeRow = state.rows.length ? 0 : -1;
@@ -967,6 +1213,7 @@
     document.getElementById('typeMenuLabel').textContent = sh.type;
     document.getElementById('metaSet').value = sh.analysisSet || 'Safety';
     document.getElementById('metaStatus').value = sh.status || 'Draft';
+    paintShellStatus(sh);
     lastUsedSap = normalizeSap(sh.sap);
     setMetaSapValue(lastUsedSap);
 
@@ -1066,7 +1313,7 @@
       html += '<div class="sap-section-body" id="' + bid + '"' + (collapsed ? ' hidden' : '') + ' aria-hidden="' + (collapsed ? 'true' : 'false') + '">';
       html += '<table class="catalog-section-table"><tbody>';
       if (!list.length) {
-        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="2"></td></tr>';
+        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="3"></td></tr>';
       }
       list.forEach(function (sh) {
         var classes = [];
@@ -1078,12 +1325,14 @@
         if (sh.copiedFrom) {
           html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
         }
-        html += '</td></tr>';
+        if (sh.status === 'Final') html += ' <span class="toc-final" title="Final">Final</span>';
+        html += '</td><td class="sync-cell">' + syncButtonHtml(sh) + '</td></tr>';
       });
       html += '</tbody></table></div></section>';
     });
     catalogBody.innerHTML = html;
     applyCatalogFilters();
+    persistCatalog();
   }
 
   function clearCatalogDropMarks() {
@@ -1360,7 +1609,7 @@
       var s = '';
       if (include) {
         s += '<th class="col-idx"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '>#</th>';
-        s += '<th class="col-label"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '></th>';
+        s += '<th class="col-label"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '>' + escapeHtml(state.labelHeader || '') + '</th>';
       }
       return s;
     }
@@ -1457,6 +1706,7 @@
       sub.classList.add('empty');
     }
 
+    paintOutIdAndFigure();
     setBlock('footnotes', state.footnotes);
     setBlock('notes', state.notes);
     setBlock('program', state.program);
@@ -1623,7 +1873,7 @@
   });
 
   document.getElementById('shellTitle').addEventListener('dblclick', function () {
-    startTextEdit(this, function () { return state.title; }, function (v) { state.title = v; });
+    startTextEdit(this, function () { return state.title; }, function (v) { state.title = v; persistEditorToSelected(); renderCatalog(); });
   });
   document.getElementById('shellSubtitle').addEventListener('dblclick', function () {
     startTextEdit(this, function () { return state.subtitle; }, function (v) { state.subtitle = v; });
@@ -2204,6 +2454,7 @@
       sh.approved = false;
       document.getElementById('metaStatus').value = 'Draft';
       renderCatalog();
+      paintShellStatus(sh);
     }
     this.textContent = 'Saved';
     var b = this;
@@ -2217,6 +2468,7 @@
       document.getElementById('metaStatus').value = 'Locked';
       persistEditorToSelected();
       renderCatalog();
+      paintShellStatus(selectedShell());
     }
   });
   document.getElementById('metaSap').addEventListener('change', function () {
@@ -2225,27 +2477,256 @@
     var sap = normalizeSap(this.value);
     if (normalizeSap(sh.sap) === sap) return;
     persistEditorToSelected();
+    if (sh.autoNumber && !sh.syncedAt) {
+      sh.number = nextShellNumber(sap, sh.id);
+      document.getElementById('metaNumber').value = sh.number;
+    }
     moveShellInCatalog(sh.id, sap, null);
   });
 
   document.getElementById('btnAddShell').addEventListener('click', function () {
     persistEditorToSelected();
-    var id = 'adhoc-' + Date.now().toString(36).slice(-5);
+    var sap = normalizeSap(lastUsedSap || DEFAULT_SAP);
+    var id = 'new-' + Date.now().toString(36).slice(-6);
+    var number = nextShellNumber(sap, id);
+    var set = sap === 'Efficacy' ? 'ITT' : 'Safety';
+    var layout = newShellLayout(sap, set);
     var shell = makeShell({
       id: id,
-      number: 'Adhoc ' + (currentShells().length + 1),
+      number: number,
       type: 'Table',
-      title: '{Adhoc Shell ' + (currentShells().length + 1) + '}',
+      title: layout.title,
       status: 'Draft',
-      sap: lastUsedSap || DEFAULT_SAP,
-      layout: cloneData(adhocPreset),
+      analysisSet: set,
+      sap: sap,
+      layout: layout,
       custom: true,
       templateKey: ''
     });
-    shell.layout.title = shell.title;
+    shell.autoNumber = true;
+    shell.createdAt = window.SPHERE_DEMO ? SPHERE_DEMO.stamp() : '';
+    var dsBySap = { 'Safety TLFs': ['ADSL, ADAE', 'USUBJID, TRT01A, TRTEMFL, AETOXGR, AESER, AEACN', 'Category order per SAP'],
+      'Labs': ['ADSL, ADLB', 'USUBJID, TRT01A, PARAMCD, BTOXGR, ATOXGR', 'PARAMCD, TRT01AN'],
+      'Efficacy': ['ADSL, ADRS', 'USUBJID, TRT01P, PARAMCD="BOR", AVALC', 'Response category order'],
+      'Demographics': ['ADSL', 'USUBJID, TRT01A, AGE, SEX, RACE', 'Parameter order per SAP'] }[sap] || ['ADSL', 'USUBJID, TRT01A', 'Per SAP'];
+    shell.datasets = dsBySap[0];
+    shell.keyVars = dsBySap[1];
+    shell.sortOrder = dsBySap[2];
+    shell.version = '0.1';
+    shell.modifiedBy = window.SPHERE_DEMO ? SPHERE_DEMO.CURRENT_USER : 'Jordan Patel';
+    shell.modifiedAt = shell.createdAt;
     currentShells().push(shell);
     selectShell(id, true);
+    showToast('New shell ' + number + ' created (Draft) · double-click the title to rename');
   });
+
+  /* —— Demo flow: clean new-shell template, Finalize, Send to Tracker —— */
+  var TRACKER_LINKED = ['14.1.1', '14.1.2', '14.2.1', '14.2.3', '14.3.1', '14.3.1.1', '14.3.1.2', '14.3.1.3', '14.3.1.4', '14.3.1.5', '14.3.1.6', '14.3.2', '14.3.2.1', '14.3.2.2', '14.3.3', '14.3.4', '14.3.5', '14.3.5.1', '14.3.5.2', '14.3.8'];
+  var SAP_PREFIX = { 'Demographics': '14.1', 'Efficacy': '14.2', 'Safety TLFs': '14.3', 'Labs': '14.3', 'Unassigned': '14.9' };
+
+  function nextShellNumber(sap, selfId) {
+    var prefix = SAP_PREFIX[normalizeSap(sap)] || '14.9';
+    var max = 0;
+    var nums = TRACKER_LINKED.slice();
+    currentShells().forEach(function (sh) { if (sh.id !== selfId) nums.push(String(sh.number || '')); });
+    nums.forEach(function (n) {
+      if (n.indexOf(prefix + '.') !== 0) return;
+      var k = parseInt(n.slice(prefix.length + 1).split('.')[0], 10);
+      if (!isNaN(k) && k > max) max = k;
+    });
+    return prefix + '.' + (max + 1);
+  }
+
+  function newShellLayout(sap, set) {
+    var cols = ARMS.slice();
+    var np = ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'];
+    var rows, title, foot;
+    function r(indent, label, cells) { return { indent: indent, label: label, cells: (cells || ['', '', '']).slice() }; }
+    sap = normalizeSap(sap);
+    if (sap === 'Safety TLFs' || sap === 'Labs') {
+      title = 'New safety table';
+      rows = [
+        r(0, 'Subjects with any TEAE, n (%)', np),
+        r(1, 'Grade 1', np), r(1, 'Grade 2', np), r(1, 'Grade 3', np), r(1, 'Grade ≥4', np),
+        r(0, 'Subjects with any serious TEAE, n (%)', np),
+        r(0, 'TEAE leading to discontinuation, n (%)', np)
+      ];
+      foot = 'n (%) = number (percentage) of subjects with at least one event. TEAE graded per CTCAE v5.0.\nSource: ADSL, ADAE.';
+    } else if (sap === 'Efficacy') {
+      title = 'New efficacy table';
+      rows = [
+        r(0, 'Best overall response, n (%)'),
+        r(1, 'Complete response (CR)', np), r(1, 'Partial response (PR)', np), r(1, 'Stable disease (SD)', np), r(1, 'Progressive disease (PD)', np),
+        r(0, 'Objective response rate (CR + PR)', np),
+        r(1, '95% CI', ['(xx.x, xx.x)', '(xx.x, xx.x)', '(xx.x, xx.x)'])
+      ];
+      foot = 'Response assessed per RECIST v1.1. 95% CI by Clopper–Pearson method.\nSource: ADSL, ADRS.';
+    } else if (sap === 'Demographics') {
+      title = 'New demographics table';
+      rows = [
+        r(0, 'Age (years)'),
+        r(1, 'n', ['xx', 'xx', 'xx']), r(1, 'Mean (SD)', ['xx.x (xx.xx)', 'xx.x (xx.xx)', 'xx.x (xx.xx)']),
+        r(1, 'Median', ['xx.x', 'xx.x', 'xx.x']), r(1, 'Min, Max', ['xx, xx', 'xx, xx', 'xx, xx']),
+        r(0, 'Sex, n (%)'), r(1, 'Male', np), r(1, 'Female', np)
+      ];
+      foot = 'Percentages are based on N in each treatment group.\nSource: ADSL.';
+    } else {
+      title = 'New table';
+      rows = [
+        r(0, 'Parameter'),
+        r(1, 'n', ['xx', 'xx', 'xx']), r(1, 'Mean (SD)', ['xx.x (xx.xx)', 'xx.x (xx.xx)', 'xx.x (xx.xx)']),
+        r(1, 'Median', ['xx.x', 'xx.x', 'xx.x']), r(1, 'Min, Max', ['xx, xx', 'xx, xx', 'xx, xx'])
+      ];
+      foot = 'Source: ADSL.';
+    }
+    var setLabel = { Safety: 'Safety Analysis Set', ITT: 'Intent-to-Treat Analysis Set', mITT: 'Modified Intent-to-Treat Analysis Set', PP: 'Per-Protocol Analysis Set' }[set] || 'Safety Analysis Set';
+    foot = foot.replace(/\nSource: (.*)\.$/, '\nSource: $1. Program: generated on Send to Tracker.');
+    return {
+      title: title,
+      subtitle: setLabel,
+      columns: cols,
+      colGroups: [],
+      rows: rows,
+      footnotes: foot,
+      notes: '',
+      program: '',
+      sapRef: '',
+      templateKey: '',
+      custom: true
+    };
+  }
+
+  function persistCatalog() {
+    if (!window.SPHERE_DEMO || !studyStore[CURRENT_STUDY]) return;
+    SPHERE_DEMO.setShells(CURRENT_STUDY, currentShells());
+  }
+  window.addEventListener('beforeunload', function () {
+    try { persistEditorToSelected(); persistCatalog(); } catch (e) {}
+  });
+  window.addEventListener('pagehide', function () {
+    try { persistEditorToSelected(); persistCatalog(); } catch (e) {}
+  });
+
+  function isLinkedExisting(sh) {
+    return CURRENT_STUDY === 'ONC-204-301' && !sh.syncedAt && !sh.autoNumber && TRACKER_LINKED.indexOf(String(sh.number)) >= 0;
+  }
+  function isSendable(sh) { return sh.status === 'Final' || sh.status === 'Locked'; }
+
+  var SYNC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/><path d="M9 12.2l2 2 4-4"/></svg>';
+  var PLUS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+
+  function syncButtonHtml(sh) {
+    if (sh.syncedAt) {
+      return '<button type="button" class="toc-sync is-synced" data-sync-id="' + escapeHtml(sh.id) + '" title="Synced to Tracker · ' + escapeHtml(sh.syncedAt) + ' (click to view)" aria-label="Synced to Tracker ' + escapeHtml(sh.syncedAt) + '">' + SYNC_ICON + '</button>';
+    }
+    if (isLinkedExisting(sh)) {
+      return '<button type="button" class="toc-sync is-synced is-linked" data-sync-id="' + escapeHtml(sh.id) + '" title="Synced to Tracker · existing program (click to view)" aria-label="Synced to Tracker, existing program">' + SYNC_ICON + '</button>';
+    }
+    var ok = isSendable(sh);
+    return '<button type="button" class="toc-sync' + (ok ? ' is-ready' : '') + '" data-sync-id="' + escapeHtml(sh.id) + '"' +
+      (ok ? '' : ' aria-disabled="true"') +
+      ' title="' + (ok ? 'Send to Tracker' : 'Finalize shell first') + '" aria-label="' + (ok ? 'Send to Tracker' : 'Send to Tracker — finalize shell first') + '">' + PLUS_ICON + '</button>';
+  }
+
+  function paintShellStatus(sh) {
+    var badge = document.getElementById('shellStatusBadge');
+    var btn = document.getElementById('btnFinalize');
+    var st = (sh && sh.status) || 'Draft';
+    if (badge) {
+      badge.textContent = sh && sh.syncedAt ? st + ' · Synced' : st;
+      badge.className = 'shell-status-badge is-' + st.toLowerCase().replace(/\s+/g, '-') + (sh && sh.syncedAt ? ' is-synced' : '');
+    }
+    if (btn) {
+      var done = st === 'Final' || st === 'Locked';
+      btn.disabled = done;
+      btn.classList.toggle('is-done', done);
+      var lbl = btn.querySelector('.btn-finalize-label');
+      if (lbl) lbl.textContent = done ? 'Final' : 'Finalize';
+      btn.title = done ? 'Shell is final — use + in the list to send it to the Tracker' : 'Finalize shell (Draft → Final)';
+    }
+  }
+
+  document.getElementById('metaStatus').addEventListener('change', function () {
+    persistEditorToSelected();
+    renderCatalog();
+    paintShellStatus(selectedShell());
+  });
+
+  document.getElementById('btnFinalize').addEventListener('click', function () {
+    var sh = selectedShell();
+    if (!sh) return;
+    persistEditorToSelected();
+    if (!confirm('Finalize shell ' + sh.number + ' “' + sh.title + '”?\n\nStatus changes Draft → Final and the shell can be sent to the Tracker.')) return;
+    sh.status = 'Final';
+    sh.finalizedAt = window.SPHERE_DEMO ? SPHERE_DEMO.stamp() : '';
+    sh.version = '1.0';
+    sh.modifiedBy = window.SPHERE_DEMO ? SPHERE_DEMO.CURRENT_USER : 'Jordan Patel';
+    sh.modifiedAt = sh.finalizedAt;
+    document.getElementById('metaStatus').value = 'Final';
+    renderCatalog();
+    paintShellStatus(sh);
+    showToast('Shell ' + sh.number + ' finalized · click + in the list to send it to the Tracker');
+  });
+
+  function showSyncToast(sh, rec) {
+    if (!toastEl) return;
+    toastEl.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = 'Shell ' + sh.number + ' synced to Tracker · ' + rec.program + ' created ';
+    var a = document.createElement('a');
+    a.href = 'tracker.html?focus=' + encodeURIComponent(rec.id);
+    a.className = 'toast-link';
+    a.textContent = 'View in Tracker →';
+    toastEl.appendChild(span);
+    toastEl.appendChild(a);
+    toastEl.classList.add('show', 'has-link');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show', 'has-link'); }, 6000);
+  }
+
+  catalogBody.addEventListener('mousedown', function (e) {
+    if (e.target.closest && e.target.closest('.toc-sync')) e.stopPropagation();
+  }, true);
+  catalogBody.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('.toc-sync');
+    if (!btn) return;
+    e.stopPropagation();
+    e.preventDefault();
+    var sh = findShell(btn.getAttribute('data-sync-id'));
+    if (!sh) return;
+    if (btn.classList.contains('is-synced')) {
+      var target = sh.syncedAt && sh.recordId ? sh.recordId : 'num:' + sh.number;
+      location.href = 'tracker.html?focus=' + encodeURIComponent(target);
+      return;
+    }
+    if (!isSendable(sh)) {
+      showToast('Finalize shell ' + sh.number + ' first (Draft → Final), then send it to the Tracker');
+      return;
+    }
+    if (btn.classList.contains('is-busy') || !window.SPHERE_DEMO) return;
+    btn.classList.add('is-busy');
+    btn.setAttribute('aria-busy', 'true');
+    btn.title = 'Sending to Tracker…';
+    btn.innerHTML = '<span class="toc-spin" aria-hidden="true"></span>';
+    setTimeout(function () {
+      if (studyStore[CURRENT_STUDY].selectedId === sh.id) persistEditorToSelected();
+      var rec = SPHERE_DEMO.syncShell(sh);
+      sh.syncedAt = rec.syncedAt;
+      sh.recordId = rec.id;
+      sh.program = rec.program;
+      sh.layout = sh.layout || {};
+      sh.layout.program = rec.program + '  ·  QC: ' + SPHERE_DEMO.qcName(rec.program);
+      sh.layout.footnotes = String(sh.layout.footnotes || '').replace('Program: generated on Send to Tracker.', 'Program: ' + rec.program + '.');
+      if (studyStore[CURRENT_STUDY].selectedId === sh.id) loadShellIntoEditor(sh);
+      renderCatalog();
+      var nb = catalogBody.querySelector('.toc-sync[data-sync-id="' + sh.id + '"]');
+      if (nb) nb.classList.add('just-synced');
+      if (studyStore[CURRENT_STUDY].selectedId === sh.id) paintShellStatus(sh);
+      showSyncToast(sh, rec);
+    }, 900);
+  }, true);
+
+  if (window.SPHERE_DEMO && SPHERE_DEMO.justReset) setTimeout(function () { showToast('Demo data reset'); }, 300);
 
   /* —— Metadata (SAS macro spec prototype) —— */
   var metadataModal = document.getElementById('metadataModal');
@@ -2279,8 +2760,9 @@
 
   function metadataModuleOn() {
     try {
-      return !!(window.SPHERE && SPHERE.isModuleEnabled && SPHERE.isModuleEnabled('metadata'));
-    } catch (e) { return false; }
+      if (window.SPHERE && SPHERE.isModuleEnabled) return !!SPHERE.isModuleEnabled('metadata');
+      return localStorage.getItem('sphere-module-metadata') !== 'off';
+    } catch (e) { return true; }
   }
 
   function syncMetadataButton(sh) {
@@ -2292,18 +2774,18 @@
       try { closeMetadataModal(); } catch (e) {}
       return;
     }
-    if (shellIsAutomatable(sh)) {
+    if (sh) {
       btnMetadata.hidden = false;
       btnMetadata.disabled = false;
       btnMetadata.removeAttribute('aria-disabled');
-      btnMetadata.title = 'Metadata';
+      btnMetadata.title = 'Metadata — output ID, population, datasets, key variables, status, version';
       btnMetadata.setAttribute('aria-label', 'Metadata');
     } else {
       btnMetadata.hidden = false;
       btnMetadata.disabled = true;
       btnMetadata.setAttribute('aria-disabled', 'true');
-      btnMetadata.title = 'Not available for this shell type';
-      btnMetadata.setAttribute('aria-label', 'Not available for this shell type');
+      btnMetadata.title = 'Select a shell first';
+      btnMetadata.setAttribute('aria-label', 'Metadata — select a shell first');
     }
   }
 
@@ -2341,10 +2823,7 @@
       showToast('Select a shell');
       return;
     }
-    if (!shellIsAutomatable(sh)) {
-      showToast('Not available for this shell type');
-      return;
-    }
+    renderShellMetaForm(sh);
     if (metadataTitleEl) {
       var num = (sh.number || '').trim();
       var title = (sh.title || state.title || '').replace(/^Table\s+/i, '').trim();
@@ -2364,13 +2843,14 @@
 
   function saveMetadata() {
     var sh = selectedShell();
-    if (!sh || !shellIsAutomatable(sh)) {
+    if (!sh) {
       closeMetadataModal();
       return;
     }
     sh.metadata = readMetadataGrid(false);
+    saveShellMetaForm(sh);
     closeMetadataModal();
-    showToast('Demo: metadata saved with shell (not persisted)');
+    showToast('Metadata saved · ' + sh.number + ' v' + sh.version + ' · ' + sh.modifiedBy + ' ' + sh.modifiedAt);
   }
 
   if (btnMetadata) btnMetadata.addEventListener('click', openMetadataModal);
@@ -2690,6 +3170,109 @@
     loadWidth();
   })();
 
+  /* —— Shell metadata form (flow1) —— */
+  function metaField(id, label, html, wide) {
+    return '<label class="smf-field' + (wide ? ' is-wide' : '') + '" for="' + id + '"><span>' + label + '</span>' + html + '</label>';
+  }
+  function metaSelect(id, opts, val) {
+    return '<select id="' + id + '">' + opts.map(function (o) { return '<option' + (o === val ? ' selected' : '') + '>' + escapeHtml(o) + '</option>'; }).join('') + '</select>';
+  }
+  function metaInput(id, val, ro) {
+    return '<input type="text" id="' + id + '" value="' + escapeHtml(val || '') + '"' + (ro ? ' readonly' : '') + ' autocomplete="off" />';
+  }
+  function renderShellMetaForm(sh) {
+    var host = document.getElementById('shellMetaForm');
+    if (!host || !sh) return;
+    var lay = sh.layout || {};
+    var tracker = sh.syncedAt ? 'Synced ' + sh.syncedAt + ' · ' + (sh.program || '') : (isLinkedExisting(sh) ? 'Linked to existing Tracker row' : 'Not in Tracker yet');
+    host.innerHTML =
+      metaField('smfNumber', 'Output ID', metaInput('smfNumber', sh.number)) +
+      metaField('smfType', 'Type', metaSelect('smfType', ['Table', 'Figure', 'Listing'], sh.type)) +
+      metaField('smfTitle', 'Title', metaInput('smfTitle', sh.title), true) +
+      metaField('smfPop', 'Population', metaSelect('smfPop', ['Safety', 'ITT', 'mITT', 'PP'], sh.analysisSet || 'Safety')) +
+      metaField('smfStatus', 'Status', metaSelect('smfStatus', ['Draft', 'In review', 'Final', 'Locked'], sh.status || 'Draft')) +
+      metaField('smfDatasets', 'Analysis datasets', metaInput('smfDatasets', sh.datasets), true) +
+      metaField('smfKeyVars', 'Key variables', metaInput('smfKeyVars', sh.keyVars), true) +
+      metaField('smfSort', 'Sort order', metaInput('smfSort', sh.sortOrder), true) +
+      metaField('smfFoot', 'Footnotes', '<textarea id="smfFoot" rows="3">' + escapeHtml(lay.footnotes || '') + '</textarea>', true) +
+      metaField('smfVersion', 'Version', metaInput('smfVersion', sh.version || '0.1')) +
+      metaField('smfModified', 'Last modified', metaInput('smfModified', (sh.modifiedBy || '—') + ' · ' + (sh.modifiedAt || '—'), true)) +
+      metaField('smfTracker', 'Tracker', metaInput('smfTracker', tracker, true), true);
+  }
+  function bumpVersion(v) {
+    var m = String(v || '0.1').match(/^(\d+)\.(\d+)$/);
+    return m ? m[1] + '.' + (parseInt(m[2], 10) + 1) : String(v || '0.1');
+  }
+  function saveShellMetaForm(sh) {
+    function val(id) { var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
+    if (!document.getElementById('smfNumber')) return;
+    var oldVersion = sh.version;
+    sh.number = val('smfNumber') || sh.number;
+    sh.type = val('smfType') || sh.type;
+    sh.title = val('smfTitle') || sh.title;
+    sh.analysisSet = val('smfPop') || sh.analysisSet;
+    sh.status = val('smfStatus') || sh.status;
+    sh.locked = sh.status === 'Locked';
+    sh.datasets = val('smfDatasets');
+    sh.keyVars = val('smfKeyVars');
+    sh.sortOrder = val('smfSort');
+    sh.layout = sh.layout || {};
+    sh.layout.title = sh.title;
+    sh.layout.footnotes = (document.getElementById('smfFoot') || {}).value || '';
+    var setLabel = { Safety: 'Safety Analysis Set', ITT: 'Intent-to-Treat Analysis Set', mITT: 'Modified Intent-to-Treat Analysis Set', PP: 'Per-Protocol Analysis Set' }[sh.analysisSet];
+    if (setLabel && (!sh.layout.subtitle || /Analysis Set|analysis set/.test(sh.layout.subtitle))) sh.layout.subtitle = setLabel;
+    var v = val('smfVersion');
+    sh.version = v && v !== oldVersion ? v : bumpVersion(oldVersion);
+    sh.modifiedBy = window.SPHERE_DEMO ? SPHERE_DEMO.CURRENT_USER : 'Jordan Patel';
+    sh.modifiedAt = window.SPHERE_DEMO ? SPHERE_DEMO.stamp() : '';
+    if (sh.recordId && window.SPHERE_DEMO) {
+      SPHERE_DEMO.updateRecord(sh.recordId, function (r) {
+        r.title = sh.title;
+        r.number = sh.number;
+        r.type = sh.type;
+        r.analysisSet = sh.analysisSet;
+        r.sources = sh.datasets ? sh.datasets.split(/\s*,\s*/).map(function (d) { return /\./.test(d) ? d : 'ADAM.' + d; }) : r.sources;
+        r.history.push({ at: SPHERE_DEMO.stamp(), action: 'Shell metadata updated', status: r.status, person: sh.modifiedBy, note: 'Mock Shells ' + sh.number + ' v' + sh.version });
+      });
+    }
+    loadShellIntoEditor(sh);
+    renderCatalog();
+  }
+  function paintOutIdAndFigure() {
+    var out = document.getElementById('shellOutId');
+    var type = (document.getElementById('metaType') || {}).value || 'Table';
+    var num = (document.getElementById('metaNumber') || {}).value || '';
+    if (out) out.textContent = type + ' ' + num;
+    var fig = document.getElementById('figPreview');
+    if (!fig) return;
+    if (type !== 'Figure') { fig.hidden = true; fig.innerHTML = ''; return; }
+    function spec(name) {
+      for (var i = 0; i < state.rows.length; i++) if (String(state.rows[i].label).toLowerCase() === name) return state.rows[i].cells[0] || '';
+      return '';
+    }
+    var xl = spec('x-axis') || 'Time (months)';
+    var yl = spec('y-axis') || 'Probability';
+    var leg = (spec('legend') || 'Placebo — solid; Drug X 10 mg — dashed').split(';');
+    fig.hidden = false;
+    fig.innerHTML = '<svg viewBox="0 0 560 250" role="img" aria-label="Figure placeholder: ' + escapeHtml(yl) + ' by ' + escapeHtml(xl) + '">' +
+      '<rect x="0" y="0" width="560" height="250" fill="none"/>' +
+      '<line x1="60" y1="20" x2="60" y2="190" class="fp-axis"/><line x1="60" y1="190" x2="540" y2="190" class="fp-axis"/>' +
+      [0, 1, 2, 3, 4, 5].map(function (i) { var y = 190 - i * 34; return '<line x1="56" y1="' + y + '" x2="60" y2="' + y + '" class="fp-axis"/><text x="50" y="' + (y + 3) + '" class="fp-tick" text-anchor="end">' + (i * 0.2).toFixed(1) + '</text>'; }).join('') +
+      [0, 1, 2, 3, 4, 5, 6].map(function (i) { var x = 60 + i * 80; return '<line x1="' + x + '" y1="190" x2="' + x + '" y2="194" class="fp-axis"/><text x="' + x + '" y="206" class="fp-tick" text-anchor="middle">xx</text>'; }).join('') +
+      '<path d="M60 20 H120 V40 H190 V70 H250 V92 H330 V120 H400 V136 H470 V150 H540" class="fp-c1"/>' +
+      '<path d="M60 20 H140 V30 H220 V46 H290 V60 H360 V78 H450 V92 H540" class="fp-c2"/>' +
+      '<text x="300" y="228" class="fp-lbl" text-anchor="middle">' + escapeHtml(xl) + '</text>' +
+      '<text x="16" y="105" class="fp-lbl" text-anchor="middle" transform="rotate(-90 16 105)">' + escapeHtml(yl.split(';')[0]) + '</text>' +
+      '<g transform="translate(350,28)"><rect x="0" y="0" width="180" height="40" rx="4" class="fp-leg"/>' +
+      '<line x1="10" y1="14" x2="34" y2="14" class="fp-c1"/><text x="40" y="17" class="fp-tick">' + escapeHtml((leg[0] || '').replace(/—.*$/, '').trim()) + '</text>' +
+      '<line x1="10" y1="30" x2="34" y2="30" class="fp-c2"/><text x="40" y="33" class="fp-tick">' + escapeHtml((leg[1] || '').replace(/—.*$/, '').trim()) + '</text></g>' +
+      '<text x="70" y="236" class="fp-tick">Number at risk: xx  xx  xx  xx  xx  xx  xx</text>' +
+      '</svg>';
+  }
+  document.getElementById('metaType').addEventListener('change', function () { persistEditorToSelected(); render(); renderCatalog(); });
+
+  window.addEventListener('load', function () { syncMetadataButton(selectedShell()); });
+
   /* boot */
   updateStudyChrome();
   renderCatalog();
@@ -2698,6 +3281,6 @@
 
 })();
 </script>
-<script src="shared-chrome.js?v=sticky1"></script>
+<script src="shared-chrome.js?v=flow1"></script>
 </body>
 </html>

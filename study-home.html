@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=sticky1" />
+<link rel="stylesheet" href="shared-white.css?v=flow1" />
 <script>
 (function () {
   try {
@@ -118,11 +118,6 @@
 
     <div class="content">
       <div class="stack">
-      <div class="success-banner" id="structureSuccess" role="status">
-        <span class="note-label" style="color:var(--ok)">Done</span>
-        <div><strong>Folder tree created</strong> for <span data-study-name>ONC-204-301</span> — raw, sdtm, adam, programs, tlf, logs.</div>
-      </div>
-
       <section class="study-hero is-open" id="studyHero" aria-label="Study summary">
         <button type="button" class="study-hero-toggle" id="studyHeroToggle" aria-expanded="true" aria-controls="studyHeroBody">
           <div class="study-hero-heading">
@@ -155,7 +150,6 @@
           <h2 class="section-heading">Libraries</h2>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <span class="muted">Logical layout</span>
-            <button class="btn sm" type="button" data-open-structure data-study="ONC-204-301">Create study structure</button>
             <a class="btn sm ghost" href="files.html" style="text-decoration:none">Browse files</a>
           </div>
         </div>
@@ -262,34 +256,6 @@
     </div>
   </section>
 
-<div class="modal-backdrop" id="structureModal" hidden role="dialog" aria-modal="true" aria-labelledby="structureTitle">
-  <div class="modal">
-    <div class="modal-head">
-      <div>
-        <h2 id="structureTitle">Create study structure</h2>
-        <div class="hint">Creates the standard SPHERE folder tree under this study from the tenant template.</div>
-      </div>
-      <button class="btn ghost sm" type="button" id="structureClose" aria-label="Close">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="folder-path" id="structureStudyPath">{study}/</div>
-      <p class="hint" style="margin:0 0 10px">Folders that will be created:</p>
-      <ul class="folder-list" id="structurePreview">
-        <li class="dir"><span class="fname">raw/</span></li>
-        <li class="dir"><span class="fname">sdtm/</span></li>
-        <li class="dir"><span class="fname">adam/</span></li>
-        <li class="dir"><span class="fname">programs/</span></li>
-        <li class="dir"><span class="fname">tlf/</span></li>
-        <li class="dir"><span class="fname">logs/</span></li>
-      </ul>
-      <p class="hint" style="margin-top:12px">Template from Admin → Study layout. Existing folders are left as-is (stub).</p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" type="button" id="structureCancel">Cancel</button>
-      <button class="btn primary" type="button" id="structureConfirm">Create folders</button>
-    </div>
-  </div>
-</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -388,57 +354,6 @@
 
 })();
 
-  /* Create study structure modal */
-  (function () {
-    var modal = document.getElementById('structureModal');
-    if (!modal) return;
-    var openBtns = document.querySelectorAll('[data-open-structure]');
-    var closeBtn = document.getElementById('structureClose');
-    var cancelBtn = document.getElementById('structureCancel');
-    var confirmBtn = document.getElementById('structureConfirm');
-    var pathEl = document.getElementById('structureStudyPath');
-    var toast = document.getElementById('toast');
-    var toastTimer = null;
-    var currentStudy = 'ONC-204-301';
-
-    function showToast(msg) {
-      if (!toast) return;
-      toast.textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2800);
-    }
-
-    function open(study) {
-      currentStudy = study || 'ONC-204-301';
-      if (pathEl) pathEl.textContent = currentStudy + '/';
-      modal.removeAttribute('hidden');
-    }
-    function close() { modal.setAttribute('hidden', ''); }
-
-    openBtns.forEach(function (b) {
-      b.addEventListener('click', function () {
-        open(b.getAttribute('data-study') || currentStudy);
-      });
-    });
-    if (closeBtn) closeBtn.addEventListener('click', close);
-    if (cancelBtn) cancelBtn.addEventListener('click', close);
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) close();
-    });
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', function () {
-        close();
-        var banner = document.getElementById('structureSuccess');
-        if (banner) {
-          banner.classList.add('show');
-          banner.querySelector('[data-study-name]') && (banner.querySelector('[data-study-name]').textContent = currentStudy);
-        }
-        showToast('Created standard folder tree under ' + currentStudy + ' (stub)');
-      });
-    }
-  })();
-
 </script>
 
 <script>
@@ -460,7 +375,7 @@
   });
 })();
 </script>
-<script src="shared-chrome.js?v=sticky1"></script>
+<script src="shared-chrome.js?v=flow1"></script>
 
 <script>
 (function () {

@@ -16,7 +16,7 @@
 
   /* Tenant module flags (Admin → Modules). Demo: localStorage sphere-module-<id> = "on"|"off" */
   var MODULE_DEFAULTS = {
-    metadata: 'off' /* optional; tenants opt in */
+    metadata: 'on' /* on by default; tenants can switch off in Admin → Modules */
   };
 
   function getModuleFlag(id) {

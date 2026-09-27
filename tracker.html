@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=sticky1" />
+<link rel="stylesheet" href="shared-white.css?v=flow1" />
 <script>
 (function () {
   try {
@@ -140,6 +140,15 @@
             <span class="badge frozen">1 Frozen</span>
           </div>
           <div class="tracker-actions" id="trackerListsBar" role="toolbar" aria-label="Tracker actions">
+              <span class="my-assign-wrap">
+              <button class="action-icon-btn my-assign-btn" type="button" id="btnMyAssign" aria-pressed="false" title="Show only records assigned to you or where you hold a role (PR, QC, Stats, MW)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M3 20c0-3.3 3.1-6 7-6 1.3 0 2.5.3 3.5.8"/><path d="M15 18l2 2 4-4"/></svg>
+                <span class="label">My Assignments</span>
+                <span class="my-assign-count" id="myAssignCount">0</span>
+              </button>
+              <button class="my-assign-clear" type="button" id="btnMyAssignClear" hidden title="Clear My Assignments filter" aria-label="Clear My Assignments filter">×</button>
+              </span>
+<span class="actions-sep" aria-hidden="true"></span>
               <button class="action-icon-btn primary" type="button" id="btnSetLists" title="Custom Lists" aria-label="Custom Lists">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
                 <span class="label">Custom Lists</span>
@@ -209,6 +218,9 @@
                 <option>Safety TLFs</option>
                 <option>Labs</option>
               </select>
+              <select id="filterAssigned" style="width:140px" aria-label="Filter by Assigned To">
+                <option value="">All assignees</option>
+              </select>
 </div>
           </div>
         </div>
@@ -265,7 +277,7 @@
               <div class="meta-cell col-head-program-spacer" aria-hidden="true"></div>
               <div class="meta-cell"><span class="col-head-label">Type</span></div>
               <div class="meta-cell"><span class="col-head-label">Status</span></div>
-              <div class="meta-cell"><span class="col-head-label">Owner</span></div>
+              <div class="meta-cell"><span class="col-head-label">Assigned To</span></div>
               <div class="meta-cell"><span class="col-head-label">Shell</span></div>
               <div class="meta-cell"><span class="col-head-label">Job</span></div>
               <div class="meta-cell"><span class="col-head-label">Files</span></div>
@@ -917,6 +929,19 @@
       <input type="text" id="reTags" name="tags" placeholder="First look, DMC" autocomplete="off" />
     </label>
     <div class="grid2">
+      <label>Assigned To
+        <select id="reAssigned" name="assigned">
+          <option value="">—</option>
+          <option>Jordan Patel</option>
+          <option>Alex Rivera</option>
+          <option>Sam Okonkwo</option>
+          <option>Mei Chen</option>
+          <option>Priya Shah</option>
+          <option>Chris Nguyen</option>
+          <option>Riley Nguyen</option>
+          <option>Dana Brooks</option>
+        </select>
+      </label>
     </div>
   </form>
   <div class="float-editor-foot">
@@ -1010,6 +1035,7 @@
     </div>
     <div class="modal-body">
       <div class="history-panel" id="histPanelLog" role="tabpanel" data-hist-panel="log">
+        <div class="history-stepper" id="historyStepper"></div>
         <ol class="txn-timeline" id="historyTimeline"></ol>
       </div>
       <div class="history-panel" id="histPanelVersions" role="tabpanel" data-hist-panel="versions" hidden>
@@ -1062,6 +1088,11 @@
       <button class="btn sm" type="button" id="programEditClose" aria-label="Close">Close</button>
     </div>
     <div class="modal-body program-edit-body">
+      <div class="prog-tabs" role="tablist" id="programEditTabs" aria-label="Program">
+        <button type="button" class="prog-tab" role="tab" data-prog-tab="prod" aria-selected="true">Production<span class="prog-tab-file" id="progTabProdFile"></span></button>
+        <button type="button" class="prog-tab" role="tab" data-prog-tab="qc" aria-selected="false">QC / validation<span class="prog-tab-file" id="progTabQcFile"></span></button>
+      </div>
+      <p class="prog-ro-note" id="programEditRo" hidden></p>
       <label class="sr-only" for="programEditCode">Program source</label>
       <textarea id="programEditCode" class="program-edit-code" spellcheck="false"></textarea>
     </div>
@@ -1119,6 +1150,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
+<script src="demo-flow.js?v=flow1"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -1333,16 +1365,17 @@
       btn.type = 'button';
       btn.className = g.hand.action === 'revise' ? 'btn' : 'btn primary';
       var count = g.rows.length;
-      var label = g.hand.label;
+      var label = flowHandLabel(g.hand, g.rows[0].getAttribute('data-status'));
       if (count !== sel.length) label += ' (' + count + ')';
       btn.textContent = label;
       btn.title = count + ' of ' + sel.length + ' → ' + g.hand.nextStatus;
       btn.addEventListener('click', function () {
+        if (!confirm(flowHandLabel(g.hand, g.rows[0].getAttribute('data-status')) + ' — ' + g.rows.length + ' row(s) → ' + flowStatusLabel(g.hand.nextStatus) + '?')) return;
         g.rows.forEach(function (row) {
-          row.setAttribute('data-status', g.hand.nextStatus);
-          refreshRowWorkflowUI(row);
+          applyTransition(row, g.hand);
         });
-        showToast(g.hand.label + ' → ' + g.hand.nextStatus + ' · ' + g.rows.length + ' row(s)');
+        showToast(flowHandLabel(g.hand, '') + ' → ' + flowStatusLabel(g.hand.nextStatus) + ' · ' + g.rows.length + ' row(s) · recorded in History');
+        applyFilters();
         syncBulk();
       });
       host.appendChild(btn);
@@ -1423,6 +1456,9 @@
         if (tags.indexOf(tag) === -1) ok = false;
       }
       if (sap && row.getAttribute('data-sap') !== sap) ok = false;
+      var assignedF = (document.getElementById('filterAssigned') || {}).value || '';
+      if (assignedF && rowAssignedTo(row) !== assignedF) ok = false;
+      if (myAssignOn && !rowIsMine(row)) ok = false;
       row.classList.toggle('is-filtered-out', !ok);
       if (!ok) {
         var cb = row.querySelector('.row-check');
@@ -1433,7 +1469,7 @@
     syncBulk();
   }
 
-  ['searchInput', 'filterType', 'filterStatus', 'filterTag', 'filterSap'].forEach(function (id) {
+  ['searchInput', 'filterType', 'filterStatus', 'filterTag', 'filterSap', 'filterAssigned'].forEach(function (id) {
     var el = document.getElementById(id);
     el.addEventListener(id === 'searchInput' ? 'input' : 'change', applyFilters);
   });
@@ -2050,7 +2086,7 @@
 
   /* —— Simulated logs —— */
   function runDomain(prog) {
-    var m = prog.match(/^(?:qc_)?adam_(ad[a-z0-9]+)/i);
+    var m = prog.match(/^(?:qc[-_])?adam_(ad[a-z0-9]+)/i);
     return m ? m[1].toUpperCase() : null;
   }
   function runOutId(prog) {
@@ -2081,7 +2117,7 @@
     var t = phaseTimes(j, idx);
     var rnd = seeded(j.id * 97 + idx * 13 + hashStr(j.prog));
     var total = t.dur / 1000;
-    var prog = (isQc ? 'qc_' : '') + j.prog.replace(/\.[^.]+$/, '') + '.sas';
+    var prog = (isQc ? 'qc-' : '') + j.prog.replace(/\.[^.]+$/, '') + '.sas';
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var title = runRowTitle(j.row);
@@ -2242,7 +2278,7 @@
     var rnd = seeded(j.id * 89 + idx * 7 + hashStr(j.prog));
     var total = t.dur / 1000;
     var base = j.prog.replace(/\.[^.]+$/, '');
-    var prog = (isQc ? 'qc_' : '') + base + '.R';
+    var prog = (isQc ? 'qc-' : '') + base + '.R';
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var warn = j.warn && j.warnPhase === idx;
@@ -2526,7 +2562,16 @@
       shellSel.value = shellTxt;
     }
     document.getElementById('reTags').value = row.getAttribute('data-tags') || '';
-    var ownerEl = cells[3] ? cells[3].querySelector('strong') : null;
+    var ownerEl = cells[3] ? cells[3].querySelector('strong, .meta-v') : null;
+    var reAssigned = document.getElementById('reAssigned');
+    if (reAssigned) {
+      var curOwner = ownerEl ? String(ownerEl.textContent || '').trim() : '';
+      if (curOwner === '—') curOwner = '';
+      if (curOwner && !Array.prototype.some.call(reAssigned.options, function (o) { return o.value === curOwner; })) {
+        var oo = document.createElement('option'); oo.textContent = curOwner; reAssigned.appendChild(oo);
+      }
+      reAssigned.value = curOwner;
+    }
         if (!rowEditor.style.left && !rowEditor.style.top) {
       rowEditor.style.left = Math.max(24, (window.innerWidth - 420) / 2) + 'px';
       rowEditor.style.top = Math.max(24, window.scrollY + 80) + 'px';
@@ -2552,7 +2597,7 @@
     var shell = document.getElementById('reShell').value;
     var tagsRaw = document.getElementById('reTags').value;
     var tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-    var owner = '';
+    var owner = ((document.getElementById('reAssigned') || {}).value || '').trim();
     var ownerEl2 = null;
     var coState = (document.getElementById('reCheckoutState')||{value:''}).value;
 
@@ -2582,8 +2627,7 @@
     if (cells[3]) {
       if (owner || coState) {
         var sub = '';
-        cells[3].innerHTML = '<div class="cell-stack"><strong style="font-size:13px">' +
-          (owner || '—') + '</strong><span class="sub">' + sub + '</span></div>';
+        cells[3].innerHTML = '<span class="meta-v">' + (owner || '—') + '</span>';
       } else {
         cells[3].innerHTML = '<span class="meta-v muted">—</span>';
       }
@@ -2603,6 +2647,8 @@
     } else {
       row.setAttribute('data-sap', sap);
     }
+    refreshRowWorkflowUI(row);
+    refreshAssignedFilter();
     syncSectionCounts();
     applyFilters();
     closeRowEditor();
@@ -2760,6 +2806,15 @@
   };
 
   function demoRolesForRow(row) {
+    var rec = flowRecord(row);
+    if (rec) {
+      return [
+        { role: 'Production programmer', people: [rec.roles.prod] },
+        { role: 'QC programmer', people: [rec.roles.qc] },
+        { role: 'Stats', people: [rec.roles.stats] },
+        { role: 'Medical writer', people: [rec.roles.mw] }
+      ];
+    }
     var key = '';
     if (row) {
       key = row.getAttribute('data-program') || '';
@@ -2771,17 +2826,28 @@
     key = String(key || '');
     var h = 0;
     for (var i = 0; i < key.length; i++) h = (h + key.charCodeAt(i) * (i + 3)) % 97;
-    var ownerEl = row && row.querySelector('.artifact-meta .meta-cell:nth-child(4) .meta-v');
+    var ownerEl = row && row.querySelector('.artifact-meta .meta-cell:nth-child(4) .meta-v, .artifact-meta .meta-cell:nth-child(4) strong');
     var owner = ownerEl ? String(ownerEl.textContent || '').trim() : '';
     if (!owner || owner === '—') owner = ROLE_POOL.prod[h % ROLE_POOL.prod.length];
-    var prod2 = ROLE_POOL.prod[(h + 1) % ROLE_POOL.prod.length];
-    if (prod2 === owner) prod2 = ROLE_POOL.prod[(h + 2) % ROLE_POOL.prod.length];
+    var PROD2 = ['Alex Rivera', 'Sam Okonkwo'];
+    var prod2 = PROD2[h % PROD2.length];
+    if (prod2 === owner) prod2 = PROD2[(h + 1) % PROD2.length];
     return [
       { role: 'Production programmer', people: [owner, prod2] },
-      { role: 'QC programmer', people: [ROLE_POOL.qc[h % ROLE_POOL.qc.length]] },
+      { role: 'QC programmer', people: [pickQc(h, [owner, prod2])] },
       { role: 'Stats', people: [ROLE_POOL.stats[h % ROLE_POOL.stats.length]] },
       { role: 'Medical writer', people: [ROLE_POOL.mw[h % ROLE_POOL.mw.length]] }
     ];
+  }
+
+  /* QC pool includes the signed-in mock user so "My Assignments" spans PR + QC roles. */
+  var QC_POOL = ['Mei Chen', 'Jordan Patel', 'Priya Shah', 'Chris Nguyen'];
+  function pickQc(h, prodPeople) {
+    for (var i = 0; i < QC_POOL.length; i++) {
+      var c = QC_POOL[(h + i) % QC_POOL.length];
+      if (prodPeople.indexOf(c) < 0) return c;
+    }
+    return QC_POOL[0];
   }
 
   function fillPeopleTip(wrap, row) {
@@ -3294,7 +3360,9 @@
     var editable = window.SPHERE && SPHERE.isProgramEditable ? SPHERE.isProgramEditable(status) : (status === 'In dev' || status === 'Revise');
     row.classList.toggle('is-readonly', !editable);
     var cells = row.querySelectorAll('.artifact-meta > .meta-cell');
-    if (cells[2]) { var st = cells[2].querySelector('.meta-v'); if (st) st.textContent = status; }
+    if (cells[2]) cells[2].innerHTML = wfPillHtml(status);
+    paintProgramCell(row, cells[0], status);
+    paintInlineRoles(row);
     if (cells[6]) {
       cells[6].innerHTML = editable ? '<button type="button" class="badge file-rw file-edit-link" title="Edit program">Editable</button>' : '<span class="badge file-ro">Read-only</span>';
     }
@@ -3371,7 +3439,11 @@
 
   function demoHistoryForRow(row) {
     var title = (row.querySelector('.artifact-title') || {}).textContent || 'Program';
-    var status = row.getAttribute('data-status') || '';
+    var rec0 = flowRecord(row);
+    if (rec0) {
+      return { title: (row.querySelector('.artifact-title') || {}).textContent.replace(/\s*New$/, '').trim(), program: rec0.program, status: rec0.status, owner: rec0.roles.prod, events: rec0.history.slice() };
+    }
+    var status = row.getAttribute('data-orig-status') || row.getAttribute('data-status') || '';
     var owner = '';
     var metas = row.querySelectorAll('.artifact-meta .meta-cell .meta-v');
     if (metas.length >= 4) owner = metas[3].textContent.trim();
@@ -3422,8 +3494,8 @@
         { at: '2026-09-01 08:00', action: 'Frozen', status: 'Frozen', person: 'System', note: 'Files ACL freeze' }
       ])
     };
-    var events = byStatus[status] || base;
-    return { title: title.trim(), program: prog, status: status, owner: owner || 'Jordan Patel', events: events };
+    var events = (byStatus[status] || base).concat(window.SPHERE_DEMO ? SPHERE_DEMO.getEvents(flowKey(row)) : []);
+    return { title: title.trim(), program: prog, status: row.getAttribute('data-status') || status, owner: owner || 'Jordan Patel', events: events };
   }
 
   function demoVersionsForRow(row) {
@@ -3557,7 +3629,7 @@
       return '<li class="txn-item">' +
         '<div class="txn-dot" aria-hidden="true"></div>' +
         '<div class="txn-body">' +
-          '<div class="txn-top"><strong>' + ev.action + '</strong><span class="txn-status">' + ev.status + '</span></div>' +
+          '<div class="txn-top"><strong>' + ev.action + '</strong><span class="txn-status">' + flowStatusLabel(ev.status) + '</span></div>' +
           '<div class="txn-meta"><span>' + ev.at + '</span><span>' + ev.person + '</span></div>' +
           (ev.note ? ('<div class="txn-note">' + ev.note + '</div>') : '') +
         '</div></li>';
@@ -3678,8 +3750,10 @@
     histActiveRow = row;
     var data = demoHistoryForRow(row);
     if (titleEl) titleEl.textContent = 'History — ' + data.title;
-    if (sub) sub.textContent = (data.program ? data.program + ' · ' : '') + 'Current: ' + (data.status || '—');
+    if (sub) sub.textContent = (data.program ? data.program + ' · ' : '') + 'Current: ' + flowStatusLabel(data.status || '—') + ' · Assigned To: ' + (rowAssignedTo(row) || data.owner || '—');
     paintWorkflowTimeline(data);
+    var hs = document.getElementById('historyStepper');
+    if (hs) hs.innerHTML = stepperHtml(row, data.events);
     paintVersionsList(row);
     closeVersionPreview();
     setHistoryTab('log');
@@ -3767,36 +3841,117 @@
       ].join('\n')
     };
   }
-  function openProgramEditor(row) {
-    var modal = document.getElementById('programEditModal');
+  var programEditWhich = 'prod';
+  function flowPseudoRecord(row) {
+    var rec = flowRecord(row);
+    if (rec) return rec;
+    var title = (((row && row.querySelector('.artifact-title')) || {}).textContent || '').trim();
+    var m = title.match(/^([0-9][0-9.]*)\s*·\s*(.*)$/);
+    var number = m ? m[1] : title.split(' · ')[0];
+    var t = m ? m[2] : (title.split(' · ')[1] || title);
+    var roles = demoRolesForRow(row);
+    var tl = t.toLowerCase();
+    var set = /\bitt\b|full analysis|fas/.test(tl) ? 'ITT' : (/mitt/.test(tl) ? 'mITT' : 'Safety');
+    var srcs = ['ADAM.ADSL'];
+    if (/lab|chem|hemat/.test(tl)) srcs.push('ADAM.ADLB');
+    else if (/survival|kaplan|time to/.test(tl)) srcs.push('ADAM.ADTTE');
+    else if (/response|orr/.test(tl)) srcs.push('ADAM.ADRS');
+    else if (/medication/.test(tl)) srcs.push('ADAM.ADCM');
+    else if (/adverse|ae|death/.test(tl)) srcs.push('ADAM.ADAE');
+    else if (/^ad/i.test(number)) srcs = ['SDTM.DM', 'SDTM.' + number.slice(2).toUpperCase()];
+    return {
+      number: number, title: t, type: row.getAttribute('data-type') || 'Table',
+      program: (row.getAttribute('data-program') || 'program.sas').split('/').pop(),
+      population: { Safety: 'Safety analysis set (SAFFL = "Y")', ITT: 'Intent-to-treat set (ITTFL = "Y")', mITT: 'Modified ITT set (MITTFL = "Y")' }[set],
+      analysisSet: set, sources: srcs, rows: [], columns: [],
+      syncedAt: '2026-08-12 09:14',
+      roles: { prod: roles[0].people[0], qc: roles[1].people[0], stats: roles[2].people[0], mw: roles[3].people[0] }
+    };
+  }
+  function programSourceFor(row, which) {
+    var rec = flowPseudoRecord(row);
+    var key = flowKey(row) + ':' + which;
+    var saved = window.SPHERE_DEMO && SPHERE_DEMO.getSource(key);
+    if (saved) return saved;
+    if (!window.SPHERE_DEMO) return demoProgramSource(row).body;
+    var header = SPHERE_DEMO.programHeader(rec, which);
+    if (flowRecord(row)) return header;
+    var headOnly = header.slice(0, header.indexOf('*/') + 2);
+    var body = demoProgramSource(row).body;
+    if (/\.r$/i.test(rec.program)) {
+      headOnly = headOnly.split('\n').map(function (l) { return l.replace(/^\/?\*+\/?/, '#').replace(/^#\s?$/, '#'); }).join('\n')
+        .replace(/SAS version\s*: SAS 9\.4 M8/, 'R version      : R 4.3.2');
+      body = body.split('\n').slice(2).join('\n');
+      if (which === 'qc') body = body.replace(/write_csv\(out, "tlf\/out.csv"\)/, 'qc <- out\nstopifnot(isTRUE(all.equal(qc, read_csv("tlf/out.csv"))))  # compare vs production');
+    } else {
+      body = body.split('\n').slice(2).join('\n');
+      if (which === 'qc') body += '\nproc compare base=prod.out compare=work.stats listall;\nrun;\n';
+    }
+    return headOnly + '\n' + body;
+  }
+  function qcEditable(status) { return status === 'Not started' || status === 'In dev' || status === 'Revise' || status === 'In QC'; }
+  function paintProgramEditor() {
+    var row = programEditRow;
+    if (!row) return;
+    var which = programEditWhich;
     var code = document.getElementById('programEditCode');
     var titleEl = document.getElementById('programEditTitle');
     var sub = document.getElementById('programEditSub');
+    var ro = document.getElementById('programEditRo');
+    var save = document.getElementById('programEditSave');
+    var status = row.getAttribute('data-status') || '';
+    var prog = (row.getAttribute('data-program') || '').split('/').pop();
+    var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
+    var file = which === 'qc' ? qc : prog;
+    var editable = which === 'qc' ? qcEditable(status)
+      : (window.SPHERE && SPHERE.isProgramEditable ? SPHERE.isProgramEditable(status) : (status === 'In dev' || status === 'Revise'));
+    document.querySelectorAll('#programEditTabs .prog-tab').forEach(function (t) {
+      t.setAttribute('aria-selected', t.getAttribute('data-prog-tab') === which ? 'true' : 'false');
+    });
+    var pf = document.getElementById('progTabProdFile'); if (pf) pf.textContent = prog;
+    var qf = document.getElementById('progTabQcFile'); if (qf) qf.textContent = qc;
+    var rtitle = (((row.querySelector('.artifact-title')) || {}).textContent || '').replace(/\s*New$/, '').trim();
+    if (titleEl) titleEl.textContent = (editable ? 'Edit — ' : 'View — ') + file;
+    if (sub) sub.textContent = rtitle + ' · ' + flowStatusLabel(status) + (which === 'qc' ? ' · QC / validation program' : ' · Production program') + (editable ? ' · Save seals a new version (demo)' : '');
+    if (ro) {
+      ro.hidden = editable;
+      ro.textContent = editable ? '' : 'Read-only in ' + flowStatusLabel(status) + ' — return the record to Revise to edit.';
+    }
+    if (save) save.hidden = !editable;
+    if (code) {
+      code.value = programSourceFor(row, which);
+      code.readOnly = !editable;
+    }
+  }
+  function openProgramEditor(row, which) {
+    var modal = document.getElementById('programEditModal');
     var meta = document.getElementById('programEditMeta');
     if (!modal || !row) return;
-    var status = row.getAttribute('data-status') || '';
-    var editable = window.SPHERE && SPHERE.isProgramEditable
-      ? SPHERE.isProgramEditable(status)
-      : (status === 'In dev' || status === 'In dev' || status === 'Revise');
-    if (!editable) {
-      showToast('Program is read-only in this stage');
+    if (!row.getAttribute('data-program')) {
+      showToast('No program file linked to this row yet');
       return;
     }
     programEditRow = row;
-    var src = demoProgramSource(row);
-    if (titleEl) titleEl.textContent = 'Edit — ' + (src.prog || src.title);
-    if (sub) sub.textContent = (src.title || src.prog) + ' · ' + status + ' · Save seals a new version (demo)';
+    programEditWhich = which === 'qc' ? 'qc' : 'prod';
     if (meta) {
       var mode = (window.SPHERE && SPHERE.getProgramVersionControl) ? SPHERE.getProgramVersionControl() : 'local';
       meta.textContent = mode === 'github' ? 'Versions → Enterprise GitHub' : 'Versions → Local history';
     }
-    if (code) {
-      code.value = src.body;
-      code.readOnly = false;
-    }
+    paintProgramEditor();
     modal.removeAttribute('hidden');
-    if (code) code.focus();
+    var code = document.getElementById('programEditCode');
+    if (code) { code.focus(); code.setSelectionRange(0, 0); code.scrollTop = 0; }
   }
+  (function bindProgramTabs() {
+    var tabs = document.getElementById('programEditTabs');
+    if (!tabs) return;
+    tabs.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-prog-tab]');
+      if (!t || !programEditRow) return;
+      programEditWhich = t.getAttribute('data-prog-tab');
+      paintProgramEditor();
+    });
+  })();
   function closeProgramEditor() {
     var modal = document.getElementById('programEditModal');
     if (modal) modal.setAttribute('hidden', '');
@@ -3804,10 +3959,20 @@
   }
   function saveProgramEditor() {
     if (!programEditRow) return;
+    var row = programEditRow;
     var code = document.getElementById('programEditCode');
-    var prog = programEditRow.getAttribute('data-program') || 'program';
+    if (code && code.readOnly) { closeProgramEditor(); return; }
+    var prog = (row.getAttribute('data-program') || 'program').split('/').pop();
+    var file = programEditWhich === 'qc' ? SPHERE_DEMO.qcName(prog) : prog;
     var len = code ? code.value.length : 0;
-    showToast('Saved ' + prog + ' (' + len + ' chars) · new version sealed (demo)');
+    if (window.SPHERE_DEMO && code) {
+      SPHERE_DEMO.setSource(flowKey(row) + ':' + programEditWhich, code.value);
+      var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
+      var rec = flowRecord(row);
+      if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
+      else SPHERE_DEMO.addEvent(flowKey(row), ev);
+    }
+    showToast('Saved ' + file + ' (' + len + ' chars) · new version sealed');
     closeProgramEditor();
   }
   document.getElementById('trackerBoard').addEventListener('click', function (e) {
@@ -3923,12 +4088,367 @@
     }
   })();
 
+  /* ===== Demo flow (flow1): Mock Shell → Tracker records, workflow pills, stepper, My Assignments ===== */
+  var FLOW_ME = (window.SPHERE_DEMO && SPHERE_DEMO.CURRENT_USER) || 'Jordan Patel';
+  var myAssignOn = false;
+  try { myAssignOn = sessionStorage.getItem('sphere-my-assign') === '1'; } catch (e) {}
+
+  function flowRecord(row) {
+    var id = row && row.getAttribute('data-flow-id');
+    return id && window.SPHERE_DEMO ? SPHERE_DEMO.record(id) : null;
+  }
+  function flowKey(row) {
+    var id = row.getAttribute('data-flow-id');
+    if (id) return id;
+    var prog = row.getAttribute('data-program');
+    if (prog) return prog;
+    return 'title:' + (((row.querySelector('.artifact-title')) || {}).textContent || '').trim();
+  }
+  var FLOW_STATUS_LABEL = { 'In Stats': 'Stats review', 'In MW': 'Released to MW' };
+  function flowStatusLabel(st) { return FLOW_STATUS_LABEL[st] || st; }
+  function flowStatusClass(st) {
+    return ({ 'Not started': 'st-dev', 'In dev': 'st-dev', 'Revise': 'st-revise', 'In QC': 'st-qc', 'In Stats': 'st-stats', 'In MW': 'st-mw', 'Approved': 'st-done', 'Frozen': 'st-done' })[st] || 'st-none';
+  }
+  function flowHandLabel(hand, from) {
+    if (!hand) return '';
+    if (hand.action === 'to-qc') return 'Send to QC';
+    if (hand.action === 'to-stats') return 'QC passed · send to Stats';
+    if (hand.action === 'to-mw') return from === 'In QC' ? 'QC passed · release to MW' : 'Stats approved · release to MW';
+    return hand.label;
+  }
+  function flowActionName(hand, from) {
+    if (hand.action === 'to-qc') return 'Sent to QC';
+    if (hand.action === 'to-stats') return 'QC passed → Stats review';
+    if (hand.action === 'to-mw') return (from === 'In QC' ? 'QC passed' : 'Stats approved') + ' → Released to MW';
+    if (hand.action === 'revise') return 'Returned for revise';
+    if (hand.action === 'approve') return 'Approved';
+    return hand.label;
+  }
+  function flowSteps() {
+    var wf = window.SPHERE && SPHERE.getTrackerWorkflow ? SPHERE.getTrackerWorkflow() : null;
+    var stages = wf ? wf.stages.filter(function (s) { return s.id !== 'done'; }) : [
+      { id: 'primary', statuses: ['Not started', 'In dev', 'Revise'] }, { id: 'qc', statuses: ['In QC'] },
+      { id: 'stats', statuses: ['In Stats'] }, { id: 'mw', statuses: ['In MW'] }];
+    var names = { primary: 'Dev', qc: 'QC', stats: 'Stats', mw: 'Released to MW' };
+    return stages.map(function (s) { return { id: s.id, label: names[s.id] || s.short, statuses: s.statuses }; });
+  }
+  function flowStepIndex(status, steps) {
+    if (status === 'Approved' || status === 'Frozen') return steps.length;
+    for (var i = 0; i < steps.length; i++) if (steps[i].statuses.indexOf(status) >= 0) return i;
+    return 0;
+  }
+  function wfPillHtml(status) {
+    var steps = flowSteps();
+    var idx = flowStepIndex(status, steps);
+    var mini = steps.map(function (s, i) { return '<i class="' + (i <= idx ? 'on' : '') + '"></i>'; }).join('');
+    return '<button type="button" class="meta-v wf-pill ' + flowStatusClass(status) + '" title="Workflow: ' + flowStatusLabel(status) +
+      ' · click for next step" aria-label="Status ' + flowStatusLabel(status) + ', open workflow">' +
+      '<span class="wf-pill-label">' + flowStatusLabel(status) + '</span><span class="wf-mini" aria-hidden="true">' + mini + '</span></button>';
+  }
+  function stepperHtml(row, events) {
+    var status = row.getAttribute('data-status') || '';
+    var steps = flowSteps();
+    var idx = flowStepIndex(status, steps);
+    events = events || [];
+    return '<ol class="wf-stepper" aria-label="Workflow progress">' + steps.map(function (s, i) {
+      var last = i === steps.length - 1 && i === idx;
+      var cls = (i < idx || last) ? 'is-done' : (i === idx ? 'is-current' : '');
+      var when = '';
+      for (var k = events.length - 1; k >= 0; k--) {
+        if (s.statuses.indexOf(events[k].status) >= 0) { when = String(events[k].at || '').slice(5); break; }
+      }
+      return '<li class="' + cls + '"' + (i === idx ? ' aria-current="step"' : '') + '><span class="wf-dot">' + ((i < idx || last) ? '✓' : (i + 1)) + '</span>' +
+        '<span class="wf-lbl">' + s.label + '</span>' + (when && i <= idx ? '<span class="wf-when">' + when + '</span>' : '') + '</li>';
+    }).join('') + '</ol>';
+  }
+  function paintProgramCell(row, cell, status) {
+    if (!cell) return;
+    var prog = (row.getAttribute('data-program') || '').split('/').pop();
+    if (!prog) return;
+    var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
+    var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
+    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open program · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
+      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC program · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+  }
+  function rowRoles(row) {
+    var r = demoRolesForRow(row);
+    return { prod: r[0].people, qc: r[1].people, stats: r[2].people, mw: r[3].people };
+  }
+  function rowAssignedTo(row) {
+    var c = metaCells(row)[3];
+    var el = c && c.querySelector('.meta-v, strong');
+    var v = el ? String(el.textContent || '').trim() : '';
+    return v === '—' ? '' : v;
+  }
+  function rowIsMine(row) {
+    if (rowAssignedTo(row) === FLOW_ME) return true;
+    var r = rowRoles(row);
+    return [r.prod, r.qc, r.stats, r.mw].some(function (list) { return list.indexOf(FLOW_ME) >= 0; });
+  }
+  function initials(name) {
+    return String(name || '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+  }
+  function paintInlineRoles(row) {
+    var band = row.querySelector('.artifact-title-band');
+    if (!band) return;
+    var host = band.querySelector('.row-roles-inline');
+    if (!host) {
+      host = document.createElement('div');
+      host.className = 'row-roles-inline';
+      host.setAttribute('aria-label', 'Roles');
+      band.appendChild(host);
+    }
+    var r = rowRoles(row);
+    var defs = [['PR', 'Production programmer', r.prod], ['QC', 'QC programmer', r.qc], ['Stats', 'Statistician', r.stats], ['MW', 'Medical writer', r.mw]];
+    host.innerHTML = defs.map(function (d) {
+      var mine = d[2].indexOf(FLOW_ME) >= 0;
+      var first = d[2][0] || '—';
+      var parts = first.split(' ');
+      var short = parts.length > 1 ? parts[0].charAt(0) + '. ' + parts[parts.length - 1] : first;
+      return '<span class="role-chip' + (mine ? ' is-me' : '') + '" title="' + d[1] + ': ' + escapeHtml(d[2].join(', ')) + (mine ? ' (you)' : '') + '">' +
+        '<b>' + d[0] + '</b><span class="role-av" aria-hidden="true">' + initials(first) + '</span><span class="role-nm">' + escapeHtml(short) + (d[2].length > 1 ? ' +' + (d[2].length - 1) : '') + '</span></span>';
+    }).join('');
+  }
+  function refreshAssignedFilter() {
+    var sel = document.getElementById('filterAssigned');
+    if (!sel) return;
+    var cur = sel.value;
+    var names = {};
+    allRows().forEach(function (row) { var a = rowAssignedTo(row); if (a) names[a] = 1; });
+    sel.innerHTML = '<option value="">All assignees</option>' + Object.keys(names).sort().map(function (n) {
+      return '<option' + (n === cur ? ' selected' : '') + '>' + escapeHtml(n) + '</option>';
+    }).join('');
+  }
+  function paintMyAssign() {
+    var btn = document.getElementById('btnMyAssign');
+    var clr = document.getElementById('btnMyAssignClear');
+    var cnt = document.getElementById('myAssignCount');
+    var n = allRows().filter(rowIsMine).length;
+    if (cnt) cnt.textContent = String(n);
+    if (btn) {
+      btn.classList.toggle('is-active', myAssignOn);
+      btn.setAttribute('aria-pressed', myAssignOn ? 'true' : 'false');
+      btn.title = myAssignOn ? 'Showing ' + n + ' records assigned to ' + FLOW_ME + ' (Assigned To or any role) · click to show all'
+        : 'Show only records assigned to ' + FLOW_ME + ' — Assigned To or any role (PR, QC, Stats, MW)';
+    }
+    if (clr) clr.hidden = !myAssignOn;
+  }
+  function setMyAssign(on) {
+    myAssignOn = !!on;
+    try { sessionStorage.setItem('sphere-my-assign', myAssignOn ? '1' : '0'); } catch (e) {}
+    paintMyAssign();
+    applyFilters();
+    showToast(myAssignOn ? 'My Assignments · ' + visibleRows().length + ' records for ' + FLOW_ME : 'Showing all records');
+  }
+  (function bindMyAssign() {
+    var btn = document.getElementById('btnMyAssign');
+    var clr = document.getElementById('btnMyAssignClear');
+    if (btn) btn.addEventListener('click', function () { setMyAssign(!myAssignOn); });
+    if (clr) clr.addEventListener('click', function () { setMyAssign(false); });
+  })();
+
+  function flashRow(row, scroll) {
+    var sec = row.closest('.sap-section');
+    if (sec && sec.classList.contains('collapsed')) {
+      var head = sec.querySelector('.sap-section-head');
+      if (head) head.click();
+    }
+    if (scroll) row.scrollIntoView({ behavior: 'auto', block: 'center' });
+    row.classList.remove('flow-flash');
+    void row.offsetWidth;
+    row.classList.add('flow-flash');
+    setTimeout(function () { row.classList.remove('flow-flash'); }, 2600);
+  }
+
+  function applyTransition(row, hand) {
+    if (!hand || !window.SPHERE_DEMO) return;
+    var from = row.getAttribute('data-status') || '';
+    var r = rowRoles(row);
+    var person = ({ 'to-qc': r.prod[0], 'to-stats': r.qc[0], 'to-mw': from === 'In QC' ? r.qc[0] : r.stats[0], 'approve': r.mw[0] })[hand.action] ||
+      ({ 'In QC': r.qc[0], 'In Stats': r.stats[0], 'In MW': r.mw[0] })[from] || r.prod[0];
+    var ev = { at: SPHERE_DEMO.stamp(), action: flowActionName(hand, from), status: hand.nextStatus, person: person, note: flowStatusLabel(from) + ' → ' + flowStatusLabel(hand.nextStatus) };
+    if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
+    row.setAttribute('data-status', hand.nextStatus);
+    var rec = flowRecord(row);
+    if (rec) {
+      SPHERE_DEMO.updateRecord(rec.id, function (x) { x.status = hand.nextStatus; x.isNew = false; x.history.push(ev); });
+    } else {
+      SPHERE_DEMO.setStatus(flowKey(row), hand.nextStatus);
+      SPHERE_DEMO.addEvent(flowKey(row), ev);
+    }
+    row.classList.remove('is-flow-new');
+    var chip = row.querySelector('.new-chip');
+    if (chip) chip.remove();
+    refreshRowWorkflowUI(row);
+    flashRow(row, false);
+  }
+
+  /* Workflow popover (status pill) */
+  var wfPop = document.createElement('div');
+  wfPop.className = 'wf-pop';
+  wfPop.id = 'wfPop';
+  wfPop.hidden = true;
+  wfPop.setAttribute('role', 'dialog');
+  wfPop.setAttribute('aria-label', 'Workflow');
+  document.body.appendChild(wfPop);
+  var wfPopRow = null;
+  var wfPopAnchor = null;
+  function closeWfPop() { wfPop.hidden = true; wfPopRow = null; wfPopAnchor = null; }
+  function paintWfPop(confirmHand) {
+    var row = wfPopRow;
+    if (!row) return;
+    var status = row.getAttribute('data-status') || '';
+    var title = (((row.querySelector('.artifact-title')) || {}).textContent || '').replace(/\s*New$/, '').trim();
+    var data = demoHistoryForRow(row);
+    var next = window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null;
+    var ret = window.SPHERE && SPHERE.returnHandoff ? SPHERE.returnHandoff(status) : null;
+    var r = rowRoles(row);
+    var stageOwner = ({ 'In QC': ['QC programmer', r.qc[0]], 'In Stats': ['Statistician', r.stats[0]], 'In MW': ['Medical writer', r.mw[0]] })[status] || ['Production programmer', r.prod[0]];
+    var html = '<button type="button" class="wf-pop-close" data-wf="close" aria-label="Close">×</button>' +
+      '<div class="wf-pop-title">' + escapeHtml(title) + '</div>' +
+      '<div class="wf-pop-sub">Current stage: <strong>' + flowStatusLabel(status) + '</strong></div>' +
+      stepperHtml(row, data.events) +
+      '<div class="wf-pop-owner">With: <strong>' + escapeHtml(stageOwner[1] || '—') + '</strong> (' + stageOwner[0] + ')</div>';
+    if (confirmHand) {
+      html += '<div class="wf-pop-confirm" role="alertdialog">' +
+        '<div><strong>' + flowHandLabel(confirmHand, status) + '?</strong><br>' + flowStatusLabel(status) + ' → ' + flowStatusLabel(confirmHand.nextStatus) + '. Recorded in History with time and user.</div>' +
+        '<div class="wf-pop-actions"><button type="button" class="btn primary sm" data-wf="confirm">Confirm</button><button type="button" class="btn sm" data-wf="cancel">Cancel</button></div></div>';
+    } else {
+      html += '<div class="wf-pop-actions">' +
+        (next ? '<button type="button" class="btn primary sm" data-wf="next">' + flowHandLabel(next, status) + '</button>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>') +
+        (ret ? '<button type="button" class="btn sm" data-wf="revise">Return to Revise</button>' : '') +
+        '<button type="button" class="btn sm" data-wf="history">History</button></div>';
+    }
+    wfPop.innerHTML = html;
+    wfPop._confirm = confirmHand || null;
+  }
+  function positionWfPop() {
+    if (!wfPopAnchor || wfPop.hidden) return;
+    var rect = wfPopAnchor.getBoundingClientRect();
+    var scale = wfPopAnchor.offsetWidth ? rect.width / wfPopAnchor.offsetWidth : 1;
+    var vw = window.innerWidth / scale, vh = window.innerHeight / scale;
+    var left = rect.left / scale, top = rect.bottom / scale + 6;
+    var w = wfPop.offsetWidth, h = wfPop.offsetHeight;
+    if (left + w > vw - 12) left = Math.max(12, vw - w - 12);
+    if (top + h > vh - 12) top = Math.max(12, rect.top / scale - h - 6);
+    wfPop.style.left = left + 'px';
+    wfPop.style.top = top + 'px';
+  }
+  function openWfPop(row, anchor) {
+    wfPopRow = row;
+    wfPopAnchor = anchor;
+    paintWfPop(null);
+    wfPop.hidden = false;
+    positionWfPop();
+    var first = wfPop.querySelector('[data-wf="next"], [data-wf="history"]');
+    if (first) first.focus();
+  }
+  wfPop.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-wf]');
+    if (!b || !wfPopRow) return;
+    var act = b.getAttribute('data-wf');
+    var row = wfPopRow;
+    var status = row.getAttribute('data-status') || '';
+    if (act === 'close') { closeWfPop(); return; }
+    if (act === 'history') { closeWfPop(); openHistoryModal(row); return; }
+    if (act === 'next') { paintWfPop(SPHERE.nextHandoff(status)); positionWfPop(); return; }
+    if (act === 'revise') { paintWfPop(SPHERE.returnHandoff(status)); positionWfPop(); return; }
+    if (act === 'cancel') { paintWfPop(null); positionWfPop(); return; }
+    if (act === 'confirm' && wfPop._confirm) {
+      var hand = wfPop._confirm;
+      applyTransition(row, hand);
+      showToast(flowActionName(hand, status) + ' · ' + (((row.querySelector('.artifact-title')) || {}).textContent || '').trim().split(' · ')[0] + ' · ' + SPHERE_DEMO.hhmm());
+      var anchor = row.querySelector('.wf-pill');
+      wfPopAnchor = anchor || wfPopAnchor;
+      paintWfPop(null);
+      positionWfPop();
+      applyFilters();
+    }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !wfPop.hidden) closeWfPop(); });
+  document.addEventListener('mousedown', function (e) {
+    if (wfPop.hidden) return;
+    if (wfPop.contains(e.target) || (e.target.closest && e.target.closest('.wf-pill'))) return;
+    closeWfPop();
+  });
+  window.addEventListener('scroll', function () { if (!wfPop.hidden) positionWfPop(); }, true);
+  window.addEventListener('resize', function () { if (!wfPop.hidden) positionWfPop(); });
+
+  board.addEventListener('click', function (e) {
+    var pill = e.target.closest('.wf-pill');
+    if (pill) {
+      e.preventDefault();
+      var row = pill.closest('.artifact-row');
+      if (wfPopRow === row && !wfPop.hidden) closeWfPop();
+      else openWfPop(row, pill);
+      return;
+    }
+    var link = e.target.closest('.program-open-link');
+    if (link) {
+      e.preventDefault();
+      openProgramEditor(link.closest('.artifact-row'), link.getAttribute('data-which'));
+    }
+  });
+
+  /* Build rows for records synced from Mock Shells + apply persisted statuses */
+  function buildFlowRow(rec) {
+    var row = buildArtifactRow({ type: rec.type, status: rec.status, tags: '', sap: rec.sap, job: '', program: rec.program, title: escapeHtml(rec.number + ' · ' + rec.title) });
+    row.setAttribute('data-flow-id', rec.id);
+    row.setAttribute('data-orig-status', rec.status);
+    var cells = metaCells(row);
+    if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml(rec.roles.prod) + '</span>';
+    if (cells[4]) cells[4].innerHTML = '<span class="meta-v">Final</span>';
+    if (rec.isNew) {
+      var t = row.querySelector('.artifact-title');
+      if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
+      row.classList.add('is-flow-new');
+    }
+    return row;
+  }
+  (function bootFlow() {
+    if (!window.SPHERE_DEMO) return;
+    allRows().forEach(function (row) {
+      var st = SPHERE_DEMO.getStatus(flowKey(row));
+      if (st) {
+        row.setAttribute('data-orig-status', row.getAttribute('data-status') || '');
+        row.setAttribute('data-status', st);
+      }
+    });
+    SPHERE_DEMO.records().forEach(function (rec) {
+      var row = buildFlowRow(rec);
+      moveRowToSap(row, rec.sap);
+    });
+    var focus = '';
+    try { focus = new URLSearchParams(location.search).get('focus') || ''; } catch (e) {}
+    setTimeout(function () {
+      var target = null;
+      if (focus.indexOf('num:') === 0) {
+        var num = focus.slice(4);
+        target = allRows().filter(function (r) { return ((r.querySelector('.artifact-title') || {}).textContent || '').trim().indexOf(num + ' · ') === 0; })[0];
+      } else if (focus) {
+        target = board.querySelector('.artifact-row[data-flow-id="' + focus.replace(/"/g, '') + '"]');
+      }
+      if (target) {
+        flashRow(target, true);
+        var rec = flowRecord(target);
+        if (rec && rec.isNew) showToast('Synced from Mock Shells · ' + rec.program + ' + ' + SPHERE_DEMO.qcName(rec.program) + ' generated');
+      }
+      board.querySelectorAll('.artifact-row.is-flow-new').forEach(function (r) { if (r !== target) flashRow(r, false); });
+    }, 350);
+    if (SPHERE_DEMO.justReset) setTimeout(function () { showToast('Demo data reset'); }, 400);
+  })();
+  window.addEventListener('sphere-workflow-change', function () { paintMyAssign(); });
+  window.addEventListener('load', function () { refreshAllWorkflowUI(); paintMyAssign(); applyFilters(); });
+  refreshAssignedFilter();
+
   syncSectionCounts();
   syncBulk();
   refreshListSelect();
   refreshAllWorkflowUI();
+  paintMyAssign();
+  if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=sticky1"></script>
+<script src="shared-chrome.js?v=flow1"></script>
 </body>
 </html>
