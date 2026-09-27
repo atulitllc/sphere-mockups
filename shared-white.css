@@ -6526,3 +6526,10 @@ html[data-ui-zoom="125"] .artifact-row .role-chip .role-nm,
 html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-block; max-width: 11ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 @media (max-width: 1280px) { .artifact-row .role-chip .role-nm { display: inline-block; } }
 .artifact-row .role-chip b { padding-left: 4px; }
+/* File Explorer: one compact info bar (study + programs layout) (flow3) */
+.files-infobar { display: flex; flex-direction: column; gap: 3px; padding: 7px 12px; margin: 0; border: 1px solid var(--blue-border); border-radius: var(--radius-sm); background: var(--accent-soft); font-size: 12px; line-height: 1.45; color: var(--text); }
+.files-infobar-line { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.files-infobar-k { flex: 0 0 64px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+.files-infobar code { font-size: 11px; }
+.files-infobar a { color: var(--accent); }
+.files-stack:has(.files-infobar) .page-intro { margin-bottom: 0; }

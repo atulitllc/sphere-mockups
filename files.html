@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3c" />
+<link rel="stylesheet" href="shared-white.css?v=flow3d" />
 <script>
 (function () {
   try {
@@ -33,7 +33,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3c"></script>
+<script src="study-layout.js?v=flow3d"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -758,6 +758,30 @@
     b.addEventListener('click', function () { /* root stub */ });
   });
 
+  function filesInfoBar() {
+    var bar = document.getElementById('filesInfoBar');
+    if (bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'filesInfoBar';
+    bar.className = 'files-infobar';
+    bar.setAttribute('role', 'note');
+    var layout = document.querySelector('.files-layout');
+    if (layout && layout.parentNode) layout.parentNode.insertBefore(bar, layout);
+    return bar;
+  }
+  function filesInfoLine(id, order) {
+    var bar = filesInfoBar();
+    var line = document.getElementById(id);
+    if (!line) {
+      line = document.createElement('div');
+      line.id = id;
+      line.className = 'files-infobar-line';
+      line.style.order = String(order || 0);
+      bar.appendChild(line);
+    }
+    return line;
+  }
+  window.SPHERE_filesInfoLine = filesInfoLine;
   /* Tenant study layout: studies tree (compound / protocol / deliverable) + switch root */
   (function () {
     var L = window.SPHERE_LAYOUT;
@@ -800,9 +824,10 @@
       });
       current = FOLDERS[0] ? FOLDERS[0].id : current;
       window.SPHERE_filesStartFolder = current;
-      var sub = document.querySelector('.page-sub');
-      if (sub) sub.insertAdjacentHTML('afterend', '<div class="note-banner" role="note" id="filesStudyNote" style="margin:0 0 10px"><div class="note-banner-inner"><div><strong>' + esc(active.name || activePath) + '</strong> · <code>' + esc(activePath) + '</code> — folders created from the tenant study layout on ' + esc(when) + '. <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></div></div></div>');
     }
+    filesInfoLine('filesStudyNote', 1).innerHTML = '<span class="files-infobar-k">Study</span><span><strong>' + esc(active.name || activePath) + '</strong> · <code>' + esc(activePath) + '</code>' +
+      (active.current ? '' : ' — folders created from the tenant study layout on ' + esc(active.created || 'today')) +
+      ' · <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></span>';
   })();
 
   buildTree();
@@ -813,7 +838,7 @@
   };
 })();
 </script>
-<script src="shared-chrome.js?v=flow3c"></script>
+<script src="shared-chrome.js?v=flow3d"></script>
 
 <script>
 (function () {
@@ -823,28 +848,12 @@
   function applyProgramsFolderMode() {
     if (!window.SPHERE || !SPHERE.getProgramsFolderMode) return;
     var mode = SPHERE.getProgramsFolderMode();
-    var hint = document.getElementById('programsFolderHint');
-    if (!hint) {
-      hint = document.createElement('div');
-      hint.id = 'programsFolderHint';
-      hint.className = 'note-banner';
-      hint.style.margin = '0';
-      hint.setAttribute('role', 'note');
-      var layout = document.querySelector('.files-layout');
-      if (layout && layout.parentNode) {
-        layout.parentNode.insertBefore(hint, layout);
-      } else {
-        var sub = document.querySelector('.page-sub');
-        if (sub) sub.parentNode.insertBefore(hint, sub.nextSibling);
-      }
-    }
+    var hint = window.SPHERE_filesInfoLine ? SPHERE_filesInfoLine('programsFolderHint', 2) : null;
     if (!hint) return;
     if (isSplitMode(mode)) {
-      hint.innerHTML = '<div class="note-banner-inner"><div><strong>Programs layout:</strong> <code>programs/dev</code> (editable · In&nbsp;dev / Revise), <code>programs/qc</code> (QC copies), and <code>programs/prod</code> (approved / production, read-only). Change in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</div></div>';
-      hint.hidden = false;
+      hint.innerHTML = '<span class="files-infobar-k">Programs</span><span><code>programs/dev</code> (editable · In&nbsp;dev / Revise) · <code>programs/qc</code> (QC copies) · <code>programs/prod</code> (approved, read-only) · <a href="admin.html?panel=workflow">Change in Admin → Tracker workflow</a></span>';
     } else {
-      hint.innerHTML = '<div class="note-banner-inner"><div><strong>Programs layout:</strong> single <code>programs/</code> folder — files stay put; stage lock makes them read-only outside In&nbsp;dev / Revise. <a href="admin.html?panel=workflow">Configure</a>.</div></div>';
-      hint.hidden = false;
+      hint.innerHTML = '<span class="files-infobar-k">Programs</span><span>single <code>programs/</code> folder — stage lock makes files read-only outside In&nbsp;dev / Revise · <a href="admin.html?panel=workflow">Configure in Admin → Tracker workflow</a></span>';
     }
     // Demo: if tree has programs node, ensure child folders exist in UI list when split
     try {
