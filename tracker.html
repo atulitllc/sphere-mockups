@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=run1" />
+<link rel="stylesheet" href="shared-white.css?v=float1" />
 <script>
 (function () {
   try {
@@ -213,9 +213,12 @@
           </div>
         </div>
 
-        <div class="bulk-bar" id="bulkBar" aria-live="polite">
+        <div class="bulk-bar" id="bulkBar" role="region" aria-label="Bulk actions for selected programs">
           <div class="bulk-left">
-            <span class="sel-count" id="selCount">0 selected</span>
+            <button class="bulk-clear" type="button" id="btnClearSel" title="Clear selection" aria-label="Clear selection">
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+            <span class="sel-count" id="selCount" aria-live="polite">0 selected</span>
             <span class="muted" style="font-size:12px" id="bulkHint">Select rows for Send / Run</span>
           </div>
           <div class="bulk-right">
@@ -250,7 +253,6 @@
             <select id="bulkAddToList" style="width:140px" aria-label="Add selected programs to a list">
               <option value="">Add to list…</option>
             </select>
-            <button class="btn ghost" type="button" id="btnClearSel">Clear</button>
           </div>
         </div>
 
@@ -1355,6 +1357,8 @@
     var n = sel.length;
     selCount.textContent = n + ' selected';
     bulkBar.classList.toggle('visible', n > 0);
+    body.classList.toggle('has-bulkbar', n > 0);
+    body.style.setProperty('--bulkbar-h', bulkBar.offsetHeight + 'px');
     visibleRows().forEach(function (row) {
       var cb = row.querySelector('.row-check');
       row.classList.toggle('row-selected', !!(cb && cb.checked));
@@ -2438,6 +2442,13 @@
     if (row && row._runJob) openRunLog(row._runJob, b);
   });
   updateJobTableRow({ tr: null, jobs: [] });
+
+  /* Floating bulk bar: keep its height available for page padding / panel offset */
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      if (bulkBar.offsetHeight) body.style.setProperty('--bulkbar-h', bulkBar.offsetHeight + 'px');
+    }).observe(bulkBar);
+  }
 
   /* Import modal */
   var importModal = document.getElementById('importModal');
@@ -3890,6 +3901,6 @@
   refreshAllWorkflowUI();
 })();
 </script>
-<script src="shared-chrome.js?v=run1"></script>
+<script src="shared-chrome.js?v=float1"></script>
 </body>
 </html>
