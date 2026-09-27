@@ -6493,3 +6493,36 @@ html[data-ui-zoom="125"] .artifact-row .artifact-main, html[data-ui-zoom="125"] 
 #metaStatus[data-status="in-review"] { color: var(--warn, #b45309); background: var(--warn-soft, #fff7e6); border-color: var(--warn-border, #f5d49a); }
 #metaStatus[data-status="final"] { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-border); }
 #metaStatus[data-status="locked"] { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
+
+/* Shared SAP sections (flow3) */
+.shell-catalog .sap-section { position: relative; }
+.sap-section-ref { margin-left: auto; font-size: 10px; font-weight: 600; color: var(--muted-2); letter-spacing: .02em; white-space: nowrap; }
+.shell-catalog .sap-section-head { padding-right: 30px; width: 100%; }
+.sap-section-edit { position: absolute; right: 4px; top: 6px; width: 24px; height: 24px; border: none; background: transparent; color: var(--muted); border-radius: 6px; cursor: pointer; font-size: 15px; line-height: 1; opacity: .55; }
+.shell-catalog .sap-section:hover .sap-section-edit, .sap-section-edit:focus-visible { opacity: 1; }
+.sap-section-edit:hover { background: var(--row-hover); color: var(--accent); }
+.catalog-empty-hint { display: block; padding: 8px 10px; font-size: 11px; color: var(--muted-2); font-style: italic; }
+.shell-catalog tr.catalog-drop-pad { cursor: pointer; }
+.catalog-new-section { display: flex; align-items: center; gap: 6px; width: calc(100% - 16px); margin: 10px 8px 12px; padding: 8px 10px; border: 1.5px dashed var(--border-strong); border-radius: 8px; background: transparent; color: var(--accent); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.catalog-new-section:hover { background: var(--accent-soft); border-color: var(--accent); }
+.catalog-new-section svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.section-modal { max-width: 460px; }
+.section-form { display: grid; gap: 12px; }
+.section-form .meta-field { display: grid; gap: 5px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.section-form input, .section-form select { font: inherit; font-size: 13.5px; font-weight: 400; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; }
+.section-form .hint { font-weight: 400; font-size: 11.5px; }
+.section-form-err { margin: 0; color: var(--danger); font-size: 12px; }
+.sap-section.flow-flash > .sap-section-head, .sap-section.flow-flash > .sap-section-bar { animation: secFlash 1.6s ease; }
+@keyframes secFlash { 0%, 40% { background: var(--accent-soft); } 100% { background: transparent; } }
+.sap-empty-note { padding: 10px 12px 12px 44px; font-size: 12px; color: var(--muted); font-style: italic; }
+.tracker-board .sap-section.is-vacant .sap-section-count { opacity: .6; }
+.sap-section-bar .sap-section-ref { margin-left: 8px; }
+.tracker-add-section { margin: 6px 0 4px; }
+/* Role chips: label + name only (no initials), names always shown; wrap/ellipsis instead of initials (flow3) */
+.artifact-row .artifact-title-band .row-roles-inline { flex-wrap: wrap; overflow: visible; row-gap: 3px; column-gap: 4px; }
+.artifact-row .role-chip { padding: 0 7px 0 2px; max-width: 100%; min-width: 0; }
+.artifact-row .role-chip .role-nm,
+html[data-ui-zoom="125"] .artifact-row .role-chip .role-nm,
+html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-block; max-width: 11ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+@media (max-width: 1280px) { .artifact-row .role-chip .role-nm { display: inline-block; } }
+.artifact-row .role-chip b { padding-left: 4px; }

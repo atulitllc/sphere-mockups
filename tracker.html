@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3b" />
+<link rel="stylesheet" href="shared-white.css?v=flow3c" />
 <script>
 (function () {
   try {
@@ -1151,7 +1151,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow3b"></script>
+<script src="demo-flow.js?v=flow3c"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -1303,8 +1303,19 @@
       var vis = rows.filter(function (r) { return !r.classList.contains('is-filtered-out'); });
       var countEl = sec.querySelector('.sap-section-count');
       if (countEl) countEl.textContent = String(vis.length);
-      sec.classList.toggle('is-empty', vis.length === 0);
+      var filtering = trackerFiltering();
+      sec.classList.toggle('is-vacant', rows.length === 0);
+      sec.classList.toggle('is-empty', vis.length === 0 && (rows.length > 0 || filtering));
+      var bodyEl = sec.querySelector('.sap-section-body');
+      var note = bodyEl && bodyEl.querySelector('.sap-empty-note');
+      if (bodyEl && rows.length === 0 && !note) bodyEl.insertAdjacentHTML('beforeend', '<div class="sap-empty-note">No outputs yet — send shells from Mock Shells with + (status Final).</div>');
+      if (note && rows.length) note.remove();
     });
+  }
+  function trackerFiltering() {
+    var ids = ['searchInput', 'filterType', 'filterStatus', 'filterTag', 'filterSap', 'filterAssigned'];
+    if (typeof myAssignOn !== 'undefined' && myAssignOn) return true;
+    return ids.some(function (id) { var el = document.getElementById(id); return el && String(el.value || '').trim(); });
   }
 
   
@@ -4212,7 +4223,7 @@
       var parts = first.split(' ');
       var short = parts.length > 1 ? parts[0].charAt(0) + '. ' + parts[parts.length - 1] : first;
       return '<span class="role-chip' + (mine ? ' is-me' : '') + '" title="' + d[1] + ': ' + escapeHtml(d[2].join(', ')) + (mine ? ' (you)' : '') + '">' +
-        '<b>' + d[0] + '</b><span class="role-av" aria-hidden="true">' + initials(first) + '</span><span class="role-nm">' + escapeHtml(short) + (d[2].length > 1 ? ' +' + (d[2].length - 1) : '') + '</span></span>';
+        '<b>' + d[0] + '</b><span class="role-nm">' + escapeHtml(short) + (d[2].length > 1 ? ' +' + (d[2].length - 1) : '') + '</span></span>';
     }).join('');
   }
   function refreshAssignedFilter() {
@@ -4412,6 +4423,63 @@
     }
     return row;
   }
+  /* Shared SAP sections (same list as Mock Shells TOC) */
+  function applySharedSections() {
+    if (!window.SPHERE_DEMO) return;
+    var list = SPHERE_DEMO.getSections();
+    list.forEach(function (sd) {
+      var sec = board.querySelector('.sap-section[data-sap-group="' + sd.name.replace(/"/g, '') + '"]') ||
+        board.querySelector('.sap-section[data-sap-group="' + String(sd.id).replace(/"/g, '') + '"]');
+      if (sec && sec.getAttribute('data-sap-group') !== sd.name) {
+        var old = sec.getAttribute('data-sap-group');
+        sec.setAttribute('data-sap-group', sd.name);
+        sec.querySelectorAll('.artifact-row').forEach(function (r) { if (r.getAttribute('data-sap') === old) r.setAttribute('data-sap', sd.name); });
+        var sel = sec.querySelector('[data-sap-select]');
+        if (sel) { sel.title = 'Select all in ' + sd.name; sel.setAttribute('aria-label', 'Select all in ' + sd.name); }
+      }
+      if (!sec) sec = ensureSapSection(escapeHtml(sd.name));
+      if (sec.getAttribute('data-sap-group') !== sd.name) sec.setAttribute('data-sap-group', sd.name);
+      var t = sec.querySelector('.sap-section-title');
+      if (t) t.textContent = sd.name;
+      var bar = sec.querySelector('.sap-section-bar') || sec;
+      var refEl = bar.querySelector('.sap-section-ref');
+      if (sd.ref) {
+        if (!refEl) { refEl = document.createElement('span'); refEl.className = 'sap-section-ref'; var head = bar.querySelector('.sap-section-head'); if (head) head.appendChild(refEl); }
+        refEl.textContent = sd.ref;
+      } else if (refEl) refEl.remove();
+      board.appendChild(sec);
+    });
+    var addBtn = document.getElementById('btnTrackerNewSection');
+    if (!addBtn) {
+      addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.id = 'btnTrackerNewSection';
+      addBtn.className = 'catalog-new-section tracker-add-section';
+      addBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New SAP section';
+      addBtn.title = 'Add a SAP section (shared with Mock Shells)';
+      addBtn.addEventListener('click', function () {
+        var name = prompt('New SAP section name (shared with Mock Shells)', '');
+        if (!name || !name.trim()) return;
+        var ref = prompt('SAP reference (optional), e.g. SAP §14.4', '') || '';
+        var sec = SPHERE_DEMO.addSection(name.trim(), ref.trim());
+        if (!sec) { showToast('A section named “' + name.trim() + '” already exists'); return; }
+        applySharedSections();
+        syncSectionCounts();
+        showToast('Section “' + sec.name + '” created · also visible in Mock Shells');
+      });
+    }
+    board.appendChild(addBtn);
+    ['filterSap', 'bulkSap'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var cur = el.value;
+      var first = el.options[0] ? el.options[0].outerHTML : '';
+      el.innerHTML = first + list.map(function (sd) { return '<option>' + escapeHtml(sd.name) + '</option>'; }).join('');
+      el.value = cur;
+    });
+    if (typeof syncSectionCounts === 'function') syncSectionCounts();
+  }
+
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
     allRows().forEach(function (row) {
@@ -4421,10 +4489,13 @@
         row.setAttribute('data-status', st);
       }
     });
+    applySharedSections();
     SPHERE_DEMO.records().forEach(function (rec) {
       var row = buildFlowRow(rec);
-      moveRowToSap(row, rec.sap);
+      moveRowToSap(row, SPHERE_DEMO.sectionName(rec.sap));
     });
+    applySharedSections();
+    window.addEventListener('storage', function (e) { if (e.key === SPHERE_DEMO.KEY) { applySharedSections(); syncSectionCounts(); } });
     var focus = '';
     try { focus = new URLSearchParams(location.search).get('focus') || ''; } catch (e) {}
     setTimeout(function () {
@@ -4456,6 +4527,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3b"></script>
+<script src="shared-chrome.js?v=flow3c"></script>
 </body>
 </html>

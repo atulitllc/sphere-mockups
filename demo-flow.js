@@ -90,7 +90,7 @@
   }
   function trackerSap(shell) {
     var sap = shell.sap || '';
-    if (sap && sap !== 'Unassigned') return sap;
+    if (sap && sap !== 'Unassigned') return sectionName(sap);
     var n = String(shell.number || '');
     if (/^14\.1/.test(n)) return 'Demographics';
     if (/^14\.2/.test(n)) return 'Efficacy';
@@ -177,8 +177,77 @@
     return L.join('\n');
   }
 
+  /* Shared SAP sections (Mock Shells TOC groups == Tracker groups) */
+  var SEED_SECTIONS = [
+    { id: 'Demographics', name: 'Demographics', ref: 'SAP §14.1' },
+    { id: 'Efficacy', name: 'Efficacy', ref: 'SAP §14.2' },
+    { id: 'Safety TLFs', name: 'Safety TLFs', ref: 'SAP §14.3' },
+    { id: 'Labs', name: 'Labs', ref: 'SAP §14.3.5' }
+  ];
+  function getSections() {
+    var s = read();
+    if (!Array.isArray(s.sections) || !s.sections.length) return SEED_SECTIONS.map(function (x) { return Object.assign({}, x); });
+    return s.sections;
+  }
+  function setSections(list) {
+    var s = read(); s.sections = list; write(s);
+    try { window.dispatchEvent(new CustomEvent('sphere-sap-sections-change')); } catch (e) {}
+  }
+  function sectionPrefix(name) {
+    var sec = getSections().filter(function (x) { return x.name === name; })[0];
+    var m = sec && /(\d+(?:\.\d+)+)/.exec(sec.ref || '');
+    return m ? m[1] : null;
+  }
+  function addSection(name, ref, index) {
+    name = String(name || '').trim();
+    if (!name) return null;
+    var list = getSections().slice();
+    if (list.some(function (x) { return x.name.toLowerCase() === name.toLowerCase(); })) return null;
+    var sec = { id: name, name: name, ref: String(ref || '').trim(), created: stamp() };
+    if (index == null || index < 0 || index > list.length) list.push(sec); else list.splice(index, 0, sec);
+    setSections(list);
+    return sec;
+  }
+  function updateSection(oldName, patch) {
+    var list = getSections().slice();
+    var sec = list.filter(function (x) { return x.name === oldName; })[0];
+    if (!sec) return null;
+    var newName = patch.name != null ? String(patch.name).trim() : sec.name;
+    if (!newName) return null;
+    if (newName !== oldName && list.some(function (x) { return x !== sec && x.name.toLowerCase() === newName.toLowerCase(); })) return null;
+    sec.name = newName;
+    if (patch.ref != null) sec.ref = String(patch.ref).trim();
+    if (patch.index != null) {
+      list.splice(list.indexOf(sec), 1);
+      list.splice(Math.max(0, Math.min(list.length, patch.index)), 0, sec);
+    }
+    var st = read();
+    st.sections = list;
+    if (newName !== oldName) {
+      st.records.forEach(function (r) { if (r.sap === oldName) r.sap = newName; });
+      Object.keys(st.shells).forEach(function (k) { (st.shells[k] || []).forEach(function (sh) { if (sh.sap === oldName) sh.sap = newName; }); });
+    }
+    write(st);
+    try { window.dispatchEvent(new CustomEvent('sphere-sap-sections-change')); } catch (e) {}
+    return sec;
+  }
+  /* Map an original (seed) section id to its current name (after renames). */
+  function sectionName(idOrName) {
+    var list = getSections();
+    var byName = list.filter(function (x) { return x.name === idOrName; })[0];
+    if (byName) return byName.name;
+    var byId = list.filter(function (x) { return x.id === idOrName; })[0];
+    return byId ? byId.name : idOrName;
+  }
+
   var api = {
     KEY: KEY,
+    getSections: getSections,
+    setSections: setSections,
+    addSection: addSection,
+    updateSection: updateSection,
+    sectionName: sectionName,
+    sectionPrefix: sectionPrefix,
     STUDY: STUDY,
     CURRENT_USER: CURRENT_USER,
     justReset: justReset,

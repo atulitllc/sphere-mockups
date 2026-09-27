@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3b" />
+<link rel="stylesheet" href="shared-white.css?v=flow3c" />
 <script>
 (function () {
   try {
@@ -321,6 +321,35 @@
 </div>
 
 <!-- Metadata (SAS macro spec) modal -->
+<div class="modal-backdrop" id="sectionModal" hidden role="dialog" aria-modal="true" aria-labelledby="sectionModalTitle">
+  <div class="modal section-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="sectionModalTitle">New SAP section</h2>
+        <div class="hint">Sections are shared with the Tracker — a new or renamed section appears in both places.</div>
+      </div>
+      <button class="btn ghost sm" type="button" id="sectionModalClose" aria-label="Close">✕</button>
+    </div>
+    <form class="modal-body section-form" id="sectionForm" autocomplete="off">
+      <label class="meta-field">Section name
+        <input type="text" id="secName" required maxlength="60" placeholder="e.g. Pharmacokinetics" />
+      </label>
+      <label class="meta-field">SAP reference <span class="muted">(optional)</span>
+        <input type="text" id="secRef" maxlength="40" placeholder="e.g. SAP §14.4" />
+        <span class="hint">A numeric reference (e.g. §14.4) also sets auto-numbering for new shells in this section (14.4.1, 14.4.2…).</span>
+      </label>
+      <label class="meta-field">Order
+        <select id="secOrder"></select>
+      </label>
+      <p class="section-form-err" id="secErr" hidden role="alert"></p>
+    </form>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="sectionModalCancel">Cancel</button>
+      <button class="btn primary" type="submit" form="sectionForm" id="sectionModalSave">Create section</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="metadataModal" hidden role="dialog" aria-modal="true" aria-labelledby="metadataTitle">
   <div class="modal metadata-modal">
     <div class="modal-head">
@@ -448,7 +477,7 @@
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
 
-<script src="demo-flow.js?v=flow3b"></script>
+<script src="demo-flow.js?v=flow3c"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -572,6 +601,22 @@
   var catalogJustDragged = false;
   var catalogDragClickUntil = 0;
 
+  function sapOrder() {
+    if (!window.SPHERE_DEMO) return SAP_ORDER;
+    return SPHERE_DEMO.getSections().map(function (x) { return x.name; }).concat([DEFAULT_SAP]);
+  }
+  function sapRef(name) {
+    if (!window.SPHERE_DEMO) return '';
+    var sec = SPHERE_DEMO.getSections().filter(function (x) { return x.name === name; })[0];
+    return sec ? (sec.ref || '') : '';
+  }
+  function fillSapSelect() {
+    var el = document.getElementById('metaSap');
+    if (!el) return;
+    var cur = el.value;
+    el.innerHTML = sapOrder().map(function (n) { return '<option>' + escapeHtml(n) + '</option>'; }).join('');
+    if (cur) el.value = cur;
+  }
   function normalizeSap(sap) {
     var s = (sap || '').toString().trim();
     return s || DEFAULT_SAP;
@@ -1066,6 +1111,8 @@
     Object.keys(studyStore).forEach(function (sid) {
       var saved = SPHERE_DEMO.getShells(sid);
       if (saved && saved.length) studyStore[sid].shells = saved;
+      /* shared SAP sections: map seed section ids to current (possibly renamed) names */
+      (studyStore[sid].shells || []).forEach(function (sh) { if (sh.sap) sh.sap = SPHERE_DEMO.sectionName(sh.sap); });
     });
   }
 
@@ -1240,7 +1287,7 @@
   function catalogSectionOrder() {
     var seen = {};
     var order = [];
-    SAP_ORDER.forEach(function (sap) {
+    sapOrder().forEach(function (sap) {
       seen[sap] = true;
       order.push(sap);
     });
@@ -1300,11 +1347,13 @@
       html += '<button type="button" class="sap-section-head" aria-expanded="' + (collapsed ? 'false' : 'true') + '" aria-controls="' + bid + '">';
       html += '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
       html += '<span class="sap-section-title">' + escapeHtml(sap) + '</span>';
-      html += '<span class="sap-section-count">' + list.length + '</span></button>';
+      html += '<span class="sap-section-count">' + list.length + '</span>' +
+        (sapRef(sap) ? '<span class="sap-section-ref">' + escapeHtml(sapRef(sap)) + '</span>' : '') + '</button>';
+      if (sap !== DEFAULT_SAP && window.SPHERE_DEMO) html += '<button type="button" class="sap-section-edit" data-sap-edit="' + escapeHtml(sap) + '" title="Rename / reorder section" aria-label="Edit section ' + escapeHtml(sap) + '">⋯</button>';
       html += '<div class="sap-section-body" id="' + bid + '"' + (collapsed ? ' hidden' : '') + ' aria-hidden="' + (collapsed ? 'true' : 'false') + '">';
       html += '<table class="catalog-section-table"><tbody>';
       if (!list.length) {
-        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="3"></td></tr>';
+        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="3"><span class="catalog-empty-hint">No shells yet — drag a shell here or use + Add</span></td></tr>';
       }
       list.forEach(function (sh) {
         var classes = [];
@@ -1321,7 +1370,9 @@
       });
       html += '</tbody></table></div></section>';
     });
+    if (window.SPHERE_DEMO) html += '<button type="button" class="catalog-new-section" id="btnNewSection"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New section</button>';
     catalogBody.innerHTML = html;
+    fillSapSelect();
     applyCatalogFilters();
     persistCatalog();
   }
@@ -2248,6 +2299,12 @@
   }
 
   catalogBody.addEventListener('click', function (e) {
+    var ns = e.target.closest && e.target.closest('#btnNewSection');
+    if (ns) { e.preventDefault(); openSectionModal(null); return; }
+    var ed = e.target.closest && e.target.closest('[data-sap-edit]');
+    if (ed) { e.preventDefault(); e.stopPropagation(); openSectionModal(ed.getAttribute('data-sap-edit')); return; }
+    var pad = e.target.closest && e.target.closest('.catalog-drop-pad');
+    if (pad) { lastUsedSap = normalizeSap(pad.getAttribute('data-sap')); showToast('+ Add will create the next shell in “' + lastUsedSap + '”'); return; }
     var head = e.target.closest && e.target.closest('.sap-section-head');
     if (head) {
       e.preventDefault();
@@ -2497,7 +2554,7 @@
   var SAP_PREFIX = { 'Demographics': '14.1', 'Efficacy': '14.2', 'Safety TLFs': '14.3', 'Labs': '14.3', 'Unassigned': '14.9' };
 
   function nextShellNumber(sap, selfId) {
-    var prefix = SAP_PREFIX[normalizeSap(sap)] || '14.9';
+    var prefix = SAP_PREFIX[normalizeSap(sap)] || (window.SPHERE_DEMO && SPHERE_DEMO.sectionPrefix(normalizeSap(sap))) || '14.9';
     var max = 0;
     var nums = TRACKER_LINKED.slice();
     currentShells().forEach(function (sh) { if (sh.id !== selfId) nums.push(String(sh.number || '')); });
@@ -2567,6 +2624,80 @@
       custom: true
     };
   }
+
+  /* —— Shared SAP sections: create / rename / reorder (synced with Tracker) —— */
+  var sectionEditName = null;
+  function openSectionModal(name) {
+    if (!window.SPHERE_DEMO) return;
+    var modal = document.getElementById('sectionModal');
+    var list = SPHERE_DEMO.getSections();
+    var sec = name ? list.filter(function (x) { return x.name === name; })[0] : null;
+    sectionEditName = sec ? sec.name : null;
+    document.getElementById('sectionModalTitle').textContent = sec ? 'Edit SAP section' : 'New SAP section';
+    document.getElementById('sectionModalSave').textContent = sec ? 'Save section' : 'Create section';
+    document.getElementById('secName').value = sec ? sec.name : '';
+    var nextRef = '';
+    if (!sec) {
+      var max = 0;
+      list.forEach(function (x) { var m = /14\.(\d+)/.exec(x.ref || ''); if (m) max = Math.max(max, parseInt(m[1], 10)); });
+      nextRef = 'SAP §14.' + (max + 1);
+    }
+    document.getElementById('secRef').value = sec ? (sec.ref || '') : nextRef;
+    var others = list.filter(function (x) { return x !== sec; });
+    var ord = document.getElementById('secOrder');
+    ord.innerHTML = '<option value="0">1 · At the top</option>' + others.map(function (x, i) {
+      return '<option value="' + (i + 1) + '">' + (i + 2) + ' · After “' + escapeHtml(x.name) + '”</option>';
+    }).join('');
+    ord.value = String(sec ? list.indexOf(sec) : others.length);
+    var err = document.getElementById('secErr'); err.hidden = true;
+    modal.removeAttribute('hidden');
+    setTimeout(function () { document.getElementById('secName').focus(); document.getElementById('secName').select(); }, 30);
+  }
+  function closeSectionModal() { document.getElementById('sectionModal').setAttribute('hidden', ''); }
+  (function wireSectionModal() {
+    var form = document.getElementById('sectionForm');
+    if (!form) return;
+    document.getElementById('sectionModalClose').addEventListener('click', closeSectionModal);
+    document.getElementById('sectionModalCancel').addEventListener('click', closeSectionModal);
+    document.getElementById('sectionModal').addEventListener('click', function (e) { if (e.target === this) closeSectionModal(); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('secName').value.trim();
+      var ref = document.getElementById('secRef').value.trim();
+      var index = parseInt(document.getElementById('secOrder').value, 10);
+      var err = document.getElementById('secErr');
+      if (!name || name.toLowerCase() === DEFAULT_SAP.toLowerCase()) { err.textContent = 'Enter a section name.'; err.hidden = false; return; }
+      var clash = SPHERE_DEMO.getSections().some(function (x) { return x.name.toLowerCase() === name.toLowerCase() && x.name !== sectionEditName; });
+      if (clash) { err.textContent = 'A section named “' + name + '” already exists.'; err.hidden = false; return; }
+      persistEditorToSelected();
+      if (sectionEditName) {
+        var old = sectionEditName;
+        if (name !== old) {
+          Object.keys(studyStore).forEach(function (sid) {
+            (studyStore[sid].shells || []).forEach(function (sh) { if (sh.sap === old) sh.sap = name; });
+          });
+          if (collapsedSap[old] != null) { collapsedSap[name] = collapsedSap[old]; delete collapsedSap[old]; }
+          if (lastUsedSap === old) lastUsedSap = name;
+          persistCatalog();
+        }
+        SPHERE_DEMO.updateSection(old, { name: name, ref: ref, index: index });
+        closeSectionModal();
+        renderCatalog();
+        var cur = selectedShell();
+        if (cur) setMetaSapValue(cur.sap);
+        showToast('Section ' + (name !== old ? '“' + old + '” renamed to “' + name + '”' : '“' + name + '” updated') + ' · synced to Tracker');
+      } else {
+        SPHERE_DEMO.addSection(name, ref, index);
+        lastUsedSap = name;
+        collapsedSap[name] = false;
+        closeSectionModal();
+        renderCatalog();
+        showToast('Section “' + name + '” created · synced to Tracker · + Add creates shells in it');
+        var sec = catalogBody.querySelector('.sap-section[data-sap-group="' + name.replace(/"/g, '') + '"]');
+        if (sec) { sec.classList.add('flow-flash'); sec.scrollIntoView({ block: 'nearest' }); }
+      }
+    });
+  })();
 
   function persistCatalog() {
     if (!window.SPHERE_DEMO || !studyStore[CURRENT_STUDY]) return;
@@ -3288,6 +3419,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow3b"></script>
+<script src="shared-chrome.js?v=flow3c"></script>
 </body>
 </html>

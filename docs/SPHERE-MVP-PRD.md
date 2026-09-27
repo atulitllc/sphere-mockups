@@ -36,7 +36,7 @@ These are durable product decisions from the client demo flow. The mockups are f
 ### 5. Tracker assignment and roles
 - The "Owner" column is renamed **Assigned To** everywhere: the column header, the filter ("All assignees"), the Edit form, tooltips and History.
 - **Row layout (flow3):** the first cell holds the output ID + title (+ tags) on line 1 and the role chips directly underneath on line 2 (compact, muted). The production and QC program names live in their own **Programs** column on the right (after Job, before Files/Actions), stacked: program on top, `QC qc-…` muted below; both open the editor. Actions stay pinned on the right when the board scrolls horizontally (large zoom / narrow screens).
-- All roles are shown inline on every record as compact chips: **PR · QC · Stats · MW**, each with initials or a short name and the full name on hover. The signed-in user's chips are highlighted. The Roles button remains for detail/editing.
+- All roles are shown inline on every record as compact chips: **PR · QC · Stats · MW**, each with the role label and a short name (e.g. "PR J. Patel"), no initials avatars; the full name is on hover. At large zoom the chips wrap or truncate names with an ellipsis rather than falling back to initials. The signed-in user's chips are highlighted. The Roles button remains for detail/editing.
 - A **My Assignments** toggle in the toolbar shows only records where the signed-in user is Assigned To or holds any role (PR, QC, Stats or MW). It has a count badge, an active state and a one-click clear (×).
 - Toolbar buttons show their labels by default (My Assignments, Custom Lists, Import programs, Export CSV).
 
@@ -55,3 +55,10 @@ These are durable product decisions from the client demo flow. The mockups are f
 - A live preview shows the resulting path and the nested tenant tree, with the new node and its subfolders highlighted, before Create.
 - After Create, the study is added to the study registry (demo: `sphere-study-registry-v1`), appears in the Studies list/cards with its folder path, in **File Explorer** (a Studies tree grouped compound → protocol → deliverable above Folders; `files.html?path=…` switches the root and breadcrumb; new studies show the template subfolders) and in Study home metadata.
 - Demo seed: `XP-204/ONC-204-301/{CSR,DSUR}`, `XP-204/ONC-204-302/CSR`, `CMP-101/PRO-001/{CSR,DSUR}`, `CMP-101/PRO-002/CSR`, plus the other listed studies under their compounds.
+
+### 8. Shared SAP sections (flow3)
+- SAP sections (the TOC groups in Mock Shells and the section groups in the Tracker) are **one shared list** (demo: stored in the demo state, `sphere-demo-flow-v1` → `sections`). Seed: Demographics (SAP §14.1), Efficacy (§14.2), Safety TLFs (§14.3), Labs (§14.3.5), so both pages start identical.
+- Mock Shells: **+ New section** at the bottom of the TOC opens a small form with name, optional SAP reference (defaults to the next §14.x) and order. The **⋯** on each section header edits it (rename, change the reference, reorder). A numeric reference drives auto-numbering of new shells in that section (e.g. §14.4 → 14.4.1). Empty sections show "No shells yet — drag a shell here or use + Add". Clicking that line targets **+ Add** at the section, and shells can be dragged between sections or moved with the SAP dropdown.
+- Renaming a section updates the shells and Tracker records that use it.
+- Tracker: sections follow the shared order and show their SAP reference. A section with no rows shows as an empty group ("No outputs yet") instead of disappearing. **+ New SAP section** under the board writes to the same list. The SAP filter and bulk "Assign SAP…" options come from the list too.
+- Shells sent with **+** land in the Tracker section that matches their SAP section.
