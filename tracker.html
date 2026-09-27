@@ -2157,11 +2157,13 @@
         L.push('');
         L.push('NOTE: There were ' + nAe + ' observations read from the data set SDTM.' + sd.toUpperCase() + '.');
         L.push('NOTE: There were 254 observations read from the data set WORK.ADSL.');
-        if (warn) L.push('WARNING: Multiple lengths were specified for the variable TRT01A by input data set(s). This can cause truncation of data.');
+        if (warn) L.push('WARNING: Multiple lengths were specified for the variable TRT01A by input data set(s). This can cause');
+        L.push('         truncation of data.');
         L.push('NOTE: The data set WORK.' + dom + '_1 has ' + nAe + ' observations and ' + (nVars - 6) + ' variables.');
         step('DATA statement', 0.14);
       } else if (warn) {
-        L.push('WARNING: Multiple lengths were specified for the variable ARM by input data set(s). This can cause truncation of data.');
+        L.push('WARNING: Multiple lengths were specified for the variable ARM by input data set(s). This can cause');
+        L.push('         truncation of data.');
         L.push('');
       }
       src('proc sort data=work.' + d + (dom === 'ADSL' ? '' : '_1') + ' out=' + target + (isQc ? '' : ' (label="' + dom + ' Analysis Dataset")') + ';');
@@ -2355,7 +2357,7 @@
   function highlightLog(text, lang) {
     return text.split('\n').map(function (line) {
       var e = runEsc(line);
-      if (/^WARNING:|^Warning message|^In left_join|^  Detected|^ℹ Row/.test(line)) return '<span class="ln-warn">' + e + '</span>';
+      if (/^WARNING:|^ {9}truncation of data|^Warning message|^In left_join|^  Detected|^ℹ Row/.test(line)) return '<span class="ln-warn">' + e + '</span>';
       if (/^NOTE:/.test(line)) return '<span class="ln-note">' + e + '</span>';
       if (lang === 'SAS' && /^\d+ {2,}/.test(line)) return '<span class="ln-src">' + e + '</span>';
       if (lang === 'R' && /^[>+] /.test(line)) return '<span class="ln-src">' + e + '</span>';
@@ -2405,8 +2407,8 @@
     } else {
       runLogTabs.hidden = true;
     }
-    showRunLogPhase(j, j.warn && j.warnPhase >= 0 ? j.warnPhase : j.phases.length - 1);
     runLogModal.hidden = false;
+    showRunLogPhase(j, j.warn && j.warnPhase >= 0 ? j.warnPhase : j.phases.length - 1);
     document.getElementById('runLogClose').focus();
   }
   function closeRunLog() {
