@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow1" />
+<link rel="stylesheet" href="shared-white.css?v=flow2" />
 <script>
 (function () {
   try {
@@ -135,7 +135,7 @@
             <span class="badge" data-stat="revise">1 Revise</span>
             <span class="badge qc">2 In QC</span>
             <span class="badge" data-stat="stats">1 In Stats</span>
-            <span class="badge" data-stat="mw">1 In MW</span>
+            <span class="badge" data-stat="mw">1 Released to MW</span>
             <span class="badge approved">1 Approved</span>
             <span class="badge frozen">1 Frozen</span>
           </div>
@@ -1150,7 +1150,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow1"></script>
+<script src="demo-flow.js?v=flow2"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -1340,7 +1340,8 @@
     });
     var keys = Object.keys(groups);
     if (!keys.length) {
-      if (hint) hint.textContent = sel.length + ' selected · no Send actions for these statuses';
+      var allReleased = sel.every(function (r) { return r.getAttribute('data-status') === 'In MW'; });
+      if (hint) hint.textContent = sel.length + ' selected · ' + (allReleased ? 'Released to MW is the final stage' : 'no Send actions for these statuses');
       return;
     }
     keys.sort(function (a, b) {
@@ -3359,6 +3360,7 @@
     var status = row.getAttribute('data-status') || '';
     var editable = window.SPHERE && SPHERE.isProgramEditable ? SPHERE.isProgramEditable(status) : (status === 'In dev' || status === 'Revise');
     row.classList.toggle('is-readonly', !editable);
+    row.classList.toggle('is-released', status === 'In MW');
     var cells = row.querySelectorAll('.artifact-meta > .meta-cell');
     if (cells[2]) cells[2].innerHTML = wfPillHtml(status);
     paintProgramCell(row, cells[0], status);
@@ -3450,46 +3452,46 @@
     var prog = row.getAttribute('data-program') || '';
     var base = [
       { at: '2026-08-12 09:14', action: 'Drafted', status: 'Not started', person: owner || 'Jordan Patel', note: 'Created from study programs folder' },
-      { at: '2026-08-14 11:02', action: 'Started development', status: 'In dev', person: owner || 'Jordan Patel', note: 'First save' }
+      { at: '2026-08-14 11:02', action: 'Started development', status: 'In dev', person: owner || 'Jordan Patel', note: 'First save' }
     ];
     var byStatus = {
       'Not started': base.slice(0, 1),
-      'In dev': base,
+      'In dev': base,
       'In dev': base,
       'Revise': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff for first look' },
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff for first look' },
         { at: '2026-08-22 10:15', action: 'Returned for revise', status: 'Revise', person: 'Mei Chen', note: 'Footnote and denominator comments' }
       ]),
-      'In QC': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' }
+      'In QC': base.concat([
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' }
       ]),
       'In QC': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' }
-      ]),
-      'In Stats': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
-        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' }
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' }
       ]),
       'In Stats': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
-        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' }
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
+        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' }
       ]),
-      'In MW': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
-        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' },
-        { at: '2026-08-28 14:05', action: 'Sent to Medical Writing', status: 'In MW', person: 'Riley Nguyen', note: 'Ready for shell check' }
+      'In Stats': base.concat([
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
+        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' }
       ]),
       'In MW': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
-        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' },
-        { at: '2026-08-28 14:05', action: 'Sent to Medical Writing', status: 'In MW', person: 'Riley Nguyen', note: 'Ready for shell check' }
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
+        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' },
+        { at: '2026-08-28 14:05', action: 'Stats approved → Released to MW', status: 'In MW', person: 'Riley Nguyen', note: 'Final stage' }
+      ]),
+      'In MW': base.concat([
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
+        { at: '2026-08-25 09:30', action: 'QC approved → Stats', status: 'In Stats', person: 'Mei Chen', note: 'Passed QC' },
+        { at: '2026-08-28 14:05', action: 'Stats approved → Released to MW', status: 'In MW', person: 'Riley Nguyen', note: 'Final stage' }
       ]),
       'Approved': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
         { at: '2026-08-26 11:20', action: 'Approved', status: 'Approved', person: 'Mei Chen', note: 'E-sign (demo)' }
       ]),
       'Frozen': base.concat([
-        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
+        { at: '2026-08-20 16:40', action: 'Sent to QC', status: 'In QC', person: owner || 'Jordan Patel', note: 'Handoff' },
         { at: '2026-08-26 11:20', action: 'Approved', status: 'Approved', person: 'Mei Chen', note: 'E-sign (demo)' },
         { at: '2026-09-01 08:00', action: 'Frozen', status: 'Frozen', person: 'System', note: 'Files ACL freeze' }
       ])
@@ -3602,7 +3604,7 @@
     if (!row) return false;
     var status = row.getAttribute('data-status') || '';
     if (window.SPHERE && SPHERE.isProgramEditable) return !!SPHERE.isProgramEditable(status);
-    return status === 'In dev' || status === 'In dev' || status === 'Revise';
+    return status === 'In dev' || status === 'In dev' || status === 'Revise';
   }
 
   function setHistoryTab(tab) {
@@ -4141,9 +4143,10 @@
     var steps = flowSteps();
     var idx = flowStepIndex(status, steps);
     var mini = steps.map(function (s, i) { return '<i class="' + (i <= idx ? 'on' : '') + '"></i>'; }).join('');
-    return '<button type="button" class="meta-v wf-pill ' + flowStatusClass(status) + '" title="Workflow: ' + flowStatusLabel(status) +
-      ' · click for next step" aria-label="Status ' + flowStatusLabel(status) + ', open workflow">' +
-      '<span class="wf-pill-label">' + flowStatusLabel(status) + '</span><span class="wf-mini" aria-hidden="true">' + mini + '</span></button>';
+    var fin = status === 'In MW';
+    return '<button type="button" class="meta-v wf-pill ' + flowStatusClass(status) + (fin ? ' is-released' : '') + '" title="Workflow: ' + flowStatusLabel(status) +
+      (fin ? ' · final stage' : ' · click for next step') + '" aria-label="Status ' + flowStatusLabel(status) + ', open workflow">' +
+      '<span class="wf-pill-label">' + (fin ? '<span class="wf-rel-check" aria-hidden="true">✓</span>' : '') + flowStatusLabel(status) + '</span><span class="wf-mini" aria-hidden="true">' + mini + '</span></button>';
   }
   function stepperHtml(row, events) {
     var status = row.getAttribute('data-status') || '';
@@ -4315,7 +4318,8 @@
         '<div class="wf-pop-actions"><button type="button" class="btn primary sm" data-wf="confirm">Confirm</button><button type="button" class="btn sm" data-wf="cancel">Cancel</button></div></div>';
     } else {
       html += '<div class="wf-pop-actions">' +
-        (next ? '<button type="button" class="btn primary sm" data-wf="next">' + flowHandLabel(next, status) + '</button>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>') +
+        (next ? '<button type="button" class="btn primary sm" data-wf="next">' + flowHandLabel(next, status) + '</button>'
+          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage — no further workflow actions</span>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>')) +
         (ret ? '<button type="button" class="btn sm" data-wf="revise">Return to Revise</button>' : '') +
         '<button type="button" class="btn sm" data-wf="history">History</button></div>';
     }
@@ -4449,6 +4453,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow1"></script>
+<script src="shared-chrome.js?v=flow2"></script>
 </body>
 </html>

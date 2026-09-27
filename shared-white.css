@@ -6332,3 +6332,9 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .admin-subnav .admin-reset-demo:hover { color: var(--danger); text-decoration: underline; }
 /* Shell grid: let long column headers wrap instead of truncating (listings) */
 .sheet-grid thead th.col-data, .sheet-grid thead th.col-data .th-text { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: normal; word-break: normal; line-height: 1.25; vertical-align: bottom; }
+/* Released to MW = final stage (flow2) */
+.wf-pill.is-released { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-border); cursor: pointer; }
+.wf-pill.is-released .wf-mini i.on { background: var(--ok); }
+.wf-pill .wf-rel-check { font-weight: 700; margin-right: 3px; }
+.wf-released-note { font-size: 12px; font-weight: 600; color: var(--ok); background: var(--ok-soft); border: 1px solid var(--ok-border); border-radius: 8px; padding: 5px 9px; }
+.artifact-row.is-released .artifact-title { color: var(--text); }

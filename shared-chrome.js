@@ -485,10 +485,17 @@
       stages.push({ id: 'stats', label: 'Stats', short: 'Stats', role: 'Statistician', statuses: ['In Stats'] });
     }
     if (f.mw) {
-      stages.push({ id: 'mw', label: 'Medical writing', short: 'MW', role: 'Medical writer', statuses: ['In MW'] });
+      /* Released to MW is the final stage of the 4-stage flow (Dev → QC → Stats → Released to MW). */
+      stages.push({ id: 'mw', label: 'Released to MW', short: 'Released to MW', role: 'Medical writer', statuses: ['In MW'], final: true });
+    } else {
+      /* Legacy tenants without the MW stage keep an explicit approval end state. */
+      stages.push({ id: 'done', label: 'Approved', short: 'Done', role: '—', statuses: ['Approved', 'Frozen'], final: true });
     }
-    stages.push({ id: 'done', label: 'Approved', short: 'Done', role: '—', statuses: ['Approved', 'Frozen'] });
     return { flags: f, stages: stages };
+  }
+
+  function isFinalStatus(status) {
+    return status === 'In MW' || status === 'Approved' || status === 'Frozen';
   }
 
   function isProgramEditable(status) {
@@ -510,14 +517,12 @@
       if (f.mw) return { action: 'to-mw', label: 'Send to MW', nextStatus: 'In MW' };
       return { action: 'approve', label: 'Approve', nextStatus: 'Approved' };
     }
-    if (status === 'In MW') {
-      return { action: 'approve', label: 'Approve', nextStatus: 'Approved' };
-    }
+    /* In MW = Released to MW: final stage, no further workflow actions. */
     return null;
   }
 
   function returnHandoff(status) {
-    if (status === 'In QC' || status === 'In Stats' || status === 'In MW') {
+    if (status === 'In QC' || status === 'In Stats') {
       return { action: 'revise', label: 'Return to Revise', nextStatus: 'Revise' };
     }
     return null;
@@ -529,6 +534,7 @@
   window.SPHERE.getTrackerWorkflowFlags = readWorkflowFlags;
   window.SPHERE.isProgramEditable = isProgramEditable;
   window.SPHERE.nextHandoff = nextHandoff;
+  window.SPHERE.isFinalStatus = isFinalStatus;
   window.SPHERE.returnHandoff = returnHandoff;
   window.SPHERE.getProgramsFolderMode = getProgramsFolderMode;
   window.SPHERE.isSplitProgramsFolderMode = isSplitProgramsFolderMode;

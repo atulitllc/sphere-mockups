@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow1" />
+<link rel="stylesheet" href="shared-white.css?v=flow2" />
 <script>
 (function () {
   try {
@@ -365,7 +365,7 @@
                   </div>
                   <label>
                     <span>ACS URL (SP)</span>
-                    <input type="text" readonly value="https://sphere.atulit.com/sso/acs/ten_x_pharma" />
+                    <input type="text" readonly value="https://xpharma.sphere.app/sso/acs/ten_x_pharma" />
                     <span class="hint">Read-only SP endpoint — copy to IdP</span>
                   </label>
                   <div class="form-actions">
@@ -449,7 +449,7 @@
               <div class="card-body" style="padding-top:4px">
                 <div class="note-banner" role="note" style="margin-bottom:12px">
                   <span class="note-label">Order</span>
-                  <div>When optional roles are on, records move <strong>Primary → QC → Stats → Medical writing → Approved</strong>. Primary (production programmer) and QC are always in the path. Program files are <strong>editable only in In&nbsp;dev and Revise</strong>; all other stages are read-only.</div>
+                  <div>When optional roles are on, records move <strong>Primary → QC → Stats → Released to MW</strong> (Released to MW is the final stage; without the MW stage, records end at Approved). Primary (production programmer) and QC are always in the path. Program files are <strong>editable only in In&nbsp;dev and Revise</strong>; all other stages are read-only.</div>
                 </div>
 
                 <div class="wf-preview" id="wfPreview" aria-live="polite"></div>
@@ -1264,7 +1264,7 @@
   boot();
 })();
 </script>
-<script src="shared-chrome.js?v=flow1"></script>
+<script src="shared-chrome.js?v=flow2"></script>
 <script>
 
   /* Tracker workflow flags + program version control */

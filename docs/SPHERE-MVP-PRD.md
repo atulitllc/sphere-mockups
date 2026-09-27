@@ -25,6 +25,7 @@ These are durable product decisions from the client demo flow. The mockups are f
 
 ### 4. Workflow stages
 - Stages: **Dev (In dev / Revise) → QC → Stats review → Released to MW** (tenant flags can switch off the Stats and MW stages).
+- **Released to MW is the final stage.** It offers no further workflow actions (no Approve and no Return to Revise). Its stepper shows complete, and the row takes a subtle green "Released" state. The legacy Approved/Frozen end state applies only to tenants that switch the MW stage off.
 - Clicking the status pill opens a 4-step stepper with the next action: **Send to QC**, **QC passed · send to Stats**, **Stats approved · release to MW**, or **Return to Revise**. Each action has an inline confirm.
 - Each move changes the pill colour and records time + user (the role owner for that stage) in History. A toast confirms the move.
 - The same actions work on several rows at once from the sticky selection bar.
