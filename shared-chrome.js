@@ -263,7 +263,7 @@
     var chips = CHIP_MAP[page] || CHIP_MAP.generic;
 
     var replies = {
-      'draft-shell': 'Draft suggestion (demo): create shell <strong>14.3.5 Laboratory — chemistry shifts</strong> from SAP §11.4. Columns Placebo / Drug X; rows AST, ALT, ALP, BILI. Status stays <em>Draft</em> until you lock — Copilot cannot lock or run.',
+      'draft-shell': 'Draft suggestion (demo): create shell <strong>14.3.5 Laboratory — chemistry shifts</strong> from SAP 11.4. Columns Placebo / Drug X; rows AST, ALT, ALP, BILI. Status stays <em>Draft</em> until you lock — Copilot cannot lock or run.',
       'fill-meta': 'For automatable safety tables, metadata could include: analysis dataset, population flag, treatment variable, sort vars, subgroup, and denominator. Open <strong>Metadata</strong> (if the module is on) to edit the spreadsheet stub.',
       'footnotes': 'Suggested footnotes (demo): “Baseline = last non-missing before first dose.” “N = subjects in Safety population.” Accept would create a Draft note on the shell only.',
       'explain-fail': 'Demo read of a typical fail: missing treatment label for TRT01A = “Drug X 200mg” (n=2). Suggested action: add a label map entry, then re-run from Tracker. Copilot will not re-run for you.',

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3i" />
+<link rel="stylesheet" href="shared-white.css?v=flow3j" />
 <script>
 (function () {
   try {
@@ -1150,7 +1150,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow3i"></script>
+<script src="demo-flow.js?v=flow3j"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -4692,7 +4692,7 @@
       addBtn.addEventListener('click', function () {
         var name = prompt('New SAP section name (shared with Mock Shells)', '');
         if (!name || !name.trim()) return;
-        var ref = prompt('SAP reference (optional), e.g. SAP §14.4', '') || '';
+        var ref = prompt('SAP reference (optional), e.g. SAP 14.4', '') || '';
         var sec = SPHERE_DEMO.addSection(name.trim(), ref.trim());
         if (!sec) { showToast('A section named “' + name.trim() + '” already exists'); return; }
         applySharedSections();
@@ -4759,6 +4759,6 @@
   if (myAssignOn) applyFilters();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3i"></script>
+<script src="shared-chrome.js?v=flow3j"></script>
 </body>
 </html>

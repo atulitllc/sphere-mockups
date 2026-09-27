@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3i" />
+<link rel="stylesheet" href="shared-white.css?v=flow3j" />
 <script>
 (function () {
   try {
@@ -605,7 +605,7 @@
     metaRow('Missing handling', 'Exclude', ''),
     metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub — not written in this prototype'),
     metaRow('Program stub', 'tfl_14_3_1_ae.sas', ''),
-    metaRow('SAP / footnote keys', 'SAP §12.1; AESI footnote [1]', 'Optional')
+    metaRow('SAP / footnote keys', 'SAP 12.1; AESI footnote [1]', 'Optional')
   ];
 
   var DEMOG_META = [
@@ -615,7 +615,7 @@
     metaRow('Treatment variable', 'TRT01A', 'Actual treatment'),
     metaRow('Subject ID', 'USUBJID', ''),
     metaRow('Variables', 'AGE, SEX, RACE, ETHNIC', 'Continuous + categorical'),
-    metaRow('Age derivation', 'Age at informed consent', 'SAP §10.1'),
+    metaRow('Age derivation', 'Age at informed consent', 'SAP 10.1'),
     metaRow('Stats — continuous', 'n, Mean (SD), Median, Min, Max', ''),
     metaRow('Stats — categorical', 'n (%)', ''),
     metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
@@ -623,7 +623,7 @@
     metaRow('Missing handling', 'Missing category', 'Show Missing for SEX/RACE'),
     metaRow('Output RTF path', 'tlf/14_1_1_demog.rtf', ''),
     metaRow('Program stub', 't_14_1_1_demog.sas', ''),
-    metaRow('SAP / footnote keys', 'SAP §10.1 Demographics; aCRF DM', '')
+    metaRow('SAP / footnote keys', 'SAP 10.1 Demographics; aCRF DM', '')
   ];
 
   var SAFETY_SUMMARY_META = [
@@ -642,7 +642,7 @@
     metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
     metaRow('Output RTF path', 'tlf/14_3_0_safety_sum.rtf', ''),
     metaRow('Program stub', 'tfl_14_3_0_saf.sas', ''),
-    metaRow('SAP / footnote keys', 'SAP §12.0 Safety overview', '')
+    metaRow('SAP / footnote keys', 'SAP 12.0 Safety overview', '')
   ];
 
   var GENERIC_AUTO_META = [
@@ -675,7 +675,7 @@
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Treatment-emergent adverse events (TRTEMFL=Y).',
     notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.',
     program: 'tfl_14_3_0_saf.sas',
-    sapRef: 'SAP §12.0 Safety overview',
+    sapRef: 'SAP 12.0 Safety overview',
     templateKey: 'Safety summary',
     custom: false
   };
@@ -694,7 +694,7 @@
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] MedDRA hierarchy: AEBODSYS / AEDECOD.',
     notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.',
     program: 'tfl_14_3_1_ae.sas',
-    sapRef: 'SAP §12.1 Adverse events',
+    sapRef: 'SAP 12.1 Adverse events',
     templateKey: 'Adverse events — overview',
     custom: false
   };
@@ -717,7 +717,7 @@
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Age calculated at informed consent.',
     notes: '',
     program: 't_14_1_1_demog.sas',
-    sapRef: 'SAP §10.1 Demographics; aCRF DM',
+    sapRef: 'SAP 10.1 Demographics; aCRF DM',
     templateKey: 'Demographics',
     custom: false
   };
@@ -2498,6 +2498,6 @@
 
 })();
 </script>
-<script src="shared-chrome.js?v=flow3i"></script>
+<script src="shared-chrome.js?v=flow3j"></script>
 </body>
 </html>

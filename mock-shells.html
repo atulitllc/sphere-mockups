@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3i" />
+<link rel="stylesheet" href="shared-white.css?v=flow3j" />
 <script>
 (function () {
   try {
@@ -334,9 +334,9 @@
       <label class="meta-field">Section name
         <input type="text" id="secName" required maxlength="60" placeholder="e.g. Pharmacokinetics" />
       </label>
-      <label class="meta-field">SAP reference <span class="muted">(optional)</span>
-        <input type="text" id="secRef" maxlength="40" placeholder="e.g. SAP §14.4" />
-        <span class="hint">A numeric reference (e.g. §14.4) also sets auto-numbering for new shells in this section (14.4.1, 14.4.2…).</span>
+      <label class="meta-field"><span class="section-field-label">SAP reference <span class="muted">(optional)</span></span>
+        <input type="text" id="secRef" maxlength="40" placeholder="e.g. SAP 14.4" />
+        <span class="hint">A numeric reference (e.g. 14.4 or SAP 14.4) also sets auto-numbering for new shells in this section (14.4.1, 14.4.2…).</span>
       </label>
       <label class="meta-field">Order
         <select id="secOrder"></select>
@@ -477,7 +477,7 @@
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
 
-<script src="demo-flow.js?v=flow3i"></script>
+<script src="demo-flow.js?v=flow3j"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -657,7 +657,7 @@
     metaRow('Missing handling', 'Exclude', ''),
     metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub — not written in this prototype'),
     metaRow('Program stub', 'tfl_14_3_1_ae.sas', ''),
-    metaRow('SAP / footnote keys', 'SAP §12.1; AESI footnote [1]', 'Optional')
+    metaRow('SAP / footnote keys', 'SAP 12.1; AESI footnote [1]', 'Optional')
   ];
 
   var DEMOG_META = [
@@ -667,7 +667,7 @@
     metaRow('Treatment variable', 'TRT01A', 'Actual treatment'),
     metaRow('Subject ID', 'USUBJID', ''),
     metaRow('Variables', 'AGE, SEX, RACE, ETHNIC', 'Continuous + categorical'),
-    metaRow('Age derivation', 'Age at informed consent', 'SAP §10.1'),
+    metaRow('Age derivation', 'Age at informed consent', 'SAP 10.1'),
     metaRow('Stats — continuous', 'n, Mean (SD), Median, Min, Max', ''),
     metaRow('Stats — categorical', 'n (%)', ''),
     metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
@@ -675,7 +675,7 @@
     metaRow('Missing handling', 'Missing category', 'Show Missing for SEX/RACE'),
     metaRow('Output RTF path', 'tlf/14_1_1_demog.rtf', ''),
     metaRow('Program stub', 't_14_1_1_demog.sas', ''),
-    metaRow('SAP / footnote keys', 'SAP §10.1 Demographics; aCRF DM', '')
+    metaRow('SAP / footnote keys', 'SAP 10.1 Demographics; aCRF DM', '')
   ];
 
   var SAFETY_SUMMARY_META = [
@@ -694,7 +694,7 @@
     metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
     metaRow('Output RTF path', 'tlf/14_3_0_safety_sum.rtf', ''),
     metaRow('Program stub', 'tfl_14_3_0_saf.sas', ''),
-    metaRow('SAP / footnote keys', 'SAP §12.0 Safety overview', '')
+    metaRow('SAP / footnote keys', 'SAP 12.0 Safety overview', '')
   ];
 
   var GENERIC_AUTO_META = [
@@ -727,7 +727,7 @@
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Treatment-emergent adverse events (TRTEMFL=Y).',
     notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.',
     program: 'tfl_14_3_0_saf.sas',
-    sapRef: 'SAP §12.0 Safety overview',
+    sapRef: 'SAP 12.0 Safety overview',
     templateKey: 'Safety summary',
     custom: false
   };
@@ -746,7 +746,7 @@
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] MedDRA hierarchy: AEBODSYS / AEDECOD.',
     notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.',
     program: 'tfl_14_3_1_ae.sas',
-    sapRef: 'SAP §12.1 Adverse events',
+    sapRef: 'SAP 12.1 Adverse events',
     templateKey: 'Adverse events — overview',
     custom: false
   };
@@ -769,7 +769,7 @@
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Age calculated at informed consent.',
     notes: '',
     program: 't_14_1_1_demog.sas',
-    sapRef: 'SAP §10.1 Demographics; aCRF DM',
+    sapRef: 'SAP 10.1 Demographics; aCRF DM',
     templateKey: 'Demographics',
     custom: false
   };
@@ -903,32 +903,32 @@
         catRows('Race', ['White', 'Black or African American', 'Asian', 'Other']), catRows('Ethnicity', ['Hispanic or Latino', 'Not Hispanic or Latino']),
         contRows('Weight', 'kg'), catRows('ECOG performance status', ['0', '1'])),
       footnotes: 'N = number of subjects in the Safety Analysis Set. Percentages are based on N.\nAge is calculated at informed consent.\n' + srcLine('ADSL', 'tfl_14_1_1_demog.R'),
-      program: 'tfl_14_1_1_demog.R', sapRef: 'SAP §10.1 Demographics; aCRF DM', templateKey: 'Demographics' }); },
+      program: 'tfl_14_1_1_demog.R', sapRef: 'SAP 10.1 Demographics; aCRF DM', templateKey: 'Demographics' }); },
     '14.1.2': function () { return lay({ title: 'Baseline disease characteristics and prior anticancer therapies', subtitle: ITT, columns: ARMS,
       rows: [].concat(contRows('Time since initial diagnosis', 'months'), catRows('Disease stage at study entry', ['Stage IIIB', 'Stage IV']),
         catRows('PD-L1 expression', ['TPS < 1%', 'TPS 1–49%', 'TPS ≥ 50%']), catRows('Number of prior lines of therapy', ['1', '2', '≥ 3']),
         catRows('Prior therapy type', ['Platinum-based chemotherapy', 'Immune checkpoint inhibitor', 'Targeted therapy'])),
       footnotes: 'N = number of subjects in the ITT Analysis Set. Percentages are based on N.\nSubjects may have received more than one prior therapy type.\n' + srcLine('ADSL, ADMH, ADCM', 'tfl_14_1_2_base.R'),
-      program: 'tfl_14_1_2_base.R', sapRef: 'SAP §10.2 Baseline characteristics', templateKey: 'Baseline characteristics' }); },
+      program: 'tfl_14_1_2_base.R', sapRef: 'SAP 10.2 Baseline characteristics', templateKey: 'Baseline characteristics' }); },
     '14.1.3': function () { return lay({ title: 'Subject disposition', subtitle: 'All Randomized Subjects', columns: ARMS,
       rows: [L(0, 'Randomized', NP), L(0, 'Treated (Safety Analysis Set)', NP), L(0, 'Ongoing study treatment', NP), L(0, 'Discontinued study treatment', NP),
         L(1, 'Progressive disease', NP), L(1, 'Adverse event', NP), L(1, 'Withdrawal by subject', NP), L(1, 'Physician decision', NP), L(1, 'Death', NP),
         L(0, 'Discontinued study', NP), L(1, 'Lost to follow-up', NP), L(1, 'Death', NP)],
       footnotes: 'Percentages are based on the number of randomized subjects.\nPrimary reason for discontinuation as recorded on the End of Treatment CRF.\n' + srcLine('ADSL, ADDS', 't_14_1_3_disp.sas'),
-      program: 't_14_1_3_disp.sas', sapRef: 'SAP §10.0 Subject disposition', templateKey: 'Disposition' }); },
+      program: 't_14_1_3_disp.sas', sapRef: 'SAP 10.0 Subject disposition', templateKey: 'Disposition' }); },
     '14.2.1': function () { return lay({ title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', subtitle: MITT, columns: ARMS2,
       rows: [L(0, 'Best overall response, n (%)', ['', '']), L(1, 'Complete response (CR)', NP2), L(1, 'Partial response (PR)', NP2), L(1, 'Stable disease (SD)', NP2),
         L(1, 'Progressive disease (PD)', NP2), L(1, 'Not evaluable (NE)', NP2), L(0, 'Objective response rate (CR + PR), n (%)', NP2),
         L(1, '95% CI [a]', ['(xx.x, xx.x)', '(xx.x, xx.x)']), L(0, 'Difference in ORR vs placebo (%)', ['', 'xx.x']), L(1, '95% CI [b]', ['', '(xx.x, xx.x)']), L(1, 'p-value [c]', ['', 'x.xxxx'])],
       footnotes: 'Response per RECIST v1.1 by blinded independent central review (BICR); confirmation required ≥ 4 weeks after first response.\n[a] Clopper–Pearson exact CI. [b] Miettinen–Nurminen CI stratified by randomization factors. [c] CMH test, two-sided.\n' + srcLine('ADSL, ADRS (PARAMCD = "BOR", BICR)', 'tfl_14_2_1_orr.R'),
-      program: 'tfl_14_2_1_orr.R', sapRef: 'SAP §11.1 Primary efficacy', templateKey: 'Primary endpoint — ORR' }); },
+      program: 'tfl_14_2_1_orr.R', sapRef: 'SAP 11.1 Primary efficacy', templateKey: 'Primary endpoint — ORR' }); },
     '14.2.3': function () { return lay({ title: 'Duration of response and time to response among confirmed responders', subtitle: FAS + ' — confirmed responders', columns: ARMS2,
       rows: [L(0, 'Number of confirmed responders', ['xx', 'xx']), L(0, 'Duration of response (months) [a]', ['', '']), L(1, 'Events (PD or death), n (%)', NP2), L(1, 'Censored, n (%)', NP2),
         L(1, 'Median (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']), L(1, '% with DoR ≥ 6 months (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']),
         L(1, '% with DoR ≥ 12 months (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']), L(0, 'Time to response (months)', ['', '']), L(1, 'Mean (SD)', ['x.x (x.xx)', 'x.x (x.xx)']),
         L(1, 'Median', ['x.x', 'x.x']), L(1, 'Min, Max', ['x.x, x.x', 'x.x, x.x'])],
       footnotes: '[a] Kaplan–Meier estimates; CI by Brookmeyer–Crowley method with log-log transformation.\nDoR measured from first documented CR/PR to PD or death.\n' + srcLine('ADSL, ADTTE (PARAMCD = "DOR", "TTR")', 'tfl_14_2_3_orr_dorr.sas'),
-      program: 'tfl_14_2_3_orr_dorr.sas', sapRef: 'SAP §11.3 Secondary efficacy', templateKey: 'Duration of response' }); },
+      program: 'tfl_14_2_3_orr_dorr.sas', sapRef: 'SAP 11.3 Secondary efficacy', templateKey: 'Duration of response' }); },
     '14.3.2': function () { return lay({ title: 'Kaplan–Meier plot of overall survival with landmark rates at 12 and 24 months', subtitle: ITT, labelHeader: 'Figure element', columns: ['Specification'],
       rows: figRows([['Figure type', 'Kaplan–Meier step curves by treatment arm with censor marks (+)'], ['X-axis', 'Time since randomization (months); 0 to 36 by 3'],
         ['Y-axis', 'Overall survival probability; 0.0 to 1.0 by 0.2'], ['Legend', 'Placebo (N=xx) — solid; Drug X 10 mg (N=xx) — dashed'],
@@ -936,67 +936,67 @@
         ['Landmark rates', '12-month and 24-month OS rate (95% CI) per arm, dotted vertical reference lines'],
         ['Number at risk', 'Table below x-axis at each 3-month tick, one line per arm']]),
       footnotes: 'HR from stratified Cox proportional hazards model; p-value from stratified log-rank test (two-sided).\nSubjects without death are censored at last known alive date.\n' + srcLine('ADSL, ADTTE (PARAMCD = "OS")', 'f_14_3_2_os_km.R'),
-      program: 'f_14_3_2_os_km.R', sapRef: 'SAP §11.4 Overall survival', templateKey: 'Kaplan–Meier overall survival' }); },
+      program: 'f_14_3_2_os_km.R', sapRef: 'SAP 11.4 Overall survival', templateKey: 'Kaplan–Meier overall survival' }); },
     '14.3.0': function () { return lay({ title: 'Overall summary of treatment-emergent adverse events', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any TEAE', NP), L(0, 'Subjects with any treatment-related TEAE', NP), L(0, 'Subjects with any Grade ≥ 3 TEAE', NP), L(0, 'Subjects with any serious TEAE', NP),
         L(1, 'Treatment-related serious TEAE', NP), L(0, 'TEAE leading to dose interruption', NP), L(0, 'TEAE leading to dose reduction', NP), L(0, 'TEAE leading to permanent discontinuation', NP),
         L(0, 'TEAE leading to death', NP)],
       footnotes: FOOT_SAF + '\n' + srcLine('ADSL, ADAE', 't_14_3_0_saf.sas'),
-      notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.', program: 't_14_3_0_saf.sas', sapRef: 'SAP §12.0 Safety overview', templateKey: 'Safety summary' }); },
+      notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.', program: 't_14_3_0_saf.sas', sapRef: 'SAP 12.0 Safety overview', templateKey: 'Safety summary' }); },
     '14.3.1': function () { return lay({ title: 'Adverse events — overview of TEAE, SAE, Grade ≥ 3, and discontinuations', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Number of TEAEs (events)', ['xxx', 'xxx', 'xxx']), L(0, 'Subjects with any TEAE', NP), L(1, 'Maximum grade 1–2', NP), L(1, 'Maximum grade 3', NP), L(1, 'Maximum grade 4', NP),
         L(1, 'Grade 5 (fatal)', NP), L(0, 'Subjects with any serious TEAE', NP), L(0, 'Subjects with TEAE leading to discontinuation', NP), L(0, 'Subjects with AESI', NP)],
       footnotes: FOOT_SAF + '\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_ae.R'),
-      notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.', program: 'tfl_14_3_1_ae.R', sapRef: 'SAP §12.1 Adverse events', templateKey: 'Adverse events — overview' }); },
+      notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.', program: 'tfl_14_3_1_ae.R', sapRef: 'SAP 12.1 Adverse events', templateKey: 'Adverse events — overview' }); },
     '14.3.1.1': function () { return lay({ title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term', subtitle: SAF, columns: ARMS,
       rows: socRows(3), footnotes: FOOT_SAF + '\nSOCs sorted alphabetically; PTs by descending frequency in the Total column.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_1_ae_soc_pt.R'),
-      program: 'tfl_14_3_1_1_ae_soc_pt.R', sapRef: 'SAP §12.1.1', templateKey: 'AE by SOC/PT' }); },
+      program: 'tfl_14_3_1_1_ae_soc_pt.R', sapRef: 'SAP 12.1.1', templateKey: 'AE by SOC/PT' }); },
     '14.3.1.2': function () { return lay({ title: 'Serious adverse events by SOC/PT and relationship to study drug', subtitle: SAF,
       columns: ['Placebo Any (N=xx)', 'Placebo Related (N=xx)', 'Drug X Any (N=xx)', 'Drug X Related (N=xx)'],
       rows: [L(0, 'Subjects with at least one serious TEAE', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Infections and infestations', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
         L(1, 'Pneumonia', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(1, 'Sepsis', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
         L(0, 'Respiratory, thoracic and mediastinal disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(1, 'Pneumonitis', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'])],
       footnotes: FOOT_SAF + '\nRelated = investigator-assessed as possibly, probably, or definitely related (AEREL).\n' + srcLine('ADSL, ADAE (AESER = "Y")', 'tfl_14_3_1_2_sae_rel.R'),
-      program: 'tfl_14_3_1_2_sae_rel.R', sapRef: 'SAP §12.1.2', templateKey: 'SAE by relationship' }); },
+      program: 'tfl_14_3_1_2_sae_rel.R', sapRef: 'SAP 12.1.2', templateKey: 'SAE by relationship' }); },
     '14.3.1.3': function () { return lay({ title: 'Adverse events leading to permanent discontinuation of study treatment by Preferred Term', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any TEAE leading to discontinuation', NP), L(1, 'Pneumonitis', NP), L(1, 'Alanine aminotransferase increased', NP), L(1, 'Fatigue', NP), L(1, 'Colitis', NP), L(1, 'Infusion related reaction', NP)],
       footnotes: FOOT_SAF + '\nAction taken with study treatment = "DRUG WITHDRAWN" (AEACN). PTs by descending frequency in Total.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_3_ae_disc.R'),
-      program: 'tfl_14_3_1_3_ae_disc.R', sapRef: 'SAP §12.1.3', templateKey: 'AE discontinuation' }); },
+      program: 'tfl_14_3_1_3_ae_disc.R', sapRef: 'SAP 12.1.3', templateKey: 'AE discontinuation' }); },
     '14.3.1.4': function () { return lay({ title: 'Grade 3 or higher treatment-emergent adverse events by System Organ Class and Preferred Term', subtitle: SAF, columns: ARMS,
       rows: socRows(3, 'Grade ≥ 3 TEAE'), footnotes: FOOT_SAF + '\nGrade ≥ 3 per CTCAE v5.0 (AETOXGR ≥ 3).\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_4_ae_g3.R'),
-      program: 'tfl_14_3_1_4_ae_g3.R', sapRef: 'SAP §12.1.4', templateKey: 'AE Grade 3+' }); },
+      program: 'tfl_14_3_1_4_ae_g3.R', sapRef: 'SAP 12.1.4', templateKey: 'AE Grade 3+' }); },
     '14.3.1.5': function () { return lay({ title: 'Adverse events of special interest: immune-mediated events, infusion reactions, and hepatic toxicity', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any AESI', NP), L(0, 'Immune-mediated adverse events', NP), L(1, 'Pneumonitis', NP), L(1, 'Colitis', NP), L(1, 'Hypothyroidism', NP),
         L(0, 'Infusion-related reactions', NP), L(0, 'Hepatic toxicity', NP), L(1, 'ALT or AST > 3 × ULN', NP), L(1, "Potential Hy's law", NP)],
       footnotes: FOOT_SAF + '\nAESI categories defined by sponsor-specified MedDRA search list v3.0.\n' + srcLine('ADSL, ADAE (AESIFL = "Y")', 'tfl_14_3_1_5_aesi.R'),
-      program: 'tfl_14_3_1_5_aesi.R', sapRef: 'SAP §12.1.5', templateKey: 'AESI' }); },
+      program: 'tfl_14_3_1_5_aesi.R', sapRef: 'SAP 12.1.5', templateKey: 'AESI' }); },
     '14.3.1.6': function () { return lay({ title: 'Time to first Grade ≥ 3 treatment-emergent adverse event — Kaplan–Meier plot', subtitle: SAF, labelHeader: 'Figure element', columns: ['Specification'],
       rows: figRows([['Figure type', 'Kaplan–Meier cumulative incidence (1 − KM) by arm with censor marks (+)'], ['X-axis', 'Time since first dose (weeks); 0 to 52 by 4'],
         ['Y-axis', 'Cumulative probability of first Grade ≥ 3 TEAE; 0.0 to 1.0'], ['Legend', 'Placebo (N=xx) — solid; Drug X 10 mg (N=xx) — dashed'],
         ['Inset statistics', 'Median time (95% CI) per arm; HR (95% CI) = x.xx (x.xx, x.xx)'], ['Number at risk', 'Table below x-axis every 4 weeks, one line per arm']]),
       footnotes: 'Subjects without a Grade ≥ 3 TEAE are censored at end of treatment-emergent period.\n' + srcLine('ADSL, ADTTE (PARAMCD = "TTAEG3")', 'tfl_14_3_1_6_ae_ttf.R'),
-      program: 'tfl_14_3_1_6_ae_ttf.R', sapRef: 'SAP §12.1.6', templateKey: 'AE time-to-event' }); },
+      program: 'tfl_14_3_1_6_ae_ttf.R', sapRef: 'SAP 12.1.6', templateKey: 'AE time-to-event' }); },
     '14.3.2.1': function () {
       var cols = ['Subject ID', 'Treatment', 'Age/Sex', 'SOC / Preferred Term', 'Onset day', 'Duration (days)', 'Grade', 'Outcome', 'Action taken'];
       return lay({ labelHeader: 'Subject ID', title: 'Listing of serious adverse events', subtitle: SAF, columns: cols.slice(1), rows: listRows(cols, 4),
         footnotes: 'Onset day relative to first dose (Day 1). Duration = end date − start date + 1.\n' + srcLine('ADAE (AESER = "Y")', 'tfl_14_3_2_1_sae_list.R'),
-        program: 'tfl_14_3_2_1_sae_list.R', sapRef: 'SAP §12.2', templateKey: 'SAE listing' }); },
+        program: 'tfl_14_3_2_1_sae_list.R', sapRef: 'SAP 12.2', templateKey: 'SAE listing' }); },
     '14.3.2.2': function () {
       var cols = ['Subject ID', 'Treatment', 'Age/Sex', 'Date of death (study day)', 'Primary cause of death', 'Related AE (PT)', 'Days since last dose'];
       return lay({ labelHeader: 'Subject ID', title: 'Listing of deaths and adverse events with fatal outcome', subtitle: SAF, columns: cols.slice(1), rows: listRows(cols, 3),
         footnotes: 'Includes all deaths during study and within 90 days of last dose.\n' + srcLine('ADSL, ADAE (AEOUT = "FATAL"), ADDS', 'tfl_14_3_2_2_death_list.R'),
-        program: 'tfl_14_3_2_2_death_list.R', sapRef: 'SAP §12.2', templateKey: 'Death listing' }); },
+        program: 'tfl_14_3_2_2_death_list.R', sapRef: 'SAP 12.2', templateKey: 'Death listing' }); },
     '14.3.3': function () { return lay({ title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', subtitle: SAF,
       columns: ['Placebo Gr 1–2 (N=xx)', 'Placebo Gr ≥ 3 (N=xx)', 'Drug X Gr 1–2 (N=xx)', 'Drug X Gr ≥ 3 (N=xx)'],
       rows: [L(0, 'Subjects with any TEAE', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Gastrointestinal disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
         L(0, 'General disorders and administration site conditions', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Investigations', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
         L(0, 'Skin and subcutaneous tissue disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'])],
       footnotes: FOOT_SAF + '\nSubjects are counted once per SOC at their maximum grade.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_3_ae_sev.R'),
-      program: 'tfl_14_3_3_ae_sev.R', sapRef: 'SAP §12.1.7', templateKey: 'AE by severity' }); },
+      program: 'tfl_14_3_3_ae_sev.R', sapRef: 'SAP 12.1.7', templateKey: 'AE by severity' }); },
     '14.3.4': function () { return lay({ title: 'Common adverse events (≥ 5% in any arm) by Preferred Term — descending frequency', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any common TEAE', NP), L(1, 'Fatigue', NP), L(1, 'Diarrhoea', NP), L(1, 'Nausea', NP), L(1, 'Decreased appetite', NP), L(1, 'Rash', NP), L(1, 'Anaemia', NP), L(1, 'Pruritus', NP)],
       footnotes: FOOT_SAF + '\nPTs with incidence ≥ 5% in any treatment arm, sorted by descending frequency in Drug X 10 mg.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_4_ae_common.R'),
-      program: 'tfl_14_3_4_ae_common.R', sapRef: 'SAP §12.1.8', templateKey: 'Common AEs' }); },
+      program: 'tfl_14_3_4_ae_common.R', sapRef: 'SAP 12.1.8', templateKey: 'Common AEs' }); },
     '14.3.5.1': function () { return lay({ title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade', subtitle: SAF,
       colGroups: [], columns: ['Worst Gr 0', 'Worst Gr 1', 'Worst Gr 2', 'Worst Gr 3', 'Worst Gr 4', 'Total'],
       rows: [L(0, 'ALT increased — Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
@@ -1004,23 +1004,23 @@
         L(0, 'ALT increased — Placebo (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
         L(0, 'Creatinine increased — Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx'])],
       footnotes: 'Grades per CTCAE v5.0. Percentages based on subjects with baseline and ≥ 1 post-baseline value.\nWorst post-baseline = highest grade on treatment through 30 days after last dose.\n' + srcLine('ADLB (PARCAT1 = "CHEMISTRY")', 'tfl_14_3_5_1_lb_chem.sas'),
-      program: 'tfl_14_3_5_1_lb_chem.sas', sapRef: 'SAP §12.3 Laboratory', templateKey: 'Lab chemistry shifts' }); },
+      program: 'tfl_14_3_5_1_lb_chem.sas', sapRef: 'SAP 12.3 Laboratory', templateKey: 'Lab chemistry shifts' }); },
     '14.3.5.2': function () { return lay({ title: 'Hematology parameters: change from baseline over time', subtitle: SAF, columns: ARMS2,
       rows: [].concat([L(0, 'Hemoglobin (g/L)', ['', ''])], [['Baseline', 'xx.x (xx.xx)'], ['Week 6 — change from baseline', 'xx.x (xx.xx)'], ['Week 12 — change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
         [L(0, 'Platelets (10^9/L)', ['', ''])], [['Baseline', 'xxx.x (xx.xx)'], ['Week 6 — change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
         [L(0, 'Neutrophils (10^9/L)', ['', ''])], [['Baseline', 'x.xx (x.xxx)'], ['Week 6 — change from baseline', 'x.xx (x.xxx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); })),
       footnotes: 'Only subjects with a value at both baseline and the visit are included in change from baseline.\n' + srcLine('ADLB (PARCAT1 = "HEMATOLOGY")', 'tfl_14_3_5_2_lb_heme.R'),
-      program: 'tfl_14_3_5_2_lb_heme.R', sapRef: 'SAP §12.3 Laboratory', templateKey: 'Hematology' }); },
+      program: 'tfl_14_3_5_2_lb_heme.R', sapRef: 'SAP 12.3 Laboratory', templateKey: 'Hematology' }); },
     '14.3.7': function () { return lay({ title: 'Vital signs: summary of values and change from baseline by visit', subtitle: SAF, columns: ARMS2,
       rows: [].concat(contRows('Systolic blood pressure — Baseline', 'mmHg', 2), contRows('Systolic blood pressure — Week 12 change from baseline', 'mmHg', 2).slice(0, 3),
         contRows('Heart rate — Baseline', 'beats/min', 2).slice(0, 3), contRows('Body temperature — Baseline', '°C', 2).slice(0, 3)),
       footnotes: 'Baseline = last non-missing value before first dose.\n' + srcLine('ADVS', 't_14_3_7_vs.sas'),
-      program: 't_14_3_7_vs.sas', sapRef: 'SAP §12.4 Vital signs', templateKey: 'Vital signs' }); },
+      program: 't_14_3_7_vs.sas', sapRef: 'SAP 12.4 Vital signs', templateKey: 'Vital signs' }); },
     '14.3.8': function () { return lay({ title: 'Concomitant medications by ATC class and preferred name', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any concomitant medication', NP), L(0, 'Analgesics', NP), L(1, 'Paracetamol', NP), L(1, 'Oxycodone', NP), L(0, 'Corticosteroids for systemic use', NP),
         L(1, 'Dexamethasone', NP), L(1, 'Prednisone', NP), L(0, 'Antiemetics and antinauseants', NP), L(1, 'Ondansetron', NP)],
       footnotes: 'WHO Drug Global B3 Mar 2026. Concomitant = taken on or after first dose. Subjects counted once per ATC class and preferred name.\n' + srcLine('ADSL, ADCM (ONTRTFL = "Y")', 'tfl_14_3_8_cm.sas'),
-      program: 'tfl_14_3_8_cm.sas', sapRef: 'SAP §12.5 Concomitant medications', templateKey: 'Con meds' }); }
+      program: 'tfl_14_3_8_cm.sas', sapRef: 'SAP 12.5 Concomitant medications', templateKey: 'Con meds' }); }
   };
   var SHELL_SPEC = {
     '14.1.1': ['ADSL', 'USUBJID, TRT01A, AGE, AGEGR1, SEX, RACE, ETHNIC, WEIGHTBL, ECOGBL', 'Parameter order per SAP; TRT01AN'],
@@ -2643,7 +2643,7 @@
     if (!sec) {
       var max = 0;
       list.forEach(function (x) { var m = /14\.(\d+)/.exec(x.ref || ''); if (m) max = Math.max(max, parseInt(m[1], 10)); });
-      nextRef = 'SAP §14.' + (max + 1);
+      nextRef = 'SAP 14.' + (max + 1);
     }
     document.getElementById('secRef').value = sec ? (sec.ref || '') : nextRef;
     var others = list.filter(function (x) { return x !== sec; });
@@ -3475,6 +3475,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow3i"></script>
+<script src="shared-chrome.js?v=flow3j"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 
   function read() {
     var s = null;
-    try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { s = null; }
+    try { var raw = localStorage.getItem(KEY) || 'null'; if (raw.indexOf('\u00a7') >= 0) raw = raw.replace(/SAP \u00a7/g, 'SAP ').replace(/\u00a7\s*/g, ''); s = JSON.parse(raw); } catch (e) { s = null; }
     s = s || {};
     s.shells = s.shells || {};      /* studyId -> shells[] */
     s.records = s.records || [];    /* tracker records created from Mock Shells */
@@ -181,10 +181,10 @@
 
   /* Shared SAP sections (Mock Shells TOC groups == Tracker groups) */
   var SEED_SECTIONS = [
-    { id: 'Demographics', name: 'Demographics', ref: 'SAP §14.1' },
-    { id: 'Efficacy', name: 'Efficacy', ref: 'SAP §14.2' },
-    { id: 'Safety TLFs', name: 'Safety TLFs', ref: 'SAP §14.3' },
-    { id: 'Labs', name: 'Labs', ref: 'SAP §14.3.5' }
+    { id: 'Demographics', name: 'Demographics', ref: 'SAP 14.1' },
+    { id: 'Efficacy', name: 'Efficacy', ref: 'SAP 14.2' },
+    { id: 'Safety TLFs', name: 'Safety TLFs', ref: 'SAP 14.3' },
+    { id: 'Labs', name: 'Labs', ref: 'SAP 14.3.5' }
   ];
   function getSections() {
     var s = read();

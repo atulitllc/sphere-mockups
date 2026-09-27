@@ -6609,3 +6609,8 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 .artifact-row .role-chip.is-stage { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--blue-border); }
 .artifact-row .role-chip.is-stage b { color: var(--accent); }
 .artifact-row .role-chip.is-stage .role-nm { color: var(--text); font-weight: 600; }
+/* SAP section modal: full-width fields (flow3j) */
+#sectionModal .section-form .meta-field { display: flex; flex-direction: column; align-items: stretch; width: 100%; }
+#sectionModal .section-form .meta-field > input,
+#sectionModal .section-form .meta-field > select { display: block; width: 100%; max-width: none; min-width: 0; height: 38px; box-sizing: border-box; flex: none; }
+#sectionModal .section-field-label { display: block; }
