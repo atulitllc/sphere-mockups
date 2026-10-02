@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact — AmiSoft Solutions</title>
+  <meta name="description" content="Start a partner conversation with AmiSoft Solutions. Email partnerships@amisoftsolutions.com." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#1B4F40"/>
+          <path fill="#fff" d="M16 7.6 23.6 24h-2.5l-1.55-3.5h-7.1L10.9 24H8.4L16 7.6Zm-2.7 10.7h5.4L16 12.7l-2.7 5.6Z"/>
+        </svg>
+        <span class="brand-name">AmiSoft</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Menu</span>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13"/>
+        </svg>
+      </button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary">
+        <a href="solutions.html">Solutions</a>
+        <a href="partners.html">For partners</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" aria-current="page">Contact</a>
+        <a class="btn btn-primary btn-sm" href="contact.html">Talk with us</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="page-hero">
+      <div class="container">
+        <p class="crumb"><a href="index.html">Home</a> / Contact</p>
+        <p class="eyebrow">Partnerships</p>
+        <h1>Start a partner conversation.</h1>
+        <p class="lead">Tell us the regulated setting, how you expect to work, and what the client already owns. A confidential client name can wait. We will say plainly where AmiSoft fits — and where it does not.</p>
+
+        <div class="contact-layout">
+          <form id="partner-form" class="form-card" action="mailto:partnerships@amisoftsolutions.com" method="post" enctype="text/plain" novalidate>
+            <div id="form-status" class="form-status" role="status" hidden></div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="name">Your name <span class="req">*</span></label>
+                <input id="name" name="name" type="text" autocomplete="name" required />
+                <p class="field-error" id="name-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="firm">Firm <span class="req">*</span></label>
+                <input id="firm" name="firm" type="text" autocomplete="organization" required />
+                <p class="field-error" id="firm-error" hidden></p>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="email">Work email <span class="req">*</span></label>
+                <input id="email" name="email" type="email" autocomplete="email" required />
+                <p class="field-error" id="email-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="role">Role</label>
+                <input id="role" name="role" type="text" autocomplete="organization-title" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="setting">Regulated setting <span class="req">*</span></label>
+                <select id="setting" name="setting" required>
+                  <option value="">Select a setting</option>
+                  <option>Clinical</option>
+                  <option>Quality</option>
+                  <option>R&amp;D</option>
+                  <option>Manufacturing informatics</option>
+                  <option>More than one of these</option>
+                  <option>Not sure yet</option>
+                </select>
+                <p class="field-error" id="setting-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="motion">How you expect to work <span class="req">*</span></label>
+                <select id="motion" name="motion" required>
+                  <option value="">Select a motion</option>
+                  <option>Resell</option>
+                  <option>Implement</option>
+                  <option>Staff a joint delivery team</option>
+                  <option>Not sure yet</option>
+                </select>
+                <p class="field-error" id="motion-error" hidden></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="owns">What the client already owns that should not be replaced</label>
+              <textarea id="owns" name="owns" rows="3"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="due">When a proposal or workshop is due</label>
+                <input id="due" name="due" type="text" placeholder="A date, or a window" />
+              </div>
+              <div class="field"></div>
+            </div>
+
+            <div class="field">
+              <label for="notes">The computing and systems frame <span class="req">*</span></label>
+              <textarea id="notes" name="notes" rows="5" required placeholder="Two or three specifics are enough."></textarea>
+              <p class="field-error" id="notes-error" hidden></p>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Send to partnerships</button>
+              <p class="form-note">Opens your email application to partnerships@amisoftsolutions.com. This page does not store the note.</p>
+            </div>
+          </form>
+
+          <div>
+            <aside class="aside-card">
+              <h2>Write directly</h2>
+              <p>If a form is the long way around, send the same context by email.</p>
+              <a class="email" href="mailto:partnerships@amisoftsolutions.com">partnerships@amisoftsolutions.com</a>
+            </aside>
+            <aside class="aside-card">
+              <h2>What helps us answer</h2>
+              <ol class="aside-steps">
+                <li><strong>01</strong><span>The regulated setting: clinical, quality, R&amp;D, or manufacturing informatics.</span></li>
+                <li><strong>02</strong><span>Whether you expect to resell, implement, or staff a joint delivery team.</span></li>
+                <li><strong>03</strong><span>What the client already owns that should not be replaced.</span></li>
+                <li><strong>04</strong><span>The date a proposal or workshop has to be ready.</span></li>
+              </ol>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="8" fill="#1B4F40"/>
+            <path fill="#fff" d="M16 7.6 23.6 24h-2.5l-1.55-3.5h-7.1L10.9 24H8.4L16 7.6Zm-2.7 10.7h5.4L16 12.7l-2.7 5.6Z"/>
+          </svg>
+          <span class="brand-name">AmiSoft</span>
+        </a>
+        <p>GxP-ready computing and data platforms for firms that implement in life sciences.</p>
+      </div>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="solutions.html">Solutions</a></li>
+          <li><a href="partners.html">For partners</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Work with us</h2>
+        <ul>
+          <li><a href="partners.html#enablement">Enablement</a></li>
+          <li><a href="partners.html#cosell">Co-sell</a></li>
+          <li><a href="partners.html#kits">Implementation kits</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h2>Contact</h2>
+        <a href="mailto:partnerships@amisoftsolutions.com">partnerships@amisoftsolutions.com</a>
+        <span>amisoftsolutions.com</span>
+      </div>
+    </div>
+    <div class="container footer-base">
+      <p>© 2026 AmiSoft Solutions. All rights reserved.</p>
+      <p>Qualification support is delivery guidance for partner teams. It is not legal, regulatory, or quality sign-off.</p>
+    </div>
+  </footer>
+  <script src="js/site.js"></script>
+</body>
+</html>
