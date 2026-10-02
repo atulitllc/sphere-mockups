@@ -875,6 +875,7 @@ textarea:focus {
 }
 
 .site-footer .brand-name { color: #fff; }
+.site-footer .brand-mark rect { fill: #2f6f5c; }
 
 .site-footer h2 {
   font-family: var(--sans);
