@@ -15,10 +15,3 @@ Interactive UI previews for **SPHERE**. Colored left-nav chrome (default **blue*
 GitHub Pages: https://atulitllc.github.io/sphere-mockups/
 
 Brand: sidebar uses Remy **on-navy** nav lockup (mark + wordmark) for contrast on colored chrome; inverse mark when collapsed. Full expansion lockup is docs/marketing only.
-
-## AmiSoft Solutions (separate)
-
-Partner marketing mockup for consulting and systems-integration firms that sell into life sciences. It is not a SPHERE UI mockup and does not share SPHERE chrome or brand assets.
-
-- Source: `amisoftsolutions/`
-- GitHub Pages: https://atulitllc.github.io/sphere-mockups/amisoftsolutions/
