@@ -1958,7 +1958,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .artifact-meta {
   display: grid;
   /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(120px, 1.2fr) 70px 86px 120px 70px 128px 84px 188px;
+  grid-template-columns: minmax(120px, 1.2fr) 70px 86px 120px 70px 128px 188px;
   gap: 8px 12px;
   align-items: center;
   width: 100%;
@@ -1970,10 +1970,10 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 @media (max-width: 1200px) {
-  /* Keep all 8 Tracker columns; scroll horizontally instead of crushing Actions */
+  /* Keep Tracker columns; scroll horizontally instead of crushing Actions */
   .artifact-meta {
-    grid-template-columns: minmax(110px, 1.1fr) 66px 80px 110px 66px 122px 80px 188px;
-    min-width: 912px;
+    grid-template-columns: minmax(110px, 1.1fr) 66px 80px 110px 66px 122px 188px;
+    min-width: 820px;
   }
   .artifact-meta .meta-cell.actions-cell .row-actions,
   .artifact-meta .meta-cell:has(.row-actions) .row-actions {
@@ -1982,8 +1982,8 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 @media (max-width: 720px) {
   .artifact-meta {
-    grid-template-columns: minmax(100px, 1fr) 60px 72px 96px 60px 116px 72px 188px;
-    min-width: 852px;
+    grid-template-columns: minmax(100px, 1fr) 60px 72px 96px 60px 116px 188px;
+    min-width: 768px;
   }
 }
 
@@ -6421,7 +6421,7 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .layout-card-path { overflow-wrap: anywhere; white-space: normal; }
 .new-study-grid .new-study-preview { display: grid; grid-template-columns: minmax(0, 1fr); }
 
-/* Tracker row layout v2 (flow3): [title + tags / roles] | Type Status Assigned Shell Job Programs Files Actions */
+/* Tracker row layout v2 (flow3): [title + tags / roles] | Programs Type Status Assigned Shell Job Actions */
 .artifact-row .artifact-main,
 .tracker-col-head .artifact-main {
   display: grid;
@@ -6631,7 +6631,47 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   display: flex;
   flex-direction: column;
 }
-.rtf-modal .modal-body { overflow: auto; }
+.rtf-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+.artifact-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.artifact-tab {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.artifact-tab[aria-selected="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.artifact-pane { min-height: 240px; }
+.artifact-pane .run-log-pre {
+  max-height: min(58vh, 560px);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.artifact-miss {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 13.5px;
+}
 .rtf-preview {
   background: #fff;
   color: #161616;
