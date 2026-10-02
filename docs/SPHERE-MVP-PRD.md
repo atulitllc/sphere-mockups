@@ -72,7 +72,7 @@ SPHERE is built for four groups in biometrics (the part of a pharma company that
 | Persona (demo name) | Role | What they do in SPHERE | What they need most |
 |------|-----|--------|------|
 | **Jordan Patel**, lead statistical programmer | Statistical programming | Owns a study's programming; assigns work; writes production programs; unlocks shells when needed | One view of all outputs, who owns each, and what stage it is in; fast program setup |
-| **Priya Shah**, QC programmer | Statistical programming | Writes independent QC (double) programs; compares results; passes or returns outputs | Clear list of what is waiting for QC; read-only access to production code; one-click "Both" runs |
+| **Priya Shah**, QC programmer | Statistical programming | Writes independent QC (double) programs; compares results; passes or returns outputs | Clear list of what is waiting for QC; read-only access to production code; one-click "Both" runs (production program, then QC program) |
 | **Riley Nguyen / Dana Brooks**, biostatistician | Biostatistics | Agrees shells with the SAP; reviews results; approves release to medical writing | Shells that match the SAP; a simple "Stats approved" step; history of every change |
 | **Mei Chen**, reviewer / study lead | Programming or biostatistics lead | Locks shells and datasets after sign-off; watches progress | Reliable locks; progress by SAP section; audit timeline |
 | **Avery Lopez**, medical writer | Medical writing | Receives released outputs for the clinical study report (CSR) | Knows exactly which outputs are released and final; PDF/Word packages in the right order |
@@ -358,7 +358,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 **User stories**
 
 - As a lead programmer, I want every output, its program, its stage and its people on one board, grouped by SAP section.
-- As a QC programmer, I want to see only my assignments and run QC then production in one go.
+- As a QC programmer, I want to see only my assignments and run the production program, then the QC program, in one go.
 - As a statistician, I want to approve and release outputs to medical writing with a clear record.
 - As a medical writer, I want to know exactly which outputs are released.
 
@@ -376,6 +376,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-012** (MVP) Status column shows only a colour-coded status pill. Header counters show how many records are in each status.
 - **PRD-TRK-013** (MVP) The former "Owner" is called **Assigned To** everywhere (column, filter "All assignees", Edit form, tooltips, History).
 - **PRD-TRK-014** (MVP) Filters: search by ID or title, type, status, tag, SAP section, Assigned To. Light zebra striping aids reading of long titles.
+- **PRD-TRK-015** (MVP) The **Shell** cell links to Mock Shells when the row has a real shell state (Locked, Draft, Synced, and any other state). The link opens that output's shell (`mock-shells.html?shell=` plus the output ID). Blank and **n/a** stay plain text.
 
 **Requirements — roles**
 
@@ -397,14 +398,14 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 
 - **PRD-TRK-040** (MVP) Toolbar buttons with labels: **My Assignments, Custom Lists, Import programs, Export CSV**. No separators, equal size. **Solid blue means "on/active" only** (My Assignments filtering; Custom Lists panel open), announced to screen readers as pressed. Action buttons stay neutral.
 - **PRD-TRK-041** (MVP) Delete and Generate PDF Package icons in the header bar are enabled only when rows are selected.
-- **PRD-TRK-042** (MVP) The **sticky selection bar** appears when rows are selected and stays pinned under the header while scrolling. It shows the count and offers: workflow moves (smart: only actions valid for the whole selection), **Run Prod** with a menu (Production programs, QC programs only, Both (QC then Prod)), **Assign roles**, Generate PDF Package, tags, Assign SAP section, Add to list, Clear.
+- **PRD-TRK-042** (MVP) The **sticky selection bar** appears when rows are selected and stays pinned under the header while scrolling. It shows the count and offers: workflow moves (smart: only actions valid for the whole selection), **Run Prod** with a menu (Production programs, QC programs only, Both (Prod then QC)), **Assign roles**, Generate PDF Package, tags, Assign SAP section, Add to list, Clear.
 - **PRD-TRK-043** (MVP) **Custom Lists**: named, ordered lists of programs (drag to reorder several at once) used for "Run list" and for the order of PDF packages.
 - **PRD-TRK-044** (MVP) Export CSV of the current (filtered) board.
 
 **Requirements — running programs**
 
 - **PRD-TRK-050** (MVP) Run from a row (Execute: Production, QC, or Both) or from the selection bar. Runs go to the customer's own SAS or R servers. (Mockups: simulated runs, "no compute engine attached".)
-- **PRD-TRK-051** (MVP) **Both** runs QC first, then production.
+- **PRD-TRK-051** (MVP) **Both** runs the production program first, then the QC program. The menu label is **Both (Prod then QC)**. Toasts, job text, background-job lines, log tabs, and run summaries use the same order (production, then QC).
 - **PRD-TRK-052** (MVP) A **background queue** runs a limited number of programs at once (demo: 3) and queues the rest with their position. Work continues while runs proceed. A Background jobs panel shows running, queued and finished jobs with SAS/R labels and "Clear finished".
 - **PRD-TRK-053** (MVP) The Job column shows Queued, Running (with elapsed time), Done, or Done with warnings. Programs already queued or running are not queued twice; rows without a program or in Frozen are skipped with a message ("2 skipped").
 - **PRD-TRK-054** (MVP) **Logs** open from the job; the viewer scrolls to the first WARNING or ERROR, wraps long lines, and offers Copy log. Logs are stored in the study `logs/` folder.
@@ -413,12 +414,13 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 **Requirements — history**
 
 - **PRD-TRK-060** (MVP) Per-row **History** popup with tabs: **Log** (workflow timeline with stepper and date/time of each stage, role changes, runs) and **Versions** (list of program versions, side-by-side view, difference against current, "Restore as current" in editable stages).
+- **PRD-TRK-061** (MVP) An **RTF** icon sits with History and Edit. It opens the row's RTF output as HTML in the browser. The mockup ships a few demo TLF files (a table, a listing, and a figure) and converts them in the page. Dataset rows have no TLF RTF.
 
 **Acceptance criteria**
 
 - Given a record In dev with PR J. Patel and QC P. Shah, when J. Patel chooses Send to QC and confirms, then the pill shows QC, the QC chip is highlighted with "Currently with QC · P. Shah", production code becomes read-only, and History shows the move with time and user.
 - Given record status is Released to MW, when I open the status stepper, then no actions are offered and all four steps show complete.
-- Given I select 5 rows and choose Both, then each gets a QC job followed by a production job; at most the configured number run at once; the rest show "Queued · n".
+- Given I select 5 rows and choose Both (Prod then QC), then each production program runs before its QC program; toasts and the live job line say Prod then QC; at most the configured number run at once; the rest show "Queued · n".
 - Given a finished run with warnings, when I open its log, then the viewer is scrolled to the first WARNING.
 - Given I turn on My Assignments, then the button is solid blue, a count shows, and only my records are listed; × clears it.
 - Given I bulk-assign QC = P. Shah to 10 rows with Stats left empty, then all 10 show P. Shah as QC and their Stats roles are unchanged.
@@ -551,7 +553,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 8. **Assign roles.** The lead sets PR, QC, Stats and MW for each record, one by one in the Roles popup or in bulk with "Assign roles" (TRK-022, TRK-023). People find their work with **My Assignments** (TRK-024).
 9. **Develop.** The production programmer edits the program (In dev), runs it on the customer's SAS or R server, reads the log, and saves versions (TRK-004, TRK-050 to 055).
 10. **Send to QC.** The production programmer chooses **Send to QC**. Production code becomes read-only; the QC chip is highlighted (TRK-021, TRK-032, TRK-034).
-11. **QC.** The QC programmer completes `qc-<program>` and runs **Both (QC then Prod)** to compare results. If there are differences, they choose **Return to Revise** (back to step 9, program editable again). If clean, they choose **QC passed · send to Stats**.
+11. **QC.** The QC programmer completes `qc-<program>` and runs **Both (Prod then QC)** to compare results. If there are differences, they choose **Return to Revise** (back to step 9, program editable again). If clean, they choose **QC passed · send to Stats**.
 12. **Statistical review.** The statistician reviews the output. If changes are needed, **Return to Revise**. Otherwise **Stats approved · release to MW**.
 13. **Released to MW.** The record reaches its final stage: no further actions, green "Released" look, MW chip highlighted. The medical writer uses the output (TRK-031).
 14. **Package.** The lead or medical writer selects locked shells and released outputs (or a custom list) and builds a PDF/Word package (PKG-001 to 005).
@@ -810,6 +812,7 @@ Rules:
 | 2026-09-27 | Validation: GAMP 5 Category 4; Part 11/Annex 11 support; automated OQ evidence; customer-owned UAT. |
 | 2026-09-27 | Operating constraint: no paid tools until the first paying customer. |
 | 2026-09-27 | PRD v2.0 consolidated rewrite replaces the appended living document. |
+| 2026-10-02 | Both runs execute the production (primary) program first, then the QC program. |
 
 # 16. Glossary
 
@@ -820,7 +823,7 @@ Rules:
 | Annex 11 | EU GMP Annex 11: European rules for computerised systems in regulated work. |
 | Assigned To | The person responsible for a Tracker record overall (formerly "Owner"). |
 | Audit trail | A permanent, time-stamped record of who did what and when. |
-| Both run | Running the QC program and then the production program in one request. |
+| Both run | Running the production program and then the QC program in one request. |
 | CDISC | Clinical Data Interchange Standards Consortium: sets data standards used for submissions. |
 | Compound | The drug or product being studied; may contain several protocols. |
 | Copilot | SPHERE's suggest-only assistant; a person must accept or reject every suggestion. |
