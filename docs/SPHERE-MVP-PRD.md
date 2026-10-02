@@ -372,7 +372,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 **Requirements — board layout**
 
 - **PRD-TRK-010** (MVP) Records are grouped by **SAP section** (shared list, in shared order, showing the SAP reference), collapsible, each with a count and "Select all". Empty sections show "No outputs yet". "+ New SAP section" under the board writes to the shared list.
-- **PRD-TRK-011** (MVP) Row layout: first cell has output ID + title (+ tags) on line 1 and **role chips** on line 2. Columns: **Programs** (production on top, `QC qc-…` muted below; both open the editor), Type, Status, **Assigned To**, Shell, Job, Files, Actions. Actions stay visible on the right when the board scrolls sideways.
+- **PRD-TRK-011** (MVP) Row layout: first cell has output ID + title (+ tags) on line 1 and **role chips** on line 2. Columns: **Programs** (production on top, `QC qc-…` muted below; both open the editor), Type, Status, **Assigned To**, Shell, Job, Actions. There is no Files column. Actions stay visible on the right when the board scrolls sideways.
 - **PRD-TRK-012** (MVP) Status column shows only a colour-coded status pill. Header counters show how many records are in each status.
 - **PRD-TRK-013** (MVP) The former "Owner" is called **Assigned To** everywhere (column, filter "All assignees", Edit form, tooltips, History).
 - **PRD-TRK-014** (MVP) Filters: search by ID or title, type, status, tag, SAP section, Assigned To. Light zebra striping aids reading of long titles.
@@ -414,7 +414,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 **Requirements — history**
 
 - **PRD-TRK-060** (MVP) Per-row **History** popup with tabs: **Log** (workflow timeline with stepper and date/time of each stage, role changes, runs) and **Versions** (list of program versions, side-by-side view, difference against current, "Restore as current" in editable stages).
-- **PRD-TRK-061** (MVP) An **RTF** icon sits with History and Edit. It opens the row's RTF output as HTML in the browser. The mockup ships a few demo TLF files (a table, a listing, and a figure) and converts them in the page. Dataset rows have no TLF RTF.
+- **PRD-TRK-061** (MVP) The icon next to History opens an **artifact viewer** for that record. Tabs, in production-then-QC order: **SAS program (prod)** or **R program (prod)** (the language of the program), **Log (prod)**, **Output**, **QC program** (`qc-<production program>`), **QC log**. Output for tables, listings, and figures is RTF rendered as HTML. The mockup ships demo TLF files (a table, a listing, and a figure). Dataset rows have no TLF RTF; the Output tab says so and, when a program exists, shows the analysis dataset under `data/adam/`. Program and log tabs still open. Logs use the same simulated SAS/R text as the job log.
 
 **Acceptance criteria**
 
@@ -422,6 +422,8 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - Given record status is Released to MW, when I open the status stepper, then no actions are offered and all four steps show complete.
 - Given I select 5 rows and choose Both (Prod then QC), then each production program runs before its QC program; toasts and the live job line say Prod then QC; at most the configured number run at once; the rest show "Queued · n".
 - Given a finished run with warnings, when I open its log, then the viewer is scrolled to the first WARNING.
+- Given I open artifacts on a table, listing, or figure, then the tabs are the production program, production log, Output (RTF as HTML), QC program, and QC log, in that order.
+- Given I open artifacts on a dataset, then Output says there is no TLF RTF, and the production program, production log, QC program, and QC log tabs still open when a program is on the record.
 - Given I turn on My Assignments, then the button is solid blue, a count shows, and only my records are listed; × clears it.
 - Given I bulk-assign QC = P. Shah to 10 rows with Stats left empty, then all 10 show P. Shah as QC and their Stats roles are unchanged.
 
@@ -813,6 +815,7 @@ Rules:
 | 2026-09-27 | Operating constraint: no paid tools until the first paying customer. |
 | 2026-09-27 | PRD v2.0 consolidated rewrite replaces the appended living document. |
 | 2026-10-02 | Both runs execute the production (primary) program first, then the QC program. |
+| 2026-10-02 | Tracker has no Files column. The icon next to History opens a multi-tab artifact viewer (production program, production log, output, QC program, QC log). |
 
 # 16. Glossary
 
