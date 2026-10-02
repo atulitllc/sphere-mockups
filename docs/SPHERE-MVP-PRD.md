@@ -367,12 +367,12 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-001** (MVP) Records are created from Final shells (MS-040) or by **Import programs**, which lists R and SAS files in the study `programs/` folder and creates records for the ones selected. Records can also be added and edited in an Edit form (title, program file name, type, status, SAP section, shell status, tags, Assigned To).
 - **PRD-TRK-002** (MVP) Every record has a production program and a **QC program named `qc-<production program>`** (for example `t_14_3_1_ae.sas` → `qc-t_14_3_1_ae.sas`).
 - **PRD-TRK-003** (MVP) An **automatic SAS program header** is generated for both programs: Program, Study/Protocol, Output ID, Title, Population, Source data, Key variables, Sort order, Output file, Mock shell reference and version, Author, QC programmer, Date created, SAS version, and a Modification history table; followed by a starter macro body based on the shell layout. The QC header is marked **QC / VALIDATION PROGRAM** with purpose (independent double programming), production program reference and a PROC COMPARE starter.
-- **PRD-TRK-004** (MVP) Clicking a program name opens the editor with **Production** and **QC** tabs. Production is editable in In dev and Revise; QC is editable up to and including QC; every other stage opens read-only. Each save creates a version and a History entry.
+- **PRD-TRK-004** (MVP) Clicking the **production program name** opens a viewer scoped to production with tabs **Program · Log · RTF**. Clicking the **QC program name** opens the same pattern for QC. The Program tab keeps edit/view + save (Production editable in In dev and Revise; QC editable up to and including QC; every other stage read-only). Each save creates a version and a History entry. Log reuses the simulated run log; RTF shows TLF output as HTML (datasets and QC note when there is no TLF RTF).
 
 **Requirements — board layout**
 
 - **PRD-TRK-010** (MVP) Records are grouped by **SAP section** (shared list, in shared order, showing the SAP reference), collapsible, each with a count and "Select all". Empty sections show "No outputs yet". "+ New SAP section" under the board writes to the shared list.
-- **PRD-TRK-011** (MVP) Row layout: first cell has output ID + title (+ tags) on line 1 and **role chips** on line 2. Columns: **Programs** (production on top, `QC qc-…` muted below; both open the editor), Type, Status, **Assigned To**, Shell, Job, Actions. There is no Files column. Actions stay visible on the right when the board scrolls sideways.
+- **PRD-TRK-011** (MVP) Row layout: first cell has output ID + title (+ tags) on line 1 and **role chips** on line 2. Columns: **Programs** (production on top, `QC qc-…` muted below; each opens a scoped Program · Log · RTF viewer), Type, Status, **Assigned To**, Shell, Job, Actions. There is no Files column. Actions stay visible on the right when the board scrolls sideways.
 - **PRD-TRK-012** (MVP) Status column shows only a colour-coded status pill. Header counters show how many records are in each status.
 - **PRD-TRK-013** (MVP) The former "Owner" is called **Assigned To** everywhere (column, filter "All assignees", Edit form, tooltips, History).
 - **PRD-TRK-014** (MVP) Filters: search by ID or title, type, status, tag, SAP section, Assigned To. Light zebra striping aids reading of long titles.
@@ -414,7 +414,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 **Requirements — history**
 
 - **PRD-TRK-060** (MVP) Per-row **History** popup with tabs: **Log** (workflow timeline with stepper and date/time of each stage, role changes, runs) and **Versions** (list of program versions, side-by-side view, difference against current, "Restore as current" in editable stages).
-- **PRD-TRK-061** (MVP) The icon next to History opens an **artifact viewer** for that record. Tabs, in production-then-QC order: **SAS program (prod)** or **R program (prod)** (the language of the program), **Log (prod)**, **Output**, **QC program** (`qc-<production program>`), **QC log**. Output for tables, listings, and figures is RTF rendered as HTML. The mockup ships demo TLF files (a table, a listing, and a figure). Dataset rows have no TLF RTF; the Output tab says so and, when a program exists, shows the analysis dataset under `data/adam/`. Program and log tabs still open. Logs use the same simulated SAS/R text as the job log.
+- **PRD-TRK-061** (MVP) Program names open a **scoped artifact viewer** (not an Actions icon). Production name → **Program · Log · RTF** for prod; QC name → the same for QC. Default tab is Program. Title/subtitle name the file and side (Prod vs QC). TLF RTF is rendered as HTML (demo table/listing/figure files ship with the mockup). Dataset rows and the QC RTF tab show a clear empty state when there is no TLF RTF. Logs use the same simulated SAS/R text as the job log. There is no single crowded viewer that dumps prod + QC + output together.
 
 **Acceptance criteria**
 
@@ -815,7 +815,7 @@ Rules:
 | 2026-09-27 | Operating constraint: no paid tools until the first paying customer. |
 | 2026-09-27 | PRD v2.0 consolidated rewrite replaces the appended living document. |
 | 2026-10-02 | Both runs execute the production (primary) program first, then the QC program. |
-| 2026-10-02 | Tracker has no Files column. The icon next to History opens a multi-tab artifact viewer (production program, production log, output, QC program, QC log). |
+| 2026-10-02 | Tracker has no Files column. Program names open a scoped Program · Log · RTF viewer (Prod or QC); the crowded all-in-one artifacts icon was removed. |
 
 # 16. Glossary
 

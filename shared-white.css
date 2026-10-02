@@ -6662,6 +6662,21 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 .artifact-pane { min-height: 240px; }
+.artifact-pane .program-edit-code {
+  min-height: min(52vh, 520px);
+  max-height: min(58vh, 560px);
+  width: 100%;
+  box-sizing: border-box;
+}
+.rtf-modal .program-edit-foot {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 .artifact-pane .run-log-pre {
   max-height: min(58vh, 560px);
   white-space: pre-wrap;
