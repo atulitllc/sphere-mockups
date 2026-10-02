@@ -3436,7 +3436,25 @@
   /* boot */
   updateStudyChrome();
   renderCatalog();
-  selectShell('14.1.1', true);
+  (function bootFromShellQuery() {
+    var requested = '';
+    try { requested = new URLSearchParams(location.search).get('shell') || ''; } catch (e) {}
+    var id = (requested && findShell(requested)) ? requested : '14.1.1';
+    selectShell(id, true);
+    if (!requested || id !== requested || !catalogBody) return;
+    var tr = null;
+    var rows = catalogBody.querySelectorAll('tr[data-id]');
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].getAttribute('data-id') === requested) { tr = rows[i]; break; }
+    }
+    if (!tr) return;
+    var sec = tr.closest('.sap-section');
+    if (sec && sec.classList.contains('collapsed')) {
+      var head = sec.querySelector('.sap-section-head');
+      if (head) head.click();
+    }
+    tr.scrollIntoView({ block: 'center' });
+  })();
 
 
 })();

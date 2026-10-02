@@ -1958,7 +1958,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .artifact-meta {
   display: grid;
   /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(120px, 1.2fr) 70px 86px 120px 70px 128px 84px 152px;
+  grid-template-columns: minmax(120px, 1.2fr) 70px 86px 120px 70px 128px 84px 188px;
   gap: 8px 12px;
   align-items: center;
   width: 100%;
@@ -1972,8 +1972,8 @@ label .req::after { content: " *"; color: var(--danger); }
 @media (max-width: 1200px) {
   /* Keep all 8 Tracker columns; scroll horizontally instead of crushing Actions */
   .artifact-meta {
-    grid-template-columns: minmax(110px, 1.1fr) 66px 80px 110px 66px 122px 80px 152px;
-    min-width: 876px;
+    grid-template-columns: minmax(110px, 1.1fr) 66px 80px 110px 66px 122px 80px 188px;
+    min-width: 912px;
   }
   .artifact-meta .meta-cell.actions-cell .row-actions,
   .artifact-meta .meta-cell:has(.row-actions) .row-actions {
@@ -1982,8 +1982,8 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 @media (max-width: 720px) {
   .artifact-meta {
-    grid-template-columns: minmax(100px, 1fr) 60px 72px 96px 60px 116px 72px 152px;
-    min-width: 816px;
+    grid-template-columns: minmax(100px, 1fr) 60px 72px 96px 60px 116px 72px 188px;
+    min-width: 852px;
   }
 }
 
@@ -4737,6 +4737,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 
 
 .btn.icon-btn.row-history,
+.btn.icon-btn.row-rtf,
 .btn.icon-btn.row-people,
 .btn.icon-btn.row-exec,
 .btn.icon-btn.row-edit {
@@ -4754,17 +4755,20 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   opacity: 1 !important;
 }
 .btn.icon-btn.row-history,
+.btn.icon-btn.row-rtf,
 .btn.icon-btn.row-people,
 .btn.icon-btn.row-exec {
   color: var(--muted);
 }
 .btn.icon-btn.row-history:hover,
+.btn.icon-btn.row-rtf:hover,
 .btn.icon-btn.row-people:hover,
 .btn.icon-btn.row-exec:hover {
   color: var(--accent);
   background: var(--accent-soft);
 }
 .btn.icon-btn.row-history svg,
+.btn.icon-btn.row-rtf svg,
 .btn.icon-btn.row-people svg,
 .btn.icon-btn.row-exec svg,
 .btn.icon-btn.row-edit svg {
@@ -6206,6 +6210,12 @@ html[data-ui-zoom="125"] .artifact-row .artifact-meta {
 .artifact-row .artifact-meta .qc-program-name b { font-weight: 650; color: var(--muted-2); margin-right: 3px; font-size: 9.5px; letter-spacing: .03em; }
 .artifact-row .artifact-meta .program-open-link { color: var(--accent); text-decoration: none; cursor: pointer; }
 .artifact-row .artifact-meta .program-open-link:hover { text-decoration: underline; }
+a.shell-open-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.shell-open-link:hover { text-decoration: underline; }
 
 /* Tracker: status pill + mini stepper */
 .wf-pill {
@@ -6614,3 +6624,49 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 #sectionModal .section-form .meta-field > input,
 #sectionModal .section-form .meta-field > select { display: block; width: 100%; max-width: none; min-width: 0; height: 38px; box-sizing: border-box; flex: none; }
 #sectionModal .section-field-label { display: block; }
+
+.rtf-modal {
+  width: min(980px, 96vw);
+  max-height: min(92vh, 900px);
+  display: flex;
+  flex-direction: column;
+}
+.rtf-modal .modal-body { overflow: auto; }
+.rtf-preview {
+  background: #fff;
+  color: #161616;
+  border: 1px solid #d5d5d5;
+  padding: 28px 32px 36px;
+  min-height: 280px;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.rtf-preview.is-empty { background: var(--surface); color: var(--text); font-family: inherit; }
+.rtf-empty { margin: 0; color: var(--muted); font-family: inherit; }
+.rtf-preview .rtf-p { margin: 0 0 2px; }
+.rtf-preview .rtf-qc { text-align: center; }
+.rtf-preview .rtf-ql { text-align: left; }
+.rtf-preview .rtf-qr { text-align: right; }
+.rtf-preview .rtf-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 16px;
+  font-size: 12.5px;
+}
+.rtf-preview .rtf-table td {
+  padding: 3px 8px;
+  vertical-align: top;
+  border-bottom: 1px solid #e4e4e4;
+}
+.rtf-preview .rtf-table tr.rtf-head td {
+  border-top: 1.5px solid #111;
+  border-bottom: 1.5px solid #111;
+  font-weight: 600;
+}
+.rtf-preview img.rtf-pict {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 10px auto 6px;
+}
