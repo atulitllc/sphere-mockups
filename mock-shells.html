@@ -234,6 +234,9 @@
                       <option>In Review</option>
                       <option>Final</option>
                     </select>
+                    <button class="btn icon-btn" type="button" id="btnContentAudit" title="Content history" aria-label="Content history">
+                      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2.5L19.5 9H14V4.5zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16z"/></svg>
+                    </button>
                     <button class="btn icon-btn" type="button" id="btnStatusHistory" title="Status history" aria-label="Status history">
                       <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
                     </button>
@@ -484,6 +487,21 @@
     </div>
     <div class="modal-foot">
       <button class="btn" type="button" id="statusHistoryDone">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="contentAuditModal" hidden role="dialog" aria-modal="true" aria-labelledby="contentAuditTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="contentAuditTitle">Content history</h2>
+      <button class="btn ghost sm" type="button" id="contentAuditClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <ul id="contentAuditList" class="status-history-list"></ul>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="contentAuditDone">Close</button>
     </div>
   </div>
 </div>
@@ -1245,6 +1263,35 @@
     return findShell(studyStore[CURRENT_STUDY].selectedId);
   }
 
+  function pushContentAudit(sh, element, oldVal, newVal) {
+    if (!sh) return;
+    var a = String(oldVal == null ? '' : oldVal);
+    var b = String(newVal == null ? '' : newVal);
+    if (a === b) return;
+    sh.contentAudit = sh.contentAudit || [];
+    sh.contentAudit.push({
+      element: element,
+      oldValue: a,
+      newValue: b,
+      user: statusUser(),
+      at: new Date().toISOString()
+    });
+  }
+  function auditRowCells(sh, prevRows, nextRows) {
+    prevRows = prevRows || [];
+    nextRows = nextRows || [];
+    var max = Math.max(prevRows.length, nextRows.length);
+    for (var i = 0; i < max; i++) {
+      var a = prevRows[i] || { label: '', cells: [] };
+      var b = nextRows[i] || { label: '', cells: [] };
+      pushContentAudit(sh, 'Cell row ' + (i + 1) + ' label', a.label || '', b.label || '');
+      var cols = Math.max((a.cells || []).length, (b.cells || []).length);
+      for (var c = 0; c < cols; c++) {
+        pushContentAudit(sh, 'Cell row ' + (i + 1) + ' col ' + (c + 1), (a.cells && a.cells[c]) || '', (b.cells && b.cells[c]) || '');
+      }
+    }
+  }
+
   function persistEditorToSelected() {
     var sh = selectedShell();
     if (!sh) return;
@@ -1258,7 +1305,12 @@
     if (sh.status === 'In Review') sh.qc = 'In Review';
     else if (sh.status === 'Draft') sh.qc = null;
     var prevTitle = sh.title || '';
-    var prevFoot = (sh.layout && sh.layout.footnotes) || '';
+    var prevLay = sh.layout || {};
+    var prevFoot = prevLay.footnotes || '';
+    var prevNotes = prevLay.notes || '';
+    var prevSub = prevLay.subtitle || '';
+    var prevSap = sh.sap || '';
+    var prevRows = prevLay.rows || [];
     sh.title = state.title || sh.title;
     sh.custom = !!state.custom;
     sh.templateKey = state.templateKey || '';
@@ -1280,6 +1332,12 @@
     var changed = [];
     if ((sh.title || '') !== prevTitle) changed.push('title');
     if ((sh.layout.footnotes || '') !== prevFoot) changed.push('footnotes');
+    pushContentAudit(sh, 'Title', prevTitle, sh.title || '');
+    pushContentAudit(sh, 'Footnotes', prevFoot, sh.layout.footnotes || '');
+    pushContentAudit(sh, 'Programming notes', prevNotes, sh.layout.notes || '');
+    pushContentAudit(sh, 'Subsection', prevSub, sh.layout.subtitle || '');
+    if (sapEl && normalizeSap(sapEl.value) !== prevSap) pushContentAudit(sh, 'Subsection', prevSap, normalizeSap(sapEl.value));
+    auditRowCells(sh, prevRows, state.rows || []);
     if (changed.length && window.SPHERE_DEMO && isTrackerLinked(sh)) {
       try {
         SPHERE_DEMO.noteShellContent(CURRENT_STUDY, {
@@ -2933,6 +2991,17 @@
         : 'Shell ' + sh.number + ' set to ' + sh.status);
     }
   }
+  function openContentAudit() {
+    var sh = selectedShell();
+    var list = (sh && sh.contentAudit ? sh.contentAudit.slice() : []).reverse();
+    var host = document.getElementById('contentAuditList');
+    if (!host) return;
+    host.innerHTML = list.length ? list.map(function (e) {
+      return '<li><strong>' + escapeHtml(e.element) + '</strong> · ' + escapeHtml(e.user || '') + ' · ' + escapeHtml(e.at || '') +
+        '<div>From: ' + escapeHtml(e.oldValue) + '</div><div>To: ' + escapeHtml(e.newValue) + '</div></li>';
+    }).join('') : '<li>No content changes yet.</li>';
+    document.getElementById('contentAuditModal').hidden = false;
+  }
   function openStatusHistory() {
     var sh = selectedShell();
     var list = (sh && sh.statusHistory ? sh.statusHistory.slice() : []).reverse();
@@ -2947,6 +3016,14 @@
   (function wireStatusHistory() {
     var hist = document.getElementById('btnStatusHistory');
     if (hist) hist.addEventListener('click', openStatusHistory);
+    var auditBtn = document.getElementById('btnContentAudit');
+    if (auditBtn) auditBtn.addEventListener('click', openContentAudit);
+    ['contentAuditClose', 'contentAuditDone'].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) b.addEventListener('click', function () { document.getElementById('contentAuditModal').hidden = true; });
+    });
+    var am = document.getElementById('contentAuditModal');
+    if (am) am.addEventListener('click', function (e) { if (e.target === am) am.hidden = true; });
     ['statusHistoryClose', 'statusHistoryDone'].forEach(function (id) {
       var b = document.getElementById(id);
       if (b) b.addEventListener('click', function () { document.getElementById('statusHistoryModal').hidden = true; });
@@ -3555,6 +3632,8 @@
     function val(id) { var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
     if (!document.getElementById('smfNumber')) return;
     var oldVersion = sh.version;
+    var oldTitle = sh.title || '';
+    var oldFoot = (sh.layout && sh.layout.footnotes) || '';
     sh.number = val('smfNumber') || sh.number;
     sh.type = val('smfType') || sh.type;
     sh.title = val('smfTitle') || sh.title;
@@ -3575,6 +3654,8 @@
     sh.layout = sh.layout || {};
     sh.layout.title = sh.title;
     sh.layout.footnotes = (document.getElementById('smfFoot') || {}).value || '';
+    pushContentAudit(sh, 'Title', oldTitle, sh.title || '');
+    pushContentAudit(sh, 'Footnotes', oldFoot, sh.layout.footnotes || '');
     var setLabel = { Safety: 'Safety Analysis Set', ITT: 'Intent-to-Treat Analysis Set', mITT: 'Modified Intent-to-Treat Analysis Set', PP: 'Per-Protocol Analysis Set' }[sh.analysisSet];
     if (setLabel && (!sh.layout.subtitle || /Analysis Set|analysis set/.test(sh.layout.subtitle))) sh.layout.subtitle = setLabel;
     var v = val('smfVersion');
