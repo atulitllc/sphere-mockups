@@ -213,7 +213,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 
 **Requirements: New study**
 
-- **PRD-STU-010** (MVP) "+ New study" opens a form that follows the saved company study layout (see LAY). Fields: study name; Compound and Protocol (each pick existing or "+ New…"); Deliverable (folder level in layouts 2 and 3; existing deliverables for that protocol are disabled); description; deliverable type (Submission, DMC, Interim analysis, Regulatory, CSR, Exploratory, Other); phase; indication; lead programmer; statistician; sponsor; FPFV; LPLV; planned database lock.
+- **PRD-STU-010** (MVP) "+ New study" opens a form that follows the saved company study layout (see LAY). Fields: study name; Compound and Protocol (each pick existing or "+ New…"); Deliverable (folder level in layouts 2 and 3; existing deliverables for that protocol are disabled); description; deliverable type (Submission, DMC, Custom, CSR, Exploratory, Other); study type (Submission, DMC, Custom); phase; indication; lead programmer; statistician; sponsor; FPFV; LPLV; planned database lock.
 - **PRD-STU-011** (MVP) Compound is always captured. When it is not part of the folder path (layouts 1 and 2) it is labelled "metadata · not in path". In layout 1 the deliverable type is kept as metadata only.
 - **PRD-STU-012** (MVP) The form shows the layout in use ("Tenant layout: … · change in Admin"), a live folder path, and a tree preview of the folders that will be created (new folders highlighted).
 - **PRD-STU-013** (MVP) If the resulting folder already exists, Create is blocked with "This folder already exists: pick another protocol / deliverable". Exception: in layout 1, several deliverables of one protocol intentionally share one folder.

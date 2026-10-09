@@ -14,8 +14,8 @@
   var SEED = [
     { compound: 'XP-204', protocol: 'ONC-204-301', deliverable: 'CSR', name: 'Metastatic NSCLC', phase: '3', current: true, row: true, created: '2023-03-20', studyType: 'Submission', lead: 'Jordan Patel', statistician: 'Riley Nguyen', fpfv: '2023-04-12', lplv: '2025-11-30', dblock: '2026-03-15', status: 'Active', statusBadge: 'locked' },
     { compound: 'XP-118', protocol: 'ONC-118-402', deliverable: 'CSR', name: 'HER2+ breast cancer', phase: '2', row: true, created: '2024-01-10', studyType: 'DMC', lead: 'Alex Rivera', statistician: 'Dana Brooks', fpfv: '2024-01-08', status: 'Active', statusBadge: 'locked' },
-    { compound: 'XV-302', protocol: 'VAC-302-011', deliverable: 'CSR', name: 'RSV vaccine · adults 60 and older', phase: '3', row: true, created: '2024-05-02', studyType: 'Interim analysis', lead: 'Sam Okonkwo', statistician: 'Taylor Kim', fpfv: '2025-09-01', status: 'Startup', statusBadge: 'running' },
-    { compound: 'XH-220', protocol: 'HEM-220-015', deliverable: 'CSR', name: 'Relapsed / refractory AML', phase: '1/2', row: true, created: '2024-09-12', studyType: 'Regulatory', lead: 'Chris Nguyen', statistician: 'Priya Shah', fpfv: '2021-06-20', lplv: '2024-02-14', dblock: '2024-05-01', status: 'Closed', statusBadge: 'not-started' },
+    { compound: 'XV-302', protocol: 'VAC-302-011', deliverable: 'CSR', name: 'RSV vaccine · adults 60 and older', phase: '3', row: true, created: '2024-05-02', studyType: 'Custom', lead: 'Sam Okonkwo', statistician: 'Taylor Kim', fpfv: '2025-09-01', status: 'Startup', statusBadge: 'running' },
+    { compound: 'XH-220', protocol: 'HEM-220-015', deliverable: 'CSR', name: 'Relapsed / refractory AML', phase: '1/2', row: true, created: '2024-09-12', studyType: 'Submission', lead: 'Chris Nguyen', statistician: 'Priya Shah', fpfv: '2021-06-20', lplv: '2024-02-14', dblock: '2024-05-01', status: 'Closed', statusBadge: 'not-started' },
     { compound: 'XP-204', protocol: 'ONC-204-301', deliverable: 'DSUR', name: 'Metastatic NSCLC · DSUR 2026', phase: '3', created: '2026-07-15', studyType: 'Submission', lead: 'Jordan Patel', statistician: 'Riley Nguyen', status: 'Active', statusBadge: 'locked' },
     { compound: 'XP-204', protocol: 'ONC-204-302', deliverable: 'CSR', name: 'NSCLC 1L combination · CSR', phase: '3', created: '2026-08-01', studyType: 'Submission', lead: 'Jordan Patel', statistician: 'Riley Nguyen', status: 'Active', statusBadge: 'locked' },
     { compound: 'CMP-101', protocol: 'PRO-001', deliverable: 'CSR', name: 'CMP-101 Phase 2 · CSR', phase: '2', created: '2026-03-10', studyType: 'Submission', status: 'Active', statusBadge: 'locked' },
@@ -67,6 +67,8 @@
     r.forEach(function (e) {
       var nextName = tidyName(e.name);
       if (nextName !== e.name) { e.name = nextName; changed = true; }
+      var typeFix = { 'Interim analysis': 'Custom', 'Regulatory': 'Submission' };
+      if (typeFix[e.studyType]) { e.studyType = typeFix[e.studyType]; changed = true; }
       var seed = matchSeed(e);
       if (seed) {
         ['studyType', 'fpfv', 'lplv', 'dblock', 'status', 'statusBadge', 'phase'].forEach(function (k) {
@@ -223,7 +225,7 @@
       var crumb = document.querySelector('.crumb strong');
       if (crumb) crumb.textContent = label;
       var foot = document.querySelector('.nav-footer');
-      if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || 'Not set');
+      if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '-');
     }
     var qs = 'study=' + encodeURIComponent(studyId(e)) + '&path=' + encodeURIComponent(path);
     document.querySelectorAll('a[href^="files.html"]').forEach(function (a) {

@@ -585,14 +585,14 @@
     var p = parseWhen(raw);
     if (!p) {
       var s = String(raw || '').trim();
-      if (!s || s === '-') return '<span class="cell-empty">Not set</span>';
+      if (!s || s === '-') return '<span class="cell-empty">-</span>';
       return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
     }
     return withTime ? formatDateTime(p) : formatDate(p);
   }
   function sizeCell(size) {
     var s = String(size || '').trim();
-    if (!s || s === '-') return '<span class="cell-empty">n/a</span>';
+    if (!s || s === '-') return '<span class="cell-empty">-</span>';
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
   function render(folder) {

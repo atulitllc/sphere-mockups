@@ -19,7 +19,7 @@ Every SPHERE mockup page loads `shared-white.css`. Add new controls with the cla
 ## Tables, pills, fields
 
 - Sortable headers use `button.sort-h`. Put the arrow in `span.sort-arrow` on the active column only. Plain `th` labels stay uppercase so Size, Access, and the sortable columns match.
-- Empty values use `span.cell-empty` with the words `Not set`, or `n/a` when a value does not apply. Do not leave a bare hyphen.
+- Empty values use `span.cell-empty` around a hyphen (`-`). Do not write `Not set`.
 - Status pills use `badge` with `locked`, `running`, `not-started`, `draft`, or `review`.
 - Short tags use `tag-chip`.
 - Inputs and `select` elements inherit the shared field rules. Pages that already use `field-input` or `label.meta-field` should keep those.

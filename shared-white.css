@@ -465,7 +465,7 @@ button {
   margin: 0;
   cursor: pointer;
   border-radius: 0;
-  text-align: inherit;
+  text-align: center;
 }
 
 .app {
@@ -841,6 +841,7 @@ body.nav-collapsed {
 
 .content {
   padding: 22px 24px 48px;
+  min-width: 0;
 }
 
 .content.cols-2,
@@ -997,6 +998,13 @@ body.nav-collapsed {
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+}
+.table-panel .table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .table-panel .card-head,
@@ -1140,6 +1148,7 @@ tbody tr:last-child td { border-bottom: none; }
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-weight: 500;
   font-size: 13.5px;
@@ -5841,7 +5850,7 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 .tracker-col-head .artifact-meta,
 .artifact-row .artifact-meta {
-  min-width: 876px;
+  min-width: 0;
 }
 
 /* Bulk run split control */
@@ -6168,10 +6177,10 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 /* Long program names: ellipsis instead of spilling into the Type column (visible at larger UI zoom) */
 .artifact-row .artifact-meta .program-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* Largest UI zoom: tighter Tracker tracks so Actions stay on screen */
+/* Largest UI zoom: tighter Tracker tracks so Actions stay on screen. Job stays wide enough for "Completed". */
 html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta {
-  grid-template-columns: 72px 124px 76px 108px minmax(140px, 1.2fr) 128px;
+  grid-template-columns: 64px 96px 68px 176px minmax(124px, 1fr) 116px;
   column-gap: 8px;
   min-width: 0;
 }
@@ -6521,29 +6530,33 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .col-head-sub { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .col-head-sub::before { content: '· '; }
 
-/* Six visible columns. Assigned To (nth-child 4) is display:none and must not consume a track.
-   Fixed tracks are in visual order: Type, Status, Shell, Job, Programs, Actions. */
+/* Six visible columns on one row: Type, Status, Shell, Job, Programs, Actions.
+   Assigned To (nth-child 4) is display:none and does not take a track.
+   Do not set grid-column to a later column and then an earlier one. Sparse
+   auto-placement will not move backward, so the next cell wraps to row 2. */
 .tracker-col-head .artifact-meta,
 .artifact-row .artifact-meta {
-  grid-template-columns: 78px 136px 84px 118px minmax(156px, 1.3fr) 136px;
+  grid-template-columns: 68px 104px 72px 176px minmax(136px, 1.15fr) 124px;
   column-gap: 10px;
+  align-items: center;
   min-width: 0;
 }
 html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta,
 html[data-ui-zoom="150"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="150"] .artifact-row .artifact-meta {
-  grid-template-columns: 72px 124px 76px 108px minmax(140px, 1.2fr) 128px;
+  grid-template-columns: 64px 96px 68px 176px minmax(124px, 1fr) 116px;
   column-gap: 8px;
   min-width: 0;
 }
 html[data-ui-zoom="125"] .artifact-row .artifact-main, html[data-ui-zoom="125"] .tracker-col-head .artifact-main { grid-template-columns: minmax(180px, 1fr) auto; }
-.artifact-meta > .meta-cell:nth-child(1) { grid-column: 5; order: 0; } /* Programs */
-.artifact-meta > .meta-cell:nth-child(2) { grid-column: 1; order: 0; } /* Type */
-.artifact-meta > .meta-cell:nth-child(3) { grid-column: 2; order: 0; } /* Status */
-.artifact-meta > .meta-cell:nth-child(5) { grid-column: 3; order: 0; } /* Shell */
-.artifact-meta > .meta-cell:nth-child(6) { grid-column: 4; order: 0; } /* Job */
-.artifact-meta > .meta-cell:nth-child(7) { grid-column: 6; order: 0; } /* Actions */
+.artifact-meta > .meta-cell { grid-row: 1; align-self: center; }
+.artifact-meta > .meta-cell:nth-child(2) { order: 1; } /* Type */
+.artifact-meta > .meta-cell:nth-child(3) { order: 2; } /* Status */
+.artifact-meta > .meta-cell:nth-child(5) { order: 3; } /* Shell */
+.artifact-meta > .meta-cell:nth-child(6) { order: 4; } /* Job */
+.artifact-meta > .meta-cell:nth-child(1) { order: 5; } /* Programs */
+.artifact-meta > .meta-cell:nth-child(7) { order: 6; } /* Actions */
 .artifact-row .artifact-meta .program-name { font-size: 11px; line-height: 1.35; }
 .artifact-row .artifact-meta .qc-program-name { margin-top: 2px; }
 .artifact-row { padding-top: 11px; padding-bottom: 11px; }
@@ -6879,22 +6892,37 @@ tr.protocol-folder td { background: color-mix(in srgb, var(--accent) 4%, var(--s
 }
 #trackerListsBar #btnNewRecord.action-icon-btn svg { stroke: currentColor; }
 
-/* Tracker rows: one height, columns share the header tracks */
+/* Tracker rows: header and cells share one line, vertically centered */
 .tracker-board .artifact-row {
   align-items: center;
-  min-height: 68px;
 }
 .artifact-title-band .artifact-footnotes { display: none !important; }
 .job-cell .run-st {
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
   max-width: 100%;
 }
-.job-cell .run-st-line { max-width: 100%; }
-.job-cell .run-st-txt { overflow: visible; text-overflow: clip; }
-.job-cell .run-st-sub,
+.job-cell .run-st-line {
+  max-width: 100%;
+  white-space: nowrap;
+}
+.job-cell .run-st-txt {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+.job-cell .run-st-sub {
+  display: block;
+  padding-left: 21px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  line-height: 1.2;
+}
 .job-cell .run-bar { display: none; }
+.run-st.is-error .run-st-line { color: var(--danger); }
 
 /* Mock Shells toolbar: one control height, export menu */
 .shell-props { align-items: center; }
