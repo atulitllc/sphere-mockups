@@ -4020,7 +4020,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   font: inherit;
   color: inherit;
 }
-.modules-block .modules-toggle .sap-chevron {
+.modules-block .modules-toggle .sap-chevron,
+.activity-block .modules-toggle .sap-chevron {
   width: 16px;
   height: 16px;
   stroke: currentColor;
@@ -4028,7 +4029,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   stroke-width: 2;
   transition: transform .15s ease;
 }
-.modules-block.is-collapsed .modules-toggle .sap-chevron {
+.modules-block.is-collapsed .modules-toggle .sap-chevron,
+.activity-block.is-collapsed .modules-toggle .sap-chevron {
   transform: rotate(-90deg);
 }
 .modules-block.is-collapsed .module-grid {
