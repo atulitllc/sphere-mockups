@@ -656,7 +656,7 @@ body.nav-collapsed {
 .crumb { color: var(--muted); font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .crumb strong { color: var(--text); font-weight: 600; }
 
-.tenant-pill {
+.tenant-pill, .company-pill {
   background: var(--accent-soft);
   border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border));
   padding: 6px 12px;
@@ -1302,7 +1302,7 @@ label .req::after { content: " *"; color: var(--danger); }
 
   .top { padding: 10px 14px; }
   .content { padding: 16px 14px 40px; }
-  .tenant-pill { display: none; }
+  .tenant-pill, .company-pill { display: none; }
   .grid3 { grid-template-columns: 1fr; }
   .grid2 { grid-template-columns: 1fr; }
   .search-wrap input { width: 150px; }
