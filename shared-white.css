@@ -3013,6 +3013,9 @@ label .req::after { content: " *"; color: var(--danger); }
   flex-wrap: wrap;
   align-items: center;
 }
+.status-field { display: inline-flex; align-items: center; gap: 6px; }
+.status-history-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+.status-history-list li { font-size: 13px; }
 .shell-actions-icons {
   display: inline-flex;
   align-items: center;

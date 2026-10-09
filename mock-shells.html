@@ -228,12 +228,16 @@
                   </select>
                 </label>
                 <label class="meta-field">Status
-                  <select id="metaStatus">
-                    <option selected>Draft</option>
-                    <option>In review</option>
-                    <option>Final</option>
-                    <option>Locked</option>
-                  </select>
+                  <span class="status-field">
+                    <select id="metaStatus">
+                      <option selected>Draft</option>
+                      <option>In Review</option>
+                      <option>Final</option>
+                    </select>
+                    <button class="btn icon-btn" type="button" id="btnStatusHistory" title="Status history" aria-label="Status history">
+                      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                    </button>
+                  </span>
                 </label>
                 <label class="meta-field">SAP
                   <select id="metaSap" aria-label="SAP section">
@@ -251,7 +255,7 @@
                 <button class="btn icon-btn accent-icon" type="button" id="btnCopyShell" title="Copy to study" aria-label="Copy to study">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
                 </button>
-                <button class="btn icon-btn accent-icon" type="button" id="btnLock" title="Lock" aria-label="Lock">
+                <button class="btn icon-btn accent-icon" type="button" id="btnLock" title="Lock" aria-label="Lock" hidden>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
                 </button>
               </div>
@@ -451,6 +455,39 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="statusReasonModal" hidden role="dialog" aria-modal="true" aria-labelledby="statusReasonTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="statusReasonTitle">Reason for status change</h2>
+      <button class="btn ghost sm" type="button" id="statusReasonClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="statusReasonText"></p>
+      <label>Reason
+        <textarea id="statusReasonInput" rows="3" required></textarea>
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="statusReasonCancel">Cancel</button>
+      <button class="btn primary" type="button" id="statusReasonSave">Save status</button>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="statusHistoryModal" hidden role="dialog" aria-modal="true" aria-labelledby="statusHistoryTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="statusHistoryTitle">Status history</h2>
+      <button class="btn ghost sm" type="button" id="statusHistoryClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <ul id="statusHistoryList" class="status-history-list"></ul>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="statusHistoryDone">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
 
 <!-- Context menu -->
@@ -478,7 +515,8 @@
 </div>
 
 <script src="study-layout.js?v=flow4a"></script>
-<script src="demo-flow.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4e"></script>
+<script src="demo-flow.js?v=flow4e"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -1059,7 +1097,7 @@
     sh.datasets = sh.datasets || (spec ? spec[0] : 'ADSL');
     sh.keyVars = sh.keyVars || (spec ? spec[1] : 'USUBJID, TRT01A');
     sh.sortOrder = sh.sortOrder || (spec ? spec[2] : 'Per SAP');
-    sh.version = sh.version || ((sh.status === 'Locked' || sh.status === 'Final') ? '1.0' : (sh.status === 'In review' ? '0.3' : '0.2'));
+    sh.version = sh.version || ((sh.status === 'Final') ? '1.0' : (sh.status === 'In Review' || sh.status === 'In review' ? '0.3' : '0.2'));
     sh.modifiedBy = sh.modifiedBy || (sh.status === 'Locked' ? 'Mei Chen' : 'Jordan Patel');
     sh.modifiedAt = sh.modifiedAt || ('2026-09-' + (10 + (String(sh.number).length % 9)) + ' 1' + (String(sh.number).length % 7) + ':2' + (String(sh.number).length % 6));
     return sh;
@@ -1069,19 +1107,19 @@
     if (studyId === 'ONC-204-301') {
       return [
         makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics and baseline characteristics of the Safety analysis set', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
-        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline disease characteristics and prior anticancer therapies (ITT)', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
-        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
+        makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline disease characteristics and prior anticancer therapies (ITT)', status: 'Final', locked: false, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', status: 'In Review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
         makeShell({ id: '14.2.3', number: '14.2.3', type: 'Table', title: 'Duration of response and time to response among confirmed responders (FAS)', status: 'Draft', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Duration of response' }),
-        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary — treatment-emergent adverse events (Safety analysis set)', status: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
+        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary — treatment-emergent adverse events (Safety analysis set)', status: 'In Review', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
         makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview of TEAE, SAE, Grade ≥3, and discontinuations', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
         makeShell({ id: '14.3.1.1', number: '14.3.1.1', type: 'Table', title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by SOC/PT', automate: true, metadata: AE_OVERVIEW_META }),
-        makeShell({ id: '14.3.1.2', number: '14.3.1.2', type: 'Table', title: 'Serious adverse events by SOC/PT and relationship to study drug', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE by relationship' }),
+        makeShell({ id: '14.3.1.2', number: '14.3.1.2', type: 'Table', title: 'Serious adverse events by SOC/PT and relationship to study drug', status: 'In Review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE by relationship' }),
         makeShell({ id: '14.3.1.3', number: '14.3.1.3', type: 'Table', title: 'Adverse events leading to permanent discontinuation of study treatment by Preferred Term', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE discontinuation' }),
         makeShell({ id: '14.3.1.4', number: '14.3.1.4', type: 'Table', title: 'Grade 3 or higher treatment-emergent adverse events by System Organ Class and Preferred Term', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE Grade 3+' }),
-        makeShell({ id: '14.3.1.5', number: '14.3.1.5', type: 'Table', title: 'Adverse events of special interest: immune-mediated events, infusion reactions, and hepatic toxicity', status: 'Locked', locked: true, analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AESI' }),
+        makeShell({ id: '14.3.1.5', number: '14.3.1.5', type: 'Table', title: 'Adverse events of special interest: immune-mediated events, infusion reactions, and hepatic toxicity', status: 'Final', locked: false, analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AESI' }),
         makeShell({ id: '14.3.1.6', number: '14.3.1.6', type: 'Figure', title: 'Time to first Grade ≥3 treatment-emergent adverse event — Kaplan–Meier (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE time-to-event' }),
         makeShell({ id: '14.3.2.1', number: '14.3.2.1', type: 'Listing', title: 'Listing of serious adverse events with onset, duration, outcome, and action taken', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE listing' }),
-        makeShell({ id: '14.3.2.2', number: '14.3.2.2', type: 'Listing', title: 'Listing of deaths and adverse events with fatal outcome including primary cause of death', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Death listing' }),
+        makeShell({ id: '14.3.2.2', number: '14.3.2.2', type: 'Listing', title: 'Listing of deaths and adverse events with fatal outcome including primary cause of death', status: 'In Review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Death listing' }),
         makeShell({ id: '14.3.3', number: '14.3.3', type: 'Table', title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by severity' }),
         makeShell({ id: '14.3.4', number: '14.3.4', type: 'Table', title: 'Common adverse events (≥5% in any arm) by Preferred Term — descending frequency', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Common AEs' }),
         makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival — full analysis set with landmark rates at 12 and 24 months', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' }),
@@ -1089,7 +1127,7 @@
         makeShell({ id: '14.3.5.2', number: '14.3.5.2', type: 'Table', title: 'Hematology parameters: change from baseline over time', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Hematology' }),
         makeShell({ id: '14.1.3', number: '14.1.3', type: 'Table', title: 'Subject disposition', status: 'Final', version: '1.0', analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Disposition' }),
         makeShell({ id: '14.3.7', number: '14.3.7', type: 'Table', title: 'Vital signs: summary of values and change from baseline by visit', status: 'Final', version: '1.0', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Vital signs' }),
-        makeShell({ id: '14.3.8', number: '14.3.8', type: 'Table', title: 'Concomitant medications by ATC class and preferred name', status: 'In review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Con meds' })
+        makeShell({ id: '14.3.8', number: '14.3.8', type: 'Table', title: 'Concomitant medications by ATC class and preferred name', status: 'In Review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Con meds' })
       ].map(enrichShell);
     }
     /* other studies start with a light catalog so copy result is visible */
@@ -1107,7 +1145,21 @@
       studyStore[s.id] = { shells: seedCatalog(s.id), selectedId: null };
     }
   });
+  function canonStatus(st) {
+    if (st === 'In review' || st === 'In Review') return 'In Review';
+    if (st === 'Final' || st === 'Locked') return 'Final';
+    return 'Draft';
+  }
+  function normalizeShellStatus(sh) {
+    if (!sh) return;
+    if (sh.status === 'Locked') sh.locked = false;
+    sh.status = canonStatus(sh.status);
+  }
   studyStore['ONC-204-301'].selectedId = '14.1.1';
+  Object.keys(studyStore).forEach(function (sid) {
+    (studyStore[sid].shells || []).forEach(normalizeShellStatus);
+    if (window.SPHERE_DEMO && SPHERE_DEMO.applyQueuedQc) SPHERE_DEMO.applyQueuedQc(sid, studyStore[sid].shells);
+  });
   /* Demo flow: restore the catalog saved in localStorage (survives navigation). */
   if (window.SPHERE_DEMO) {
     Object.keys(studyStore).forEach(function (sid) {
@@ -1169,9 +1221,8 @@
 
   function statusBadge(status) {
     var cls = 'draft';
-    if (status === 'Locked') cls = 'locked';
-    else if (status === 'Final') cls = 'locked';
-    else if (status === 'In review') cls = 'review';
+    if (status === 'Final') cls = 'locked';
+    else if (status === 'In Review' || status === 'In review') cls = 'review';
     return '<span class="badge ' + cls + '">' + escapeHtml(status) + '</span>';
   }
 
@@ -1200,11 +1251,11 @@
     sh.number = document.getElementById('metaNumber').value.trim() || sh.number;
     sh.type = document.getElementById('metaType').value;
     sh.analysisSet = document.getElementById('metaSet').value;
-    sh.status = document.getElementById('metaStatus').value;
+    sh.status = canonStatus(document.getElementById('metaStatus').value);
     var sapEl = document.getElementById('metaSap');
     if (sapEl) sh.sap = normalizeSap(sapEl.value);
-    sh.locked = sh.status === 'Locked';
-    if (sh.status === 'In review') sh.qc = 'In review';
+    sh.locked = false;
+    if (sh.status === 'In Review') sh.qc = 'In Review';
     else if (sh.status === 'Draft') sh.qc = null;
     var prevTitle = sh.title || '';
     var prevFoot = (sh.layout && sh.layout.footnotes) || '';
@@ -1268,7 +1319,7 @@
     document.getElementById('metaType').value = sh.type;
     document.getElementById('typeMenuLabel').textContent = sh.type;
     document.getElementById('metaSet').value = sh.analysisSet || 'Safety';
-    document.getElementById('metaStatus').value = sh.status || 'Draft';
+    document.getElementById('metaStatus').value = canonStatus(sh.status);
     paintShellStatus(sh);
     lastUsedSap = normalizeSap(sh.sap);
     setMetaSapValue(lastUsedSap);
@@ -2514,15 +2565,7 @@
   });
 
   document.getElementById('btnLock').addEventListener('click', function () {
-    var cur = selectedShell();
-    if (cur && cur.status === 'Locked') { unlockShell(); return; }
-    if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze. Lock is shell/spec only — copy never carries lock/QC.)')) {
-      if (cur) cur.prevStatus = cur.status || 'Draft';
-      document.getElementById('metaStatus').value = 'Locked';
-      persistEditorToSelected();
-      renderCatalog();
-      paintShellStatus(selectedShell());
-    }
+    return;
   });
   document.getElementById('metaSap').addEventListener('change', function () {
     var sh = selectedShell();
@@ -2840,18 +2883,111 @@
     }
   }
 
-  document.getElementById('metaStatus').addEventListener('change', function () {
-    persistEditorToSelected();
-    var sh = selectedShell();
+  function statusUser() {
+    try { if (window.SPHERE_ACCESS && SPHERE_ACCESS.username()) return SPHERE_ACCESS.username(); } catch (e) {}
+    return window.SPHERE_DEMO ? SPHERE_DEMO.CURRENT_USER : 'Jordan Patel';
+  }
+  function recordStatusChange(sh, from, to, reason, cause) {
+    if (!sh || from === to) return;
+    sh.statusHistory = sh.statusHistory || [];
+    sh.statusHistory.push({
+      user: statusUser(),
+      at: new Date().toISOString(),
+      from: from,
+      to: to,
+      reason: reason || '',
+      cause: cause || ''
+    });
+    sh.status = to;
+  }
+  var statusReasonPending = null;
+  function closeStatusReason(commit) {
+    var modal = document.getElementById('statusReasonModal');
+    if (modal) modal.hidden = true;
+    var pending = statusReasonPending;
+    statusReasonPending = null;
+    if (!pending) return;
+    if (commit) pending.onOk(document.getElementById('statusReasonInput').value);
+    else pending.onCancel();
+  }
+  function askStatusReason(from, to, onOk, onCancel) {
+    statusReasonPending = { onOk: onOk, onCancel: onCancel };
+    document.getElementById('statusReasonText').textContent = 'A reason is required to change this shell from ' + from + ' to ' + to + '.';
+    document.getElementById('statusReasonInput').value = '';
+    document.getElementById('statusReasonModal').hidden = false;
+    setTimeout(function () { document.getElementById('statusReasonInput').focus(); }, 30);
+  }
+  function finishStatusChange(sh) {
     if (sh && sh.status === 'Final' && parseFloat(sh.version || '0') < 1) sh.version = '1.0';
+    var sel = document.getElementById('metaStatus');
+    if (sel && sh) sel.dataset.prev = canonStatus(sh.status);
+    persistEditorToSelected();
     renderCatalog();
     paintShellStatus(sh);
     persistCatalog();
     if (sh && !sh.syncedAt && !isLinkedExisting(sh)) {
-      showToast(sh.status === 'Final' || sh.status === 'Locked'
-        ? 'Shell ' + sh.number + ' is ' + sh.status + ' · click + in the list to send it to the Tracker'
-        : 'Shell ' + sh.number + ' set to ' + sh.status + ' · set Final to send it to the Tracker');
+      showToast(sh.status === 'Final'
+        ? 'Shell ' + sh.number + ' is Final · click + in the list to send it to the Tracker'
+        : 'Shell ' + sh.number + ' set to ' + sh.status);
     }
+  }
+  function openStatusHistory() {
+    var sh = selectedShell();
+    var list = (sh && sh.statusHistory ? sh.statusHistory.slice() : []).reverse();
+    var host = document.getElementById('statusHistoryList');
+    host.innerHTML = list.length ? list.map(function (e) {
+      return '<li><strong>' + escapeHtml(e.from) + ' → ' + escapeHtml(e.to) + '</strong> · ' + escapeHtml(e.user || '') + ' · ' + escapeHtml(e.at || '') +
+        (e.reason ? '<div>Reason: ' + escapeHtml(e.reason) + '</div>' : '') +
+        (e.cause ? '<div>' + escapeHtml(e.cause) + '</div>' : '') + '</li>';
+    }).join('') : '<li>No status changes yet.</li>';
+    document.getElementById('statusHistoryModal').hidden = false;
+  }
+  (function wireStatusHistory() {
+    var hist = document.getElementById('btnStatusHistory');
+    if (hist) hist.addEventListener('click', openStatusHistory);
+    ['statusHistoryClose', 'statusHistoryDone'].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) b.addEventListener('click', function () { document.getElementById('statusHistoryModal').hidden = true; });
+    });
+    var hm = document.getElementById('statusHistoryModal');
+    if (hm) hm.addEventListener('click', function (e) { if (e.target === hm) hm.hidden = true; });
+    var saveR = document.getElementById('statusReasonSave');
+    var cancelR = document.getElementById('statusReasonCancel');
+    var closeR = document.getElementById('statusReasonClose');
+    if (saveR) saveR.addEventListener('click', function () {
+      var reason = document.getElementById('statusReasonInput').value.trim();
+      if (!reason) { showToast('Enter a reason before saving the status change.'); return; }
+      closeStatusReason(true);
+    });
+    if (cancelR) cancelR.addEventListener('click', function () { closeStatusReason(false); });
+    if (closeR) closeR.addEventListener('click', function () { closeStatusReason(false); });
+  })();
+  document.getElementById('metaStatus').addEventListener('focus', function () { this.dataset.prev = this.value; });
+  document.getElementById('metaStatus').addEventListener('change', function () {
+    var sel = this;
+    var prev = canonStatus(sel.dataset.prev || 'Draft');
+    var next = canonStatus(sel.value);
+    var sh = selectedShell();
+    if (!sh) return;
+    function apply(reason) {
+      recordStatusChange(sh, prev, next, reason, '');
+      sel.value = next;
+      finishStatusChange(sh);
+    }
+    if (prev === 'Final' && (next === 'Draft' || next === 'In Review')) {
+      sel.value = prev;
+      askStatusReason(prev, next, function (reason) {
+        if (!String(reason || '').trim()) { sel.value = 'Final'; showToast('Status stays Final. A reason is required.'); return; }
+        apply(String(reason).trim());
+      }, function () {
+        sel.value = 'Final';
+        sel.dataset.prev = 'Final';
+        showToast('Status stays Final.');
+      });
+      return;
+    }
+    if (prev !== next) recordStatusChange(sh, prev, next, '', '');
+    finishStatusChange(sh);
   });
 
   function showSyncToast(sh, rec) {
@@ -3400,7 +3536,7 @@
       metaField('smfType', 'Type', metaSelect('smfType', ['Table', 'Figure', 'Listing'], sh.type)) +
       metaField('smfTitle', 'Title', metaInput('smfTitle', sh.title), true) +
       metaField('smfPop', 'Population', metaSelect('smfPop', ['Safety', 'ITT', 'mITT', 'PP'], sh.analysisSet || 'Safety')) +
-      metaField('smfStatus', 'Status', metaSelect('smfStatus', ['Draft', 'In review', 'Final', 'Locked'], sh.status || 'Draft')) +
+      metaField('smfStatus', 'Status', metaSelect('smfStatus', ['Draft', 'In Review', 'Final'], canonStatus(sh.status))) +
       metaField('smfDatasets', 'Analysis datasets', metaInput('smfDatasets', sh.datasets), true) +
       metaField('smfKeyVars', 'Key variables', metaInput('smfKeyVars', sh.keyVars), true) +
       metaField('smfSort', 'Sort order', metaInput('smfSort', sh.sortOrder), true) +
@@ -3421,8 +3557,16 @@
     sh.type = val('smfType') || sh.type;
     sh.title = val('smfTitle') || sh.title;
     sh.analysisSet = val('smfPop') || sh.analysisSet;
-    sh.status = val('smfStatus') || sh.status;
-    sh.locked = sh.status === 'Locked';
+    var prevStatus = canonStatus(sh.status);
+    var nextStatus = canonStatus(val('smfStatus') || prevStatus);
+    if (prevStatus === 'Final' && (nextStatus === 'Draft' || nextStatus === 'In Review')) {
+      showToast('Use the Status dropdown to leave Final. A reason is required.');
+      nextStatus = prevStatus;
+    } else if (prevStatus !== nextStatus) {
+      recordStatusChange(sh, prevStatus, nextStatus, '', '');
+    }
+    sh.status = nextStatus;
+    sh.locked = false;
     sh.datasets = val('smfDatasets');
     sh.keyVars = val('smfKeyVars');
     sh.sortOrder = val('smfSort');

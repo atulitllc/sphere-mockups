@@ -1150,7 +1150,8 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4e"></script>
+<script src="demo-flow.js?v=flow4e"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -1895,6 +1896,12 @@
       batch.jobs.push(j);
       runJobs.push(j);
     });
+    if ((mode === 'qc' || mode === 'both') && window.SPHERE_DEMO && SPHERE_DEMO.noteShellSentToQc) {
+      fresh.forEach(function (row) {
+        var num = rowOutputId(row);
+        if (num) SPHERE_DEMO.noteShellSentToQc(num);
+      });
+    }
     runJobs.forEach(function (j) { if (isActive(j)) renderJobCell(j.row); });
     addJobTableRow(batch);
     renderRunPanel();

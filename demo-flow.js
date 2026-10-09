@@ -385,6 +385,57 @@
       var name = String(prog || '').split('/').pop();
       var s = read();
       return s.lastRun[name] || '';
+    },
+    /* SPH-R-602: Tracker send-to-QC moves the linked shell to In Review. */
+    noteShellSentToQc: function (number) {
+      var num = String(number || '');
+      if (!num) return null;
+      var s = read();
+      var user = CURRENT_USER;
+      try { if (window.SPHERE_ACCESS && SPHERE_ACCESS.username) user = SPHERE_ACCESS.username() || user; } catch (e) {}
+      var at = new Date().toISOString();
+      var list = s.shells[STUDY];
+      if (list && list.length) {
+        var sh = null;
+        for (var i = 0; i < list.length; i++) if (String(list[i].number) === num) sh = list[i];
+        if (!sh) return null;
+        var cur = sh.status === 'In review' ? 'In Review' : (sh.status === 'Locked' ? 'Final' : (sh.status || 'Draft'));
+        if (cur === 'In Review') return sh;
+        sh.statusHistory = sh.statusHistory || [];
+        sh.statusHistory.push({ user: user, at: at, from: cur, to: 'In Review', reason: '', cause: 'Tracker record sent to QC' });
+        sh.status = 'In Review';
+        sh.qc = 'In Review';
+        write(s);
+        return sh;
+      }
+      s.qcShell = s.qcShell || {};
+      s.qcShell[num] = { user: user, at: at, cause: 'Tracker record sent to QC' };
+      write(s);
+      return { queued: true, number: num };
+    },
+    applyQueuedQc: function (study, shells) {
+      var s = read();
+      var qmap = s.qcShell || {};
+      var changed = false;
+      (shells || []).forEach(function (sh) {
+        var q = qmap[String(sh.number)];
+        if (!q) return;
+        var cur = sh.status === 'In review' ? 'In Review' : (sh.status === 'Locked' ? 'Final' : (sh.status || 'Draft'));
+        if (cur !== 'In Review') {
+          sh.statusHistory = sh.statusHistory || [];
+          sh.statusHistory.push({ user: q.user, at: q.at, from: cur, to: 'In Review', reason: '', cause: 'Tracker record sent to QC' });
+          sh.status = 'In Review';
+          sh.qc = 'In Review';
+        }
+        delete qmap[String(sh.number)];
+        changed = true;
+      });
+      if (changed) {
+        s.shells[study || STUDY] = shells;
+        s.qcShell = qmap;
+        write(s);
+      }
+      return shells;
     }
   };
   window.SPHERE_DEMO = api;
