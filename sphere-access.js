@@ -114,13 +114,20 @@
       var s = read();
       var who = user(s.currentId, s);
       if (!who) return false;
-      var compound = String(path || '').replace(/^\/+|\/+$/g, '').split('/')[0] || window.SPHERE_filesCompound || '';
+      var first = String(path || '').replace(/^\/+|\/+$/g, '').split('/')[0];
+      function hasGrants(c) {
+        return Object.keys(s.grants).some(function (k) { return k.indexOf(c + '|') === 0; });
+      }
+      var compound = (first && hasGrants(first)) ? first : (window.SPHERE_filesCompound || first || '');
       var keys = Object.keys(s.grants).filter(function (k) { return k.indexOf(compound + '|') === 0; });
       if (!keys.length) return who.company === 'X Pharma';
       var ok = false;
       keys.forEach(function (k) {
         (s.grants[k] || []).forEach(function (g) {
-          if (g.userId === who.id && g.role === 'Edit') ok = true;
+          var id = g.userId || g.who || g.name;
+          var role = String(g.role || '');
+          if (role !== 'Edit' && role !== 'edit') return;
+          if (id === who.id || id === who.username || id === who.name) ok = true;
         });
       });
       return ok;

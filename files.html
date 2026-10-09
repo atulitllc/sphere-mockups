@@ -215,8 +215,10 @@
         <select id="accessAddWho" aria-label="Add user or team">
           <option value="">Add user or team…</option>
           <optgroup label="Users">
-            <option value="user:A. Rivera">A. Rivera</option>
-            <option value="user:S. Ortiz">S. Ortiz</option>
+            <option value="user:jpatel">Jordan Patel</option>
+            <option value="user:rlee">Riley Nguyen</option>
+            <option value="user:u3">Alex Rivera</option>
+            <option value="user:u4">Sam Okonkwo</option>
           </optgroup>
           <optgroup label="Teams">
             <option value="team:Stats programmers">Stats programmers</option>
@@ -876,15 +878,18 @@
     if (!accessTarget) return;
     var v = accessAddWho.value;
     if (!v) { showToast('Pick a user or team'); return; }
+    var opt = accessAddWho.options[accessAddWho.selectedIndex];
     var parts = v.split(':');
     var kind = parts[0];
-    var name = parts.slice(1).join(':');
+    var userId = parts.slice(1).join(':');
+    var name = (opt && opt.textContent.trim()) || userId;
     var role = accessTarget.frozen ? 'View' : accessAddRole.value;
     var exists = accessTarget.rows.some(function (r) { return r.name === name; });
     if (exists) { showToast('Already on ACL'); return; }
     accessTarget.rows.push({
       kind: kind,
       name: name,
+      userId: userId,
       meta: kind === 'team' ? 'Team · folder ACL' : '',
       role: role,
       locked: !!accessTarget.frozen
@@ -902,7 +907,7 @@
     try {
       if (window.SPHERE_ACCESS) {
         SPHERE_ACCESS.setFolderAccess(window.SPHERE_filesCompound || '', level, (window.SPHERE_filesPath || '') + (accessTarget && accessTarget.folder || current), (accessTarget && accessTarget.rows || []).map(function (r) {
-          return { userId: r.name, role: r.role };
+          return { userId: r.userId || r.name, role: r.role };
         }));
       }
     } catch (err) {
@@ -962,9 +967,9 @@
       reg.filter(function (e) { return e.current; })[0] || reg[0];
     if (!active) return;
     if (L.setCurrent) active = L.setCurrent(active) || active;
+    var activePath = L.entryPath(active);
     window.SPHERE_filesCompound = active.compound || '';
     window.SPHERE_filesPath = activePath;
-    var activePath = L.entryPath(active);
     var demoFiles = active.protocol === 'ONC-204-301' && active.deliverable === 'CSR';
     function link(e) { return 'files.html?path=' + encodeURIComponent(L.entryPath(e)); }
     var box = document.createElement('div');
