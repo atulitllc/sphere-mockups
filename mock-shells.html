@@ -1319,7 +1319,9 @@
     document.getElementById('metaType').value = sh.type;
     document.getElementById('typeMenuLabel').textContent = sh.type;
     document.getElementById('metaSet').value = sh.analysisSet || 'Safety';
-    document.getElementById('metaStatus').value = canonStatus(sh.status);
+    var statusSel = document.getElementById('metaStatus');
+    statusSel.value = canonStatus(sh.status);
+    statusSel.dataset.prev = statusSel.value;
     paintShellStatus(sh);
     lastUsedSap = normalizeSap(sh.sap);
     setMetaSapValue(lastUsedSap);
