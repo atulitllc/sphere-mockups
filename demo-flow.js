@@ -16,6 +16,8 @@
     s.events = s.events || {};      /* program -> [history events] (existing rows) */
     s.sources = s.sources || {};    /* program -> saved source (existing rows) */
     s.roles = s.roles || {};        /* row key -> {prod,qc,stats,mw} role overrides (Roles editor) */
+    s.shellSync = s.shellSync || {}; /* study|number -> {title, footnotes, changedAt, why} */
+    s.lastRun = s.lastRun || {};     /* program -> ISO time of last completed run */
     return s;
   }
   function write(s) {
@@ -313,7 +315,77 @@
     setRoles: function (key, roles) { var s = read(); s.roles[key] = roles; write(s); },
     addEvent: function (prog, ev) { var s = read(); (s.events[prog] = s.events[prog] || []).push(ev); write(s); },
     getSource: function (key) { return read().sources[key] || null; },
-    setSource: function (key, src) { var s = read(); s.sources[key] = src; write(s); }
+    setSource: function (key, src) { var s = read(); s.sources[key] = src; write(s); },
+    /* SPH-R-701: title and footnotes only. Programming notes and subgroup are not synced. */
+    noteShellContent: function (study, info) {
+      if (!info || !info.number) return null;
+      var changed = info.changed || [];
+      if (!changed.length) return null;
+      var s = read();
+      var key = (study || STUDY) + '|' + info.number;
+      var title = String(info.title || '');
+      var footnotes = String(info.footnotes || '');
+      var parts = changed.filter(function (c) { return c === 'title' || c === 'footnotes'; });
+      if (!parts.length) return null;
+      var prev = s.shellSync[key];
+      var stillPending = prev && prev.pending && prev.pending.length && !(prev.clearedAt && prev.changedAt && prev.clearedAt >= prev.changedAt);
+      var pending = stillPending ? prev.pending.slice() : [];
+      parts.forEach(function (c) { if (pending.indexOf(c) < 0) pending.push(c); });
+      var names = pending.map(function (c) { return c === 'title' ? 'Title' : 'Footnotes'; });
+      var rec = {
+        number: String(info.number),
+        title: title,
+        footnotes: footnotes,
+        changedAt: new Date().toISOString(),
+        changed: pending,
+        pending: pending,
+        clearedAt: '',
+        why: 'Changed in mock shell: ' + names.join(', ')
+      };
+      s.shellSync[key] = rec;
+      s.records.forEach(function (r) {
+        var hit = (info.shellId && r.shellId === info.shellId) || String(r.number) === String(info.number);
+        if (!hit) return;
+        if (pending.indexOf('title') >= 0) r.title = title;
+        if (pending.indexOf('footnotes') >= 0) r.footnotes = footnotes;
+      });
+      write(s);
+      return rec;
+    },
+    shellContent: function (study, number) {
+      var s = read();
+      return s.shellSync[(study || STUDY) + '|' + number] || null;
+    },
+    rerunWhy: function (study, number, lastRunIso) {
+      var rec = api.shellContent(study, number);
+      if (!rec || !rec.changedAt || !rec.pending || !rec.pending.length) return '';
+      if (lastRunIso && String(lastRunIso) >= rec.changedAt) return '';
+      return rec.why || '';
+    },
+    markProgramRan: function (prog, iso, shellNumber) {
+      var name = String(prog || '').split('/').pop();
+      if (!name) return;
+      var s = read();
+      var when = iso || new Date().toISOString();
+      s.lastRun[name] = when;
+      var num = shellNumber ? String(shellNumber) : '';
+      Object.keys(s.shellSync).forEach(function (k) {
+        var rec = s.shellSync[k];
+        if (!rec) return;
+        if (num && String(rec.number) !== num) return;
+        if (!num) return;
+        rec.pending = [];
+        rec.changed = [];
+        rec.clearedAt = when;
+        rec.why = '';
+      });
+      write(s);
+    },
+    lastRun: function (prog) {
+      var name = String(prog || '').split('/').pop();
+      var s = read();
+      return s.lastRun[name] || '';
+    }
   };
   window.SPHERE_DEMO = api;
 })();
