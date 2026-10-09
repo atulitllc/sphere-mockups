@@ -1960,12 +1960,13 @@ label .req::after { content: " *"; color: var(--danger); }
 .artifact-meta {
   display: grid;
   /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(120px, 1.2fr) 70px 86px 120px 70px 128px 188px;
+  grid-template-columns: minmax(160px, 1.6fr) 84px 110px 84px 150px minmax(188px, 1.1fr);
   gap: 8px 12px;
   align-items: center;
   width: 100%;
 }
 .artifact-meta .meta-cell { min-width: 0; }
+.artifact-meta > .meta-cell:nth-child(4) { display: none; }
 .artifact-meta .row-actions {
   justify-content: flex-end;
   align-self: center;
@@ -1974,7 +1975,7 @@ label .req::after { content: " *"; color: var(--danger); }
 @media (max-width: 1200px) {
   /* Keep Tracker columns; scroll horizontally instead of crushing Actions */
   .artifact-meta {
-    grid-template-columns: minmax(110px, 1.1fr) 66px 80px 110px 66px 122px 188px;
+    grid-template-columns: minmax(140px, 1.4fr) 78px 96px 78px 140px minmax(188px, 1fr);
     min-width: 820px;
   }
   .artifact-meta .meta-cell.actions-cell .row-actions,
@@ -1984,7 +1985,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 @media (max-width: 720px) {
   .artifact-meta {
-    grid-template-columns: minmax(100px, 1fr) 60px 72px 96px 60px 116px 188px;
+    grid-template-columns: minmax(120px, 1.2fr) 70px 88px 70px 128px minmax(188px, 1fr);
     min-width: 768px;
   }
 }
