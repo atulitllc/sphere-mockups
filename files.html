@@ -127,11 +127,11 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Study directory tree that programs <code>libname</code> / <code>setwd</code> against — not a second data store. Browse <strong>raw</strong>, <strong>sdtm</strong>, <strong>adam</strong>, <strong>programs</strong>, <strong>tlf</strong>, <strong>logs</strong> (tenant template). Folder ACL is Box/WatchDox-like: <strong>Manage access</strong> on folders (View | Edit); permissions inherit down the study tree.</p>
+        <p class="page-sub">Folders follow the compound, protocol, and folder layout set in Admin.</p>
       </div>
 
         <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
-        <div class="note-banner-inner"><div><strong>Share ACL.</strong> Right-click or ⋯ on a folder → <strong>Manage access</strong> (users &amp; <a href="admin.html?panel=users">teams</a>, View | Edit only for v1). Permissions inherit down the study tree.</div></div>
+        <div class="note-banner-inner"><div>Select a study folder in the tree. Access is set on the compound, protocol, or folder, and it inherits downward.</div></div>
       </div>
 
         <div class="files-layout">
@@ -800,8 +800,8 @@
     var box = document.createElement('div');
     box.className = 'files-studies';
     box.id = 'filesStudies';
-    box.innerHTML = '<div class="tree-head"><span>Studies</span><a class="badge info" href="admin.html?panel=defaults" title="Tenant layout: ' + L.levelLabel(L.get().level) + ' · change in Admin" style="text-decoration:none">Layout ' + L.get().level + '</a></div>' +
-      '<div style="padding:0 8px 4px">' + L.treeHtml({ link: link, activePath: activePath }) + '</div>';
+    box.innerHTML = '<div class="tree-head"><span>Studies</span><a class="badge info" href="admin.html?panel=defaults" title="' + L.levelLabel(L.get().level) + ' · change in Admin" style="text-decoration:none">Layout ' + L.get().level + '</a></div>' +
+      '<div style="padding:0 8px 4px">' + L.treeHtml({ link: link, activePath: activePath, expandCurrent: true }) + '</div>';
     treeRoot.insertBefore(box, treeRoot.firstChild);
     var folderHead = Array.prototype.filter.call(treeRoot.querySelectorAll(':scope > .tree-head'), function () { return true; })[0];
     if (folderHead) folderHead.firstElementChild.textContent = 'Folders';
@@ -817,16 +817,24 @@
         rootBtn.remove();
       }
     }
-    if (!demoFiles) {
-      var when = active.created || 'today';
-      FOLDERS.length = 0;
-      L.get().subfolders.forEach(function (sf) {
-        FOLDERS.push({ id: sf, count: '0', frozen: false, title: 'Created from tenant template' });
-        TREE[sf] = [{ name: 'README.txt', type: 'txt', size: '1 KB', modified: when + ' · created from tenant template' }];
-      });
-      current = FOLDERS[0] ? FOLDERS[0].id : current;
-      window.SPHERE_filesStartFolder = current;
-    }
+    var subs = L.get().subfolders.slice();
+    var kept = {};
+    FOLDERS.forEach(function (f) { kept[f.id] = f; });
+    FOLDERS.length = 0;
+    subs.forEach(function (sf) {
+      var sourceId = (sf === 'data/raw' && !kept['data/raw'] && kept.raw) ? 'raw' : sf;
+      if (sourceId !== sf && TREE[sourceId] && !TREE[sf]) TREE[sf] = TREE[sourceId];
+      if (kept[sf]) FOLDERS.push(kept[sf]);
+      else if (kept[sourceId]) {
+        kept[sourceId].id = sf;
+        FOLDERS.push(kept[sourceId]);
+      } else {
+        if (!TREE[sf]) TREE[sf] = [{ name: 'README.txt', type: 'txt', size: '1 KB', modified: (active.created || 'today') + ' · Admin layout' }];
+        FOLDERS.push({ id: sf, count: String((TREE[sf] || []).length), frozen: false, title: 'Admin layout' });
+      }
+    });
+    current = FOLDERS[0] ? FOLDERS[0].id : current;
+    window.SPHERE_filesStartFolder = current;
     if (window.SPHERE_INGEST) {
       SPHERE_INGEST.forStudy(activePath).forEach(function (it) {
         var fid = SPHERE_INGEST.folderId(it.dest);
@@ -867,7 +875,7 @@
     return mode === 'dev-qc-prod' || mode === 'dev-prod';
   }
   function applyProgramsFolderMode() {
-    if (!window.SPHERE || !SPHERE.getProgramsFolderMode) return;
+    return;
     var mode = SPHERE.getProgramsFolderMode();
     var hint = window.SPHERE_filesInfoLine ? SPHERE_filesInfoLine('programsFolderHint', 2) : null;
     if (!hint) return;
