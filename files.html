@@ -188,7 +188,8 @@
   <button type="button" data-action="manage" role="menuitem">Manage access…</button>
   <div class="ctx-sep" aria-hidden="true"></div>
   <button type="button" data-action="open" role="menuitem">Open</button>
-  <button type="button" data-action="download" role="menuitem" disabled title="Demo stub">Download</button>
+  <button type="button" data-action="copy" role="menuitem">Copy</button>
+  <button type="button" data-action="paste" role="menuitem">Paste</button>
 </div>
 
 <div class="modal-backdrop" id="accessModal" hidden role="dialog" aria-modal="true" aria-labelledby="accessTitle">
@@ -720,12 +721,40 @@
     openCtx(e, { kind: type === 'dir' ? 'folder' : 'file', folder: current, name: name, frozen: frozen });
   });
 
+  var clip = null;
+  function pasteClip() {
+    if (!clip) return;
+    var path = (window.SPHERE_filesPath || '') + current;
+    if (window.SPHERE_ACCESS && !SPHERE_ACCESS.canEdit(path)) {
+      window.alert('Paste refused: no edit permission on this folder.');
+      return;
+    }
+    TREE[current] = TREE[current] || [];
+    if (clip.kind === 'file' && clip.item) {
+      TREE[current].push(JSON.parse(JSON.stringify(clip.item)));
+    } else if (clip.kind === 'folder') {
+      TREE[current].push({ name: clip.name, type: 'dir', size: '-', modified: '2026-10-09 14:05' });
+      TREE[current + '/' + clip.name] = (clip.items || []).map(function (f) { return JSON.parse(JSON.stringify(f)); });
+    }
+    render(current);
+  }
   ctxMenu.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-action]');
     if (!btn || !ctxTarget) return;
     var action = btn.getAttribute('data-action');
     if (action === 'manage') {
       openAccess(ctxTarget);
+    } else if (action === 'copy') {
+      var file = (TREE[current] || []).filter(function (f) { return f.name === ctxTarget.name; })[0];
+      if (ctxTarget.kind === 'folder') {
+        var kids = (TREE[ctxTarget.name] || TREE[current + '/' + ctxTarget.name] || (file ? [] : [])).map(function (f) { return JSON.parse(JSON.stringify(f)); });
+        if (!kids.length && file && file.type === 'dir') kids = [{ name: 'readme.txt', type: 'txt', size: '1 KB', modified: '2026-10-09 14:05' }];
+        clip = { kind: 'folder', name: ctxTarget.name, items: kids };
+      } else if (file) clip = { kind: 'file', item: JSON.parse(JSON.stringify(file)) };
+      closeCtx();
+    } else if (action === 'paste') {
+      pasteClip();
+      closeCtx();
     } else if (action === 'open') {
       if (ctxTarget.kind === 'folder' && FOLDER_ACL[ctxTarget.name]) {
         render(ctxTarget.name);
