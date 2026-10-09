@@ -366,7 +366,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Efficacy" aria-label="Select all in Efficacy">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-efficacy">
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="done" data-program="tfl_14_2_1_orr.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -451,7 +451,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Safety TLFs" aria-label="Select all in Safety TLFs">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-safety-tlfs">
-            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.sas">
+            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="adam_adae.sas">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADAE" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -541,7 +541,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Safety TLFs" data-job="queued" data-program="tfl_14_3_1_3_ae_disc.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_3_ae_disc.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events leading to permanent disc" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -667,7 +667,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="tfl_14_3_4_ae_common.R">
+            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_4_ae_common.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Common adverse events (≥5% in any treatm" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -716,7 +716,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Labs" data-job="queued" data-program="tfl_14_3_5_1_lb_chem.sas">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Labs" data-job="done" data-program="tfl_14_3_5_1_lb_chem.sas">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry shifts from baselin" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -1822,21 +1822,32 @@
     if (dayDiff === 1) return 'Yesterday ' + clock;
     return d.getDate() + ' ' + RUN_MONTHS[d.getMonth()] + ' ' + clock;
   }
-  function seedLastRun(h) {
+  /* Explicit finished outcomes. No program-name hash. 14.1.1 stays Completed.
+     days is how many calendar days before today. h/m is the clock time. */
+  var SEED_JOBS = {
+    'tfl_14_1_1_demog.R': { outcome: 'completed', days: 0, h: 15, m: 49, dur: 18 },
+    'adam_adsl.sas': { outcome: 'warning', days: 1, h: 8, m: 24, dur: 22 },
+    'tfl_14_1_2_base.R': { outcome: 'completed', days: 1, h: 13, m: 44, dur: 31 },
+    'tfl_14_2_1_orr.R': { outcome: 'completed', days: 0, h: 10, m: 20, dur: 14 },
+    'tfl_14_2_3_orr_dorr.sas': { outcome: 'warning', days: 2, h: 14, m: 10, dur: 27 },
+    'adam_adae.sas': { outcome: 'completed', days: 1, h: 9, m: 19, dur: 19 },
+    'tfl_14_3_1_ae.R': { outcome: 'completed', days: 3, h: 11, m: 5, dur: 16 },
+    'tfl_14_3_8_cm.sas': { outcome: 'error', days: 1, h: 16, m: 2, dur: 12 },
+    'tfl_14_3_1_1_ae_soc_pt.R': { outcome: 'completed', days: 0, h: 9, m: 10, dur: 24 },
+    'tfl_14_3_1_2_sae_rel.R': { outcome: 'completed', days: 6, h: 15, m: 40, dur: 21 },
+    'tfl_14_3_1_3_ae_disc.R': { outcome: 'completed', days: 1, h: 12, m: 34, dur: 17 },
+    'tfl_14_3_1_5_aesi.R': { outcome: 'completed', days: 10, h: 10, m: 8, dur: 29 },
+    'tfl_14_3_1_6_ae_ttf.R': { outcome: 'completed', days: 0, h: 13, m: 17, dur: 11 },
+    'tfl_14_3_2_2_death_list.R': { outcome: 'completed', days: 4, h: 14, m: 18, dur: 15 },
+    'tfl_14_3_3_ae_sev.R': { outcome: 'completed', days: 12, h: 9, m: 58, dur: 33 },
+    'tfl_14_3_4_ae_common.R': { outcome: 'completed', days: 1, h: 15, m: 34, dur: 20 },
+    'tfl_14_3_5_1_lb_chem.sas': { outcome: 'completed', days: 0, h: 11, m: 5, dur: 13 }
+  };
+  function seedStamp(spec) {
     var now = new Date();
-    var bucket = h % 5;
-    var hour = 8 + (h % 9);
-    var minute = (h * 7) % 60;
-    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
-    if (bucket <= 1) {
-      if (d.getTime() > now.getTime() - 2 * 60000) d = new Date(now.getTime() - (15 + (h % 120)) * 60000);
-    } else if (bucket === 2) {
-      d.setDate(d.getDate() - 1);
-    } else if (bucket === 3) {
-      d.setDate(d.getDate() - (2 + h % 5));
-    } else {
-      d.setDate(d.getDate() - (10 + h % 18));
-    }
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), spec.h, spec.m, 0, 0);
+    d.setDate(d.getDate() - spec.days);
+    if (d.getTime() > now.getTime() - 60000) d = new Date(now.getTime() - 20 * 60000);
     return d.getTime();
   }
   function hhmmss(d) { return hhmm(d) + ':' + pad2(d.getSeconds()); }
@@ -1953,31 +1964,19 @@
       : '<span class="run-st ' + face.cls + '" title="' + runEsc(title) + '">' + inner + '</span>';
   }
 
-  /* Seeded jobs: finished rows get a real last-run timestamp. Live rows stay Running or Queued. */
+  /* Seeded jobs are finished. Running and Queued exist only after the user clicks Run. */
   allRows().forEach(function (row) {
     var st = row.getAttribute('data-job');
     var prog = runProgName(row);
     if (!prog || !st) return;
-    var h = hashStr(prog);
-    var durMs = (6 + h % 30) * 1000 + (h % 1000);
-    var end = seedLastRun(h);
-    if (st === 'running' || st === 'queued') {
-      var live = {
-        id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: 'prod',
-        phases: [{ kind: 'Prod', dur: 20000 }], phase: 0, state: st, warn: false, warnPhase: -1,
-        batch: null, startedAt: st === 'running' ? Date.now() - 8000 : 0,
-        phaseAt: st === 'running' ? Date.now() - 8000 : 0, endedAt: 0, endDate: null,
-        prevEnd: new Date(end), logs: {}
-      };
-      row._runJob = live;
-      renderJobCell(row);
-      return;
-    }
-    var isError = h % 13 === 0;
+    var spec = SEED_JOBS[prog] || { outcome: 'completed', days: 1, h: 9, m: 0, dur: 15 };
+    var durMs = spec.dur * 1000;
+    var end = seedStamp(spec);
+    var outcome = spec.outcome === 'error' ? 'error' : 'completed';
     var j = {
       id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: 'prod',
-      phases: [{ kind: 'Prod', dur: durMs }], phase: 0, state: isError ? 'error' : 'done',
-      warn: !isError && h % 6 === 0, warnPhase: 0,
+      phases: [{ kind: 'Prod', dur: durMs }], phase: 0, state: outcome === 'error' ? 'error' : 'done',
+      warn: outcome !== 'error' && spec.outcome === 'warning', warnPhase: 0,
       batch: null, startedAt: end - durMs, endedAt: end, endDate: new Date(end), logs: {}
     };
     row._runJob = j;
@@ -4907,9 +4906,8 @@
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
     if (!prog) return;
     var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
-    var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
-    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
-      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="' + escapeHtml(prog) + '">' + escapeHtml(prog) + '</a>' +
+      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
     decorateRerunDot(row);
   }
   function rerunWhyForRow(row) {
