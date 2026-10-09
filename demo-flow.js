@@ -18,6 +18,9 @@
     s.roles = s.roles || {};        /* row key -> {prod,qc,stats,mw} role overrides (Roles editor) */
     s.shellSync = s.shellSync || {}; /* study|number -> {title, footnotes, changedAt, why} */
     s.lastRun = s.lastRun || {};     /* program -> ISO time of last completed run */
+    s.programTx = s.programTx || []; /* program renames: old, new, user, time */
+    s.programByNumber = s.programByNumber || {}; /* study|number -> program file name */
+    s.fileRenames = s.fileRenames || {}; /* old file name -> new file name */
     return s;
   }
   function write(s) {
@@ -388,6 +391,50 @@
       });
       write(s);
     },
+    renameProgram: function (info) {
+      if (!info || !info.newName || info.oldName === info.newName) return null;
+      var s = read();
+      var when = new Date().toISOString();
+      var user = info.user || CURRENT_USER;
+      var tx = {
+        at: when,
+        oldName: info.oldName || '',
+        newName: info.newName,
+        user: user,
+        study: info.study || STUDY,
+        shellId: info.shellId || '',
+        number: info.number || '',
+        action: 'Program renamed'
+      };
+      s.programTx.push(tx);
+      if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
+      if (info.oldName) s.fileRenames[info.oldName] = info.newName;
+      (s.records || []).forEach(function (r) {
+        var hit = (info.shellId && r.shellId === info.shellId) ||
+          (info.oldName && r.program === info.oldName) ||
+          (info.number && String(r.number) === String(info.number));
+        if (!hit) return;
+        r.program = info.newName;
+        r.history = r.history || [];
+        r.history.push({ at: when, action: 'Program renamed', person: user, oldName: tx.oldName, newName: info.newName, note: tx.oldName + ' -> ' + info.newName });
+      });
+      if (info.oldName && s.status[info.oldName]) {
+        s.status[info.newName] = s.status[info.oldName];
+        delete s.status[info.oldName];
+      }
+      if (info.oldName) {
+        (s.events[info.newName] = s.events[info.newName] || s.events[info.oldName] || []).push({
+          at: stamp(new Date()), action: 'Program renamed', person: user, status: '', note: tx.oldName + ' -> ' + info.newName, oldName: tx.oldName, newName: info.newName
+        });
+      }
+      write(s);
+      return tx;
+    },
+    programTransactions: function () { return read().programTx.slice(); },
+    programForNumber: function (study, number) {
+      return read().programByNumber[(study || STUDY) + '|' + number] || '';
+    },
+    fileRenames: function () { return Object.assign({}, read().fileRenames); },
     lastRun: function (prog) {
       var name = String(prog || '').split('/').pop();
       var s = read();

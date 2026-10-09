@@ -4771,6 +4771,14 @@
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.shellContent) return;
     allRows().forEach(function (row) {
       var num = rowOutputId(row);
+      if (num && SPHERE_DEMO.programForNumber) {
+        var renamed = SPHERE_DEMO.programForNumber('ONC-204-301', num);
+        if (renamed && row.getAttribute('data-program') !== renamed) {
+          row.setAttribute('data-program', renamed);
+          var progCell = row.querySelector('.program-name');
+          if (progCell && progCell.parentNode) paintProgramCell(row, progCell.parentNode, row.getAttribute('data-status') || '');
+        }
+      }
       var rec = num ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
       if (rec) {
         var titleEl = row.querySelector('.artifact-title');

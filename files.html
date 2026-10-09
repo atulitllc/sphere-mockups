@@ -537,7 +537,20 @@
   var NESTED = [
     { folder: 'programs', path: 'programs/dev/qc/ae.sas', name: 'ae.sas', type: 'sas', size: '4 KB', modified: '2026-10-09 14:05', text: 'proc freq data=adam.adae;\nrun;\n' }
   ];
+  var fileRenamesApplied = false;
+  function applyStoredFileRenames() {
+    if (fileRenamesApplied || !window.SPHERE_DEMO || !SPHERE_DEMO.fileRenames) return;
+    fileRenamesApplied = true;
+    var map = SPHERE_DEMO.fileRenames();
+    Object.keys(TREE).forEach(function (key) {
+      (TREE[key] || []).forEach(function (f) {
+        if (f && map[f.name]) f.name = map[f.name];
+      });
+    });
+    NESTED.forEach(function (f) { if (map[f.name]) f.name = map[f.name]; });
+  }
   function render(folder) {
+    applyStoredFileRenames();
     current = folder;
     crumbHere.textContent = folder;
     document.querySelectorAll('.tree-item[data-folder]').forEach(function (b) {

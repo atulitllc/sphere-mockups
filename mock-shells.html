@@ -2035,22 +2035,29 @@
       var field = block.dataset.field;
       var valEl = block.querySelector('.block-value');
       if (field === 'program') {
-        var sh = selectedShell();
-        if (sh && canonStatus(sh.status) === 'Final') {
-          showToast('Program name is locked while the shell is Final.');
+        var shLock = selectedShell();
+        if (shLock && programNameLocked(shLock)) {
+          showToast('Program name can be changed only while the shell is Draft and not in the Tracker.');
           return;
         }
       }
       startTextEdit(valEl, function () { return state[field]; }, function (v) {
         if (field === 'program') {
+          var sh = selectedShell();
           var name = String(v || '').trim();
-          if (name && !/^[A-Za-z]/.test(name)) {
-            showToast('Program name must start with a letter.');
+          var problem = validateProgramName(name, sh && sh.id);
+          if (problem) {
+            showToast(problem);
             return;
           }
+          var oldName = String(state.program || '').trim();
+          state.program = name;
+          if (sh && oldName !== name) syncProgramRename(sh, oldName, name);
+          persistEditorToSelected();
+          return;
         }
         state[field] = v;
-        if (field === 'footnotes' || field === 'program') persistEditorToSelected();
+        if (field === 'footnotes') persistEditorToSelected();
       });
     });
   });
@@ -2845,6 +2852,44 @@
     try { persistEditorToSelected(); persistCatalog(); } catch (e) {}
   });
 
+  function shellProgramName(sh) {
+    return String((sh && sh.layout && sh.layout.program) || '').trim();
+  }
+  function validateProgramName(name, exceptId) {
+    if (!name) return '';
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+      if (/^[0-9]/.test(name)) return 'Program name must start with a letter or an underscore, not a digit.';
+      return 'Program name may contain only letters, digits, and underscore.';
+    }
+    if (name.length > 32) return 'Program name must be at most 32 characters.';
+    var low = name.toLowerCase();
+    var dup = currentShells().some(function (sh) {
+      return sh.id !== exceptId && shellProgramName(sh).toLowerCase() === low;
+    });
+    if (dup) return 'Program name must be unique in this study.';
+    return '';
+  }
+  function programNameLocked(sh) {
+    if (!sh) return false;
+    var draft = canonStatus(sh.status) === 'Draft';
+    var inTracker = isTrackerLinked(sh);
+    if (draft && !inTracker) return false;
+    var admin = window.SPHERE_ACCESS && SPHERE_ACCESS.isAdmin && SPHERE_ACCESS.isAdmin();
+    return !admin;
+  }
+  function syncProgramRename(sh, oldName, newName) {
+    if (!sh || !newName || oldName === newName) return;
+    if (window.SPHERE_DEMO && SPHERE_DEMO.renameProgram) {
+      SPHERE_DEMO.renameProgram({
+        study: CURRENT_STUDY,
+        shellId: sh.id,
+        number: sh.number,
+        oldName: oldName,
+        newName: newName,
+        user: statusUser()
+      });
+    }
+  }
   function isLinkedExisting(sh) {
     return CURRENT_STUDY === 'ONC-204-301' && !sh.syncedAt && !sh.autoNumber && TRACKER_LINKED.indexOf(String(sh.number)) >= 0;
   }
@@ -2932,9 +2977,9 @@
     if (stSel && sh) stSel.setAttribute('data-status', (sh.status || 'Draft').toLowerCase().replace(/\s+/g, '-'));
     var progBlock = document.querySelector('.sheet-block[data-field="program"]');
     if (progBlock) {
-      var lockedName = !!(sh && canonStatus(sh.status) === 'Final');
+      var lockedName = !!(sh && programNameLocked(sh));
       progBlock.classList.toggle('is-locked-field', lockedName);
-      progBlock.title = lockedName ? 'Program name is locked while the shell is Final.' : '';
+      progBlock.title = lockedName ? 'Program name can be changed only while the shell is Draft and not in the Tracker.' : '';
     }
     if (badge) {
       var v = 'v' + ((sh && sh.version) || '0.1');
