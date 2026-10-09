@@ -255,6 +255,7 @@
                 <button class="btn icon-btn accent-icon" type="button" id="btnMetadata" title="Metadata" aria-label="Metadata">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 16h18M9 4v16M15 4v16"/></svg>
                 </button>
+                <button class="btn sm" type="button" id="btnExportPdf">Export PDF</button>
                 <button class="btn icon-btn accent-icon" type="button" id="btnCopyShell" title="Copy to study" aria-label="Copy to study">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
                 </button>
@@ -3518,6 +3519,97 @@
     else renderCatalog();
   }
 
+  function pdfEscape(s) {
+    return String(s || '').replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/[^\x20-\x7E]/g, '?');
+  }
+  function shellExportLines(sh) {
+    var live = selectedShell() && selectedShell().id === sh.id;
+    var lay = live ? {
+      title: state.title, subtitle: state.subtitle, columns: state.columns, rows: state.rows,
+      footnotes: state.footnotes, notes: state.notes, program: state.program
+    } : (sh.layout || {});
+    var lines = [
+      (sh.type || 'Table') + ' ' + (sh.number || ''),
+      sh.title || lay.title || '',
+      lay.subtitle || '',
+      'Status: ' + (sh.status || 'Draft'),
+      (lay.columns || []).join(' | ')
+    ];
+    (lay.rows || []).forEach(function (r) {
+      lines.push(((r && r.label) || '') + '  ' + ((r && r.cells) || []).join(' | '));
+    });
+    String(lay.footnotes || '').split('\n').forEach(function (line) { lines.push(line); });
+    if (lay.notes) lines.push('Notes: ' + lay.notes);
+    if (lay.program) lines.push('Program: ' + lay.program);
+    return lines;
+  }
+  function shellsForExport() {
+    var ids = catalogSelectedIds && catalogSelectedIds.length ? catalogSelectedIds.slice() : [];
+    if (!ids.length && selectedShell()) ids = [selectedShell().id];
+    var shells = ids.map(findShell).filter(Boolean);
+    if (!shells.length && selectedShell()) shells = [selectedShell()];
+    return shells;
+  }
+  function buildPdf(pageLines) {
+    var parts = [];
+    var len = 0;
+    function push(s) { parts.push(s); len += s.length; }
+    var offsets = [];
+    push('%PDF-1.4\n');
+    var n = pageLines.length || 1;
+    var pages = pageLines.length ? pageLines : [['Empty export']];
+    var fontId = 3 + pages.length * 2;
+    var kids = [];
+    for (var i = 0; i < pages.length; i++) kids.push((3 + i * 2) + ' 0 R');
+    var bodies = [];
+    bodies[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+    bodies[2] = '<< /Type /Pages /Count ' + pages.length + ' /Kids [' + kids.join(' ') + '] >>';
+    pages.forEach(function (lines, i) {
+      var stream = 'BT /F1 11 Tf 54 740 Td 14 TL\n';
+      lines.slice(0, 46).forEach(function (line, li) {
+        stream += (li ? 'T*\n' : '') + '(' + pdfEscape(line).slice(0, 110) + ') Tj\n';
+      });
+      stream += 'ET';
+      var pageId = 3 + i * 2;
+      var contentId = pageId + 1;
+      bodies[pageId] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ' + contentId + ' 0 R /Resources << /Font << /F1 ' + fontId + ' 0 R >> >> >>';
+      bodies[contentId] = '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream';
+    });
+    bodies[fontId] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>';
+    var count = fontId;
+    for (var id = 1; id <= count; id++) {
+      offsets[id] = len;
+      push(id + ' 0 obj\n' + bodies[id] + '\nendobj\n');
+    }
+    var xrefAt = len;
+    var xref = 'xref\n0 ' + (count + 1) + '\n0000000000 65535 f \n';
+    for (var xi = 1; xi <= count; xi++) {
+      var off = String(offsets[xi]);
+      while (off.length < 10) off = '0' + off;
+      xref += off + ' 00000 n \n';
+    }
+    push(xref);
+    push('trailer << /Size ' + (count + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefAt + '\n%%EOF');
+    return parts.join('');
+  }
+  function downloadText(name, mime, text) {
+    var blob = new Blob([text], { type: mime });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  var btnExportPdf = document.getElementById('btnExportPdf');
+  if (btnExportPdf) btnExportPdf.addEventListener('click', function () {
+    persistEditorToSelected();
+    var shells = shellsForExport();
+    if (!shells.length) { showToast('Select a shell to export'); return; }
+    var name = shells.length === 1 ? ('shell-' + String(shells[0].number).replace(/[^\d.]+/g, '') + '.pdf') : ('shells-' + shells.length + '.pdf');
+    downloadText(name, 'application/pdf', buildPdf(shells.map(shellExportLines)));
+    showToast('PDF downloaded · ' + shells.length + ' shell' + (shells.length === 1 ? '' : 's'));
+  });
   document.getElementById('btnCopyShell').addEventListener('click', openCopyModal);
   document.getElementById('copyClose').addEventListener('click', closeCopyModal);
   document.getElementById('copyCancel').addEventListener('click', closeCopyModal);
