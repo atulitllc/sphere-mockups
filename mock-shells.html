@@ -256,6 +256,8 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 16h18M9 4v16M15 4v16"/></svg>
                 </button>
                 <button class="btn sm" type="button" id="btnExportPdf">Export PDF</button>
+                <button class="btn sm" type="button" id="btnExportWord">Export Word</button>
+                <button class="btn sm" type="button" id="btnExportRtf">Export RTF</button>
                 <button class="btn icon-btn accent-icon" type="button" id="btnCopyShell" title="Copy to study" aria-label="Copy to study">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
                 </button>
@@ -3610,6 +3612,36 @@
     downloadText(name, 'application/pdf', buildPdf(shells.map(shellExportLines)));
     showToast('PDF downloaded · ' + shells.length + ' shell' + (shells.length === 1 ? '' : 's'));
   });
+  function buildRtf(shells) {
+    var body = shells.map(function (sh) {
+      return shellExportLines(sh).map(function (l) {
+        return pdfEscape(l) + '\\par';
+      }).join('\n') + '\\page';
+    }).join('\n');
+    return '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Helvetica;}}\n\\f0\\fs22\n' + body + '\n}';
+  }
+  function buildWordHtml(shells) {
+    var pages = shells.map(function (sh) {
+      return '<div style="page-break-after:always">' + shellExportLines(sh).map(function (l) {
+        return '<p>' + escapeHtml(l) + '</p>';
+      }).join('') + '</div>';
+    }).join('');
+    return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Mock shells</title></head><body>' + pages + '</body></html>';
+  }
+  function bindExport(id, ext, mime, build, label) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      persistEditorToSelected();
+      var shells = shellsForExport();
+      if (!shells.length) { showToast('Select a shell to export'); return; }
+      var name = shells.length === 1 ? ('shell-' + String(shells[0].number).replace(/[^\d.]+/g, '') + '.' + ext) : ('shells-' + shells.length + '.' + ext);
+      downloadText(name, mime, build(shells));
+      showToast(label + ' downloaded · ' + shells.length + ' shell' + (shells.length === 1 ? '' : 's'));
+    });
+  }
+  bindExport('btnExportWord', 'doc', 'application/msword', buildWordHtml, 'Word');
+  bindExport('btnExportRtf', 'rtf', 'application/rtf', buildRtf, 'RTF');
   document.getElementById('btnCopyShell').addEventListener('click', openCopyModal);
   document.getElementById('copyClose').addEventListener('click', closeCopyModal);
   document.getElementById('copyCancel').addEventListener('click', closeCopyModal);
