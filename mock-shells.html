@@ -398,58 +398,20 @@
   <div class="modal copy-modal">
     <div class="modal-head">
       <div>
-        <h2 id="copyTitle">Copy to study…</h2>
-        <div class="hint">Creates a <strong>new draft</strong> in the target study. Same tenant only. Lock, QC, approve, and generated Word/RTF are never copied.</div>
+        <h2 id="copyTitle">Copy shell</h2>
+        <div class="hint" id="copyHint">Choose one or more destinations. Copies are created as Draft.</div>
       </div>
       <button class="btn ghost sm" type="button" id="copyClose" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
-      <div class="copy-rules">
-        <strong>What copies</strong>
-        <ul>
-          <li>Grid layout (rows / cols / indent), title, type, analysis set, footnotes, programming notes</li>
-          <li>Program name as <span class="muted">editable text only</span> (not bound to the source file)</li>
-        </ul>
-        <strong style="display:block;margin-top:8px">What does not</strong>
-        <ul>
-          <li class="muted">Lock / QC / approve state · generated .docx / .rtf (Generate again in target) · programs &amp; files · cross-tenant studies</li>
-        </ul>
-      </div>
-
       <div class="copy-field">
-        <span>Target study <span class="muted">(open + create permission · same tenant)</span></span>
-        <ul class="study-pick-list" id="copyStudyList" role="radiogroup" aria-label="Target study"></ul>
-        <span class="field-hint">Only studies you can open in X Pharma are listed. Cross-tenant copy is not allowed.</span>
+        <span>Destinations <span class="muted">(compound / protocol / folder from Admin)</span></span>
+        <ul class="study-pick-list" id="copyStudyList" role="group" aria-label="Copy destinations"></ul>
       </div>
-
-      <div class="modal-inline-warn" id="copyTemplateWarn">
-        <strong>Template missing in target.</strong> Shell will be saved as <strong>Custom</strong> with a warning banner in the target study.
-      </div>
-
-      <div class="copy-field">
-        <label for="copyNumber">New shell number <span class="muted">(optional override)</span></label>
-        <input type="text" id="copyNumber" autocomplete="off" />
-        <span class="field-hint">Always assigned a new draft id in the target catalog — never reuses lock/QC ids.</span>
-      </div>
-
-      <div class="copy-field">
-        <label for="copyTitleInput">New title <span class="muted">(optional override)</span></label>
-        <input type="text" id="copyTitleInput" autocomplete="off" />
-      </div>
-
-      <div class="copy-field">
-        <label for="copyProgram">Program name <span class="muted">(editable text)</span></label>
-        <input type="text" id="copyProgram" autocomplete="off" placeholder="e.g. t_14_1_1_demog.sas" />
-        <span class="field-hint">Copied as text only — not linked to the source study file. Clear if you want a blank name.</span>
-      </div>
-
-      <div class="copy-field">
-        <span>SAP / aCRF references</span>
-        <label style="display:flex;align-items:flex-start;gap:8px;font-weight:500;color:var(--text);font-size:13px;cursor:pointer">
-          <input type="checkbox" id="copyClearRefs" checked style="width:auto;margin-top:3px;accent-color:var(--accent)" />
-          <span>Clear refs in target <span class="muted">(default — no invented paths; otherwise mark “ref not linked in target”)</span></span>
-        </label>
-      </div>
+      <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
+        <input type="checkbox" id="copyTrackerToo" />
+        Also copy linked Tracker records as Draft
+      </label>
     </div>
     <div class="modal-foot">
       <button class="btn" type="button" id="copyCancel">Cancel</button>
@@ -3365,46 +3327,61 @@
     return meta.templates.indexOf(templateKey) >= 0;
   }
 
-  function refreshTemplateWarn() {
-    var checked = copyStudyList.querySelector('input[name="copyStudy"]:checked');
-    var src = selectedShell();
-    var key = (src && (src.templateKey || state.templateKey)) || '';
-    if (!checked || !key || state.custom) {
-      copyTemplateWarn.classList.remove('show');
-      return;
-    }
-    if (!targetHasTemplate(checked.value, key)) copyTemplateWarn.classList.add('show');
-    else copyTemplateWarn.classList.remove('show');
+  var pendingCopyIds = null;
+  function copyDestinations() {
+    var L = window.SPHERE_LAYOUT;
+    var folders = L && L.get ? (L.get().subfolders || []).slice() : [];
+    var out = [];
+    var seen = {};
+    adminStudies().forEach(function (s) {
+      var names = [];
+      if (s.deliverable) names.push(s.deliverable);
+      folders.forEach(function (f) {
+        if (names.indexOf(f) < 0) names.push(f);
+      });
+      if (!names.length) names.push('CSR');
+      names.forEach(function (folder) {
+        var id = s.id + '|' + folder;
+        if (seen[id]) return;
+        seen[id] = 1;
+        out.push({
+          id: id,
+          studyId: s.id,
+          folder: folder,
+          compound: s.compound || '',
+          protocol: s.protocol || s.id,
+          label: [s.compound, s.protocol || s.id, folder].filter(Boolean).join(' / ')
+        });
+      });
+    });
+    return out;
   }
 
-  function openCopyModal() {
+  function openCopyModal(ids) {
     persistEditorToSelected();
-    var src = selectedShell();
-    if (!src) {
+    var list = ids && ids.length ? ids.slice() : (selectedShell() ? [selectedShell().id] : []);
+    list = list.filter(function (id) { return !!findShell(id); });
+    if (!list.length) {
       showToast('Select a shell to copy');
       return;
     }
-    var targets = eligibleTargets();
+    pendingCopyIds = list;
+    var targets = copyDestinations();
     if (!targets.length) {
-      showToast('No eligible target studies (need open + create, same tenant)');
+      showToast('No destinations in the Admin compound, protocol, and folder layout');
       return;
     }
-    copyStudyList.innerHTML = targets.map(function (s, i) {
-      var idLine = (s.protocol || s.id) + (s.deliverable ? ' · ' + s.deliverable : '');
-      return '<li><label><input type="radio" name="copyStudy" value="' + escapeHtml(s.id) + '"' +
-        (i === 0 ? ' checked' : '') + ' />' +
-        '<span class="study-pick-meta"><span class="study-pick-id">' + escapeHtml(idLine) + '</span>' +
-        '<span class="study-pick-title">' + escapeHtml(s.title) + '</span>' +
-        '<span class="study-pick-perm">' + escapeHtml(s.path || 'Study Admin') + ' · ' + escapeHtml(s.tenant) + '</span></span></label></li>';
+    copyStudyList.innerHTML = targets.map(function (s) {
+      return '<li><label><input type="checkbox" name="copyDest" value="' + escapeHtml(s.id) + '" data-study="' + escapeHtml(s.studyId) + '" data-folder="' + escapeHtml(s.folder) + '" />' +
+        '<span class="study-pick-meta"><span class="study-pick-id">' + escapeHtml(s.label) + '</span>' +
+        '<span class="study-pick-title">' + escapeHtml(s.compound) + ' · ' + escapeHtml(s.protocol) + ' · ' + escapeHtml(s.folder) + '</span></span></label></li>';
     }).join('');
-    document.getElementById('copyNumber').value = src.number;
-    document.getElementById('copyTitleInput').value = src.title;
-    document.getElementById('copyProgram').value = state.program || (src.layout && src.layout.program) || '';
-    document.getElementById('copyClearRefs').checked = true;
-    copyStudyList.querySelectorAll('input[name="copyStudy"]').forEach(function (r) {
-      r.addEventListener('change', refreshTemplateWarn);
-    });
-    refreshTemplateWarn();
+    var tracker = document.getElementById('copyTrackerToo');
+    if (tracker) tracker.checked = false;
+    var hint = document.getElementById('copyHint');
+    if (hint) hint.textContent = list.length > 1
+      ? ('Copy ' + list.length + ' shells. Choose one or more destinations. Copies are Draft.')
+      : 'Choose one or more destinations. Copies are created as Draft.';
     copyModal.removeAttribute('hidden');
   }
 
@@ -3429,91 +3406,114 @@
     return { id: unique, number: id };
   }
 
-  function performCopy() {
-    var checked = copyStudyList.querySelector('input[name="copyStudy"]:checked');
-    if (!checked) {
-      showToast('Choose a target study');
-      return;
-    }
-    var targetId = checked.value;
-    if (!studyStore[targetId]) studyStore[targetId] = { shells: seedCatalog(targetId), selectedId: null };
-    var target = studyMeta(targetId);
-    if (!target || target.tenant !== CURRENT_TENANT || !target.canOpen || !target.canCreate) {
-      showToast('Target not allowed (permissions / tenant)');
-      return;
-    }
-    persistEditorToSelected();
-    var src = selectedShell();
-    if (!src) return;
-
-    var numOverride = document.getElementById('copyNumber').value.trim();
-    var titleOverride = document.getElementById('copyTitleInput').value.trim();
-    var programText = document.getElementById('copyProgram').value.trim();
-    var clearRefs = document.getElementById('copyClearRefs').checked;
-
-    var ids = nextDraftId(targetId, numOverride || src.number);
-    var templateKey = src.templateKey || state.templateKey || '';
-    var missing = !src.custom && !!templateKey && !targetHasTemplate(targetId, templateKey);
-
-    var layout = {
-      title: titleOverride || state.title || src.title,
+  function shellSnapshot(src) {
+    var live = selectedShell() && selectedShell().id === src.id;
+    var lay = live ? {
+      title: state.title || src.title,
       subtitle: state.subtitle,
       columns: cloneData(state.columns),
       colGroups: cloneData(state.colGroups || []),
       rows: cloneData(state.rows),
       footnotes: state.footnotes,
       notes: state.notes,
-      program: programText, /* editable text only — not bound to source file */
-      sapRef: clearRefs
-        ? ''
-        : ((state.sapRef || (src.layout && src.layout.sapRef) || '')
-          ? 'Ref not linked in target'
-          : ''),
-      templateKey: missing ? '' : templateKey,
-      custom: missing ? true : !!src.custom
+      program: state.program || (src.layout && src.layout.program) || '',
+      sapRef: '',
+      templateKey: src.templateKey || state.templateKey || '',
+      custom: !!src.custom
+    } : cloneData(src.layout || blankLayout(src.title));
+    lay.sapRef = '';
+    return lay;
+  }
+  function copyTrackerDraft(src, draft) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.addRecord) return;
+    var linked = src.syncedAt || src.recordId || isTrackerLinked(src);
+    if (!linked) return;
+    var existing = (SPHERE_DEMO.records() || []).filter(function (r) {
+      return r.shellId === src.id || String(r.number) === String(src.number);
+    })[0];
+    var rec = existing ? JSON.parse(JSON.stringify(existing)) : {
+      title: draft.title,
+      number: draft.number,
+      program: (draft.layout && draft.layout.program) || '',
+      type: draft.type || 'Table'
     };
-
-    var draft = makeShell({
-      id: ids.id,
-      number: ids.number,
-      type: src.type || document.getElementById('metaType').value || 'Table',
-      title: titleOverride || src.title,
-      status: 'Draft', /* NEVER copy lock/QC/approve */
-      analysisSet: document.getElementById('metaSet').value || src.analysisSet || 'Safety',
-      sap: src.sap || DEFAULT_SAP,
-      locked: false,
-      qc: null,
-      approved: false,
-      custom: layout.custom,
-      templateKey: layout.templateKey,
-      templateMissing: missing,
-      automate: !!src.automate,
-      metadata: cloneData(src.metadata || []),
-      layout: layout,
-      copiedFrom: { study: CURRENT_STUDY, shellId: src.id, shellNumber: src.number }
+    rec.id = 'rec-copy-' + draft.id;
+    rec.shellId = draft.id;
+    rec.number = draft.number;
+    rec.title = draft.title;
+    rec.status = 'Draft';
+    rec.history = [{ at: SPHERE_DEMO.stamp(), action: 'Copied as Draft', status: 'Draft', person: SPHERE_DEMO.CURRENT_USER, note: 'Copied with shell ' + src.number }];
+    SPHERE_DEMO.addRecord(rec);
+  }
+  function performCopy() {
+    var boxes = copyStudyList.querySelectorAll('input[name="copyDest"]:checked');
+    if (!boxes.length) {
+      showToast('Choose at least one destination');
+      return;
+    }
+    persistEditorToSelected();
+    var sources = (pendingCopyIds || []).map(findShell).filter(Boolean);
+    if (!sources.length) {
+      showToast('Select a shell to copy');
+      return;
+    }
+    var alsoTracker = !!(document.getElementById('copyTrackerToo') && document.getElementById('copyTrackerToo').checked);
+    var made = 0;
+    var firstStudy = '';
+    Array.prototype.forEach.call(boxes, function (box) {
+      var targetId = box.getAttribute('data-study');
+      var folder = box.getAttribute('data-folder') || '';
+      var target = studyMeta(targetId);
+      if (!target || target.tenant !== CURRENT_TENANT || target.canOpen === false || target.canCreate === false) return;
+      if (!studyStore[targetId]) studyStore[targetId] = { shells: seedCatalog(targetId), selectedId: null };
+      sources.forEach(function (src) {
+        var ids = nextDraftId(targetId, src.number);
+        var templateKey = src.templateKey || '';
+        var missing = !src.custom && !!templateKey && !targetHasTemplate(targetId, templateKey);
+        var layout = shellSnapshot(src);
+        layout.templateKey = missing ? '' : (layout.templateKey || templateKey);
+        layout.custom = missing ? true : !!layout.custom;
+        var draft = makeShell({
+          id: ids.id,
+          number: ids.number,
+          type: src.type || 'Table',
+          title: layout.title || src.title,
+          status: 'Draft',
+          analysisSet: src.analysisSet || 'Safety',
+          sap: src.sap || DEFAULT_SAP,
+          locked: false,
+          qc: null,
+          approved: false,
+          custom: layout.custom,
+          templateKey: layout.templateKey,
+          templateMissing: missing,
+          automate: !!src.automate,
+          metadata: cloneData(src.metadata || []),
+          layout: layout,
+          destFolder: folder,
+          copiedFrom: { study: CURRENT_STUDY, shellId: src.id, shellNumber: src.number, folder: folder }
+        });
+        draft.generatedOutputs = [];
+        studyStore[targetId].shells.push(draft);
+        studyStore[targetId].selectedId = draft.id;
+        if (alsoTracker) copyTrackerDraft(src, draft);
+        made++;
+        if (!firstStudy) firstStudy = targetId;
+      });
     });
-    /* Explicit: no generated outputs accompany the copy */
-    draft.generatedOutputs = [];
-
-    studyStore[targetId].shells.push(draft);
-    studyStore[targetId].selectedId = draft.id;
-
     closeCopyModal();
-
-    var msg = 'Copied to ' + targetId + ' as draft';
+    if (!made) {
+      showToast('No copies were created');
+      return;
+    }
+    var msg = 'Copied ' + sources.length + ' shell' + (sources.length === 1 ? '' : 's') + ' to ' + boxes.length + ' destination' + (boxes.length === 1 ? '' : 's') + ' as Draft';
     showToast(msg);
-
     var banner = document.getElementById('copySuccessBanner');
     var text = document.getElementById('copySuccessText');
-    var hint = document.getElementById('copySuccessHint');
     if (text) text.textContent = msg;
-    if (hint) {
-      hint.textContent = 'New draft ' + draft.number + ' · layout/title/type/analysis set/footnotes/notes copied. Lock/QC/approve and .docx/.rtf not copied — Generate again in target. Audit (source → target) later.';
-    }
     if (banner) banner.classList.add('show');
-
-    /* Switch into target so the draft is immediately tryable */
-    switchStudy(targetId);
+    if (firstStudy && firstStudy !== CURRENT_STUDY) switchStudy(firstStudy);
+    else renderCatalog();
   }
 
   document.getElementById('btnCopyShell').addEventListener('click', openCopyModal);

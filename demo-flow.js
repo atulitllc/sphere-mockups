@@ -262,6 +262,13 @@
     getShells: function (study) { var s = read(); return s.shells[study || STUDY] || null; },
     setShells: function (study, shells) { var s = read(); s.shells[study || STUDY] = shells; write(s); },
     records: function () { return read().records; },
+    addRecord: function (rec) {
+      var s = read();
+      s.records = s.records || [];
+      s.records.push(rec);
+      write(s);
+      return rec;
+    },
     record: function (id) { return read().records.filter(function (r) { return r.id === id; })[0] || null; },
     recordByProgram: function (prog) { return read().records.filter(function (r) { return r.program === prog; })[0] || null; },
     updateRecord: function (id, fn) {

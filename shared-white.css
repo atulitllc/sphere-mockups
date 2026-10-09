@@ -3557,7 +3557,7 @@ label .req::after { content: " *"; color: var(--danger); }
   gap: 8px;
   flex-shrink: 0;
 }
-.modal.copy-modal { width: min(520px, 100%); max-height: min(88vh, 720px); }
+.modal.copy-modal { width: min(840px, 100%); max-height: min(88vh, 720px); }
 .copy-field {
   display: flex;
   flex-direction: column;
