@@ -34,6 +34,7 @@
 })();
 </script>
 <script src="study-layout.js?v=flow3j"></script>
+<script src="sphere-access.js?v=flow4c"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -637,6 +638,11 @@
                 </div>
               </div>
 
+              <div class="card" style="margin-top:14px" id="compoundLeadsCard">
+                <div class="card-head"><span class="title-row">Compound leads</span></div>
+                <p class="hint" style="margin:0 16px 10px">Only Admin assigns or removes compound leads. File Explorer keeps the label Manage Access.</p>
+                <div id="compoundLeads"></div>
+              </div>
               <div class="card" style="margin-top:14px">
                 <div class="card-head">
                   <span class="title-row">Teams</span>
@@ -1362,6 +1368,53 @@
     else setTimeout(boot, 30);
   }
   boot();
+})();
+</script>
+<script>
+(function () {
+  var A = window.SPHERE_ACCESS;
+  var L = window.SPHERE_LAYOUT;
+  var box = document.getElementById('compoundLeads');
+  if (!A || !box) return;
+  function paint() {
+    var me = A.current();
+    var compounds = [];
+    if (L) L.registry().forEach(function (e) { if (e.compound && compounds.indexOf(e.compound) < 0) compounds.push(e.compound); });
+    var who = '<p class="hint" style="margin:0 16px 8px">Signed in as ' + me.name + (me.admin ? ' (Admin)' : '') + '.</p>';
+    if (!me.admin) {
+      box.innerHTML = who + '<p class="hint" style="margin:0 16px 12px">No control to add or remove compound leads.</p>';
+      return;
+    }
+    box.innerHTML = who + compounds.map(function (c) {
+      var leads = A.leads(c);
+      var opts = A.users().map(function (u) { return '<option value="' + u.id + '">' + u.name + '</option>'; }).join('');
+      var companyOpts = ['X Pharma', 'Amisoft Solutions'].map(function (n) { return '<option>' + n + '</option>'; }).join('');
+      return '<div style="padding:8px 16px" data-compound="' + c + '"><strong>' + c + '</strong> leads: ' +
+        (leads.map(function (id) {
+          var u = A.users().filter(function (x) { return x.id === id; })[0];
+          return (u ? u.name : id) + ' <button type="button" class="btn sm" data-remove="' + id + '">Remove</button>';
+        }).join(' ') || 'none') +
+        ' <select data-add>' + opts + '</select> <button type="button" class="btn sm" data-assign>Assign</button>' +
+        '<div style="margin-top:6px">Company for selected user <select data-company>' + companyOpts + '</select> <button type="button" class="btn sm" data-company-btn>Change company</button></div></div>';
+    }).join('');
+  }
+  box.addEventListener('click', function (e) {
+    var row = e.target.closest('[data-compound]');
+    if (!row) return;
+    var c = row.getAttribute('data-compound');
+    try {
+      if (e.target.hasAttribute('data-assign')) A.assignLead(c, row.querySelector('[data-add]').value);
+      var rm = e.target.getAttribute('data-remove');
+      if (rm) A.removeLead(c, rm);
+      if (e.target.hasAttribute('data-company-btn')) {
+        A.changeCompany(row.querySelector('[data-add]').value, row.querySelector('[data-company]').value);
+      }
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+    }
+    paint();
+  });
+  paint();
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>

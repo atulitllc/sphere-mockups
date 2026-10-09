@@ -35,6 +35,7 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4c"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -169,7 +170,7 @@
                     <th>Type</th>
                     <th>Size</th>
                     <th>Modified</th>
-                    <th class="col-access">Share access</th>
+                    <th class="col-access">Access</th>
                     <th class="col-more" aria-label="Actions"></th>
                   </tr>
                 </thead>
@@ -204,6 +205,13 @@
         <span>↓</span>
         <div>Permissions <strong>inherit</strong> down the study tree. Child folders/files start from this ACL unless overridden. Teams are defined in <a href="admin.html?panel=users">Admin → Users &amp; roles / Teams</a>.</div>
       </div>
+      <label>Level
+        <select id="accessLevel" aria-label="Access level">
+          <option value="compound">Compound</option>
+          <option value="protocol">Protocol</option>
+          <option value="folder" selected>Folder</option>
+        </select>
+      </label>
       <div class="access-add" id="accessAddRow">
         <select id="accessAddWho" aria-label="Add user or team">
           <option value="">Add user or team…</option>
@@ -589,6 +597,13 @@
   }
 
   function openAccess(target) {
+    if (target && target.kind === 'file') return;
+    try {
+      if (window.SPHERE_ACCESS) SPHERE_ACCESS.assertManage(window.SPHERE_filesCompound || '');
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+      return;
+    }
     if (target) target.frozen = false;
     closeCtx();
     accessTarget = target;
@@ -641,9 +656,41 @@
     accessTarget = null;
   }
 
-  document.getElementById('btnManageFolder').addEventListener('click', function () {
+  function syncManage() {
+    var ok = window.SPHERE_ACCESS ? SPHERE_ACCESS.canManage(window.SPHERE_filesCompound || '') : false;
+    var btn = document.getElementById('btnManageFolder');
+    var host = document.querySelector('.files-actions');
+    var item = document.querySelector('#ctxMenu [data-action="manage"]');
+    if (!ok) {
+      if (btn) btn.remove();
+      if (item) item.remove();
+      return;
+    }
+    if (!btn && host) {
+      btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.type = 'button';
+      btn.id = 'btnManageFolder';
+      btn.textContent = 'Manage access';
+      host.appendChild(btn);
+      btn.addEventListener('click', function () {
+        openAccess({ kind: 'folder', folder: current, name: current, frozen: folderHasFrozen(current) });
+      });
+    }
+    if (!item) {
+      item = document.createElement('button');
+      item.type = 'button';
+      item.setAttribute('data-action', 'manage');
+      item.setAttribute('role', 'menuitem');
+      item.textContent = 'Manage access…';
+      ctxMenu.insertBefore(item, ctxMenu.firstChild);
+    }
+  }
+  var manageBtn = document.getElementById('btnManageFolder');
+  if (manageBtn) manageBtn.addEventListener('click', function () {
     openAccess({ kind: 'folder', folder: current, name: current, frozen: folderHasFrozen(current) });
   });
+  syncManage();
 
   bodyEl.addEventListener('click', function (e) {
     var more = e.target.closest('.row-more');
@@ -741,6 +788,18 @@
   document.getElementById('accessClose').addEventListener('click', closeAccess);
   document.getElementById('accessCancel').addEventListener('click', closeAccess);
   document.getElementById('accessSave').addEventListener('click', function () {
+    var levelEl = document.getElementById('accessLevel');
+    var level = levelEl ? levelEl.value : 'folder';
+    try {
+      if (window.SPHERE_ACCESS) {
+        SPHERE_ACCESS.setFolderAccess(window.SPHERE_filesCompound || '', level, (window.SPHERE_filesPath || '') + (accessTarget && accessTarget.folder || current), (accessTarget && accessTarget.rows || []).map(function (r) {
+          return { userId: r.name, role: r.role };
+        }));
+      }
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+      return;
+    }
     if (accessTarget && accessTarget.kind === 'folder' && !accessTarget.frozen) {
       FOLDER_ACL[accessTarget.folder || accessTarget.name] = accessTarget.rows.map(function (r) {
         return { kind: r.kind, name: r.name, meta: r.meta, role: r.role };
@@ -794,6 +853,8 @@
       reg.filter(function (e) { return e.current; })[0] || reg[0];
     if (!active) return;
     if (L.setCurrent) active = L.setCurrent(active) || active;
+    window.SPHERE_filesCompound = active.compound || '';
+    window.SPHERE_filesPath = activePath;
     var activePath = L.entryPath(active);
     var demoFiles = active.protocol === 'ONC-204-301' && active.deliverable === 'CSR';
     function link(e) { return 'files.html?path=' + encodeURIComponent(L.entryPath(e)); }
@@ -857,6 +918,7 @@
       (active.current ? ' · <span class="lt-badge cur">current</span>' : '') +
       (!demoFiles ? ' — folders created from the tenant study layout on ' + esc(active.created || 'today') : '') +
       ' · <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></span>';
+    if (typeof syncManage === 'function') syncManage();
   })();
 
   buildTree();
