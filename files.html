@@ -398,7 +398,7 @@
 
   var TREE = {
     raw: [
-      { name: 'edc_cut_2026-08-28', type: 'dir', size: '—', modified: '28 Aug 2026 · 9:14 AM ET' },
+      { name: 'edc_cut_2026-08-28', type: 'dir', size: '—', modified: '2026-08-28 09:14', snapshot: true, source: 'eClinical Solutions connector' },
       { name: 'ae.csv', type: 'csv', size: '2.4 MB', modified: '28 Aug 2026 · 9:20 AM ET' },
       { name: 'dm.sas7bdat', type: 'sas7bdat', size: '1.1 MB', modified: '28 Aug 2026 · 9:18 AM ET' },
       { name: 'lb_chem.sas7bdat', type: 'sas7bdat', size: '8.6 MB', modified: '27 Aug 2026 · 4:02 PM ET' }
@@ -586,10 +586,15 @@
           ? '<button type="button" class="row-more" data-name="' + f.name + '" aria-label="Actions for ' + f.name + '" aria-haspopup="menu">⋯</button>'
           : '<button type="button" class="row-more" data-name="' + f.name + '" aria-label="Actions for ' + f.name + '" aria-haspopup="menu">⋯</button>');
       var shown = searchQ && f.path ? f.path : f.name;
+      var inRaw = folder === 'raw' || folder === 'data/raw';
+      var nameSpan = (f.snapshot && inRaw)
+        ? '<span class="snapshot-name" title="' + String(f.source || 'Snapshot').replace(/"/g, '&quot;') + '">' + shown + '</span>'
+        : '<span>' + shown + '</span>';
+      var when = f.snapshot ? f.modified : String(f.modified || '').split('·')[0].trim();
       return '<tr' + cls + ' data-name="' + f.name + '" data-type="' + f.type + '"' + (f.frozen ? ' data-frozen="1"' : '') + '>' +
-        '<td><div class="fname-cell">' + icon + '<span>' + shown + '</span></div></td>' +
+        '<td><div class="fname-cell">' + icon + nameSpan + '</div></td>' +
         '<td><span class="type-pill ' + tc + '">.' + f.type + '</span></td>' +
-        '<td>' + String(f.modified || '').split('·')[0].trim() + '</td><td>' + f.modified + '</td><td>' + f.size + '</td>' +
+        '<td>' + when + '</td><td>' + (f.snapshot ? f.modified : f.modified) + '</td><td>' + f.size + '</td>' +
         '<td class="col-access">' + accessBadge(f) + '</td>' +
         '<td class="col-more">' + moreBtn + '</td></tr>';
     }).join('');
