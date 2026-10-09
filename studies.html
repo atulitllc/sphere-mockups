@@ -398,7 +398,7 @@
           </div>
           <label class="field field-span-2">
             <span class="field-label">Description</span>
-            <textarea class="field-input" id="nsDesc" name="description" rows="2" placeholder="Short study purpose, population, or analysis scope"></textarea>
+            <textarea class="field-input" id="nsDesc" name="description" rows="2" placeholder="CRO, purpose, population, or analysis scope"></textarea>
           </label>
           <label class="field" id="nsTypeField">
             <span class="field-label">Deliverable Type</span>
@@ -434,10 +434,6 @@
           <label class="field">
             <span class="field-label">Statistician</span>
             <input class="field-input" id="nsStat" name="statistician" type="text" placeholder="Lead biostatistician" />
-          </label>
-          <label class="field">
-            <span class="field-label">Sponsor</span>
-            <input class="field-input" id="nsSponsor" name="sponsor" type="text" value="X Pharma" />
           </label>
           <label class="field">
             <span class="field-label">FPFV</span>
@@ -706,8 +702,6 @@
     function resetForm() {
       if (!form) return;
       form.reset();
-      var sponsor = document.getElementById('nsSponsor');
-      if (sponsor) sponsor.value = 'X Pharma';
       ['Compound', 'Protocol', 'Deliverable'].forEach(function (seg) { var i = $('ns' + seg + 'New'); if (i) i.value = ''; });
       applyLevel();
       var cur = L && L.registry().filter(function (e) { return e.current; })[0];
@@ -883,7 +877,6 @@
           indication: (document.getElementById('nsIndication').value || '').trim(),
           lead: (document.getElementById('nsLead') && document.getElementById('nsLead').value || '').trim(),
           statistician: (document.getElementById('nsStat').value || '').trim(),
-          sponsor: (document.getElementById('nsSponsor').value || '').trim(),
           fpfv: document.getElementById('nsFpfv').value,
           lplv: document.getElementById('nsLplv').value,
           dblock: document.getElementById('nsDblock').value
@@ -892,7 +885,7 @@
         if (L) L.addStudy({
           compound: entry.compound, protocol: entry.protocol, deliverable: entry.deliverable,
           name: data.name, description: data.description, phase: data.phase, indication: data.indication,
-          lead: data.lead, statistician: data.statistician, sponsor: data.sponsor, type: type,
+          lead: data.lead, statistician: data.statistician, type: type,
           fpfv: data.fpfv, lplv: data.lplv, dblock: data.dblock
         });
         addStudy(data);
