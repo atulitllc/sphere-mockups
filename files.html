@@ -33,7 +33,8 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3j"></script>
+<script src="study-layout.js?v=flow4a"></script>
+<script src="ingest-store.js?v=flow4a"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -792,7 +793,9 @@
     var active = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
       reg.filter(function (e) { return e.current; })[0] || reg[0];
     if (!active) return;
+    if (L.setCurrent) active = L.setCurrent(active) || active;
     var activePath = L.entryPath(active);
+    var demoFiles = active.protocol === 'ONC-204-301' && active.deliverable === 'CSR';
     function link(e) { return 'files.html?path=' + encodeURIComponent(L.entryPath(e)); }
     var box = document.createElement('div');
     box.className = 'files-studies';
@@ -814,7 +817,7 @@
         rootBtn.remove();
       }
     }
-    if (!active.current) {
+    if (!demoFiles) {
       var when = active.created || 'today';
       FOLDERS.length = 0;
       L.get().subfolders.forEach(function (sf) {
@@ -824,8 +827,27 @@
       current = FOLDERS[0] ? FOLDERS[0].id : current;
       window.SPHERE_filesStartFolder = current;
     }
+    if (window.SPHERE_INGEST) {
+      SPHERE_INGEST.forStudy(activePath).forEach(function (it) {
+        var fid = SPHERE_INGEST.folderId(it.dest);
+        if (!fid) return;
+        if (fid === 'raw' && !FOLDERS.some(function (f) { return f.id === 'raw'; }) && FOLDERS.some(function (f) { return f.id === 'data/raw'; })) fid = 'data/raw';
+        if (!FOLDERS.some(function (f) { return f.id === fid; })) {
+          FOLDERS.push({ id: fid, count: '0', frozen: false, title: it.dest });
+          TREE[fid] = [];
+        }
+        TREE[fid] = TREE[fid] || [];
+        if (!TREE[fid].some(function (f) { return f.name === it.name; })) {
+          var ext = (String(it.name).split('.').pop() || 'file');
+          TREE[fid].unshift({ name: it.name, type: ext, size: it.sizeLabel || '—', modified: (it.modified || 'Uploaded') + ' · manual upload' });
+        }
+        var folder = FOLDERS.filter(function (f) { return f.id === fid; })[0];
+        if (folder) folder.count = String(TREE[fid].length);
+      });
+    }
     filesInfoLine('filesStudyNote', 1).innerHTML = '<span class="files-infobar-k">Study</span><span><strong>' + esc(active.name || activePath) + '</strong> · <code>' + esc(activePath) + '</code>' +
-      (active.current ? '' : ' — folders created from the tenant study layout on ' + esc(active.created || 'today')) +
+      (active.current ? ' · <span class="lt-badge cur">current</span>' : '') +
+      (!demoFiles ? ' — folders created from the tenant study layout on ' + esc(active.created || 'today') : '') +
       ' · <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></span>';
   })();
 

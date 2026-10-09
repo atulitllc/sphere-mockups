@@ -33,6 +33,8 @@
   } catch (e) {}
 })();
 </script>
+<script src="study-layout.js?v=flow4a"></script>
+<script src="ingest-store.js?v=flow4a"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -216,12 +218,37 @@
             <label><span class="req">Label</span>
               <input id="ingestLabel" placeholder="e.g. elluminate pull 2026-09-06" value="elluminate · ONC-204-301 raw domains" />
             </label>
-            <label>Target library
-              <select>
+            <label id="ingestTargetLabel">Target library
+              <select id="ingestTargetLib">
                 <option selected>Raw</option>
                 <option>SDTM (derived — usually via programs)</option>
               </select>
             </label>
+
+            <div id="manualUploadFields" hidden>
+              <label><span class="req">Destination</span>
+                <select id="manualDest" aria-label="Upload destination">
+                  <option value="Raw">Raw</option>
+                  <option value="SDTM">SDTM</option>
+                  <option value="ADaM">ADaM</option>
+                </select>
+              </label>
+              <div class="manual-browse">
+                <strong>Choose local files or a folder</strong>
+                <p class="hint" style="margin:6px 0 0">Selected files are listed before upload. Empty files, and a name already in the destination, are reported as errors. This prototype copies them in the browser only.</p>
+                <div class="manual-browse-row">
+                  <button class="btn" type="button" id="manualBrowseFiles">Browse files</button>
+                  <button class="btn" type="button" id="manualBrowseFolder">Browse folder</button>
+                </div>
+                <input type="file" id="manualFileInput" multiple hidden />
+                <input type="file" id="manualFolderInput" webkitdirectory directory multiple hidden />
+                <ul class="manual-file-list" id="manualSelected" hidden></ul>
+              </div>
+              <div id="manualResultsWrap" hidden>
+                <strong>Upload results</strong>
+                <ul class="manual-result-list" id="manualResults"></ul>
+              </div>
+            </div>
 
             <div id="eclinicalFields" class="connector-panel">
               <div class="hint" style="margin-bottom:10px"><strong>Connector pull (demo).</strong> Uses the client’s elluminate API credentials to copy selected study domains into SPHERE study storage under <code>Raw/</code>. Does not replace elluminate review — this is an ingest into our file share for programming.</div>
@@ -428,25 +455,139 @@
   var sel = document.getElementById('ingestSourceType');
   var eclin = document.getElementById('eclinicalFields');
   var drop = document.getElementById('fileDropFields');
+  var manual = document.getElementById('manualUploadFields');
+  var targetLabel = document.getElementById('ingestTargetLabel');
   var btn = document.getElementById('ingestPrimaryBtn');
   var label = document.getElementById('ingestLabel');
+  var pending = [];
   if (!sel) return;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function fmtSize(n) {
+    n = Number(n) || 0;
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+  function fileLabel(f) { return f.webkitRelativePath || f.name; }
+  function paintSelected() {
+    var ul = document.getElementById('manualSelected');
+    if (!ul) return;
+    if (!pending.length) { ul.hidden = true; ul.innerHTML = ''; return; }
+    ul.hidden = false;
+    ul.innerHTML = pending.map(function (p) {
+      return '<li><span>' + esc(fileLabel(p.file)) + '</span><span class="muted">' + fmtSize(p.file.size) + '</span></li>';
+    }).join('');
+  }
+  function addFiles(list) {
+    Array.prototype.forEach.call(list || [], function (f) {
+      var key = fileLabel(f) + '|' + f.size + '|' + f.lastModified;
+      if (pending.some(function (p) { return p.key === key; })) return;
+      pending.push({ key: key, file: f });
+    });
+    paintSelected();
+  }
+  function studyPath() {
+    var L = window.SPHERE_LAYOUT;
+    if (!L) return 'ONC-204-301/';
+    var e = L.openedStudy() || L.registry().filter(function (x) { return x.current; })[0];
+    return e ? L.entryPath(e) : 'ONC-204-301/';
+  }
+  function toast(msg) {
+    var el = document.createElement('div');
+    el.className = 'toast show';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 3200);
+  }
+  function doManualUpload() {
+    var destEl = document.getElementById('manualDest');
+    var dest = destEl ? destEl.value : 'Raw';
+    var wrap = document.getElementById('manualResultsWrap');
+    var results = document.getElementById('manualResults');
+    if (!['Raw', 'SDTM', 'ADaM'].some(function (d) { return d === dest; })) dest = 'Raw';
+    if (!pending.length) {
+      if (wrap) wrap.hidden = false;
+      if (results) results.innerHTML = '<li><span>No files selected</span><span class="st-bad">Failed · Choose files with Browse files or Browse folder.</span></li>';
+      return;
+    }
+    var path = studyPath();
+    var existing = window.SPHERE_INGEST ? SPHERE_INGEST.namesIn(path, dest).slice() : [];
+    var rows = [];
+    var stored = [];
+    pending.forEach(function (p) {
+      var f = p.file;
+      var err = '';
+      if (!f.size) err = 'File is empty and was not copied.';
+      else if (existing.indexOf(f.name) >= 0) err = 'A file named ' + f.name + ' is already in ' + dest + '.';
+      var status = err ? 'failed' : 'success';
+      if (status === 'success') existing.push(f.name);
+      rows.push({ label: fileLabel(f), status: status, error: err });
+      if (status === 'success') {
+        stored.push({
+          id: 'up-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+          studyPath: path,
+          dest: dest,
+          name: f.name,
+          size: f.size,
+          sizeLabel: fmtSize(f.size),
+          status: 'success',
+          error: '',
+          at: new Date().toISOString(),
+          modified: new Date().toLocaleString()
+        });
+      }
+    });
+    if (window.SPHERE_INGEST && stored.length) SPHERE_INGEST.add(stored);
+    if (wrap) wrap.hidden = false;
+    if (results) {
+      results.innerHTML = rows.map(function (r) {
+        var st = r.status === 'success' ? 'Success' : 'Failed';
+        return '<li><span>' + esc(r.label) + '</span><span class="' + (r.status === 'success' ? 'st-ok' : 'st-bad') + '">' +
+          st + (r.error ? ' · ' + esc(r.error) : ' · copied to ' + esc(dest)) + '</span></li>';
+      }).join('');
+    }
+    var ok = stored.length;
+    var bad = rows.length - ok;
+    toast('Upload ' + (bad ? (ok + ' copied, ' + bad + ' failed') : (ok + ' file' + (ok === 1 ? '' : 's') + ' copied to ' + dest)));
+    pending = [];
+    paintSelected();
+    var fileIn = document.getElementById('manualFileInput');
+    var dirIn = document.getElementById('manualFolderInput');
+    if (fileIn) fileIn.value = '';
+    if (dirIn) dirIn.value = '';
+  }
+
   function sync() {
     var isE = sel.value === 'eclinical';
+    var isManual = sel.value === 'manual';
     if (eclin) eclin.hidden = !isE;
-    if (drop) drop.hidden = isE;
+    if (drop) drop.hidden = isE || isManual;
+    if (manual) manual.hidden = !isManual;
+    if (targetLabel) targetLabel.hidden = isManual;
     if (btn) btn.textContent = isE ? 'Pull into Raw' : 'Upload';
     if (label && !label.dataset.touched) {
       label.placeholder = isE ? 'e.g. elluminate pull 2026-09-06' : 'e.g. EDC cut 2026-09-01';
     }
   }
-  if (label) {
-    label.addEventListener('input', function () { label.dataset.touched = '1'; });
-  }
+  if (label) label.addEventListener('input', function () { label.dataset.touched = '1'; });
   sel.addEventListener('change', sync);
   sync();
+
+  var browseFiles = document.getElementById('manualBrowseFiles');
+  var browseFolder = document.getElementById('manualBrowseFolder');
+  var fileIn = document.getElementById('manualFileInput');
+  var dirIn = document.getElementById('manualFolderInput');
+  if (browseFiles && fileIn) browseFiles.addEventListener('click', function () { fileIn.click(); });
+  if (browseFolder && dirIn) browseFolder.addEventListener('click', function () { dirIn.click(); });
+  if (fileIn) fileIn.addEventListener('change', function () { addFiles(fileIn.files); });
+  if (dirIn) dirIn.addEventListener('change', function () { addFiles(dirIn.files); });
+
   if (btn) {
     btn.addEventListener('click', function () {
+      if (sel.value === 'manual') { doManualUpload(); return; }
       if (sel.value !== 'eclinical') return;
       btn.disabled = true;
       var prev = btn.textContent;
@@ -454,11 +595,7 @@
       setTimeout(function () {
         btn.disabled = false;
         btn.textContent = prev;
-        var toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = 'Demo: pulled DM, AE, LB from elluminate into Raw/ (mock).';
-        document.body.appendChild(toast);
-        setTimeout(function () { toast.remove(); }, 3200);
+        toast('Demo: pulled DM, AE, LB from elluminate into Raw/ (mock).');
       }, 900);
     });
   }

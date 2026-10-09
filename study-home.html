@@ -33,7 +33,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3j"></script>
+<script src="study-layout.js?v=flow4a"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -387,9 +387,13 @@
   var e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
     reg.filter(function (x) { return x.current; })[0];
   if (!e) return;
+  if (L.setCurrent) e = L.setCurrent(e) || e;
   var path = L.entryPath(e);
+  var filesHref = 'files.html?study=' + encodeURIComponent(L.studyId(e)) + '&path=' + encodeURIComponent(path);
+  document.querySelectorAll('a[href^="files.html"]').forEach(function (a) { a.setAttribute('href', filesHref); });
   var grid = document.querySelector('.study-hero-meta');
-  if (!e.current) {
+  var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
+  if (!defaultHero) {
     var t = document.querySelector('.study-hero-title');
     if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' — ' + (e.name || '');
     var sub = document.querySelector('.study-hero-sub');

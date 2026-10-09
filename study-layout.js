@@ -68,9 +68,46 @@
     var r = registry();
     entry.created = entry.created || new Date().toISOString().slice(0, 10);
     entry.createdLevel = getLayout().level;
+    if (!entry.sponsor) entry.sponsor = 'X Pharma';
     r.push(entry);
     writeJson(REG_KEY, r);
     return entry;
+  }
+  /* Mark one registry row as the study the user is in. Persists in localStorage so Files reloads on it. */
+  function setCurrent(entry) {
+    if (!entry) return null;
+    var r = registry();
+    var match = null;
+    if (entry.compound && entry.protocol && entry.deliverable) {
+      match = r.filter(function (e) {
+        return e.compound === entry.compound && e.protocol === entry.protocol && e.deliverable === entry.deliverable;
+      })[0] || null;
+    }
+    if (!match && (entry.protocol || entry.compound)) {
+      var id = entry.protocol || entry.compound;
+      var hits = r.filter(function (e) { return e.protocol === id || e.compound === id; });
+      match = (entry.deliverable && hits.filter(function (e) { return e.deliverable === entry.deliverable; })[0])
+        || hits.filter(function (e) { return e.current; })[0]
+        || hits[0]
+        || null;
+    }
+    if (!match) return null;
+    r.forEach(function (e) { e.current = e === match; });
+    writeJson(REG_KEY, r);
+    try { sessionStorage.setItem('sphere-open-study', JSON.stringify({ c: match.compound, p: match.protocol, d: match.deliverable })); } catch (err) {}
+    try { window.dispatchEvent(new CustomEvent('sphere-current-study', { detail: match })); } catch (err) {}
+    return match;
+  }
+  function removeStudy(entry) {
+    var r = registry().filter(function (e) {
+      if (entry && entry.compound && entry.protocol && entry.deliverable) {
+        return !(e.compound === entry.compound && e.protocol === entry.protocol && e.deliverable === entry.deliverable);
+      }
+      var id = (entry && (entry.protocol || entry.id)) || entry;
+      return e.protocol !== id && e.compound !== id;
+    });
+    writeJson(REG_KEY, r);
+    return r;
   }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
@@ -138,7 +175,7 @@
       function pick(list) { return list.filter(function (x) { return x.current; })[0] || list[0]; }
       var e = (q.get('path') && pick(reg.filter(function (x) { return entryPath(x) === q.get('path'); }))) ||
         (q.get('study') && pick(reg.filter(function (x) { return studyId(x) === q.get('study'); })));
-      if (e) { sessionStorage.setItem('sphere-open-study', JSON.stringify({ c: e.compound, p: e.protocol, d: e.deliverable })); return e; }
+      if (e) return setCurrent(e) || e;
       if (/studies\.html/.test(location.pathname)) return null;
       var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
       if (saved) return reg.filter(function (x) { return x.compound === saved.c && x.protocol === saved.p && x.deliverable === saved.d; })[0] || null;
@@ -147,16 +184,21 @@
   }
   function paintOpenedStudy() {
     var e = openedStudy();
-    if (!e || e.current) return;
+    if (!e) return;
     var path = entryPath(e);
     var label = studyId(e) + (getLayout().level >= 2 && e.deliverable ? ' · ' + e.deliverable : '');
-    var crumb = document.querySelector('.crumb strong');
-    if (crumb) crumb.textContent = label;
-    var foot = document.querySelector('.nav-footer');
-    if (foot) foot.textContent = label + ' · Phase ' + (e.phase || '—');
+    if (!/studies\.html/.test(location.pathname)) {
+      var crumb = document.querySelector('.crumb strong');
+      if (crumb) crumb.textContent = label;
+      var foot = document.querySelector('.nav-footer');
+      if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '—');
+    }
     var qs = 'study=' + encodeURIComponent(studyId(e)) + '&path=' + encodeURIComponent(path);
-    document.querySelectorAll('.nav a[href^="study-home.html"], .nav a[href^="files.html"]').forEach(function (a) {
+    document.querySelectorAll('a[href^="files.html"]').forEach(function (a) {
       a.setAttribute('href', a.getAttribute('href').split('?')[0] + '?' + qs);
+    });
+    document.querySelectorAll('.nav a[href^="study-home.html"]').forEach(function (a) {
+      a.setAttribute('href', 'study-home.html?' + qs);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintOpenedStudy);
@@ -164,6 +206,8 @@
 
   window.SPHERE_LAYOUT = {
     openedStudy: openedStudy,
+    setCurrent: setCurrent,
+    removeStudy: removeStudy,
     LEVELS: LEVELS,
     DEFAULT_SUBFOLDERS: DEFAULT_SUBFOLDERS,
     get: getLayout,

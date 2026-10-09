@@ -1150,7 +1150,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow3j"></script>
+<script src="demo-flow.js?v=flow4a"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -1940,6 +1940,8 @@
     var row = j.row;
     row.setAttribute('data-job', 'done');
     row.setAttribute('data-last-run', j.endDate.toISOString());
+    if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row));
+    if (typeof decorateRerunDot === 'function') decorateRerunDot(row);
     renderJobCell(row);
     var b = j.batch;
     if (!b) return;
@@ -4732,6 +4734,58 @@
     var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
     cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
       '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    decorateRerunDot(row);
+  }
+  function rerunWhyForRow(row) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.rerunWhy) return '';
+    var num = rowOutputId(row);
+    if (!num) return '';
+    var prog = (row.getAttribute('data-program') || '').split('/').pop();
+    var last = SPHERE_DEMO.lastRun(prog) || row.getAttribute('data-last-run') || '';
+    return SPHERE_DEMO.rerunWhy('ONC-204-301', num, last) || '';
+  }
+  function decorateRerunDot(row) {
+    if (!row) return;
+    var nameEl = row.querySelector('.program-name');
+    if (!nameEl || !nameEl.parentNode) return;
+    var why = rerunWhyForRow(row);
+    var dot = nameEl.parentNode.querySelector(':scope > .rerun-dot');
+    if (!why) { if (dot) dot.remove(); return; }
+    if (!dot) {
+      dot = document.createElement('span');
+      dot.className = 'rerun-dot';
+      dot.setAttribute('role', 'img');
+      nameEl.parentNode.insertBefore(dot, nameEl);
+    }
+    dot.title = why;
+    dot.setAttribute('aria-label', why);
+  }
+  function applyShellChrome() {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.shellContent) return;
+    allRows().forEach(function (row) {
+      var num = rowOutputId(row);
+      var rec = num ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
+      if (rec) {
+        var titleEl = row.querySelector('.artifact-title');
+        if (titleEl && rec.title) titleEl.textContent = num + ' · ' + rec.title;
+        var band = row.querySelector('.artifact-title-band');
+        if (band) {
+          var fn = band.querySelector('.artifact-footnotes');
+          if (rec.footnotes) {
+            if (!fn) {
+              fn = document.createElement('div');
+              fn.className = 'artifact-footnotes';
+              var t = band.querySelector('.artifact-title');
+              if (t) t.insertAdjacentElement('afterend', fn);
+              else band.appendChild(fn);
+            }
+            fn.textContent = rec.footnotes;
+            fn.title = rec.footnotes;
+          } else if (fn) fn.remove();
+        }
+      }
+      decorateRerunDot(row);
+    });
   }
   function rowRoles(row) {
     var r = demoRolesForRow(row);
@@ -5091,6 +5145,10 @@
   refreshAllWorkflowUI();
   paintMyAssign();
   if (myAssignOn) applyFilters();
+  applyShellChrome();
+  window.addEventListener('storage', function (e) {
+    if (window.SPHERE_DEMO && e.key === SPHERE_DEMO.KEY) applyShellChrome();
+  });
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>

@@ -477,7 +477,8 @@
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
 
-<script src="demo-flow.js?v=flow3j"></script>
+<script src="study-layout.js?v=flow4a"></script>
+<script src="demo-flow.js?v=flow4a"></script>
 <script>
 (function () {
   /* —— chrome: theme + nav —— */
@@ -588,7 +589,8 @@
     for (var i = 0; i < STUDY_DIRECTORY.length; i++) {
       if (STUDY_DIRECTORY[i].id === id) return STUDY_DIRECTORY[i];
     }
-    return null;
+    var extra = adminStudies().filter(function (s) { return s.id === id; })[0];
+    return extra || null;
   }
 
   function cloneData(x) { return JSON.parse(JSON.stringify(x)); }
@@ -1093,7 +1095,7 @@
     /* other studies start with a light catalog so copy result is visible */
     var meta = studyMeta(studyId);
     var shells = [];
-    if (meta && meta.templates.indexOf('Demographics') >= 0) {
+    if (meta && meta.templates && meta.templates.indexOf('Demographics') >= 0) {
       shells.push(makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }));
     }
     return shells.map(enrichShell);
@@ -1204,6 +1206,8 @@
     sh.locked = sh.status === 'Locked';
     if (sh.status === 'In review') sh.qc = 'In review';
     else if (sh.status === 'Draft') sh.qc = null;
+    var prevTitle = sh.title || '';
+    var prevFoot = (sh.layout && sh.layout.footnotes) || '';
     sh.title = state.title || sh.title;
     sh.custom = !!state.custom;
     sh.templateKey = state.templateKey || '';
@@ -1222,6 +1226,20 @@
       custom: state.custom,
       labelHeader: state.labelHeader || ''
     };
+    var changed = [];
+    if ((sh.title || '') !== prevTitle) changed.push('title');
+    if ((sh.layout.footnotes || '') !== prevFoot) changed.push('footnotes');
+    if (changed.length && window.SPHERE_DEMO && isTrackerLinked(sh)) {
+      try {
+        SPHERE_DEMO.noteShellContent(CURRENT_STUDY, {
+          number: sh.number,
+          title: sh.title || '',
+          footnotes: sh.layout.footnotes || '',
+          changed: changed,
+          shellId: sh.id
+        });
+      } catch (err) {}
+    }
   }
 
   function loadShellIntoEditor(sh) {
@@ -1924,7 +1942,10 @@
     block.addEventListener('dblclick', function () {
       var field = block.dataset.field;
       var valEl = block.querySelector('.block-value');
-      startTextEdit(valEl, function () { return state[field]; }, function (v) { state[field] = v; });
+      startTextEdit(valEl, function () { return state[field]; }, function (v) {
+        state[field] = v;
+        if (field === 'footnotes') persistEditorToSelected();
+      });
     });
   });
 
@@ -2728,6 +2749,11 @@
   function isLinkedExisting(sh) {
     return CURRENT_STUDY === 'ONC-204-301' && !sh.syncedAt && !sh.autoNumber && TRACKER_LINKED.indexOf(String(sh.number)) >= 0;
   }
+  function isTrackerLinked(sh) {
+    if (!sh) return false;
+    if (sh.syncedAt || sh.recordId) return true;
+    try { return isLinkedExisting(sh); } catch (err) { return false; }
+  }
   function isSendable(sh) { return !!sh && !sh.syncedAt && (sh.status === 'Final' || sh.status === 'Locked'); }
 
   var SYNC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/><path d="M9 12.2l2 2 4-4"/></svg>';
@@ -3067,19 +3093,41 @@
   var copyStudyList = document.getElementById('copyStudyList');
   var copyTemplateWarn = document.getElementById('copyTemplateWarn');
 
-  function eligibleTargets() {
-    return STUDY_DIRECTORY.filter(function (s) {
-      return s.id !== CURRENT_STUDY
-        && s.tenant === CURRENT_TENANT
-        && s.canOpen
-        && s.canCreate;
+  function storeIdForEntry(e) {
+    var proto = e.protocol || e.compound;
+    if (!e.deliverable || e.deliverable === 'CSR') return proto;
+    return proto + '::' + e.deliverable;
+  }
+  /* SPH-R-608: target studies are the Study Admin registry, not STUDY_DIRECTORY. */
+  function adminStudies() {
+    var L = window.SPHERE_LAYOUT;
+    if (!L) return [];
+    return L.registry().filter(function (e) {
+      return (e.sponsor || 'X Pharma') === CURRENT_TENANT;
+    }).map(function (e) {
+      return {
+        id: storeIdForEntry(e),
+        protocol: e.protocol,
+        deliverable: e.deliverable,
+        compound: e.compound,
+        title: e.name || e.protocol || e.compound,
+        tenant: e.sponsor || CURRENT_TENANT,
+        path: L.entryPath(e),
+        canOpen: true,
+        canCreate: true,
+        templates: e.templates || null
+      };
     });
+  }
+  function eligibleTargets() {
+    return adminStudies();
   }
 
   function targetHasTemplate(targetId, templateKey) {
     if (!templateKey) return true; /* Custom / blank — no template required */
     var meta = studyMeta(targetId);
-    return !!(meta && meta.templates.indexOf(templateKey) >= 0);
+    if (!meta || !meta.templates) return true;
+    return meta.templates.indexOf(templateKey) >= 0;
   }
 
   function refreshTemplateWarn() {
@@ -3107,11 +3155,12 @@
       return;
     }
     copyStudyList.innerHTML = targets.map(function (s, i) {
+      var idLine = (s.protocol || s.id) + (s.deliverable ? ' · ' + s.deliverable : '');
       return '<li><label><input type="radio" name="copyStudy" value="' + escapeHtml(s.id) + '"' +
         (i === 0 ? ' checked' : '') + ' />' +
-        '<span class="study-pick-meta"><span class="study-pick-id">' + escapeHtml(s.id) + '</span>' +
+        '<span class="study-pick-meta"><span class="study-pick-id">' + escapeHtml(idLine) + '</span>' +
         '<span class="study-pick-title">' + escapeHtml(s.title) + '</span>' +
-        '<span class="study-pick-perm">Open · Create draft · ' + escapeHtml(s.tenant) + '</span></span></label></li>';
+        '<span class="study-pick-perm">' + escapeHtml(s.path || 'Study Admin') + ' · ' + escapeHtml(s.tenant) + '</span></span></label></li>';
     }).join('');
     document.getElementById('copyNumber').value = src.number;
     document.getElementById('copyTitleInput').value = src.title;
@@ -3152,6 +3201,7 @@
       return;
     }
     var targetId = checked.value;
+    if (!studyStore[targetId]) studyStore[targetId] = { shells: seedCatalog(targetId), selectedId: null };
     var target = studyMeta(targetId);
     if (!target || target.tenant !== CURRENT_TENANT || !target.canOpen || !target.canCreate) {
       showToast('Target not allowed (permissions / tenant)');
