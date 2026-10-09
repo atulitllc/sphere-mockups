@@ -158,9 +158,6 @@
                   <span>Extract data</span>
                 </a>
                 <button class="btn" type="button" id="btnManageFolder" title="Manage access for this folder">Manage access</button>
-                <button class="btn" type="button" disabled title="Demo stub">Upload</button>
-                <button class="btn" type="button" disabled title="Demo stub">New folder</button>
-                <button class="btn" type="button" disabled title="Demo stub">Download</button>
               </div>
             </div>
             <div class="files-table-wrap">
@@ -168,7 +165,6 @@
                 <thead>
                   <tr>
                     <th><button type="button" class="sort-h" data-sort="name">Name</button></th>
-                    <th>Type</th>
                     <th><button type="button" class="sort-h" data-sort="date">Date</button></th>
                     <th><button type="button" class="sort-h" data-sort="modified">Modified</button></th>
                     <th>Size</th>
@@ -593,7 +589,6 @@
       var when = f.snapshot ? f.modified : String(f.modified || '').split('·')[0].trim();
       return '<tr' + cls + ' data-name="' + f.name + '" data-type="' + f.type + '"' + (f.frozen ? ' data-frozen="1"' : '') + '>' +
         '<td><div class="fname-cell">' + icon + nameSpan + '</div></td>' +
-        '<td><span class="type-pill ' + tc + '">.' + f.type + '</span></td>' +
         '<td>' + when + '</td><td>' + (f.snapshot ? f.modified : f.modified) + '</td><td>' + f.size + '</td>' +
         '<td class="col-access">' + accessBadge(f) + '</td>' +
         '<td class="col-more">' + moreBtn + '</td></tr>';
