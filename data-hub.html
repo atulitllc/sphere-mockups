@@ -307,6 +307,29 @@
 
       <div class="card">
         <div class="card-head">
+          <span class="title-row">Datasets</span>
+          <button class="btn" type="button" id="btnBackupDataset">Back up</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Dataset</th>
+                <th>Folder</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="datasetBody"></tbody>
+          </table>
+        </div>
+        <div class="card-body">
+          <div class="hint">Select a dataset and choose Back up to add a dated snapshot. Delete asks for confirmation and is available only with edit permission on the folder.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
           <span class="title-row">Study uploads</span>
           <div class="stat-pills">
             <span class="badge ok">3 files</span>
@@ -557,13 +580,23 @@
     var min = (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
     return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + hr + ':' + min + ' ' + (h >= 12 ? 'PM' : 'AM') + ' ET';
   }
-  function appendSnapshot(source, label, targetLib, statusHtml) {
+  function backupStamp() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function appendSnapshot(source, label, targetLib, statusHtml, received) {
     var body = document.getElementById('snapshotBody');
     if (!body) return;
     var user = loggedInUsername();
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + esc(source) + '</td><td>' + esc(label) + '</td><td>' + esc(stampNow()) + '</td><td>' + esc(targetLib) + '</td><td class="snapshot-user">' + esc(user) + '</td><td>' + statusHtml + '</td>';
+    tr.innerHTML = '<td>' + esc(source) + '</td><td>' + esc(label) + '</td><td>' + esc(received || stampNow()) + '</td><td>' + esc(targetLib) + '</td><td class="snapshot-user">' + esc(user) + '</td><td>' + statusHtml + '</td>';
     body.insertBefore(tr, body.firstChild);
+    return tr;
+  }
+  function addBackupSnapshot(name, targetLib) {
+    var when = backupStamp();
+    appendSnapshot('Backup', 'Backup ' + name + ' · ' + when, targetLib, '<span class="badge ok">Backup</span>', when);
   }
   function doManualUpload() {
     var destEl = document.getElementById('manualDest');
@@ -606,6 +639,8 @@
     if (window.SPHERE_INGEST && stored.length) SPHERE_INGEST.add(stored);
     if (stored.length) {
       appendSnapshot('Manual upload', stored.map(function (s) { return s.name; }).join(', '), dest, '<span class="badge draft">Uploaded</span>');
+      addBackupSnapshot(stored.map(function (s) { return s.name; }).join(', '), dest);
+      if (window.paintDatasets) window.paintDatasets();
     }
     if (wrap) wrap.hidden = false;
     if (results) {
@@ -687,8 +722,10 @@
     btn.addEventListener('click', function () {
       if (sel.value === 'manual') { doManualUpload(); return; }
       if (sel.value !== 'eclinical') {
-        appendSnapshot(sel.value === 'rave' ? 'Rave export' : 'Snapshot', (study ? study.value : 'Study') + ' file upload', target ? target.value : 'Raw', '<span class="badge draft">Uploaded</span>');
-        toast('Upload recorded for ' + (study ? study.value : 'the study') + ' into ' + (target ? target.value : 'Raw') + '.');
+        var lib = target ? target.value : 'Raw';
+        appendSnapshot(sel.value === 'rave' ? 'Rave export' : 'Snapshot', (study ? study.value : 'Study') + ' file upload', lib, '<span class="badge draft">Uploaded</span>');
+        addBackupSnapshot((study ? study.value : 'Study') + ' file upload', lib);
+        toast('Upload recorded for ' + (study ? study.value : 'the study') + ' into ' + lib + '.');
         return;
       }
       var cfg = connectorConfig();
@@ -703,12 +740,98 @@
       setTimeout(function () {
         btn.disabled = false;
         btn.textContent = prev;
-        appendSnapshot('eClinical Solutions', (study ? study.value : '') + ' · ' + picked.join(', '), target ? target.value : 'Raw', '<span class="badge ok">Complete</span>');
-        toast('Pulled ' + picked.join(', ') + ' for ' + (study ? study.value : '') + ' from ' + cfg.url + ' into ' + (target ? target.value : 'Raw') + '.');
+        var pulledLib = target ? target.value : 'Raw';
+        appendSnapshot('eClinical Solutions', (study ? study.value : '') + ' · ' + picked.join(', '), pulledLib, '<span class="badge ok">Complete</span>');
+        addBackupSnapshot(picked.join(', '), pulledLib);
+        toast('Pulled ' + picked.join(', ') + ' for ' + (study ? study.value : '') + ' from ' + cfg.url + ' into ' + pulledLib + '.');
         sync();
       }, 900);
     });
   }
+
+  var DELETED_KEY = 'sphere-deleted-datasets';
+  var DEMO_DATASETS = [
+    { id: 'demo-dm', name: 'dm.sas7bdat', dest: 'Raw' },
+    { id: 'demo-ae', name: 'ae.sas7bdat', dest: 'SDTM' },
+    { id: 'demo-adsl', name: 'adsl.sas7bdat', dest: 'ADaM' }
+  ];
+  function deletedIds() {
+    try { return JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'); } catch (e) { return []; }
+  }
+  function openedEntry() {
+    var L = window.SPHERE_LAYOUT;
+    if (!L) return null;
+    return L.openedStudy() || L.registry().filter(function (x) { return x.current; })[0] || null;
+  }
+  function canEditDest(dest) {
+    var e = openedEntry();
+    if (e) window.SPHERE_filesCompound = e.compound || '';
+    if (!window.SPHERE_ACCESS || !SPHERE_ACCESS.canEdit) return true;
+    var folder = window.SPHERE_INGEST ? SPHERE_INGEST.folderId(dest) : String(dest || '').toLowerCase();
+    var path = (e && e.compound ? e.compound + '/' : '') + (e && window.SPHERE_LAYOUT ? SPHERE_LAYOUT.entryPath(e) : '') + folder;
+    return SPHERE_ACCESS.canEdit(path);
+  }
+  function datasetRows() {
+    var gone = deletedIds();
+    var rows = DEMO_DATASETS.filter(function (d) { return gone.indexOf(d.id) < 0; });
+    if (window.SPHERE_INGEST) {
+      SPHERE_INGEST.forStudy(studyPath()).forEach(function (it) {
+        rows.push({ id: it.id, name: it.name, dest: it.dest, ingest: true });
+      });
+    }
+    return rows;
+  }
+  function paintDatasets() {
+    var body = document.getElementById('datasetBody');
+    if (!body) return;
+    var rows = datasetRows();
+    body.innerHTML = rows.map(function (d, i) {
+      var del = canEditDest(d.dest)
+        ? '<button type="button" class="btn sm" data-delete="' + esc(d.id) + '">Delete</button>'
+        : '';
+      return '<tr><td><input type="radio" name="datasetPick" value="' + esc(d.id) + '"' + (i === 0 ? ' checked' : '') + ' aria-label="Select ' + esc(d.name) + '" /></td>' +
+        '<td>' + esc(d.name) + '</td><td>' + esc(d.dest) + '</td><td>' + del + '</td></tr>';
+    }).join('') || '<tr><td colspan="4">No datasets</td></tr>';
+  }
+  window.paintDatasets = paintDatasets;
+  function deleteDataset(id, confirmed) {
+    var row = datasetRows().filter(function (d) { return d.id === id; })[0];
+    if (!row) return { ok: false, error: 'missing' };
+    if (!canEditDest(row.dest)) return { ok: false, error: 'authorization' };
+    if (!confirmed) return { ok: false, error: 'confirmation required' };
+    if (row.ingest && window.SPHERE_INGEST) SPHERE_INGEST.remove(id);
+    else {
+      var gone = deletedIds();
+      if (gone.indexOf(id) < 0) gone.push(id);
+      localStorage.setItem(DELETED_KEY, JSON.stringify(gone));
+    }
+    paintDatasets();
+    return { ok: true };
+  }
+  window.SPHERE_DATASETS = { deleteDataset: deleteDataset, canEditDest: canEditDest };
+  var backupBtn = document.getElementById('btnBackupDataset');
+  if (backupBtn) backupBtn.addEventListener('click', function () {
+    var pick = document.querySelector('input[name="datasetPick"]:checked');
+    var row = pick && datasetRows().filter(function (d) { return d.id === pick.value; })[0];
+    if (!row) { toast('Select a dataset to back up.'); return; }
+    addBackupSnapshot(row.name, row.dest);
+    toast('Backed up ' + row.name);
+  });
+  var datasetBody = document.getElementById('datasetBody');
+  if (datasetBody) datasetBody.addEventListener('click', function (e) {
+    var del = e.target.closest('[data-delete]');
+    if (!del) return;
+    var id = del.getAttribute('data-delete');
+    var row = datasetRows().filter(function (d) { return d.id === id; })[0];
+    if (!row) return;
+    if (!canEditDest(row.dest)) {
+      toast('Delete rejected: no edit permission on this folder.');
+      return;
+    }
+    if (!confirm('Delete dataset ' + row.name + '?')) return;
+    deleteDataset(id, true);
+  });
+  paintDatasets();
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>
