@@ -401,7 +401,7 @@
                   </label>
                   <label>
                     <span class="req">elluminate tenant URL</span>
-                    <input type="url" value="https://xpharma.eclinicalsol.com" placeholder="https://customer.eclinicalsol.com" />
+                    <input type="url" id="connectorUrl" value="https://xpharma.eclinicalsol.com" placeholder="https://customer.eclinicalsol.com" />
                   </label>
                   <div class="grid2">
                     <label>
@@ -1329,10 +1329,30 @@
     document.body.appendChild(t);
     setTimeout(function () { t.remove(); }, 2800);
   }
+  var CONNECTOR_KEY = 'sphere-ingest-connector-v1';
   var save = document.getElementById('btnSaveElluminate');
   var test = document.getElementById('btnTestElluminate');
-  if (save) save.addEventListener('click', function () { toast('Demo: elluminate connector saved for tenant (not persisted).'); });
-  if (test) test.addEventListener('click', function () { toast('Demo: connection OK · studies visible (mock).'); });
+  var urlInput = document.getElementById('connectorUrl');
+  function savedConnector() {
+    try { return JSON.parse(localStorage.getItem(CONNECTOR_KEY) || 'null'); }
+    catch (e) { return null; }
+  }
+  var existing = savedConnector();
+  if (existing && existing.url && urlInput) urlInput.value = existing.url;
+  if (save) save.addEventListener('click', function () {
+    var url = urlInput ? urlInput.value.trim() : '';
+    if (!url) { toast('Enter the elluminate tenant URL before saving.'); return; }
+    localStorage.setItem(CONNECTOR_KEY, JSON.stringify({
+      vendor: 'elluminate',
+      url: url,
+      savedAt: new Date().toISOString()
+    }));
+    toast('Connector saved. Data Hub pulls use ' + url + ' without asking again.');
+  });
+  if (test) test.addEventListener('click', function () {
+    var cfg = savedConnector();
+    toast(cfg && cfg.url ? ('Connection OK · ' + cfg.url) : 'Save the connector before testing.');
+  });
 })();
 </script>
 

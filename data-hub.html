@@ -209,21 +209,50 @@
           <div class="form" id="ingestForm">
             <label><span class="req">Source type</span>
               <select id="ingestSourceType" aria-label="Source type">
-                <option value="eclinical" selected>eClinical Solutions (elluminate)</option>
+                <option value="">Select source type</option>
+                <option value="eclinical">eClinical Solutions (elluminate)</option>
                 <option value="rave">Rave export</option>
                 <option value="snapshot">Snapshot file</option>
                 <option value="manual">Manual upload</option>
               </select>
             </label>
-            <label><span class="req">Label</span>
-              <input id="ingestLabel" placeholder="e.g. elluminate pull 2026-09-06" value="elluminate · ONC-204-301 raw domains" />
-            </label>
-            <label id="ingestTargetLabel">Target library
-              <select id="ingestTargetLib">
-                <option selected>Raw</option>
-                <option>SDTM (derived — usually via programs)</option>
-              </select>
-            </label>
+            <div id="ingestFlow" hidden>
+              <label><span class="req">Study</span>
+                <select id="ingestStudy" aria-label="Study" disabled>
+                  <option value="">Select study</option>
+                </select>
+              </label>
+              <label><span class="req">Source schema / location</span>
+                <select id="ingestSchema" aria-label="Source schema" disabled>
+                  <option value="">Select source schema</option>
+                  <option value="clinical">Clinical (raw + curated)</option>
+                  <option value="raw">Raw only</option>
+                </select>
+              </label>
+              <label id="ingestTargetLabel"><span class="req">Target library</span>
+                <select id="ingestTargetLib" aria-label="Target library" disabled>
+                  <option value="">Select target library</option>
+                  <option value="Raw">Raw</option>
+                  <option value="SDTM">SDTM (derived — usually via programs)</option>
+                </select>
+              </label>
+              <div id="ingestDomainsWrap" hidden>
+                <label>Datasets / domains
+                  <select id="ingestDomains" multiple size="4" aria-label="Domains to pull" style="min-height:88px" disabled>
+                    <option>DM</option>
+                    <option>AE</option>
+                    <option>LB</option>
+                    <option>VS</option>
+                    <option>CM</option>
+                    <option>EX</option>
+                  </select>
+                </label>
+                <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
+                  <input type="checkbox" id="ingestAttachments" checked disabled /> Include attachments / transfer packages when available
+                </label>
+                <p class="hint" id="ingestConnectorHint">Connector and tenant URL are set once in Admin. This pull uses that saved connector.</p>
+              </div>
+            </div>
 
             <div id="manualUploadFields" hidden>
               <label><span class="req">Destination</span>
@@ -248,38 +277,6 @@
                 <strong>Upload results</strong>
                 <ul class="manual-result-list" id="manualResults"></ul>
               </div>
-            </div>
-
-            <div id="eclinicalFields" class="connector-panel">
-              <div class="hint" style="margin-bottom:10px"><strong>Connector pull (demo).</strong> Uses the client’s elluminate API credentials to copy selected study domains into SPHERE study storage under <code>Raw/</code>. Does not replace elluminate review — this is an ingest into our file share for programming.</div>
-              <label>elluminate tenant URL
-                <input placeholder="https://xpharma.eclinicalsol.com" value="https://demo.eclinicalsol.com" />
-              </label>
-              <label>Study
-                <select>
-                  <option selected>ONC-204-301</option>
-                  <option>ONC-204-201</option>
-                </select>
-              </label>
-              <label>Schema / datastore
-                <select>
-                  <option selected>Clinical (raw + curated)</option>
-                  <option>Raw only</option>
-                </select>
-              </label>
-              <label>Domains
-                <select multiple size="4" aria-label="Domains to pull" style="min-height:88px">
-                  <option selected>DM</option>
-                  <option selected>AE</option>
-                  <option selected>LB</option>
-                  <option>VS</option>
-                  <option>CM</option>
-                  <option>EX</option>
-                </select>
-              </label>
-              <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
-                <input type="checkbox" checked /> Include attachments / transfer packages when available
-              </label>
             </div>
 
             <div id="fileDropFields" class="dropzone" hidden>
@@ -452,15 +449,53 @@
 
 <script>
 (function () {
+  var CONNECTOR_KEY = 'sphere-ingest-connector-v1';
   var sel = document.getElementById('ingestSourceType');
-  var eclin = document.getElementById('eclinicalFields');
+  var flow = document.getElementById('ingestFlow');
+  var study = document.getElementById('ingestStudy');
+  var schema = document.getElementById('ingestSchema');
+  var target = document.getElementById('ingestTargetLib');
+  var domains = document.getElementById('ingestDomains');
+  var domainsWrap = document.getElementById('ingestDomainsWrap');
+  var attachments = document.getElementById('ingestAttachments');
   var drop = document.getElementById('fileDropFields');
   var manual = document.getElementById('manualUploadFields');
-  var targetLabel = document.getElementById('ingestTargetLabel');
   var btn = document.getElementById('ingestPrimaryBtn');
-  var label = document.getElementById('ingestLabel');
   var pending = [];
   if (!sel) return;
+
+  function connectorConfig() {
+    try { return JSON.parse(localStorage.getItem(CONNECTOR_KEY) || 'null'); }
+    catch (e) { return null; }
+  }
+  function selectedDomains() {
+    if (!domains) return [];
+    return Array.prototype.filter.call(domains.options, function (o) { return o.selected; }).map(function (o) { return o.text; });
+  }
+  function fillStudies() {
+    if (!study || study.dataset.filled) return;
+    var opts = ['<option value="">Select study</option>'];
+    var seen = {};
+    var rows = window.SPHERE_LAYOUT ? SPHERE_LAYOUT.registry() : [];
+    rows.forEach(function (e) {
+      var id = e.protocol || e.id || '';
+      if (!id || seen[id]) return;
+      seen[id] = 1;
+      opts.push('<option value="' + esc(id) + '">' + esc(id) + '</option>');
+    });
+    if (opts.length === 1) {
+      opts.push('<option value="ONC-204-301">ONC-204-301</option>');
+      opts.push('<option value="ONC-204-201">ONC-204-201</option>');
+    }
+    study.innerHTML = opts.join('');
+    study.dataset.filled = '1';
+  }
+  function resetChain() {
+    if (study) study.value = '';
+    if (schema) schema.value = '';
+    if (target) target.value = '';
+    if (domains) Array.prototype.forEach.call(domains.options, function (o) { o.selected = false; });
+  }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -561,19 +596,51 @@
   }
 
   function sync() {
-    var isE = sel.value === 'eclinical';
-    var isManual = sel.value === 'manual';
-    if (eclin) eclin.hidden = !isE;
-    if (drop) drop.hidden = isE || isManual;
+    fillStudies();
+    var type = sel.value;
+    var isE = type === 'eclinical';
+    var isManual = type === 'manual';
+    var isFile = type === 'rave' || type === 'snapshot';
+    var hasStudy = !!(study && study.value);
+    var hasSchema = !!(schema && schema.value);
+    var hasTarget = !!(target && target.value);
+    if (flow) flow.hidden = !type || isManual;
     if (manual) manual.hidden = !isManual;
-    if (targetLabel) targetLabel.hidden = isManual;
-    if (btn) btn.textContent = isE ? 'Pull into Raw' : 'Upload';
-    if (label && !label.dataset.touched) {
-      label.placeholder = isE ? 'e.g. elluminate pull 2026-09-06' : 'e.g. EDC cut 2026-09-01';
+    if (domainsWrap) domainsWrap.hidden = !isE;
+    if (drop) drop.hidden = !(isFile && hasTarget);
+    if (study) study.disabled = !type || isManual;
+    if (schema) schema.disabled = !hasStudy;
+    if (target) target.disabled = !hasSchema;
+    if (domains) domains.disabled = !hasTarget;
+    if (attachments) attachments.disabled = !hasTarget;
+    if (btn) {
+      btn.textContent = isE ? 'Pull into Raw' : 'Upload';
+      if (isE) btn.disabled = !(hasTarget && selectedDomains().length);
+      else if (isFile) btn.disabled = !hasTarget;
+      else btn.disabled = !type;
+    }
+    var hint = document.getElementById('ingestConnectorHint');
+    if (hint) {
+      var cfg = connectorConfig();
+      hint.textContent = cfg && cfg.url
+        ? 'Using the connector saved in Admin: ' + cfg.url
+        : 'Set the connector and tenant URL once in Admin. This screen does not ask for them again.';
     }
   }
-  if (label) label.addEventListener('input', function () { label.dataset.touched = '1'; });
-  sel.addEventListener('change', sync);
+  sel.addEventListener('change', function () { resetChain(); sync(); });
+  if (study) study.addEventListener('change', function () {
+    if (schema) schema.value = '';
+    if (target) target.value = '';
+    if (domains) Array.prototype.forEach.call(domains.options, function (o) { o.selected = false; });
+    sync();
+  });
+  if (schema) schema.addEventListener('change', function () {
+    if (target) target.value = '';
+    if (domains) Array.prototype.forEach.call(domains.options, function (o) { o.selected = false; });
+    sync();
+  });
+  if (target) target.addEventListener('change', sync);
+  if (domains) domains.addEventListener('change', sync);
   sync();
 
   var browseFiles = document.getElementById('manualBrowseFiles');
@@ -588,14 +655,24 @@
   if (btn) {
     btn.addEventListener('click', function () {
       if (sel.value === 'manual') { doManualUpload(); return; }
-      if (sel.value !== 'eclinical') return;
+      if (sel.value !== 'eclinical') {
+        toast('Upload queued for ' + (study ? study.value : 'the study') + ' into ' + (target ? target.value : 'Raw') + '.');
+        return;
+      }
+      var cfg = connectorConfig();
+      if (!cfg || !cfg.url) {
+        toast('Set the connector and tenant URL in Admin before pulling. Ingest does not ask for them here.');
+        return;
+      }
+      var picked = selectedDomains();
       btn.disabled = true;
       var prev = btn.textContent;
       btn.textContent = 'Pulling…';
       setTimeout(function () {
         btn.disabled = false;
         btn.textContent = prev;
-        toast('Demo: pulled DM, AE, LB from elluminate into Raw/ (mock).');
+        toast('Pulled ' + picked.join(', ') + ' for ' + (study ? study.value : '') + ' from ' + cfg.url + ' into ' + (target ? target.value : 'Raw') + '.');
+        sync();
       }, 900);
     });
   }
