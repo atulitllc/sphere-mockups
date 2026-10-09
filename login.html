@@ -246,6 +246,20 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 4px var(--focus-ring);
   }
+  .password-field { position: relative; }
+  .password-field input { padding-right: 118px; }
+  .password-field button {
+    position: absolute;
+    right: 8px;
+    top: 7px;
+    height: 28px;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+  }
   .login-row {
     display: flex;
     align-items: center;
@@ -444,7 +458,10 @@
             </div>
             <div class="login-field">
               <label for="loginPassword">Password</label>
-              <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+              <span class="password-field">
+                <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+                <button type="button" id="togglePassword" aria-pressed="false">Show password</button>
+              </span>
             </div>
             <div class="login-row">
               <label class="login-remember">
@@ -501,6 +518,18 @@
     applyTheme(currentTheme());
   }
 
+  var passwordInput = document.getElementById('loginPassword');
+  var togglePassword = document.getElementById('togglePassword');
+  if (passwordInput && togglePassword) {
+    togglePassword.addEventListener('click', function () {
+      var show = passwordInput.type === 'password';
+      var value = passwordInput.value;
+      passwordInput.type = show ? 'text' : 'password';
+      passwordInput.value = value;
+      togglePassword.textContent = show ? 'Hide password' : 'Show password';
+      togglePassword.setAttribute('aria-pressed', show ? 'true' : 'false');
+    });
+  }
   var form = document.getElementById('loginForm');
   var err = document.getElementById('loginError');
   function goIn() {
