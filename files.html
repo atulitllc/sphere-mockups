@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — File Explorer</title>
+<title>SPHERE - File Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -35,6 +35,8 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4c"></script>
+<script src="demo-flow.js?v=flow4e"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -127,11 +129,11 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Study directory tree that programs <code>libname</code> / <code>setwd</code> against — not a second data store. Browse <strong>raw</strong>, <strong>sdtm</strong>, <strong>adam</strong>, <strong>programs</strong>, <strong>tlf</strong>, <strong>logs</strong> (tenant template). Folder ACL is Box/WatchDox-like: <strong>Manage access</strong> on folders (View | Edit); permissions inherit down the study tree.</p>
+        <p class="page-sub">Folders follow the compound, protocol, and folder layout set in Admin.</p>
       </div>
 
         <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
-        <div class="note-banner-inner"><div><strong>Share ACL.</strong> Right-click or ⋯ on a folder → <strong>Manage access</strong> (users &amp; <a href="admin.html?panel=users">teams</a>, View | Edit only for v1). Permissions inherit down the study tree.</div></div>
+        <div class="note-banner-inner"><div>Select a study folder in the tree. Access is set on the compound, protocol, or folder, and it inherits downward.</div></div>
       </div>
 
         <div class="files-layout">
@@ -151,25 +153,23 @@
                 <span class="here" id="crumbHere">raw</span>
               </div>
               <div class="files-actions folder-share-status">
+                <input type="search" id="filesSearch" placeholder="Search this folder and subfolders" aria-label="Search files" />
                 <a class="btn icon-text-btn accent-icon" id="btnExtractData" href="data-hub.html" title="Extract data" aria-label="Extract data">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
                   <span>Extract data</span>
                 </a>
                 <button class="btn" type="button" id="btnManageFolder" title="Manage access for this folder">Manage access</button>
-                <button class="btn" type="button" disabled title="Demo stub">Upload</button>
-                <button class="btn" type="button" disabled title="Demo stub">New folder</button>
-                <button class="btn" type="button" disabled title="Demo stub">Download</button>
               </div>
             </div>
             <div class="files-table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Type</th>
+                    <th><button type="button" class="sort-h" data-sort="name">Name</button></th>
+                    <th><button type="button" class="sort-h" data-sort="date">Date</button></th>
+                    <th><button type="button" class="sort-h" data-sort="modified">Modified</button></th>
                     <th>Size</th>
-                    <th>Modified</th>
-                    <th class="col-access">Share access</th>
+                    <th class="col-access">Access</th>
                     <th class="col-more" aria-label="Actions"></th>
                   </tr>
                 </thead>
@@ -187,7 +187,8 @@
   <button type="button" data-action="manage" role="menuitem">Manage access…</button>
   <div class="ctx-sep" aria-hidden="true"></div>
   <button type="button" data-action="open" role="menuitem">Open</button>
-  <button type="button" data-action="download" role="menuitem" disabled title="Demo stub">Download</button>
+  <button type="button" data-action="copy" role="menuitem">Copy</button>
+  <button type="button" data-action="paste" role="menuitem">Paste</button>
 </div>
 
 <div class="modal-backdrop" id="accessModal" hidden role="dialog" aria-modal="true" aria-labelledby="accessTitle">
@@ -204,12 +205,21 @@
         <span>↓</span>
         <div>Permissions <strong>inherit</strong> down the study tree. Child folders/files start from this ACL unless overridden. Teams are defined in <a href="admin.html?panel=users">Admin → Users &amp; roles / Teams</a>.</div>
       </div>
+      <label>Level
+        <select id="accessLevel" aria-label="Access level">
+          <option value="compound">Compound</option>
+          <option value="protocol">Protocol</option>
+          <option value="folder" selected>Folder</option>
+        </select>
+      </label>
       <div class="access-add" id="accessAddRow">
         <select id="accessAddWho" aria-label="Add user or team">
           <option value="">Add user or team…</option>
           <optgroup label="Users">
-            <option value="user:A. Rivera">A. Rivera</option>
-            <option value="user:S. Ortiz">S. Ortiz</option>
+            <option value="user:jpatel">Jordan Patel</option>
+            <option value="user:rlee">Riley Nguyen</option>
+            <option value="user:u3">Alex Rivera</option>
+            <option value="user:u4">Sam Okonkwo</option>
           </optgroup>
           <optgroup label="Teams">
             <option value="team:Stats programmers">Stats programmers</option>
@@ -349,7 +359,7 @@
     { id: 'data', count: 'alias', frozen: false, title: 'Optional alias shown when present in tenant template' }
   ];
 
-  /* Default folder ACLs — View | Edit only (v1). Teams from Admin. */
+  /* Default folder ACLs - View | Edit only (v1). Teams from Admin. */
   var FOLDER_ACL = {
     raw: [
       { kind: 'team', name: 'Stats programmers', role: 'Edit' },
@@ -387,7 +397,7 @@
 
   var TREE = {
     raw: [
-      { name: 'edc_cut_2026-08-28', type: 'dir', size: '—', modified: '28 Aug 2026 · 9:14 AM ET' },
+      { name: 'edc_cut_2026-08-28', type: 'dir', size: '-', modified: '2026-08-28 09:14', snapshot: true, source: 'eClinical Solutions connector' },
       { name: 'ae.csv', type: 'csv', size: '2.4 MB', modified: '28 Aug 2026 · 9:20 AM ET' },
       { name: 'dm.sas7bdat', type: 'sas7bdat', size: '1.1 MB', modified: '28 Aug 2026 · 9:18 AM ET' },
       { name: 'lb_chem.sas7bdat', type: 'sas7bdat', size: '8.6 MB', modified: '27 Aug 2026 · 4:02 PM ET' }
@@ -398,19 +408,19 @@
       { name: 'ex.sas7bdat', type: 'sas7bdat', size: '890 KB', modified: '01 Sep 2026 · 2:11 PM ET' },
       { name: 'vs.sas7bdat', type: 'sas7bdat', size: '5.1 MB', modified: '01 Sep 2026 · 2:12 PM ET' },
       { name: 'sdtm_spec.xlsx', type: 'xlsx', size: '210 KB', modified: '12 Aug 2026 · 11:00 AM ET' },
-      { name: '_qc', type: 'dir', size: '—', modified: '01 Sep 2026 · 3:00 PM ET' }
+      { name: '_qc', type: 'dir', size: '-', modified: '01 Sep 2026 · 3:00 PM ET' }
     ],
     adam: [
       { name: 'adsl.sas7bdat', type: 'sas7bdat', size: '640 KB', modified: '02 Sep 2026 · 10:05 AM ET' },
       { name: 'adae.sas7bdat', type: 'sas7bdat', size: '1.8 MB', modified: '02 Sep 2026 · 10:06 AM ET', frozen: false, frozenBy: 'ADAE · In QC' },
       { name: 'adtte.sas7bdat', type: 'sas7bdat', size: '320 KB', modified: '02 Sep 2026 · 10:08 AM ET' },
       { name: 'adam_adsl.R', type: 'R', size: '18 KB', modified: '02 Sep 2026 · 9:40 AM ET' },
-      { name: '_qc', type: 'dir', size: '—', modified: '02 Sep 2026 · 11:20 AM ET' }
+      { name: '_qc', type: 'dir', size: '-', modified: '02 Sep 2026 · 11:20 AM ET' }
     ],
     programs: [
-      { name: 'sdtm', type: 'dir', size: '—', modified: '20 Aug 2026 · 1:00 PM ET' },
-      { name: 'adam', type: 'dir', size: '—', modified: '20 Aug 2026 · 1:00 PM ET', frozen: false, frozenBy: 'ADAE · In QC' },
-      { name: 'tlf', type: 'dir', size: '—', modified: '20 Aug 2026 · 1:00 PM ET' },
+      { name: 'sdtm', type: 'dir', size: '-', modified: '20 Aug 2026 · 1:00 PM ET' },
+      { name: 'adam', type: 'dir', size: '-', modified: '20 Aug 2026 · 1:00 PM ET', frozen: false, frozenBy: 'ADAE · In QC' },
+      { name: 'tlf', type: 'dir', size: '-', modified: '20 Aug 2026 · 1:00 PM ET' },
       { name: 'adam_adsl.R', type: 'R', size: '18 KB', modified: '02 Sep 2026 · 9:40 AM ET' },
       { name: 'adam_adae.sas', type: 'sas', size: '24 KB', modified: '01 Sep 2026 · 4:22 PM ET', frozen: false, frozenBy: 'ADAE · Send to QC' },
       { name: 'adam_adae.R', type: 'R', size: '16 KB', modified: '01 Sep 2026 · 4:30 PM ET', frozen: false, frozenBy: 'ADAE · Send to QC' },
@@ -422,7 +432,7 @@
       { name: 't_14_1_1.rtf', type: 'rtf', size: '88 KB', modified: '03 Sep 2026 · 5:15 PM ET' },
       { name: 't_14_3_1.rtf', type: 'rtf', size: '120 KB', modified: '02 Sep 2026 · 6:40 PM ET' },
       { name: 'f_14_2_1.rtf', type: 'rtf', size: '210 KB', modified: '01 Sep 2026 · 1:05 PM ET', frozen: false, frozenBy: '14.2.1 · In QC' },
-      { name: 'shells', type: 'dir', size: '—', modified: '28 Aug 2026 · 11:00 AM ET' }
+      { name: 'shells', type: 'dir', size: '-', modified: '28 Aug 2026 · 11:00 AM ET' }
     ],
     logs: [
       { name: 'job_2026-09-03_adsl.log', type: 'log', size: '42 KB', modified: '03 Sep 2026 · 5:12 PM ET' },
@@ -431,7 +441,7 @@
     ],
     data: [
       { name: 'README.txt', type: 'txt', size: '1 KB', modified: '01 Jul 2026 · 9:00 AM ET' },
-      { name: '(alias → raw)', type: 'alias', size: '—', modified: '—' }
+      { name: '(alias → raw)', type: 'alias', size: '-', modified: '-' }
     ]
   };
 
@@ -522,14 +532,57 @@
     return '<span class="badge share-view" title="Inherits folder ACL">View · Edit (inherited)</span>';
   }
 
+  var sortKey = 'name';
+  var sortDir = 1;
+  var searchQ = '';
+  var NESTED = [
+    { folder: 'programs', path: 'programs/dev/qc/ae.sas', name: 'ae.sas', type: 'sas', size: '4 KB', modified: '2026-10-09 14:05', text: 'proc freq data=adam.adae;\nrun;\n' }
+  ];
+  var fileRenamesApplied = false;
+  function applyStoredFileRenames() {
+    if (fileRenamesApplied || !window.SPHERE_DEMO || !SPHERE_DEMO.fileRenames) return;
+    fileRenamesApplied = true;
+    var map = SPHERE_DEMO.fileRenames();
+    Object.keys(TREE).forEach(function (key) {
+      (TREE[key] || []).forEach(function (f) {
+        if (f && map[f.name]) f.name = map[f.name];
+      });
+    });
+    NESTED.forEach(function (f) { if (map[f.name]) f.name = map[f.name]; });
+  }
   function render(folder) {
+    applyStoredFileRenames();
     current = folder;
     crumbHere.textContent = folder;
     document.querySelectorAll('.tree-item[data-folder]').forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-folder') === folder);
     });
 
-    var rows = TREE[folder] || [];
+    var rows = (TREE[folder] || []).map(function (f) { return Object.assign({ path: folder + '/' + f.name }, f); });
+    if (searchQ) {
+      var q = searchQ.toLowerCase();
+      rows = [];
+      Object.keys(TREE).forEach(function (fid) {
+        if (fid !== folder && fid.indexOf(folder + '/') !== 0) return;
+        (TREE[fid] || []).forEach(function (f) {
+          var path = fid + '/' + f.name;
+          if ((f.name + ' ' + path).toLowerCase().indexOf(q) >= 0) rows.push(Object.assign({ path: path }, f));
+        });
+      });
+      NESTED.forEach(function (f) {
+        if ((f.folder === folder || f.path.indexOf(folder + '/') === 0) && (f.name + ' ' + f.path).toLowerCase().indexOf(q) >= 0) rows.push(f);
+      });
+    }
+    rows.sort(function (a, b) {
+      var av = sortKey === 'name' ? a.name : a.modified;
+      var bv = sortKey === 'name' ? b.name : b.modified;
+      return String(av).localeCompare(String(bv)) * sortDir;
+    });
+    document.querySelectorAll('.sort-h').forEach(function (h) {
+      var label = h.getAttribute('data-sort');
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      h.textContent = label + (h.getAttribute('data-sort') === sortKey ? (sortDir > 0 ? ' ↑' : ' ↓') : '');
+    });
     bodyEl.innerHTML = rows.map(function (f) {
       var tc = typeClass(f.type);
       var icon = f.type === 'dir'
@@ -544,10 +597,15 @@
         : (f.frozen
           ? '<button type="button" class="row-more" data-name="' + f.name + '" aria-label="Actions for ' + f.name + '" aria-haspopup="menu">⋯</button>'
           : '<button type="button" class="row-more" data-name="' + f.name + '" aria-label="Actions for ' + f.name + '" aria-haspopup="menu">⋯</button>');
+      var shown = searchQ && f.path ? f.path : f.name;
+      var inRaw = folder === 'raw' || folder === 'data/raw';
+      var nameSpan = (f.snapshot && inRaw)
+        ? '<span class="snapshot-name" title="' + String(f.source || 'Snapshot').replace(/"/g, '&quot;') + '">' + shown + '</span>'
+        : '<span>' + shown + '</span>';
+      var when = f.snapshot ? f.modified : String(f.modified || '').split('·')[0].trim();
       return '<tr' + cls + ' data-name="' + f.name + '" data-type="' + f.type + '"' + (f.frozen ? ' data-frozen="1"' : '') + '>' +
-        '<td><div class="fname-cell">' + icon + '<span>' + f.name + '</span></div></td>' +
-        '<td><span class="type-pill ' + tc + '">.' + f.type + '</span></td>' +
-        '<td>' + f.size + '</td><td>' + f.modified + '</td>' +
+        '<td><div class="fname-cell">' + icon + nameSpan + '</div></td>' +
+        '<td>' + when + '</td><td>' + (f.snapshot ? f.modified : f.modified) + '</td><td>' + f.size + '</td>' +
         '<td class="col-access">' + accessBadge(f) + '</td>' +
         '<td class="col-more">' + moreBtn + '</td></tr>';
     }).join('');
@@ -589,6 +647,13 @@
   }
 
   function openAccess(target) {
+    if (target && target.kind === 'file') return;
+    try {
+      if (window.SPHERE_ACCESS) SPHERE_ACCESS.assertManage(window.SPHERE_filesCompound || '');
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+      return;
+    }
     if (target) target.frozen = false;
     closeCtx();
     accessTarget = target;
@@ -631,9 +696,9 @@
         '<td><span class="kind-pill ' + r.kind + '">' + (r.kind === 'team' ? 'Team' : 'User') + '</span></td>' +
         '<td class="access-role"><select aria-label="Role for ' + r.name + '"' + (frozen ? ' disabled' : '') + ' data-idx="' + i + '">' + roleOpts + '</select>' +
         (frozen ? ' <span class="badge share-frozen">View only</span>' : '') + '</td>' +
-        '<td><button type="button" class="btn sm" data-remove="' + i + '"' + (frozen ? ' disabled title="Frozen — remove blocked until Return to programmer"' : '') + '>Remove</button></td>' +
+        '<td><button type="button" class="btn sm" data-remove="' + i + '"' + (frozen ? ' disabled title="Frozen - remove blocked until Return to programmer"' : '') + '>Remove</button></td>' +
         '</tr>';
-    }).join('') || '<tr><td colspan="4" style="color:var(--muted)">No grants yet — add a user or team.</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="color:var(--muted)">No grants yet - add a user or team.</td></tr>';
   }
 
   function closeAccess() {
@@ -641,9 +706,41 @@
     accessTarget = null;
   }
 
-  document.getElementById('btnManageFolder').addEventListener('click', function () {
+  function syncManage() {
+    var ok = window.SPHERE_ACCESS ? SPHERE_ACCESS.canManage(window.SPHERE_filesCompound || '') : false;
+    var btn = document.getElementById('btnManageFolder');
+    var host = document.querySelector('.files-actions');
+    var item = document.querySelector('#ctxMenu [data-action="manage"]');
+    if (!ok) {
+      if (btn) btn.remove();
+      if (item) item.remove();
+      return;
+    }
+    if (!btn && host) {
+      btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.type = 'button';
+      btn.id = 'btnManageFolder';
+      btn.textContent = 'Manage access';
+      host.appendChild(btn);
+      btn.addEventListener('click', function () {
+        openAccess({ kind: 'folder', folder: current, name: current, frozen: folderHasFrozen(current) });
+      });
+    }
+    if (!item) {
+      item = document.createElement('button');
+      item.type = 'button';
+      item.setAttribute('data-action', 'manage');
+      item.setAttribute('role', 'menuitem');
+      item.textContent = 'Manage access…';
+      ctxMenu.insertBefore(item, ctxMenu.firstChild);
+    }
+  }
+  var manageBtn = document.getElementById('btnManageFolder');
+  if (manageBtn) manageBtn.addEventListener('click', function () {
     openAccess({ kind: 'folder', folder: current, name: current, frozen: folderHasFrozen(current) });
   });
+  syncManage();
 
   bodyEl.addEventListener('click', function (e) {
     var more = e.target.closest('.row-more');
@@ -655,6 +752,17 @@
       var frozen = tr.getAttribute('data-frozen') === '1';
       openCtx(e, { kind: type === 'dir' ? 'folder' : 'file', folder: current, name: name, frozen: frozen });
       return;
+    }
+    var nameCell = e.target.closest('.fname-cell');
+    if (nameCell) {
+      var row = nameCell.closest('tr');
+      var fname = row.getAttribute('data-name');
+      var ftype = (row.getAttribute('data-type') || '').toLowerCase();
+      if (ftype === 'sas' || ftype === 'r' || ftype === 'log') {
+        var found = (TREE[current] || []).filter(function (f) { return f.name === fname; })[0];
+        if (found) openViewer(found);
+        return;
+      }
     }
     var dirRow = e.target.closest('tr.dir-row');
     if (dirRow) {
@@ -673,12 +781,76 @@
     openCtx(e, { kind: type === 'dir' ? 'folder' : 'file', folder: current, name: name, frozen: frozen });
   });
 
+  function openViewer(file) {
+    var ext = String(file.type || '').toLowerCase();
+    if (['sas', 'r', 'log'].indexOf(ext) < 0) return;
+    var key = 'sphere-file-text:' + current + '/' + file.name;
+    var stored = '';
+    try { stored = localStorage.getItem(key) || ''; } catch (err) {}
+    var text = stored || file.text || ('* ' + file.name + '\n* prototype text\n');
+    var can = !window.SPHERE_ACCESS || SPHERE_ACCESS.canEdit((window.SPHERE_filesPath || '') + current);
+    var back = document.createElement('div');
+    back.className = 'modal-backdrop';
+    back.innerHTML = '<div class="modal" role="dialog"><div class="modal-head"><h2></h2></div><div class="modal-body"><textarea id="fileViewerBody" style="width:100%;min-height:220px;font-family:ui-monospace,monospace"></textarea></div><div class="modal-foot"></div></div>';
+    back.querySelector('h2').textContent = file.name;
+    document.body.appendChild(back);
+    var area = back.querySelector('#fileViewerBody');
+    area.value = text;
+    if (!can) area.readOnly = true;
+    var foot = back.querySelector('.modal-foot');
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'btn';
+    closeBtn.type = 'button';
+    closeBtn.textContent = 'Close';
+    closeBtn.addEventListener('click', function () { back.remove(); });
+    foot.appendChild(closeBtn);
+    if (can) {
+      var save = document.createElement('button');
+      save.className = 'btn primary';
+      save.type = 'button';
+      save.textContent = 'Save';
+      save.addEventListener('click', function () {
+        file.text = area.value;
+        try { localStorage.setItem(key, area.value); } catch (err) {}
+        back.remove();
+      });
+      foot.appendChild(save);
+    }
+  }
+  var clip = null;
+  function pasteClip() {
+    if (!clip) return;
+    var path = (window.SPHERE_filesPath || '') + current;
+    if (window.SPHERE_ACCESS && !SPHERE_ACCESS.canEdit(path)) {
+      window.alert('Paste refused: no edit permission on this folder.');
+      return;
+    }
+    TREE[current] = TREE[current] || [];
+    if (clip.kind === 'file' && clip.item) {
+      TREE[current].push(JSON.parse(JSON.stringify(clip.item)));
+    } else if (clip.kind === 'folder') {
+      TREE[current].push({ name: clip.name, type: 'dir', size: '-', modified: '2026-10-09 14:05' });
+      TREE[current + '/' + clip.name] = (clip.items || []).map(function (f) { return JSON.parse(JSON.stringify(f)); });
+    }
+    render(current);
+  }
   ctxMenu.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-action]');
     if (!btn || !ctxTarget) return;
     var action = btn.getAttribute('data-action');
     if (action === 'manage') {
       openAccess(ctxTarget);
+    } else if (action === 'copy') {
+      var file = (TREE[current] || []).filter(function (f) { return f.name === ctxTarget.name; })[0];
+      if (ctxTarget.kind === 'folder') {
+        var kids = (TREE[ctxTarget.name] || TREE[current + '/' + ctxTarget.name] || (file ? [] : [])).map(function (f) { return JSON.parse(JSON.stringify(f)); });
+        if (!kids.length && file && file.type === 'dir') kids = [{ name: 'readme.txt', type: 'txt', size: '1 KB', modified: '2026-10-09 14:05' }];
+        clip = { kind: 'folder', name: ctxTarget.name, items: kids };
+      } else if (file) clip = { kind: 'file', item: JSON.parse(JSON.stringify(file)) };
+      closeCtx();
+    } else if (action === 'paste') {
+      pasteClip();
+      closeCtx();
     } else if (action === 'open') {
       if (ctxTarget.kind === 'folder' && FOLDER_ACL[ctxTarget.name]) {
         render(ctxTarget.name);
@@ -720,15 +892,18 @@
     if (!accessTarget) return;
     var v = accessAddWho.value;
     if (!v) { showToast('Pick a user or team'); return; }
+    var opt = accessAddWho.options[accessAddWho.selectedIndex];
     var parts = v.split(':');
     var kind = parts[0];
-    var name = parts.slice(1).join(':');
+    var userId = parts.slice(1).join(':');
+    var name = (opt && opt.textContent.trim()) || userId;
     var role = accessTarget.frozen ? 'View' : accessAddRole.value;
     var exists = accessTarget.rows.some(function (r) { return r.name === name; });
     if (exists) { showToast('Already on ACL'); return; }
     accessTarget.rows.push({
       kind: kind,
       name: name,
+      userId: userId,
       meta: kind === 'team' ? 'Team · folder ACL' : '',
       role: role,
       locked: !!accessTarget.frozen
@@ -741,13 +916,25 @@
   document.getElementById('accessClose').addEventListener('click', closeAccess);
   document.getElementById('accessCancel').addEventListener('click', closeAccess);
   document.getElementById('accessSave').addEventListener('click', function () {
+    var levelEl = document.getElementById('accessLevel');
+    var level = levelEl ? levelEl.value : 'folder';
+    try {
+      if (window.SPHERE_ACCESS) {
+        SPHERE_ACCESS.setFolderAccess(window.SPHERE_filesCompound || '', level, (window.SPHERE_filesPath || '') + (accessTarget && accessTarget.folder || current), (accessTarget && accessTarget.rows || []).map(function (r) {
+          return { userId: r.userId || r.name, role: r.role };
+        }));
+      }
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+      return;
+    }
     if (accessTarget && accessTarget.kind === 'folder' && !accessTarget.frozen) {
       FOLDER_ACL[accessTarget.folder || accessTarget.name] = accessTarget.rows.map(function (r) {
         return { kind: r.kind, name: r.name, meta: r.meta, role: r.role };
       });
     }
     showToast(accessTarget && false
-      ? 'Frozen path — Edit stays off until Return to programmer'
+      ? 'Frozen path - Edit stays off until Return to programmer'
       : 'Access saved (stub)');
     closeAccess();
   });
@@ -795,13 +982,15 @@
     if (!active) return;
     if (L.setCurrent) active = L.setCurrent(active) || active;
     var activePath = L.entryPath(active);
+    window.SPHERE_filesCompound = active.compound || '';
+    window.SPHERE_filesPath = activePath;
     var demoFiles = active.protocol === 'ONC-204-301' && active.deliverable === 'CSR';
     function link(e) { return 'files.html?path=' + encodeURIComponent(L.entryPath(e)); }
     var box = document.createElement('div');
     box.className = 'files-studies';
     box.id = 'filesStudies';
-    box.innerHTML = '<div class="tree-head"><span>Studies</span><a class="badge info" href="admin.html?panel=defaults" title="Tenant layout: ' + L.levelLabel(L.get().level) + ' · change in Admin" style="text-decoration:none">Layout ' + L.get().level + '</a></div>' +
-      '<div style="padding:0 8px 4px">' + L.treeHtml({ link: link, activePath: activePath }) + '</div>';
+    box.innerHTML = '<div class="tree-head"><span>Studies</span><a class="badge info" href="admin.html?panel=defaults" title="' + L.levelLabel(L.get().level) + ' · change in Admin" style="text-decoration:none">Layout ' + L.get().level + '</a></div>' +
+      '<div style="padding:0 8px 4px">' + L.treeHtml({ link: link, activePath: activePath, expandCurrent: true }) + '</div>';
     treeRoot.insertBefore(box, treeRoot.firstChild);
     var folderHead = Array.prototype.filter.call(treeRoot.querySelectorAll(':scope > .tree-head'), function () { return true; })[0];
     if (folderHead) folderHead.firstElementChild.textContent = 'Folders';
@@ -817,16 +1006,24 @@
         rootBtn.remove();
       }
     }
-    if (!demoFiles) {
-      var when = active.created || 'today';
-      FOLDERS.length = 0;
-      L.get().subfolders.forEach(function (sf) {
-        FOLDERS.push({ id: sf, count: '0', frozen: false, title: 'Created from tenant template' });
-        TREE[sf] = [{ name: 'README.txt', type: 'txt', size: '1 KB', modified: when + ' · created from tenant template' }];
-      });
-      current = FOLDERS[0] ? FOLDERS[0].id : current;
-      window.SPHERE_filesStartFolder = current;
-    }
+    var subs = L.get().subfolders.slice();
+    var kept = {};
+    FOLDERS.forEach(function (f) { kept[f.id] = f; });
+    FOLDERS.length = 0;
+    subs.forEach(function (sf) {
+      var sourceId = (sf === 'data/raw' && !kept['data/raw'] && kept.raw) ? 'raw' : sf;
+      if (sourceId !== sf && TREE[sourceId] && !TREE[sf]) TREE[sf] = TREE[sourceId];
+      if (kept[sf]) FOLDERS.push(kept[sf]);
+      else if (kept[sourceId]) {
+        kept[sourceId].id = sf;
+        FOLDERS.push(kept[sourceId]);
+      } else {
+        if (!TREE[sf]) TREE[sf] = [{ name: 'README.txt', type: 'txt', size: '1 KB', modified: (active.created || 'today') + ' · Admin layout' }];
+        FOLDERS.push({ id: sf, count: String((TREE[sf] || []).length), frozen: false, title: 'Admin layout' });
+      }
+    });
+    current = FOLDERS[0] ? FOLDERS[0].id : current;
+    window.SPHERE_filesStartFolder = current;
     if (window.SPHERE_INGEST) {
       SPHERE_INGEST.forStudy(activePath).forEach(function (it) {
         var fid = SPHERE_INGEST.folderId(it.dest);
@@ -839,7 +1036,7 @@
         TREE[fid] = TREE[fid] || [];
         if (!TREE[fid].some(function (f) { return f.name === it.name; })) {
           var ext = (String(it.name).split('.').pop() || 'file');
-          TREE[fid].unshift({ name: it.name, type: ext, size: it.sizeLabel || '—', modified: (it.modified || 'Uploaded') + ' · manual upload' });
+          TREE[fid].unshift({ name: it.name, type: ext, size: it.sizeLabel || '-', modified: (it.modified || 'Uploaded') + ' · manual upload' });
         }
         var folder = FOLDERS.filter(function (f) { return f.id === fid; })[0];
         if (folder) folder.count = String(TREE[fid].length);
@@ -847,10 +1044,24 @@
     }
     filesInfoLine('filesStudyNote', 1).innerHTML = '<span class="files-infobar-k">Study</span><span><strong>' + esc(active.name || activePath) + '</strong> · <code>' + esc(activePath) + '</code>' +
       (active.current ? ' · <span class="lt-badge cur">current</span>' : '') +
-      (!demoFiles ? ' — folders created from the tenant study layout on ' + esc(active.created || 'today') : '') +
+      (!demoFiles ? ' - folders created from the tenant study layout on ' + esc(active.created || 'today') : '') +
       ' · <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></span>';
+    if (typeof syncManage === 'function') syncManage();
   })();
 
+  document.querySelectorAll('.sort-h').forEach(function (h) {
+    h.addEventListener('click', function () {
+      var key = h.getAttribute('data-sort');
+      if (sortKey === key) sortDir = -sortDir;
+      else { sortKey = key; sortDir = 1; }
+      render(current);
+    });
+  });
+  var searchBox = document.getElementById('filesSearch');
+  if (searchBox) searchBox.addEventListener('input', function () {
+    searchQ = searchBox.value.trim();
+    render(current);
+  });
   buildTree();
   render(window.SPHERE_filesStartFolder || 'programs');
   window.SPHERE_filesTree = TREE;
@@ -867,14 +1078,14 @@
     return mode === 'dev-qc-prod' || mode === 'dev-prod';
   }
   function applyProgramsFolderMode() {
-    if (!window.SPHERE || !SPHERE.getProgramsFolderMode) return;
+    return;
     var mode = SPHERE.getProgramsFolderMode();
     var hint = window.SPHERE_filesInfoLine ? SPHERE_filesInfoLine('programsFolderHint', 2) : null;
     if (!hint) return;
     if (isSplitMode(mode)) {
       hint.innerHTML = '<span class="files-infobar-k">Programs</span><span><code>programs/dev</code> (editable · In&nbsp;dev / Revise) · <code>programs/qc</code> (QC copies) · <code>programs/prod</code> (approved, read-only) · <a href="admin.html?panel=workflow">Change in Admin → Tracker workflow</a></span>';
     } else {
-      hint.innerHTML = '<span class="files-infobar-k">Programs</span><span>single <code>programs/</code> folder — stage lock makes files read-only outside In&nbsp;dev / Revise · <a href="admin.html?panel=workflow">Configure in Admin → Tracker workflow</a></span>';
+      hint.innerHTML = '<span class="files-infobar-k">Programs</span><span>single <code>programs/</code> folder - stage lock makes files read-only outside In&nbsp;dev / Revise · <a href="admin.html?panel=workflow">Configure in Admin → Tracker workflow</a></span>';
     }
     // Demo: if tree has programs node, ensure child folders exist in UI list when split
     try {
@@ -883,7 +1094,7 @@
         var names = TREE.programs.map(function (x) { return x.name; });
         function ensureDir(name, index) {
           if (names.indexOf(name) >= 0) return;
-          TREE.programs.splice(index, 0, { name: name, type: 'dir', size: '—', modified: 'Tenant layout', frozen: false });
+          TREE.programs.splice(index, 0, { name: name, type: 'dir', size: '-', modified: 'Tenant layout', frozen: false });
           names = TREE.programs.map(function (x) { return x.name; });
         }
         ensureDir('dev', 0);

@@ -1,4 +1,4 @@
-/* SPHERE demo flow store — Mock Shells → Tracker → QC → Stats → Released to MW.
+/* SPHERE demo flow store - Mock Shells → Tracker → QC → Stats → Released to MW.
    Front-end only; state lives in localStorage so it survives page navigation.
    Reset: add ?reset=1 to any page URL (or Admin → Reset demo data). */
 (function () {
@@ -18,6 +18,9 @@
     s.roles = s.roles || {};        /* row key -> {prod,qc,stats,mw} role overrides (Roles editor) */
     s.shellSync = s.shellSync || {}; /* study|number -> {title, footnotes, changedAt, why} */
     s.lastRun = s.lastRun || {};     /* program -> ISO time of last completed run */
+    s.programTx = s.programTx || []; /* program renames: old, new, user, time */
+    s.programByNumber = s.programByNumber || {}; /* study|number -> program file name */
+    s.fileRenames = s.fileRenames || {}; /* old file name -> new file name */
     return s;
   }
   function write(s) {
@@ -47,7 +50,7 @@
 
   function qcName(prog) {
     prog = String(prog || '').split('/').pop();
-    if (!prog || prog === '—') return '';
+    if (!prog || prog === '-') return '';
     if (/^qc-/i.test(prog)) return prog;
     return 'qc-' + prog;
   }
@@ -262,6 +265,13 @@
     getShells: function (study) { var s = read(); return s.shells[study || STUDY] || null; },
     setShells: function (study, shells) { var s = read(); s.shells[study || STUDY] = shells; write(s); },
     records: function () { return read().records; },
+    addRecord: function (rec) {
+      var s = read();
+      s.records = s.records || [];
+      s.records.push(rec);
+      write(s);
+      return rec;
+    },
     record: function (id) { return read().records.filter(function (r) { return r.id === id; })[0] || null; },
     recordByProgram: function (prog) { return read().records.filter(function (r) { return r.program === prog; })[0] || null; },
     updateRecord: function (id, fn) {
@@ -381,10 +391,105 @@
       });
       write(s);
     },
+    renameProgram: function (info) {
+      if (!info || !info.newName || info.oldName === info.newName) return null;
+      var s = read();
+      var when = new Date().toISOString();
+      var user = info.user || CURRENT_USER;
+      var tx = {
+        at: when,
+        oldName: info.oldName || '',
+        newName: info.newName,
+        user: user,
+        study: info.study || STUDY,
+        shellId: info.shellId || '',
+        number: info.number || '',
+        action: 'Program renamed'
+      };
+      s.programTx.push(tx);
+      if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
+      if (info.oldName) s.fileRenames[info.oldName] = info.newName;
+      (s.records || []).forEach(function (r) {
+        var hit = (info.shellId && r.shellId === info.shellId) ||
+          (info.oldName && r.program === info.oldName) ||
+          (info.number && String(r.number) === String(info.number));
+        if (!hit) return;
+        r.program = info.newName;
+        r.history = r.history || [];
+        r.history.push({ at: when, action: 'Program renamed', person: user, oldName: tx.oldName, newName: info.newName, note: tx.oldName + ' -> ' + info.newName });
+      });
+      if (info.oldName && s.status[info.oldName]) {
+        s.status[info.newName] = s.status[info.oldName];
+        delete s.status[info.oldName];
+      }
+      if (info.oldName) {
+        (s.events[info.newName] = s.events[info.newName] || s.events[info.oldName] || []).push({
+          at: stamp(new Date()), action: 'Program renamed', person: user, status: '', note: tx.oldName + ' -> ' + info.newName, oldName: tx.oldName, newName: info.newName
+        });
+      }
+      write(s);
+      return tx;
+    },
+    programTransactions: function () { return read().programTx.slice(); },
+    programForNumber: function (study, number) {
+      return read().programByNumber[(study || STUDY) + '|' + number] || '';
+    },
+    fileRenames: function () { return Object.assign({}, read().fileRenames); },
     lastRun: function (prog) {
       var name = String(prog || '').split('/').pop();
       var s = read();
       return s.lastRun[name] || '';
+    },
+    /* SPH-R-602: Tracker send-to-QC moves the linked shell to In Review. */
+    noteShellSentToQc: function (number) {
+      var num = String(number || '');
+      if (!num) return null;
+      var s = read();
+      var user = CURRENT_USER;
+      try { if (window.SPHERE_ACCESS && SPHERE_ACCESS.username) user = SPHERE_ACCESS.username() || user; } catch (e) {}
+      var at = new Date().toISOString();
+      var list = s.shells[STUDY];
+      if (list && list.length) {
+        var sh = null;
+        for (var i = 0; i < list.length; i++) if (String(list[i].number) === num) sh = list[i];
+        if (!sh) return null;
+        var cur = sh.status === 'In review' ? 'In Review' : (sh.status === 'Locked' ? 'Final' : (sh.status || 'Draft'));
+        if (cur === 'In Review') return sh;
+        sh.statusHistory = sh.statusHistory || [];
+        sh.statusHistory.push({ user: user, at: at, from: cur, to: 'In Review', reason: '', cause: 'Tracker record sent to QC' });
+        sh.status = 'In Review';
+        sh.qc = 'In Review';
+        write(s);
+        return sh;
+      }
+      s.qcShell = s.qcShell || {};
+      s.qcShell[num] = { user: user, at: at, cause: 'Tracker record sent to QC' };
+      write(s);
+      return { queued: true, number: num };
+    },
+    applyQueuedQc: function (study, shells) {
+      var s = read();
+      var qmap = s.qcShell || {};
+      var changed = false;
+      (shells || []).forEach(function (sh) {
+        var q = qmap[String(sh.number)];
+        if (!q) return;
+        var cur = sh.status === 'In review' ? 'In Review' : (sh.status === 'Locked' ? 'Final' : (sh.status || 'Draft'));
+        if (cur !== 'In Review') {
+          sh.statusHistory = sh.statusHistory || [];
+          sh.statusHistory.push({ user: q.user, at: q.at, from: cur, to: 'In Review', reason: '', cause: 'Tracker record sent to QC' });
+          sh.status = 'In Review';
+          sh.qc = 'In Review';
+        }
+        delete qmap[String(sh.number)];
+        changed = true;
+      });
+      if (changed) {
+        s.shells[study || STUDY] = shells;
+        s.qcShell = qmap;
+        write(s);
+      }
+      return shells;
     }
   };
   window.SPHERE_DEMO = api;

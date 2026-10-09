@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Cache-Control" content="no-cache" />
-<title>SPHERE — Tracker</title>
+<title>SPHERE - Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -122,7 +122,8 @@
       <div class="tracker-page-head">
         <div class="page-intro page-intro-compact" style="margin-bottom:0">
         <div class="page-title-row">
-          <h1 class="page-title">Tracker — programs, TLFs &amp; datasets</h1>
+          <h1 class="page-title">Tracker - programs, TLFs &amp; datasets</h1>
+          <button class="btn primary" type="button" id="btnNewRecord">New Record</button>
           <button type="button" class="btn icon-btn accent-icon page-note-toggle" aria-expanded="false" aria-controls="pageNoteBanner" title="Show note" aria-label="Show note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
@@ -216,7 +217,7 @@
                 <option>Safety TLFs</option>
                 <option>Labs</option>
               </select>
-              <select id="filterAssigned" style="width:140px" aria-label="Filter by Assigned To">
+              <select id="filterAssigned" style="width:140px" aria-label="Filter by Assigned To" hidden>
                 <option value="">All assignees</option>
               </select>
 </div>
@@ -366,7 +367,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.2.1 · Primary endpoint — ORR</div>
+                  <div class="artifact-title">14.2.1 · Primary endpoint - ORR</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">Second wave</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -388,12 +389,12 @@
                   
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell"><span class="meta-v">Dataset</span></div>
                   <div class="meta-cell"><span class="meta-v">Revise</span></div>
                   <div class="meta-cell"><span class="meta-v">Mei Chen</span></div>
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell actions-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><div class="row-people-wrap"><button class="btn icon-btn row-people" type="button" title="Roles · click to edit" aria-label="Edit roles" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg></button><div class="row-people-tip" role="tooltip"><div class="row-people-tip-title">Roles</div><div class="row-people-tip-body"></div></div></div><div class="row-exec-wrap"><button class="btn icon-btn row-exec" type="button" title="Execute program" aria-label="Execute program" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72L19 12 8 5.14z"/></svg></button><div class="row-exec-menu" role="menu" hidden><button type="button" role="menuitem" data-exec="prod">Production program</button><button type="button" role="menuitem" data-exec="qc">QC program</button><button type="button" role="menuitem" data-exec="both" title="Production program first, then the QC program">Both (Prod then QC)</button></div></div><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -402,16 +403,16 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Kaplan-Meier" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.2 · Kaplan–Meier overall survival</div>
+                  <div class="artifact-title">14.3.2 · Kaplan-Meier overall survival</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
                 </div>
                 <div class="artifact-meta">
-                  <div class="meta-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell"><span class="meta-v">Figure</span></div>
                   <div class="meta-cell"><span class="meta-v">Approved</span></div>
                   <div class="meta-cell"><span class="meta-v">Riley Nguyen</span></div>
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell actions-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><div class="row-people-wrap"><button class="btn icon-btn row-people" type="button" title="Roles · click to edit" aria-label="Edit roles" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg></button><div class="row-people-tip" role="tooltip"><div class="row-people-tip-title">Roles</div><div class="row-people-tip-body"></div></div></div><div class="row-exec-wrap"><button class="btn icon-btn row-exec" type="button" title="Execute program" aria-label="Execute program" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72L19 12 8 5.14z"/></svg></button><div class="row-exec-menu" role="menu" hidden><button type="button" role="menuitem" data-exec="prod">Production program</button><button type="button" role="menuitem" data-exec="qc">QC program</button><button type="button" role="menuitem" data-exec="both" title="Production program first, then the QC program">Both (Prod then QC)</button></div></div><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -420,7 +421,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Objective response rate and duration of " /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.2.3 · Objective response rate and duration of response by BICR assessment — full analysis set (FAS)</div>
+                  <div class="artifact-title">14.2.3 · Objective response rate and duration of response by BICR assessment - full analysis set (FAS)</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -469,7 +470,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select AE overview" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.1 · Adverse events — overview</div>
+                  <div class="artifact-title">14.3.1 · Adverse events - overview</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">DMC</span><span class="tag-chip">First look</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -541,7 +542,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events leading to permanent disc" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.1.3 · Adverse events leading to permanent discontinuation of study treatment — by Preferred Term</div>
+                  <div class="artifact-title">14.3.1.3 · Adverse events leading to permanent discontinuation of study treatment - by Preferred Term</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -568,7 +569,7 @@
                   <div class="meta-cell"><span class="meta-v">Revise</span></div>
                   <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell actions-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><div class="row-people-wrap"><button class="btn icon-btn row-people" type="button" title="Roles · click to edit" aria-label="Edit roles" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg></button><div class="row-people-tip" role="tooltip"><div class="row-people-tip-title">Roles</div><div class="row-people-tip-body"></div></div></div><div class="row-exec-wrap"><button class="btn icon-btn row-exec" type="button" title="Execute program" aria-label="Execute program" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72L19 12 8 5.14z"/></svg></button><div class="row-exec-menu" role="menu" hidden><button type="button" role="menuitem" data-exec="prod">Production program</button><button type="button" role="menuitem" data-exec="qc">QC program</button><button type="button" role="menuitem" data-exec="both" title="Production program first, then the QC program">Both (Prod then QC)</button></div></div><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -595,7 +596,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Time to first Grade ≥3 treatment-emergen" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.1.6 · Time to first Grade ≥3 treatment-emergent adverse event — Kaplan–Meier summary (Safety)</div>
+                  <div class="artifact-title">14.3.1.6 · Time to first Grade ≥3 treatment-emergent adverse event - Kaplan-Meier summary (Safety)</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -622,7 +623,7 @@
                   <div class="meta-cell"><span class="meta-v">Not started</span></div>
                   <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">n/a</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell actions-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><div class="row-people-wrap"><button class="btn icon-btn row-people" type="button" title="Roles · click to edit" aria-label="Edit roles" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg></button><div class="row-people-tip" role="tooltip"><div class="row-people-tip-title">Roles</div><div class="row-people-tip-body"></div></div></div><div class="row-exec-wrap"><button class="btn icon-btn row-exec" type="button" title="Execute program" aria-label="Execute program" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72L19 12 8 5.14z"/></svg></button><div class="row-exec-menu" role="menu" hidden><button type="button" role="menuitem" data-exec="prod">Production program</button><button type="button" role="menuitem" data-exec="qc">QC program</button><button type="button" role="menuitem" data-exec="both" title="Production program first, then the QC program">Both (Prod then QC)</button></div></div><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -649,7 +650,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events by maximum severity grade" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.3 · Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class — Safety analysis set</div>
+                  <div class="artifact-title">14.3.3 · Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class - Safety analysis set</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">Second wave</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -667,7 +668,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Common adverse events (≥5% in any treatm" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.4 · Common adverse events (≥5% in any treatment arm) by Preferred Term — descending frequency</div>
+                  <div class="artifact-title">14.3.4 · Common adverse events (≥5% in any treatment arm) by Preferred Term - descending frequency</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -698,7 +699,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.5 · Laboratory — chemistry shifts</div>
+                  <div class="artifact-title">14.3.5 · Laboratory - chemistry shifts</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">Second wave</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -707,7 +708,7 @@
                   <div class="meta-cell"><span class="meta-v">Frozen</span></div>
                   <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell actions-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><div class="row-people-wrap"><button class="btn icon-btn row-people" type="button" title="Roles · click to edit" aria-label="Edit roles" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg></button><div class="row-people-tip" role="tooltip"><div class="row-people-tip-title">Roles</div><div class="row-people-tip-body"></div></div></div><div class="row-exec-wrap"><button class="btn icon-btn row-exec" type="button" title="Execute program" aria-label="Execute program" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72L19 12 8 5.14z"/></svg></button><div class="row-exec-menu" role="menu" hidden><button type="button" role="menuitem" data-exec="prod">Production program</button><button type="button" role="menuitem" data-exec="qc">QC program</button><button type="button" role="menuitem" data-exec="both" title="Production program first, then the QC program">Both (Prod then QC)</button></div></div><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -716,7 +717,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry shifts from baselin" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.5.1 · Laboratory chemistry shifts from baseline to worst post-baseline grade (CTCAE) — Safety analysis set</div>
+                  <div class="artifact-title">14.3.5.1 · Laboratory chemistry shifts from baseline to worst post-baseline grade (CTCAE) - Safety analysis set</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -734,7 +735,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Hematology parameters: change from basel" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.3.5.2 · Hematology parameters: change from baseline over time (mean ± SE) — Safety analysis set</div>
+                  <div class="artifact-title">14.3.5.2 · Hematology parameters: change from baseline over time (mean ± SE) - Safety analysis set</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">First look</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -743,7 +744,7 @@
                   <div class="meta-cell"><span class="meta-v">In dev</span></div>
                   <div class="meta-cell"><span class="meta-v">Jordan Patel</span></div>
                   <div class="meta-cell"><span class="meta-v">Draft</span></div>
-                  <div class="meta-cell job-cell"><span class="meta-v">—</span></div>
+                  <div class="meta-cell job-cell"><span class="meta-v">-</span></div>
                   <div class="meta-cell actions-cell"><div class="row-actions"><button class="btn icon-btn row-history" type="button" title="History" aria-label="History"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.06 4.94l1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></button><div class="row-people-wrap"><button class="btn icon-btn row-people" type="button" title="Roles · click to edit" aria-label="Edit roles" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg></button><div class="row-people-tip" role="tooltip"><div class="row-people-tip-title">Roles</div><div class="row-people-tip-body"></div></div></div><div class="row-exec-wrap"><button class="btn icon-btn row-exec" type="button" title="Execute program" aria-label="Execute program" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72L19 12 8 5.14z"/></svg></button><div class="row-exec-menu" role="menu" hidden><button type="button" role="menuitem" data-exec="prod">Production program</button><button type="button" role="menuitem" data-exec="qc">QC program</button><button type="button" role="menuitem" data-exec="both" title="Production program first, then the QC program">Both (Prod then QC)</button></div></div><button class="btn icon-btn row-edit" type="button" title="Edit row" aria-label="Edit row"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4zm12.7-13.3 1.6-1.6a1 1 0 0 1 1.4 0l1.2 1.2a1 1 0 0 1 0 1.4l-1.6 1.6-2.6-2.6z" fill="currentColor"/></svg></button></div></div>
                 </div>
               </div>
@@ -831,7 +832,7 @@
           <span class="badge table">SAS</span>
         </li>
         <li>
-          <input type="checkbox" class="import-file" value="tlf/tfl_14_3_6_lb_heme.R" data-title="14.3.6 · Laboratory — hematology" data-type="Table" data-sap="Labs" />
+          <input type="checkbox" class="import-file" value="tlf/tfl_14_3_6_lb_heme.R" data-title="14.3.6 · Laboratory - hematology" data-type="Table" data-sap="Labs" />
           <span class="fname">tfl_14_3_6_lb_heme.R</span>
           <span class="badge table">R</span>
         </li>
@@ -849,6 +850,65 @@
   </div>
 </div>
 
+
+<div class="modal-backdrop" id="newRecordModal" hidden role="dialog" aria-modal="true" aria-labelledby="newRecordTitle">
+  <div class="modal" style="width:min(560px,96vw)">
+    <div class="modal-head">
+      <h2 id="newRecordTitle">New Record</h2>
+      <button class="btn ghost sm" type="button" id="newRecordClose" aria-label="Close">Close</button>
+    </div>
+    <form class="modal-body" id="newRecordForm" autocomplete="off">
+      <label>Title
+        <input type="text" id="nrTitle" name="title" required autocomplete="off" />
+        <span class="field-error" id="nrTitleError" hidden style="color:var(--danger);font-size:12px">Title is required.</span>
+      </label>
+      <label>Program filename
+        <input type="text" id="nrProgram" name="program" required placeholder="e.g. tfl_14_1_1_demog.R" autocomplete="off" />
+        <span class="field-error" id="nrProgramError" hidden style="color:var(--danger);font-size:12px">Program name is required.</span>
+      </label>
+      <div class="grid2">
+        <label>Type
+          <select id="nrType" name="type">
+            <option>Table</option>
+            <option>Listing</option>
+            <option>Figure</option>
+            <option>Dataset</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="nrStatus" name="status" disabled>
+            <option selected>Draft</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid2">
+        <label>SAP section
+          <select id="nrSap" name="sap">
+            <option>Demographics</option>
+            <option>Efficacy</option>
+            <option>Safety TLFs</option>
+            <option>Labs</option>
+          </select>
+        </label>
+        <label>Shell
+          <select id="nrShell" name="shell">
+            <option>Locked</option>
+            <option>Available</option>
+            <option selected>n/a</option>
+            <option>-</option>
+          </select>
+        </label>
+      </div>
+      <label>Tags <span class="hint" style="display:inline;margin:0">(comma-separated)</span>
+        <input type="text" id="nrTags" name="tags" placeholder="First look, DMC" autocomplete="off" />
+      </label>
+    </form>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="newRecordCancel">Cancel</button>
+      <button class="btn primary" type="button" id="newRecordSave">Create record</button>
+    </div>
+  </div>
+</div>
 
 <!-- Row editor (floating, draggable) -->
 <div class="float-editor" id="rowEditor" hidden role="dialog" aria-modal="true" aria-labelledby="rowEditorTitle">
@@ -897,7 +957,7 @@
           <option>Locked</option>
           <option>Available</option>
           <option>n/a</option>
-          <option>—</option>
+          <option>-</option>
         </select>
       </label>
     </div>
@@ -907,7 +967,7 @@
     <div class="grid2">
       <label>Assigned To
         <select id="reAssigned" name="assigned">
-          <option value="">—</option>
+          <option value="">-</option>
           <option>Jordan Patel</option>
           <option>Alex Rivera</option>
           <option>Sam Okonkwo</option>
@@ -1150,7 +1210,8 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="demo-flow.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4e"></script>
+<script src="demo-flow.js?v=flow4e"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -1242,7 +1303,7 @@
   syncNavBtn();
 
 
-  /* —— Tracker interactions —— */
+  /* -- Tracker interactions -- */
   var board = document.getElementById('trackerBoard');
   var checkAll = document.getElementById('checkAll');
   var bulkBar = document.getElementById('bulkBar');
@@ -1278,14 +1339,14 @@
   function setJobCell(row, state) {
     var cell = row.querySelector('.job-cell');
     if (!cell) return;
-    var label = state === 'running' ? 'Running' : state === 'queued' ? 'Queued' : state === 'done' ? 'Done' : '—';
+    var label = state === 'running' ? 'Running' : state === 'queued' ? 'Queued' : state === 'done' ? 'Done' : '-';
     var cls = 'meta-v';
     if (state === 'running') cls += '" style="color:var(--accent)';
     else if (!state || state === 'queued') {
       /* queued muted */
     }
     if (!state) {
-      cell.innerHTML = '<span class="meta-v muted">—</span>';
+      cell.innerHTML = '<span class="meta-v muted">-</span>';
       return;
     }
     if (state === 'running') {
@@ -1308,7 +1369,7 @@
       sec.classList.toggle('is-empty', vis.length === 0 && (rows.length > 0 || filtering));
       var bodyEl = sec.querySelector('.sap-section-body');
       var note = bodyEl && bodyEl.querySelector('.sap-empty-note');
-      if (bodyEl && rows.length === 0 && !note) bodyEl.insertAdjacentHTML('beforeend', '<div class="sap-empty-note">No outputs yet — send shells from Mock Shells with + (status Final).</div>');
+      if (bodyEl && rows.length === 0 && !note) bodyEl.insertAdjacentHTML('beforeend', '<div class="sap-empty-note">No outputs yet - send shells from Mock Shells with + (status Final).</div>');
       if (note && rows.length) note.remove();
     });
   }
@@ -1383,7 +1444,7 @@
       btn.textContent = label;
       btn.title = count + ' of ' + sel.length + ' → ' + g.hand.nextStatus;
       btn.addEventListener('click', function () {
-        if (!confirm(flowHandLabel(g.hand, g.rows[0].getAttribute('data-status')) + ' — ' + g.rows.length + ' row(s) → ' + flowStatusLabel(g.hand.nextStatus) + '?')) return;
+        if (!confirm(flowHandLabel(g.hand, g.rows[0].getAttribute('data-status')) + ' - ' + g.rows.length + ' row(s) → ' + flowStatusLabel(g.hand.nextStatus) + '?')) return;
         g.rows.forEach(function (row) {
           applyTransition(row, g.hand);
         });
@@ -1588,7 +1649,7 @@
     var cell = row.querySelector('.artifact-title-band .artifact-tags') || row.querySelector('.artifact-tags');
     if (!cell) return;
     if (!tags.length) {
-      cell.innerHTML = '<span class="meta-v muted">—</span>';
+      cell.innerHTML = '<span class="meta-v muted">-</span>';
       return;
     }
     cell.innerHTML = '<div class="chip-row">' + tags.map(function (t) {
@@ -1718,7 +1779,7 @@
     });
   })();
 
-  /* —— Simulated SAS / R run engine (demo only · no compute engine attached) —— */
+  /* -- Simulated SAS / R run engine (demo only · no compute engine attached) -- */
   var RUN_MAX_PARALLEL = 3;
   var runJobs = [];
   var runJobSeq = 0;
@@ -1845,7 +1906,7 @@
       var dur = fmtDur(j.endedAt - j.startedAt);
       var full = (j.warn ? 'Completed with warnings' : 'Completed') + ' ' + hhmm(j.endDate) + ' · ' + dur;
       html = '<button type="button" class="run-st ' + (j.warn ? 'is-warn' : 'is-done') + '" data-run-log ' +
-        'title="' + full + ' · ' + j.lang + ' · ' + runEsc(modeLabel(j.mode)) + ' — view log" aria-label="' + full + '. View ' + j.lang + ' log">' +
+        'title="' + full + ' · ' + j.lang + ' · ' + runEsc(modeLabel(j.mode)) + ' - view log" aria-label="' + full + '. View ' + j.lang + ' log">' +
         '<span class="run-st-line"><span class="run-ic">' + (j.warn ? RUN_ICONS.warn : RUN_ICONS.check) + '</span><span class="run-st-txt">' + (j.warn ? 'With warnings' : 'Completed') + '</span></span>' +
         '<span class="run-st-sub">' + hhmm(j.endDate) + ' · ' + dur + '</span></button>';
     }
@@ -1895,6 +1956,12 @@
       batch.jobs.push(j);
       runJobs.push(j);
     });
+    if ((mode === 'qc' || mode === 'both') && window.SPHERE_DEMO && SPHERE_DEMO.noteShellSentToQc) {
+      fresh.forEach(function (row) {
+        var num = rowOutputId(row);
+        if (num) SPHERE_DEMO.noteShellSentToQc(num);
+      });
+    }
     runJobs.forEach(function (j) { if (isActive(j)) renderJobCell(j.row); });
     addJobTableRow(batch);
     renderRunPanel();
@@ -2103,7 +2170,7 @@
     });
   }
 
-  /* —— Simulated logs —— */
+  /* -- Simulated logs -- */
   function runDomain(prog) {
     var m = prog.match(/^(?:qc[-_])?adam_(ad[a-z0-9]+)/i);
     return m ? m[1].toUpperCase() : null;
@@ -2176,7 +2243,7 @@
     L.push('NOTE: AUTOEXEC processing completed.');
     L.push('');
     if (j.mode === 'both') {
-      L.push('NOTE: SPHERE Both run — step ' + (idx + 1) + ' of ' + j.phases.length + ': ' + (isQc ? 'QC program' : 'production program') + '.');
+      L.push('NOTE: SPHERE Both run - step ' + (idx + 1) + ' of ' + j.phases.length + ': ' + (isQc ? 'QC program' : 'production program') + '.');
       L.push('');
     }
     src('/*--------------------------------------------------------------------*/');
@@ -2564,7 +2631,7 @@
     if (state === 'out') return 'Checked out';
     if (state === 'qc') return 'In QC (owner)';
     if (state === 'released') return 'Released';
-    return '—';
+    return '-';
   }
 
   function metaCells(row) {
@@ -2587,13 +2654,13 @@
     var s = String(label || '').replace(/\s+/g, ' ').trim();
     if (!s) return false;
     var low = s.toLowerCase();
-    if (low === 'n/a' || low === 'na' || s === '—' || s === '–' || s === '-') return false;
+    if (low === 'n/a' || low === 'na' || s === '-' || s === '-' || s === '-') return false;
     return true;
   }
 
   function shellCellHtml(label, shellId) {
     var text = String(label || '').replace(/\s+/g, ' ').trim();
-    var show = text || '—';
+    var show = text || '-';
     if (!shellStatusLinks(text) || !shellId) {
       var muted = !shellStatusLinks(text);
       return '<span class="meta-v' + (muted ? ' muted' : '') + '">' + escapeHtml(show) + '</span>';
@@ -2635,7 +2702,7 @@
     var reAssigned = document.getElementById('reAssigned');
     if (reAssigned) {
       var curOwner = ownerEl ? String(ownerEl.textContent || '').trim() : '';
-      if (curOwner === '—') curOwner = '';
+      if (curOwner === '-') curOwner = '';
       if (curOwner && !Array.prototype.some.call(reAssigned.options, function (o) { return o.value === curOwner; })) {
         var oo = document.createElement('option'); oo.textContent = curOwner; reAssigned.appendChild(oo);
       }
@@ -2686,7 +2753,7 @@
     if (cells[0]) {
       cells[0].innerHTML = program
         ? '<span class="meta-v program-name">' + program.split('/').pop() + '</span>'
-        : '<span class="meta-v muted program-name">—</span>';
+        : '<span class="meta-v muted program-name">-</span>';
     }
     // Type
     if (cells[1]) cells[1].innerHTML = '<span class="meta-v">' + type + '</span>';
@@ -2696,9 +2763,9 @@
     if (cells[3]) {
       if (owner || coState) {
         var sub = '';
-        cells[3].innerHTML = '<span class="meta-v">' + (owner || '—') + '</span>';
+        cells[3].innerHTML = '<span class="meta-v">' + (owner || '-') + '</span>';
       } else {
-        cells[3].innerHTML = '<span class="meta-v muted">—</span>';
+        cells[3].innerHTML = '<span class="meta-v muted">-</span>';
       }
     }
     // Shell
@@ -2902,7 +2969,7 @@
     for (var i = 0; i < key.length; i++) h = (h + key.charCodeAt(i) * (i + 3)) % 97;
     var ownerEl = row && row.querySelector('.artifact-meta .meta-cell:nth-child(4) .meta-v, .artifact-meta .meta-cell:nth-child(4) strong');
     var owner = ownerEl ? String(ownerEl.textContent || '').trim() : '';
-    if (!owner || owner === '—') owner = ROLE_POOL.prod[h % ROLE_POOL.prod.length];
+    if (!owner || owner === '-') owner = ROLE_POOL.prod[h % ROLE_POOL.prod.length];
     var PROD2 = ['Alex Rivera', 'Sam Okonkwo'];
     var prod2 = PROD2[h % PROD2.length];
     if (prod2 === owner) prod2 = PROD2[(h + 1) % PROD2.length];
@@ -3124,7 +3191,7 @@
       ROLE_DEFS.forEach(function (d) {
         var v = ctx.bulk && !ctx.sel[d.k].length ? cur[d.k] : ctx.sel[d.k];
         next[d.k] = v.slice();
-        if (v.join('|') !== cur[d.k].join('|')) diffs.push(d.short + ': ' + (v.join(', ') || '—'));
+        if (v.join('|') !== cur[d.k].join('|')) diffs.push(d.short + ': ' + (v.join(', ') || '-'));
       });
       if (!diffs.length) return;
       changed++;
@@ -3175,10 +3242,10 @@
     var tags = (opts.tags || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var tagsHtml = tags.length
       ? '<div class="chip-row">' + tags.map(function (t) { return '<span class="tag-chip">' + t + '</span>'; }).join('') + '</div>'
-      : '<span class="meta-v muted title-tags-empty">—</span>';
-    var prog = (opts.program || '').split('/').pop() || '—';
-    var progHtml = prog === '—'
-      ? '<span class="meta-v muted program-name">—</span>'
+      : '<span class="meta-v muted title-tags-empty">-</span>';
+    var prog = (opts.program || '').split('/').pop() || '-';
+    var progHtml = prog === '-'
+      ? '<span class="meta-v muted program-name">-</span>'
       : '<span class="meta-v program-name">' + prog + '</span>';
     row.innerHTML =
       '<div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ' + opts.title + '" /></div>' +
@@ -3191,9 +3258,9 @@
           '<div class="meta-cell">' + progHtml + '</div>' +
           '<div class="meta-cell"><span class="meta-v">' + opts.type + '</span></div>' +
           '<div class="meta-cell"><span class="meta-v">' + (opts.status || 'Not started') + '</span></div>' +
-          '<div class="meta-cell"><span class="meta-v muted">—</span></div>' +
-          '<div class="meta-cell"><span class="meta-v muted">n/a</span></div>' +
-          '<div class="meta-cell job-cell"><span class="meta-v muted">—</span></div>' +
+          '<div class="meta-cell"><span class="meta-v muted">-</span></div>' +
+          '<div class="meta-cell"><span class="meta-v">' + (opts.shell || 'n/a') + '</span></div>' +
+          '<div class="meta-cell job-cell"><span class="meta-v muted">-</span></div>' +
           '<div class="meta-cell actions-cell">' + rowActionsHtml() + '</div>' +
         '</div>' +
       '</div>';
@@ -3229,8 +3296,65 @@
     showToast('Created ' + files.length + ' tracker record(s) from programs/');
   });
 
+  (function bindNewRecord() {
+    var modal = document.getElementById('newRecordModal');
+    var openBtn = document.getElementById('btnNewRecord');
+    if (!modal || !openBtn) return;
+    function field(id) { return document.getElementById(id); }
+    function close() { modal.hidden = true; }
+    function clearFlags() {
+      ['nrTitle', 'nrProgram'].forEach(function (id) {
+        var el = field(id);
+        if (el) el.removeAttribute('aria-invalid');
+      });
+      var te = field('nrTitleError');
+      var pe = field('nrProgramError');
+      if (te) te.hidden = true;
+      if (pe) pe.hidden = true;
+    }
+    function open() {
+      var form = field('newRecordForm');
+      if (form) form.reset();
+      clearFlags();
+      modal.hidden = false;
+      if (field('nrTitle')) field('nrTitle').focus();
+    }
+    openBtn.addEventListener('click', open);
+    ['newRecordClose', 'newRecordCancel'].forEach(function (id) {
+      var b = field(id);
+      if (b) b.addEventListener('click', close);
+    });
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+    var save = field('newRecordSave');
+    if (save) save.addEventListener('click', function () {
+      var title = (field('nrTitle').value || '').trim();
+      var program = (field('nrProgram').value || '').trim();
+      var bad = false;
+      if (!title) { field('nrTitle').setAttribute('aria-invalid', 'true'); field('nrTitleError').hidden = false; bad = true; }
+      else { field('nrTitle').removeAttribute('aria-invalid'); field('nrTitleError').hidden = true; }
+      if (!program) { field('nrProgram').setAttribute('aria-invalid', 'true'); field('nrProgramError').hidden = false; bad = true; }
+      else { field('nrProgram').removeAttribute('aria-invalid'); field('nrProgramError').hidden = true; }
+      if (bad) return;
+      var before = allRows().length;
+      var row = buildArtifactRow({
+        type: field('nrType').value,
+        status: 'Draft',
+        tags: field('nrTags').value,
+        sap: field('nrSap').value,
+        program: program,
+        title: title,
+        shell: field('nrShell').value
+      });
+      moveRowToSap(row, field('nrSap').value);
+      applyFilters();
+      close();
+      if (allRows().length === before) return;
+      showToast('Created Draft record ' + title);
+    });
+  })();
+
   
-  /* —— Custom run / PDF lists —— */
+  /* -- Custom run / PDF lists -- */
   var LISTS_KEY = 'sphere-tracker-lists';
   var listModal = document.getElementById('listModal');
   var listOrder = document.getElementById('listOrderBody');
@@ -3287,18 +3411,18 @@
       if (!row) return {
         program: it.program || '',
         title: it.title || it.program || '',
-        type: it.type || '—',
-        status: it.status || '—',
-        sap: it.sap || '—',
+        type: it.type || '-',
+        status: it.status || '-',
+        sap: it.sap || '-',
         tags: it.tags || ''
       };
       var p = rowPayload(row);
       return {
         program: p.program,
         title: p.title || it.title || p.program,
-        type: p.type || '—',
-        status: p.status || '—',
-        sap: p.sap || '—',
+        type: p.type || '-',
+        status: p.status || '-',
+        sap: p.sap || '-',
         tags: p.tags || ''
       };
     });
@@ -3363,11 +3487,11 @@
         '<td class="col-check"><input type="checkbox" class="setlist-row-check" data-idx="' + idx + '"' + (checked ? ' checked' : '') + ' aria-label="Select row" /></td>' +
         '<td class="col-drag"><span class="drag-handle" aria-hidden="true">⋮⋮</span></td>' +
         '<td class="col-ord">' + (idx + 1) + '</td>' +
-        '<td class="col-title">' + (it.title || '—') + '</td>' +
-        '<td class="col-prog"><code>' + (it.program || '—') + '</code></td>' +
-        '<td>' + (it.type || '—') + '</td>' +
-        '<td><span class="badge">' + (it.status || '—') + '</span></td>' +
-        '<td>' + (it.sap || '—') + '</td>' +
+        '<td class="col-title">' + (it.title || '-') + '</td>' +
+        '<td class="col-prog"><code>' + (it.program || '-') + '</code></td>' +
+        '<td>' + (it.type || '-') + '</td>' +
+        '<td><span class="badge">' + (it.status || '-') + '</span></td>' +
+        '<td>' + (it.sap || '-') + '</td>' +
         '<td class="col-more"><button type="button" class="btn sm ghost list-order-remove" data-rm="' + idx + '" aria-label="Remove">✕</button></td>';
       listOrder.appendChild(tr);
     });
@@ -3606,7 +3730,7 @@
     showToast('Saved list “' + name + '”');
   });
 
-  /* —— Workflow strip + handoffs (no check-out) —— */
+  /* -- Workflow strip + handoffs (no check-out) -- */
   function paintFlowStrip() {
     var el = document.getElementById('trackerFlowStrip');
     if (!el || !window.SPHERE || !SPHERE.getTrackerWorkflow) return;
@@ -3618,7 +3742,7 @@
     el.innerHTML = '<span class="muted" style="font-size:11px;margin-right:4px">Flow</span>' +
       wf.stages.map(function (s, i) {
         return '<span class="wf-step" data-stage="' + s.id + '"><span>' + s.short + '</span>' +
-          (s.role && s.role !== '—' ? '<span class="wf-role">' + s.role + '</span>' : '') +
+          (s.role && s.role !== '-' ? '<span class="wf-role">' + s.role + '</span>' : '') +
           '</span>' + (i < wf.stages.length - 1 ? '<span class="wf-arrow" aria-hidden="true">→</span>' : '');
       }).join('') + folderHint +
       '<a class="muted" style="font-size:11px;margin-left:8px" href="admin.html?panel=workflow">Configure</a>';
@@ -3814,7 +3938,7 @@
           'print(nrow(adsl))'
         ) },
       { n: 1, at: '2026-08-12 09:14', trigger: 'save', person: owner, note: 'Initial', current: false,
-        body: lines('# ' + prog, '# stub — not run yet') }
+        body: lines('# ' + prog, '# stub - not run yet') }
     ];
   }
 
@@ -3950,7 +4074,7 @@
     if (title) title.textContent = 'v' + v.n + ' · ' + v.at + ' · ' + v.trigger;
     if (codeEl) codeEl.textContent = String(v.body || '');
     if (v.current) {
-      if (legend) legend.textContent = 'This is the current version — no differences.';
+      if (legend) legend.textContent = 'This is the current version - no differences.';
       if (diffEl) {
         diffEl.innerHTML = String(v.body || '').split('\n').map(function (line) {
           return '<div class="diff-line diff-same"><span class="diff-pref"> </span><code>' + escapeHtml(line) + '</code></div>';
@@ -4002,7 +4126,7 @@
     var versions = (list && list._versions) || demoVersionsForRow(histActiveRow);
     var v = versions.find(function (x) { return String(x.n) === String(ver); });
     if (!v || v.current) return;
-    showToast('Restored v' + v.n + ' as new current version (demo — history kept)');
+    showToast('Restored v' + v.n + ' as new current version (demo - history kept)');
     closeVersionPreview();
     paintVersionsList(histActiveRow);
     // bump demo: mark restored as new current conceptually on next open
@@ -4015,8 +4139,8 @@
     if (!modal) return;
     histActiveRow = row;
     var data = demoHistoryForRow(row);
-    if (titleEl) titleEl.textContent = 'History — ' + data.title;
-    if (sub) sub.textContent = (data.program ? data.program + ' · ' : '') + 'Current: ' + flowStatusLabel(data.status || '—') + ' · Assigned To: ' + (rowAssignedTo(row) || data.owner || '—');
+    if (titleEl) titleEl.textContent = 'History - ' + data.title;
+    if (sub) sub.textContent = (data.program ? data.program + ' · ' : '') + 'Current: ' + flowStatusLabel(data.status || '-') + ' · Assigned To: ' + (rowAssignedTo(row) || data.owner || '-');
     paintWorkflowTimeline(data);
     var hs = document.getElementById('historyStepper');
     if (hs) hs.innerHTML = stepperHtml(row, data.events);
@@ -4218,7 +4342,7 @@
       var status = row.getAttribute('data-status') || '';
       if (ro) {
         ro.hidden = editable;
-        ro.textContent = editable ? '' : 'Read-only in ' + flowStatusLabel(status) + ' — return the record to Revise to edit.';
+        ro.textContent = editable ? '' : 'Read-only in ' + flowStatusLabel(status) + ' - return the record to Revise to edit.';
       }
       setArtifactFoot(true, editable);
       var footMeta = document.getElementById('artifactFootMeta');
@@ -4264,7 +4388,7 @@
     var file = artifactFileName(meta, scope) || (scope === 'qc' ? 'QC program' : 'Program');
     var title = ((row.querySelector('.artifact-title') || {}).textContent || '').trim();
     var editable = programEditableFor(row, scope);
-    if (titleEl) titleEl.textContent = (editable ? 'Edit — ' : 'View — ') + file + ' · ' + artifactSideLabel(scope);
+    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + file + ' · ' + artifactSideLabel(scope);
     host.innerHTML = '';
     host.setAttribute('aria-label', artifactSideLabel(scope) + ' artifacts');
     artifactTabDefs(meta, scope).forEach(function (t) {
@@ -4470,11 +4594,11 @@
     var pf = document.getElementById('progTabProdFile'); if (pf) pf.textContent = prog;
     var qf = document.getElementById('progTabQcFile'); if (qf) qf.textContent = qc;
     var rtitle = (((row.querySelector('.artifact-title')) || {}).textContent || '').replace(/\s*New$/, '').trim();
-    if (titleEl) titleEl.textContent = (editable ? 'Edit — ' : 'View — ') + file;
+    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + file;
     if (sub) sub.textContent = rtitle + ' · ' + flowStatusLabel(status) + (which === 'qc' ? ' · QC / validation program' : ' · Production program') + (editable ? ' · Save seals a new version (demo)' : '');
     if (ro) {
       ro.hidden = editable;
-      ro.textContent = editable ? '' : 'Read-only in ' + flowStatusLabel(status) + ' — return the record to Revise to edit.';
+      ro.textContent = editable ? '' : 'Read-only in ' + flowStatusLabel(status) + ' - return the record to Revise to edit.';
     }
     if (save) save.hidden = !editable;
     if (code) {
@@ -4764,6 +4888,14 @@
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.shellContent) return;
     allRows().forEach(function (row) {
       var num = rowOutputId(row);
+      if (num && SPHERE_DEMO.programForNumber) {
+        var renamed = SPHERE_DEMO.programForNumber('ONC-204-301', num);
+        if (renamed && row.getAttribute('data-program') !== renamed) {
+          row.setAttribute('data-program', renamed);
+          var progCell = row.querySelector('.program-name');
+          if (progCell && progCell.parentNode) paintProgramCell(row, progCell.parentNode, row.getAttribute('data-status') || '');
+        }
+      }
       var rec = num ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
       if (rec) {
         var titleEl = row.querySelector('.artifact-title');
@@ -4795,7 +4927,7 @@
     var c = metaCells(row)[3];
     var el = c && c.querySelector('.meta-v, strong');
     var v = el ? String(el.textContent || '').trim() : '';
-    return v === '—' ? '' : v;
+    return v === '-' ? '' : v;
   }
   function rowIsMine(row) {
     if (rowAssignedTo(row) === FLOW_ME) return true;
@@ -4823,11 +4955,11 @@
     host.setAttribute('data-stage', stage);
     host.innerHTML = defs.map(function (d) {
       var mine = d[2].indexOf(FLOW_ME) >= 0;
-      var first = d[2][0] || '—';
+      var first = d[2][0] || '-';
       var parts = first.split(' ');
       var short = parts.length > 1 ? parts[0].charAt(0) + '. ' + parts[parts.length - 1] : first;
       var cur = d[0] === stage;
-      var tip = (cur ? 'Currently with ' + d[0] + ' · ' + d[2].map(function (n) { var q = n.split(' '); return q.length > 1 ? q[0].charAt(0) + '. ' + q[q.length - 1] : n; }).join(', ') + ' — ' : '') +
+      var tip = (cur ? 'Currently with ' + d[0] + ' · ' + d[2].map(function (n) { var q = n.split(' '); return q.length > 1 ? q[0].charAt(0) + '. ' + q[q.length - 1] : n; }).join(', ') + ' - ' : '') +
         d[1] + ': ' + d[2].join(', ') + (mine ? ' (you)' : '');
       return '<span class="role-chip' + (mine ? ' is-me' : '') + (cur ? ' is-stage' : '') + '"' + (cur ? ' aria-current="step"' : '') + ' title="' + escapeHtml(tip) + '">' +
         '<b>' + d[0] + '</b><span class="role-nm">' + escapeHtml(short) + (d[2].length > 1 ? ' +' + (d[2].length - 1) : '') + '</span></span>';
@@ -4865,7 +4997,7 @@
       btn.classList.toggle('is-active', myAssignOn);
       btn.setAttribute('aria-pressed', myAssignOn ? 'true' : 'false');
       btn.title = myAssignOn ? 'Showing ' + n + ' records assigned to ' + FLOW_ME + ' (Assigned To or any role) · click to show all'
-        : 'Show only records assigned to ' + FLOW_ME + ' — Assigned To or any role (PR, QC, Stats, MW)';
+        : 'Show only records assigned to ' + FLOW_ME + ' - Assigned To or any role (PR, QC, Stats, MW)';
     }
     if (clr) clr.hidden = !myAssignOn;
   }
@@ -4944,7 +5076,7 @@
       '<div class="wf-pop-title">' + escapeHtml(title) + '</div>' +
       '<div class="wf-pop-sub">Current stage: <strong>' + flowStatusLabel(status) + '</strong></div>' +
       stepperHtml(row, data.events) +
-      '<div class="wf-pop-owner">With: <strong>' + escapeHtml(stageOwner[1] || '—') + '</strong> (' + stageOwner[0] + ')</div>';
+      '<div class="wf-pop-owner">With: <strong>' + escapeHtml(stageOwner[1] || '-') + '</strong> (' + stageOwner[0] + ')</div>';
     if (confirmHand) {
       html += '<div class="wf-pop-confirm" role="alertdialog">' +
         '<div><strong>' + flowHandLabel(confirmHand, status) + '?</strong><br>' + flowStatusLabel(status) + ' → ' + flowStatusLabel(confirmHand.nextStatus) + '. Recorded in History with time and user.</div>' +
@@ -4952,7 +5084,7 @@
     } else {
       html += '<div class="wf-pop-actions">' +
         (next ? '<button type="button" class="btn primary sm" data-wf="next">' + flowHandLabel(next, status) + '</button>'
-          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage — no further workflow actions</span>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>')) +
+          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage - no further workflow actions</span>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>')) +
         (ret ? '<button type="button" class="btn sm" data-wf="revise">Return to Revise</button>' : '') +
         '<button type="button" class="btn sm" data-wf="history">History</button></div>';
     }

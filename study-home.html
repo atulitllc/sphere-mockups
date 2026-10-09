@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Study Home</title>
+<title>SPHERE - Study Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -123,7 +123,7 @@
         <button type="button" class="study-hero-toggle" id="studyHeroToggle" aria-expanded="true" aria-controls="studyHeroBody">
           <div class="study-hero-heading">
             <div class="study-hero-title-row">
-              <h1 class="page-title study-hero-title">ONC-204-301 — Metastatic NSCLC</h1>
+              <h1 class="page-title study-hero-title">ONC-204-301 - Metastatic NSCLC</h1>
               <span class="badge locked">Active</span>
             </div>
             <p class="page-sub study-hero-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
@@ -133,15 +133,18 @@
           </span>
         </button>
         <div class="study-hero-body" id="studyHeroBody">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+            <button class="btn sm" type="button" id="btnEditStudyMeta">Edit</button>
+          </div>
           <div class="meta-grid study-hero-meta">
-            <div class="meta-item"><div class="k">Sponsor</div><div class="v">X Pharma</div></div>
             <div class="meta-item"><div class="k">Indication</div><div class="v">NSCLC 2L+</div></div>
-            <div class="meta-item"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
-            <div class="meta-item"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
+            <div class="meta-item" data-meta="cutoff"><div class="k">Cutoff</div><div class="v" id="metaCutoff">15 Aug 2026</div></div>
+            <div class="meta-item" data-meta="subjects"><div class="k">Subjects</div><div class="v" id="metaSubjects">428 randomized</div></div>
             <div class="meta-item"><div class="k">Lead programmer</div><div class="v">J. Patel</div></div>
             <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
-            <div class="meta-item"><div class="k">SAP status</div><div class="v">Locked</div></div>
-            <div class="meta-item"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+            <div class="meta-item" data-meta="sap"><div class="k">SAP status</div><div class="v" id="metaSap">Locked</div></div>
+            <div class="meta-item" data-meta="delivery"><div class="k">Delivery target</div><div class="v" id="metaDelivery">CSR package · Q4</div></div>
+            <div class="meta-item"><div class="k">Delivery type</div><div class="v" id="metaDeliveryType">-</div></div>
           </div>
         </div>
       </section>
@@ -200,19 +203,19 @@
           </a>
           <a class="module-card" href="data-hub.html">
             <div class="title">Extract data</div>
-            <div class="desc">Pull / register data from elluminate and uploads into Raw.</div>
+            <div class="desc">Pull register data from source (Illuminate, Rave EDC) and upload into Raw. Other sources include spreadsheets, CSV, Excel, and vendors.</div>
           </a>
           <a class="module-card" href="tracker.html">
             <div class="title">Tracker</div>
-            <div class="desc">Programs, TLFs &amp; datasets — tags, SAP sections, check-out/QC, and Run selected (Compute folded in).</div>
+            <div class="desc">Programs, TLFs &amp; datasets - tags, SAP sections, check-out/QC, and Run selected (Compute folded in).</div>
           </a>
           <a class="module-card" href="define.html">
             <div class="title">Define</div>
-            <div class="desc">CDISC Define-XML for SDTM/ADaM from study metadata + dataset specs — human review before publish.</div>
+            <div class="desc">CDISC Define-XML for SDTM/ADaM from study metadata + dataset specs - human review before publish.</div>
           </a>
           <a class="module-card" href="publisher.html">
             <div class="title">Generate PDF Package</div>
-            <div class="desc">Bundle locked shells and outputs into PDF/Word — also available from Tracker.</div>
+            <div class="desc">Bundle locked shells and outputs into PDF/Word - also available from Tracker.</div>
           </a>
           <a class="module-card" href="audit.html">
             <div class="title">Audit</div>
@@ -221,34 +224,42 @@
         </div>
       </div>
 
-      <section class="section">
-        <div class="section-head">
-          <h2 class="section-heading">Recent activity</h2>
+      <section class="section activity-block is-collapsed" id="activityBlock">
+        <div class="section-title" style="margin-bottom:10px">
+          <button type="button" class="modules-toggle" id="activityToggle" aria-expanded="false" aria-controls="activityList">
+            <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            Recent activity
+          </button>
         </div>
-        <ul class="activity">
-          <li>
+        <ul class="activity" id="activityList">
+          <li title="Shell Tracker">
             <span class="when">Today · 4:12 PM ET</span>
-            <span><strong>Shell 14.1.2 locked</strong> — Baseline characteristics</span>
+            <span><strong>Shell 14.1.2 updated</strong> - Baseline characteristics</span>
             <span class="who">M. Chen</span>
           </li>
-          <li>
+          <li title="Define PDF">
             <span class="when">Today · 2:40 PM ET</span>
-            <span><strong>Copilot suggestion rejected</strong> — Mapping Assist for AE.AETERM</span>
+            <span><strong>Define PDF reviewed</strong> - SDTM define package</span>
             <span class="who">J. Patel</span>
           </li>
-          <li>
+          <li title="Snapshot">
             <span class="when">Yesterday · 6:05 PM ET</span>
-            <span><strong>Snapshot ingest complete</strong> — Raw lib updated (snapshot 2026-08-28)</span>
+            <span><strong>Snapshot ingest complete</strong> - Raw lib updated (snapshot 2026-08-28)</span>
             <span class="who">System</span>
           </li>
-          <li>
+          <li title="Shell Tracker">
             <span class="when">Yesterday · 11:20 AM ET</span>
-            <span><strong>Job finished</strong> — adam_adsl.R · QC ready</span>
+            <span><strong>Job finished</strong> - adam_adsl.R · QC ready</span>
             <span class="who">Compute</span>
           </li>
-          <li>
+          <li title="Shell Tracker">
             <span class="when">Tue · 3:18 PM ET</span>
-            <span><strong>Shell 14.3.1 saved</strong> — Adverse events overview (draft)</span>
+            <span><strong>Shell 14.3.1 saved</strong> - Adverse events overview (draft)</span>
+            <span class="who">J. Patel</span>
+          </li>
+          <li title="Snapshot">
+            <span class="when">Mon · 9:02 AM ET</span>
+            <span><strong>Manual upload</strong> - dm.csv copied to SDTM</span>
             <span class="who">J. Patel</span>
           </li>
         </ul>
@@ -257,6 +268,24 @@
     </div>
   </section>
 
+<div class="modal-backdrop" id="studyMetaModal" hidden role="dialog" aria-modal="true" aria-labelledby="studyMetaTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="studyMetaTitle">Edit study details</h2>
+      <button class="btn ghost sm" type="button" id="studyMetaClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Cutoff <input id="editCutoff" type="text" /></label>
+      <label>Subjects <input id="editSubjects" type="text" /></label>
+      <label>SAP status <input id="editSap" type="text" /></label>
+      <label>Delivery target <input id="editDelivery" type="text" /></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="studyMetaCancel">Cancel</button>
+      <button class="btn primary" type="button" id="studyMetaSave">Save</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -377,6 +406,18 @@
 })();
 </script>
 <script>
+(function () {
+  var block = document.getElementById('activityBlock');
+  var btn = document.getElementById('activityToggle');
+  if (!block || !btn) return;
+  btn.addEventListener('click', function () {
+    var collapsed = !block.classList.contains('is-collapsed');
+    block.classList.toggle('is-collapsed', collapsed);
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  });
+})();
+</script>
+<script>
 /* Study metadata from tenant study registry (folder path / compound / protocol / deliverable) */
 (function () {
   var L = window.SPHERE_LAYOUT;
@@ -395,24 +436,88 @@
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
   if (!defaultHero) {
     var t = document.querySelector('.study-hero-title');
-    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' — ' + (e.name || '');
+    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' - ' + (e.name || '');
     var sub = document.querySelector('.study-hero-sub');
-    if (sub) sub.textContent = 'Phase ' + (e.phase || '—') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
+    if (sub) sub.textContent = 'Phase ' + (e.phase || '-') + ' · ' + (e.studyType || '-') + ' · created ' + (e.created || '');
     var badge = document.querySelector('.study-hero-title-row .badge');
     if (badge) { badge.className = 'badge running'; badge.textContent = 'Startup'; }
-    var map = { 'Sponsor': e.sponsor, 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': e.deliverable || e.type };
+    var map = { 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': '' };
     if (grid) grid.querySelectorAll('.meta-item').forEach(function (m) {
       var k = m.querySelector('.k'), v = m.querySelector('.v');
-      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '—';
+      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '-';
     });
   }
   if (grid) {
     var items = [['Compound', e.compound], ['Protocol', e.protocol], ['Deliverable', e.deliverable]];
     var shared = L.samePath(e);
     if (shared.length > 1) items.push(['Shares folder with', shared.filter(function (x) { return x !== e; }).map(function (x) { return x.protocol + ' · ' + x.deliverable; }).join(', ')]);
+    var deliveryType = document.getElementById('metaDeliveryType');
+    if (deliveryType) deliveryType.textContent = e.studyType || '-';
     grid.insertAdjacentHTML('afterbegin', '<div class="meta-item meta-item-path" style="grid-column:1/-1"><div class="k">Folder path</div><div class="v"><a class="study-path-line" style="font-size:12.5px" href="files.html?path=' + encodeURIComponent(path) + '">' + esc(path) + '</a> <span class="muted" style="font-size:11.5px">· layout ' + esc(L.levelLabel()) + ' · ' + esc(L.get().subfolders.join(' · ')) + '</span></div></div>' +
       items.map(function (it) { return '<div class="meta-item"><div class="k">' + it[0] + '</div><div class="v">' + esc(it[1]) + '</div></div>'; }).join(''));
   }
+})();
+</script>
+<script>
+(function () {
+  var KEY = 'sphere-study-home-meta';
+  var fields = [
+    { id: 'metaCutoff', edit: 'editCutoff', key: 'cutoff' },
+    { id: 'metaSubjects', edit: 'editSubjects', key: 'subjects' },
+    { id: 'metaSap', edit: 'editSap', key: 'sap' },
+    { id: 'metaDelivery', edit: 'editDelivery', key: 'delivery' }
+  ];
+  function studyKey() {
+    var q = new URLSearchParams(location.search);
+    return q.get('study') || 'ONC-204-301';
+  }
+  function readAll() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function show(v) {
+    var s = String(v == null ? '' : v).trim();
+    return s ? s : '-';
+  }
+  function paint() {
+    var saved = readAll()[studyKey()] || {};
+    fields.forEach(function (f) {
+      var el = document.getElementById(f.id);
+      if (!el) return;
+      if (Object.prototype.hasOwnProperty.call(saved, f.key)) el.textContent = show(saved[f.key]);
+      else if (!el.textContent.trim()) el.textContent = '-';
+    });
+  }
+  function open() {
+    var saved = readAll()[studyKey()] || {};
+    fields.forEach(function (f) {
+      var view = document.getElementById(f.id);
+      var input = document.getElementById(f.edit);
+      if (!input || !view) return;
+      var current = Object.prototype.hasOwnProperty.call(saved, f.key) ? saved[f.key] : view.textContent;
+      input.value = current === '-' ? '' : current;
+    });
+    document.getElementById('studyMetaModal').hidden = false;
+  }
+  function close() { document.getElementById('studyMetaModal').hidden = true; }
+  paint();
+  var btn = document.getElementById('btnEditStudyMeta');
+  if (btn) btn.addEventListener('click', open);
+  ['studyMetaClose', 'studyMetaCancel'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener('click', close);
+  });
+  var save = document.getElementById('studyMetaSave');
+  if (save) save.addEventListener('click', function () {
+    var all = readAll();
+    var rec = {};
+    fields.forEach(function (f) {
+      rec[f.key] = document.getElementById(f.edit).value.trim();
+      document.getElementById(f.id).textContent = show(rec[f.key]);
+    });
+    all[studyKey()] = rec;
+    localStorage.setItem(KEY, JSON.stringify(all));
+    close();
+  });
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>

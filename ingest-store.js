@@ -31,6 +31,14 @@
       return read().items.filter(function (it) {
         return it.studyPath === studyPath && it.dest === dest && it.status === 'success';
       }).map(function (it) { return it.name; });
+    },
+    remove: function (id) {
+      var s = read();
+      var next = s.items.filter(function (it) { return it.id !== id; });
+      var removed = next.length !== s.items.length;
+      s.items = next;
+      write(s);
+      return removed;
     }
   };
 })();

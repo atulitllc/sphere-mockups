@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Mock Shells</title>
+<title>SPHERE - Mock Shells</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -124,7 +124,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). Automatable safety tables expose <strong>Metadata</strong> for SAS macro generation (prototype). <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
+        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). Automatable safety tables expose <strong>Metadata</strong> for SAS macro generation (prototype). <strong>Shell lock ≠ program freeze</strong> - locking freezes titles/columns/footnotes only.</p>
       </div>
 
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
@@ -308,7 +308,7 @@
               </div>
               <div class="sheet-block" data-field="program">
                 <span class="block-label">Program Name:</span>
-                <span class="block-value empty" data-placeholder="Editable text only — not bound to a source file">Editable text only — not bound to a source file</span>
+                <span class="block-value empty" data-placeholder="Editable text only - not bound to a source file">Editable text only - not bound to a source file</span>
               </div>
               <div class="sheet-block" data-field="sapRef">
                 <span class="block-label">SAP / aCRF refs:</span>
@@ -328,7 +328,7 @@
     <div class="modal-head">
       <div>
         <h2 id="metadataTitle">Metadata</h2>
-        <div class="hint">Drives standard SAS macro generation (prototype). Editable spreadsheet — not persisted yet.</div>
+        <div class="hint">Drives standard SAS macro generation (prototype). Editable spreadsheet - not persisted yet.</div>
       </div>
       <button class="btn ghost sm" type="button" id="metadataClose" aria-label="Close">✕</button>
     </div>
@@ -393,7 +393,7 @@
       <div class="copy-field">
         <label for="copyNumber">New shell number <span class="muted">(optional override)</span></label>
         <input type="text" id="copyNumber" autocomplete="off" />
-        <span class="field-hint">Always assigned a new draft id in the target catalog — never reuses lock/QC ids.</span>
+        <span class="field-hint">Always assigned a new draft id in the target catalog - never reuses lock/QC ids.</span>
       </div>
 
       <div class="copy-field">
@@ -404,14 +404,14 @@
       <div class="copy-field">
         <label for="copyProgram">Program name <span class="muted">(editable text)</span></label>
         <input type="text" id="copyProgram" autocomplete="off" placeholder="e.g. t_14_1_1_demog.sas" />
-        <span class="field-hint">Copied as text only — not linked to the source study file. Clear if you want a blank name.</span>
+        <span class="field-hint">Copied as text only - not linked to the source study file. Clear if you want a blank name.</span>
       </div>
 
       <div class="copy-field">
         <span>SAP / aCRF references</span>
         <label style="display:flex;align-items:flex-start;gap:8px;font-weight:500;color:var(--text);font-size:13px;cursor:pointer">
           <input type="checkbox" id="copyClearRefs" checked style="width:auto;margin-top:3px;accent-color:var(--accent)" />
-          <span>Clear refs in target <span class="muted">(default — no invented paths; otherwise mark “ref not linked in target”)</span></span>
+          <span>Clear refs in target <span class="muted">(default - no invented paths; otherwise mark “ref not linked in target”)</span></span>
         </label>
       </div>
     </div>
@@ -444,7 +444,7 @@
 
 <script>
 (function () {
-  /* —— chrome: theme + nav —— */
+  /* -- chrome: theme + nav -- */
   var root = document.documentElement;
   var body = document.body;
   var btn = document.getElementById('hamburger');
@@ -533,17 +533,17 @@
   });
 
 
-  /* —— sheet model —— */
+  /* -- sheet model -- */
   var CURRENT_STUDY = 'ONC-204-301';
   var CURRENT_TENANT = 'X Pharma';
 
   /* Same-tenant studies the user can open; create permission required on target */
   var STUDY_DIRECTORY = [
-    { id: 'ONC-204-301', title: 'Metastatic NSCLC', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Primary endpoint — ORR', 'Adverse events — overview', 'Kaplan–Meier overall survival'] },
-    { id: 'ONC-118-402', title: 'HER2+ breast cancer', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Adverse events — overview'] },
-    { id: 'VAC-302-011', title: 'RSV vaccine — adults ≥60', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Adverse events — overview'] },
+    { id: 'ONC-204-301', title: 'Metastatic NSCLC', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Primary endpoint - ORR', 'Adverse events - overview', 'Kaplan-Meier overall survival'] },
+    { id: 'ONC-118-402', title: 'HER2+ breast cancer', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Adverse events - overview'] },
+    { id: 'VAC-302-011', title: 'RSV vaccine - adults ≥60', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Adverse events - overview'] },
     { id: 'HEM-220-015', title: 'Relapsed / refractory AML', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics'] },
-    /* cross-tenant / no-access stubs — never shown in picker */
+    /* cross-tenant / no-access stubs - never shown in picker */
     { id: 'EXT-990-001', title: 'External partner study', tenant: 'OtherCo Pharma', canOpen: false, canCreate: false, templates: [] },
     { id: 'ONC-050-100', title: 'Archived oncology', tenant: 'X Pharma', canOpen: false, canCreate: false, templates: ['Demographics'] }
   ];
@@ -603,7 +603,7 @@
     metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
     metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
     metaRow('Missing handling', 'Exclude', ''),
-    metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub — not written in this prototype'),
+    metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub - not written in this prototype'),
     metaRow('Program stub', 'tfl_14_3_1_ae.sas', ''),
     metaRow('SAP / footnote keys', 'SAP 12.1; AESI footnote [1]', 'Optional')
   ];
@@ -616,8 +616,8 @@
     metaRow('Subject ID', 'USUBJID', ''),
     metaRow('Variables', 'AGE, SEX, RACE, ETHNIC', 'Continuous + categorical'),
     metaRow('Age derivation', 'Age at informed consent', 'SAP 10.1'),
-    metaRow('Stats — continuous', 'n, Mean (SD), Median, Min, Max', ''),
-    metaRow('Stats — categorical', 'n (%)', ''),
+    metaRow('Stats - continuous', 'n, Mean (SD), Median, Min, Max', ''),
+    metaRow('Stats - categorical', 'n (%)', ''),
     metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
     metaRow('Display columns / treatment order', 'Placebo | Drug X 100mg | Total', ''),
     metaRow('Missing handling', 'Missing category', 'Show Missing for SEX/RACE'),
@@ -673,7 +673,7 @@
       { indent: 0, label: 'Subjects with TEAE leading to death', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
     ],
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Treatment-emergent adverse events (TRTEMFL=Y).',
-    notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.',
+    notes: 'Standard SAF_AE_SUM macro - metadata drives dataset, flags, and treatment order.',
     program: 'tfl_14_3_0_saf.sas',
     sapRef: 'SAP 12.0 Safety overview',
     templateKey: 'Safety summary',
@@ -681,7 +681,7 @@
   };
 
   var aeOverviewPreset = {
-    title: 'Table 14.3.1 Adverse events — overview',
+    title: 'Table 14.3.1 Adverse events - overview',
     subtitle: 'Safety Analysis Set',
     columns: ['Placebo', 'Drug X', 'Total'],
     colGroups: [],
@@ -692,10 +692,10 @@
       { indent: 0, label: 'Subjects with any serious AE', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
     ],
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] MedDRA hierarchy: AEBODSYS / AEDECOD.',
-    notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.',
+    notes: 'Standard AE_OVERVIEW macro - metadata drives dataset, terms, subset, and treatment order.',
     program: 'tfl_14_3_1_ae.sas',
     sapRef: 'SAP 12.1 Adverse events',
-    templateKey: 'Adverse events — overview',
+    templateKey: 'Adverse events - overview',
     custom: false
   };
 
@@ -794,10 +794,10 @@
       return [
         makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
         makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline characteristics', status: 'Locked', locked: true, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
-        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint - ORR', status: 'In review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint - ORR' }),
         makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Safety summary', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
-        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
-        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' })
+        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events - overview', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events - overview', automate: true, metadata: AE_OVERVIEW_META }),
+        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan-Meier overall survival', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan-Meier overall survival' })
       ];
     }
     /* other studies start with a light catalog so copy result is visible */
@@ -1269,7 +1269,7 @@
           html += groupTh(g2);
           i = g2.end + 1;
         } else {
-          /* under L1 but no L2 — leaf spans L2 + leaf rows */
+          /* under L1 but no L2 - leaf spans L2 + leaf rows */
           html += leafTh(i, hasL1 ? 2 : rowCount);
           covered[i] = true;
           i++;
@@ -1367,7 +1367,7 @@
     toolbar.style.top = (rowRect.top - wrapRect.top + wrap.scrollTop + (rowRect.height - 32) / 2) + 'px';
   }
 
-  /* —— editing —— */
+  /* -- editing -- */
   function startCellEdit(td) {
     if (!td || td.classList.contains('col-idx') || td.classList.contains('col-add')) return;
     if (td.querySelector('input.cell-input')) return;
@@ -1505,7 +1505,7 @@
     });
   });
 
-  /* —— row selection + toolbar —— */
+  /* -- row selection + toolbar -- */
   bodyEl.addEventListener('mouseover', function (e) {
     var tr = e.target.closest('tr.sheet-row');
     if (!tr) return;
@@ -1788,7 +1788,7 @@
     });
   }
 
-  /* —— context menu —— */
+  /* -- context menu -- */
   function hideCtx() { ctxMenu.hidden = true; }
   function showCtx(x, y, ri, ci) {
     state.ctx = { row: ri, col: ci };
@@ -1865,7 +1865,7 @@
     }
   });
 
-  /* —— catalog selection, SAP collapse, search/filter, drag-and-drop —— */
+  /* -- catalog selection, SAP collapse, search/filter, drag-and-drop -- */
   function markCatalogDragConsumed() {
     catalogJustDragged = true;
     catalogDragClickUntil = Date.now() + 200;
@@ -2013,7 +2013,7 @@
     alert('Prototype: would generate shell Word/RTF from this sheet in the current study only. Copied shells need Generate again in the target.');
   });
   document.getElementById('btnLock').addEventListener('click', function () {
-    if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze. Lock is shell/spec only — copy never carries lock/QC.)')) {
+    if (confirm('Lock this shell? Titles, columns, and footnotes will be frozen. (Shell lock ≠ program freeze. Lock is shell/spec only - copy never carries lock/QC.)')) {
       document.getElementById('metaStatus').value = 'Locked';
       persistEditorToSelected();
       renderCatalog();
@@ -2047,7 +2047,7 @@
     selectShell(id, true);
   });
 
-  /* —— Metadata (SAS macro spec prototype) —— */
+  /* -- Metadata (SAS macro spec prototype) -- */
   var metadataModal = document.getElementById('metadataModal');
   var metadataBody = document.getElementById('metadataBody');
   var metadataTitleEl = document.getElementById('metadataTitle');
@@ -2149,9 +2149,9 @@
       var num = (sh.number || '').trim();
       var title = (sh.title || state.title || '').replace(/^Table\s+/i, '').trim();
       if (num && title.indexOf(num) === 0) {
-        metadataTitleEl.textContent = 'Metadata — ' + title;
+        metadataTitleEl.textContent = 'Metadata - ' + title;
       } else {
-        metadataTitleEl.textContent = 'Metadata — ' + (num ? num + ' ' : '') + title;
+        metadataTitleEl.textContent = 'Metadata - ' + (num ? num + ' ' : '') + title;
       }
     }
     renderMetadataGrid(metadataRowsFor(sh));
@@ -2222,7 +2222,7 @@
     });
   }
 
-  /* —— Copy to study —— */
+  /* -- Copy to study -- */
   var copyModal = document.getElementById('copyModal');
   var copyStudyList = document.getElementById('copyStudyList');
   var copyTemplateWarn = document.getElementById('copyTemplateWarn');
@@ -2237,7 +2237,7 @@
   }
 
   function targetHasTemplate(targetId, templateKey) {
-    if (!templateKey) return true; /* Custom / blank — no template required */
+    if (!templateKey) return true; /* Custom / blank - no template required */
     var meta = studyMeta(targetId);
     return !!(meta && meta.templates.indexOf(templateKey) >= 0);
   }
@@ -2338,7 +2338,7 @@
       rows: cloneData(state.rows),
       footnotes: state.footnotes,
       notes: state.notes,
-      program: programText, /* editable text only — not bound to source file */
+      program: programText, /* editable text only - not bound to source file */
       sapRef: clearRefs
         ? ''
         : ((state.sapRef || (src.layout && src.layout.sapRef) || '')
@@ -2383,7 +2383,7 @@
     var hint = document.getElementById('copySuccessHint');
     if (text) text.textContent = msg;
     if (hint) {
-      hint.textContent = 'New draft ' + draft.number + ' · layout/title/type/analysis set/footnotes/notes copied. Lock/QC/approve and .docx/.rtf not copied — Generate again in target. Audit (source → target) later.';
+      hint.textContent = 'New draft ' + draft.number + ' · layout/title/type/analysis set/footnotes/notes copied. Lock/QC/approve and .docx/.rtf not copied - Generate again in target. Audit (source → target) later.';
     }
     if (banner) banner.classList.add('show');
 
@@ -2405,7 +2405,7 @@
     document.getElementById('templateWarnBanner').classList.remove('show');
   });
 
-  /* —— resizable TOC / editor split —— */
+  /* -- resizable TOC / editor split -- */
   (function initShellSplitter() {
     var workspace = document.querySelector('.shell-workspace');
     var catalog = document.querySelector('.shell-catalog');
