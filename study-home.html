@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Study Home</title>
+<title>SPHERE - Study Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -123,7 +123,7 @@
         <button type="button" class="study-hero-toggle" id="studyHeroToggle" aria-expanded="true" aria-controls="studyHeroBody">
           <div class="study-hero-heading">
             <div class="study-hero-title-row">
-              <h1 class="page-title study-hero-title">ONC-204-301 — Metastatic NSCLC</h1>
+              <h1 class="page-title study-hero-title">ONC-204-301 - Metastatic NSCLC</h1>
               <span class="badge locked">Active</span>
             </div>
             <p class="page-sub study-hero-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
@@ -206,15 +206,15 @@
           </a>
           <a class="module-card" href="tracker.html">
             <div class="title">Tracker</div>
-            <div class="desc">Programs, TLFs &amp; datasets — tags, SAP sections, check-out/QC, and Run selected (Compute folded in).</div>
+            <div class="desc">Programs, TLFs &amp; datasets - tags, SAP sections, check-out/QC, and Run selected (Compute folded in).</div>
           </a>
           <a class="module-card" href="define.html">
             <div class="title">Define</div>
-            <div class="desc">CDISC Define-XML for SDTM/ADaM from study metadata + dataset specs — human review before publish.</div>
+            <div class="desc">CDISC Define-XML for SDTM/ADaM from study metadata + dataset specs - human review before publish.</div>
           </a>
           <a class="module-card" href="publisher.html">
             <div class="title">Generate PDF Package</div>
-            <div class="desc">Bundle locked shells and outputs into PDF/Word — also available from Tracker.</div>
+            <div class="desc">Bundle locked shells and outputs into PDF/Word - also available from Tracker.</div>
           </a>
           <a class="module-card" href="audit.html">
             <div class="title">Audit</div>
@@ -435,9 +435,9 @@
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
   if (!defaultHero) {
     var t = document.querySelector('.study-hero-title');
-    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' — ' + (e.name || '');
+    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' - ' + (e.name || '');
     var sub = document.querySelector('.study-hero-sub');
-    if (sub) sub.textContent = 'Phase ' + (e.phase || '—') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
+    if (sub) sub.textContent = 'Phase ' + (e.phase || '-') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
     var badge = document.querySelector('.study-hero-title-row .badge');
     if (badge) { badge.className = 'badge running'; badge.textContent = 'Startup'; }
     var map = { 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': e.deliverable || e.type };

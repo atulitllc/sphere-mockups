@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Mock Shells</title>
+<title>SPHERE - Mock Shells</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -124,7 +124,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). Automatable safety tables expose <strong>Metadata</strong> for SAS macro generation (prototype). <strong>Shell lock ≠ program freeze</strong> — locking freezes titles/columns/footnotes only.</p>
+        <p class="page-sub">Edit TLF shells as a sheet. Select column headers to <strong>group</strong> under a parent (up to two levels). Automatable safety tables expose <strong>Metadata</strong> for SAS macro generation (prototype). <strong>Shell lock ≠ program freeze</strong> - locking freezes titles/columns/footnotes only.</p>
       </div>
 
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
@@ -319,7 +319,7 @@
               </div>
               <div class="sheet-block" data-field="program">
                 <span class="block-label">Program Name:</span>
-                <span class="block-value empty" data-placeholder="Editable text only — not bound to a source file">Editable text only — not bound to a source file</span>
+                <span class="block-value empty" data-placeholder="Editable text only - not bound to a source file">Editable text only - not bound to a source file</span>
               </div>
               <div class="sheet-block" data-field="sapRef">
                 <span class="block-label">SAP / aCRF refs:</span>
@@ -339,7 +339,7 @@
     <div class="modal-head">
       <div>
         <h2 id="sectionModalTitle">New SAP section</h2>
-        <div class="hint">Sections are shared with the Tracker — a new or renamed section appears in both places.</div>
+        <div class="hint">Sections are shared with the Tracker - a new or renamed section appears in both places.</div>
       </div>
       <button class="btn ghost sm" type="button" id="sectionModalClose" aria-label="Close">✕</button>
     </div>
@@ -506,7 +506,7 @@
 <script src="demo-flow.js?v=flow4e"></script>
 <script>
 (function () {
-  /* —— chrome: theme + nav —— */
+  /* -- chrome: theme + nav -- */
   var root = document.documentElement;
   var body = document.body;
   var btn = document.getElementById('hamburger');
@@ -595,17 +595,17 @@
   });
 
 
-  /* —— sheet model —— */
+  /* -- sheet model -- */
   var CURRENT_STUDY = 'ONC-204-301';
   var CURRENT_TENANT = 'X Pharma';
 
   /* Same-tenant studies the user can open; create permission required on target */
   var STUDY_DIRECTORY = [
-    { id: 'ONC-204-301', title: 'Metastatic NSCLC', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Primary endpoint — ORR', 'Adverse events — overview', 'Kaplan–Meier overall survival'] },
-    { id: 'ONC-118-402', title: 'HER2+ breast cancer', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Adverse events — overview'] },
-    { id: 'VAC-302-011', title: 'RSV vaccine — adults ≥60', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Adverse events — overview'] },
+    { id: 'ONC-204-301', title: 'Metastatic NSCLC', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Primary endpoint - ORR', 'Adverse events - overview', 'Kaplan-Meier overall survival'] },
+    { id: 'ONC-118-402', title: 'HER2+ breast cancer', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics', 'Adverse events - overview'] },
+    { id: 'VAC-302-011', title: 'RSV vaccine - adults ≥60', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Adverse events - overview'] },
     { id: 'HEM-220-015', title: 'Relapsed / refractory AML', tenant: 'X Pharma', canOpen: true, canCreate: true, templates: ['Demographics', 'Baseline characteristics'] },
-    /* cross-tenant / no-access stubs — never shown in picker */
+    /* cross-tenant / no-access stubs - never shown in picker */
     { id: 'EXT-990-001', title: 'External partner study', tenant: 'OtherCo Pharma', canOpen: false, canCreate: false, templates: [] },
     { id: 'ONC-050-100', title: 'Archived oncology', tenant: 'X Pharma', canOpen: false, canCreate: false, templates: ['Demographics'] }
   ];
@@ -682,7 +682,7 @@
     metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
     metaRow('Display columns / treatment order', 'Placebo | Drug X | Total', ''),
     metaRow('Missing handling', 'Exclude', ''),
-    metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub — not written in this prototype'),
+    metaRow('Output RTF path', 'tlf/14_3_1_ae.rtf', 'Stub - not written in this prototype'),
     metaRow('Program stub', 'tfl_14_3_1_ae.sas', ''),
     metaRow('SAP / footnote keys', 'SAP 12.1; AESI footnote [1]', 'Optional')
   ];
@@ -695,8 +695,8 @@
     metaRow('Subject ID', 'USUBJID', ''),
     metaRow('Variables', 'AGE, SEX, RACE, ETHNIC', 'Continuous + categorical'),
     metaRow('Age derivation', 'Age at informed consent', 'SAP 10.1'),
-    metaRow('Stats — continuous', 'n, Mean (SD), Median, Min, Max', ''),
-    metaRow('Stats — categorical', 'n (%)', ''),
+    metaRow('Stats - continuous', 'n, Mean (SD), Median, Min, Max', ''),
+    metaRow('Stats - categorical', 'n (%)', ''),
     metaRow('Denominator', 'BIG N from ADSL by TRT01A', ''),
     metaRow('Display columns / treatment order', 'Placebo | Drug X 100mg | Total', ''),
     metaRow('Missing handling', 'Missing category', 'Show Missing for SEX/RACE'),
@@ -752,7 +752,7 @@
       { indent: 0, label: 'Subjects with TEAE leading to death', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
     ],
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] Treatment-emergent adverse events (TRTEMFL=Y).',
-    notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.',
+    notes: 'Standard SAF_AE_SUM macro - metadata drives dataset, flags, and treatment order.',
     program: 'tfl_14_3_0_saf.sas',
     sapRef: 'SAP 12.0 Safety overview',
     templateKey: 'Safety summary',
@@ -760,7 +760,7 @@
   };
 
   var aeOverviewPreset = {
-    title: 'Table 14.3.1 Adverse events — overview',
+    title: 'Table 14.3.1 Adverse events - overview',
     subtitle: 'Safety Analysis Set',
     columns: ['Placebo', 'Drug X', 'Total'],
     colGroups: [],
@@ -771,10 +771,10 @@
       { indent: 0, label: 'Subjects with any serious AE', cells: ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'] }
     ],
     footnotes: '[1] Safety analysis set. Percentages based on subjects in each treatment group.\n[2] MedDRA hierarchy: AEBODSYS / AEDECOD.',
-    notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.',
+    notes: 'Standard AE_OVERVIEW macro - metadata drives dataset, terms, subset, and treatment order.',
     program: 'tfl_14_3_1_ae.sas',
     sapRef: 'SAP 12.1 Adverse events',
-    templateKey: 'Adverse events — overview',
+    templateKey: 'Adverse events - overview',
     custom: false
   };
 
@@ -868,7 +868,7 @@
     };
   }
 
-  /* —— Realistic CDISC / ICH E3-style shell content (flow1) —— */
+  /* -- Realistic CDISC / ICH E3-style shell content (flow1) -- */
   var ARMS = ['Placebo (N=xx)', 'Drug X 10 mg (N=xx)', 'Total (N=xx)'];
   var ARMS2 = ['Placebo (N=xx)', 'Drug X 10 mg (N=xx)'];
   var NP = ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'];
@@ -933,7 +933,7 @@
       program: 'tfl_14_1_1_demog.R', sapRef: 'SAP 10.1 Demographics; aCRF DM', templateKey: 'Demographics' }); },
     '14.1.2': function () { return lay({ title: 'Baseline disease characteristics and prior anticancer therapies', subtitle: ITT, columns: ARMS,
       rows: [].concat(contRows('Time since initial diagnosis', 'months'), catRows('Disease stage at study entry', ['Stage IIIB', 'Stage IV']),
-        catRows('PD-L1 expression', ['TPS < 1%', 'TPS 1–49%', 'TPS ≥ 50%']), catRows('Number of prior lines of therapy', ['1', '2', '≥ 3']),
+        catRows('PD-L1 expression', ['TPS < 1%', 'TPS 1-49%', 'TPS ≥ 50%']), catRows('Number of prior lines of therapy', ['1', '2', '≥ 3']),
         catRows('Prior therapy type', ['Platinum-based chemotherapy', 'Immune checkpoint inhibitor', 'Targeted therapy'])),
       footnotes: 'N = number of subjects in the ITT Analysis Set. Percentages are based on N.\nSubjects may have received more than one prior therapy type.\n' + srcLine('ADSL, ADMH, ADCM', 'tfl_14_1_2_base.R'),
       program: 'tfl_14_1_2_base.R', sapRef: 'SAP 10.2 Baseline characteristics', templateKey: 'Baseline characteristics' }); },
@@ -943,38 +943,38 @@
         L(0, 'Discontinued study', NP), L(1, 'Lost to follow-up', NP), L(1, 'Death', NP)],
       footnotes: 'Percentages are based on the number of randomized subjects.\nPrimary reason for discontinuation as recorded on the End of Treatment CRF.\n' + srcLine('ADSL, ADDS', 't_14_1_3_disp.sas'),
       program: 't_14_1_3_disp.sas', sapRef: 'SAP 10.0 Subject disposition', templateKey: 'Disposition' }); },
-    '14.2.1': function () { return lay({ title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', subtitle: MITT, columns: ARMS2,
+    '14.2.1': function () { return lay({ title: 'Primary endpoint - Objective response rate (ORR) by BICR assessment', subtitle: MITT, columns: ARMS2,
       rows: [L(0, 'Best overall response, n (%)', ['', '']), L(1, 'Complete response (CR)', NP2), L(1, 'Partial response (PR)', NP2), L(1, 'Stable disease (SD)', NP2),
         L(1, 'Progressive disease (PD)', NP2), L(1, 'Not evaluable (NE)', NP2), L(0, 'Objective response rate (CR + PR), n (%)', NP2),
         L(1, '95% CI [a]', ['(xx.x, xx.x)', '(xx.x, xx.x)']), L(0, 'Difference in ORR vs placebo (%)', ['', 'xx.x']), L(1, '95% CI [b]', ['', '(xx.x, xx.x)']), L(1, 'p-value [c]', ['', 'x.xxxx'])],
-      footnotes: 'Response per RECIST v1.1 by blinded independent central review (BICR); confirmation required ≥ 4 weeks after first response.\n[a] Clopper–Pearson exact CI. [b] Miettinen–Nurminen CI stratified by randomization factors. [c] CMH test, two-sided.\n' + srcLine('ADSL, ADRS (PARAMCD = "BOR", BICR)', 'tfl_14_2_1_orr.R'),
-      program: 'tfl_14_2_1_orr.R', sapRef: 'SAP 11.1 Primary efficacy', templateKey: 'Primary endpoint — ORR' }); },
-    '14.2.3': function () { return lay({ title: 'Duration of response and time to response among confirmed responders', subtitle: FAS + ' — confirmed responders', columns: ARMS2,
+      footnotes: 'Response per RECIST v1.1 by blinded independent central review (BICR); confirmation required ≥ 4 weeks after first response.\n[a] Clopper-Pearson exact CI. [b] Miettinen-Nurminen CI stratified by randomization factors. [c] CMH test, two-sided.\n' + srcLine('ADSL, ADRS (PARAMCD = "BOR", BICR)', 'tfl_14_2_1_orr.R'),
+      program: 'tfl_14_2_1_orr.R', sapRef: 'SAP 11.1 Primary efficacy', templateKey: 'Primary endpoint - ORR' }); },
+    '14.2.3': function () { return lay({ title: 'Duration of response and time to response among confirmed responders', subtitle: FAS + ' - confirmed responders', columns: ARMS2,
       rows: [L(0, 'Number of confirmed responders', ['xx', 'xx']), L(0, 'Duration of response (months) [a]', ['', '']), L(1, 'Events (PD or death), n (%)', NP2), L(1, 'Censored, n (%)', NP2),
         L(1, 'Median (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']), L(1, '% with DoR ≥ 6 months (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']),
         L(1, '% with DoR ≥ 12 months (95% CI)', ['xx.x (xx.x, xx.x)', 'xx.x (xx.x, xx.x)']), L(0, 'Time to response (months)', ['', '']), L(1, 'Mean (SD)', ['x.x (x.xx)', 'x.x (x.xx)']),
         L(1, 'Median', ['x.x', 'x.x']), L(1, 'Min, Max', ['x.x, x.x', 'x.x, x.x'])],
-      footnotes: '[a] Kaplan–Meier estimates; CI by Brookmeyer–Crowley method with log-log transformation.\nDoR measured from first documented CR/PR to PD or death.\n' + srcLine('ADSL, ADTTE (PARAMCD = "DOR", "TTR")', 'tfl_14_2_3_orr_dorr.sas'),
+      footnotes: '[a] Kaplan-Meier estimates; CI by Brookmeyer-Crowley method with log-log transformation.\nDoR measured from first documented CR/PR to PD or death.\n' + srcLine('ADSL, ADTTE (PARAMCD = "DOR", "TTR")', 'tfl_14_2_3_orr_dorr.sas'),
       program: 'tfl_14_2_3_orr_dorr.sas', sapRef: 'SAP 11.3 Secondary efficacy', templateKey: 'Duration of response' }); },
-    '14.3.2': function () { return lay({ title: 'Kaplan–Meier plot of overall survival with landmark rates at 12 and 24 months', subtitle: ITT, labelHeader: 'Figure element', columns: ['Specification'],
-      rows: figRows([['Figure type', 'Kaplan–Meier step curves by treatment arm with censor marks (+)'], ['X-axis', 'Time since randomization (months); 0 to 36 by 3'],
-        ['Y-axis', 'Overall survival probability; 0.0 to 1.0 by 0.2'], ['Legend', 'Placebo (N=xx) — solid; Drug X 10 mg (N=xx) — dashed'],
+    '14.3.2': function () { return lay({ title: 'Kaplan-Meier plot of overall survival with landmark rates at 12 and 24 months', subtitle: ITT, labelHeader: 'Figure element', columns: ['Specification'],
+      rows: figRows([['Figure type', 'Kaplan-Meier step curves by treatment arm with censor marks (+)'], ['X-axis', 'Time since randomization (months); 0 to 36 by 3'],
+        ['Y-axis', 'Overall survival probability; 0.0 to 1.0 by 0.2'], ['Legend', 'Placebo (N=xx) - solid; Drug X 10 mg (N=xx) - dashed'],
         ['Inset statistics', 'Median OS (95% CI) per arm; HR (95% CI) = x.xx (x.xx, x.xx); stratified log-rank p = x.xxxx'],
         ['Landmark rates', '12-month and 24-month OS rate (95% CI) per arm, dotted vertical reference lines'],
         ['Number at risk', 'Table below x-axis at each 3-month tick, one line per arm']]),
       footnotes: 'HR from stratified Cox proportional hazards model; p-value from stratified log-rank test (two-sided).\nSubjects without death are censored at last known alive date.\n' + srcLine('ADSL, ADTTE (PARAMCD = "OS")', 'f_14_3_2_os_km.R'),
-      program: 'f_14_3_2_os_km.R', sapRef: 'SAP 11.4 Overall survival', templateKey: 'Kaplan–Meier overall survival' }); },
+      program: 'f_14_3_2_os_km.R', sapRef: 'SAP 11.4 Overall survival', templateKey: 'Kaplan-Meier overall survival' }); },
     '14.3.0': function () { return lay({ title: 'Overall summary of treatment-emergent adverse events', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any TEAE', NP), L(0, 'Subjects with any treatment-related TEAE', NP), L(0, 'Subjects with any Grade ≥ 3 TEAE', NP), L(0, 'Subjects with any serious TEAE', NP),
         L(1, 'Treatment-related serious TEAE', NP), L(0, 'TEAE leading to dose interruption', NP), L(0, 'TEAE leading to dose reduction', NP), L(0, 'TEAE leading to permanent discontinuation', NP),
         L(0, 'TEAE leading to death', NP)],
       footnotes: FOOT_SAF + '\n' + srcLine('ADSL, ADAE', 't_14_3_0_saf.sas'),
-      notes: 'Standard SAF_AE_SUM macro — metadata drives dataset, flags, and treatment order.', program: 't_14_3_0_saf.sas', sapRef: 'SAP 12.0 Safety overview', templateKey: 'Safety summary' }); },
-    '14.3.1': function () { return lay({ title: 'Adverse events — overview of TEAE, SAE, Grade ≥ 3, and discontinuations', subtitle: SAF, columns: ARMS,
-      rows: [L(0, 'Number of TEAEs (events)', ['xxx', 'xxx', 'xxx']), L(0, 'Subjects with any TEAE', NP), L(1, 'Maximum grade 1–2', NP), L(1, 'Maximum grade 3', NP), L(1, 'Maximum grade 4', NP),
+      notes: 'Standard SAF_AE_SUM macro - metadata drives dataset, flags, and treatment order.', program: 't_14_3_0_saf.sas', sapRef: 'SAP 12.0 Safety overview', templateKey: 'Safety summary' }); },
+    '14.3.1': function () { return lay({ title: 'Adverse events - overview of TEAE, SAE, Grade ≥ 3, and discontinuations', subtitle: SAF, columns: ARMS,
+      rows: [L(0, 'Number of TEAEs (events)', ['xxx', 'xxx', 'xxx']), L(0, 'Subjects with any TEAE', NP), L(1, 'Maximum grade 1-2', NP), L(1, 'Maximum grade 3', NP), L(1, 'Maximum grade 4', NP),
         L(1, 'Grade 5 (fatal)', NP), L(0, 'Subjects with any serious TEAE', NP), L(0, 'Subjects with TEAE leading to discontinuation', NP), L(0, 'Subjects with AESI', NP)],
       footnotes: FOOT_SAF + '\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_ae.R'),
-      notes: 'Standard AE_OVERVIEW macro — metadata drives dataset, terms, subset, and treatment order.', program: 'tfl_14_3_1_ae.R', sapRef: 'SAP 12.1 Adverse events', templateKey: 'Adverse events — overview' }); },
+      notes: 'Standard AE_OVERVIEW macro - metadata drives dataset, terms, subset, and treatment order.', program: 'tfl_14_3_1_ae.R', sapRef: 'SAP 12.1 Adverse events', templateKey: 'Adverse events - overview' }); },
     '14.3.1.1': function () { return lay({ title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term', subtitle: SAF, columns: ARMS,
       rows: socRows(3), footnotes: FOOT_SAF + '\nSOCs sorted alphabetically; PTs by descending frequency in the Total column.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_1_1_ae_soc_pt.R'),
       program: 'tfl_14_3_1_1_ae_soc_pt.R', sapRef: 'SAP 12.1.1', templateKey: 'AE by SOC/PT' }); },
@@ -997,9 +997,9 @@
         L(0, 'Infusion-related reactions', NP), L(0, 'Hepatic toxicity', NP), L(1, 'ALT or AST > 3 × ULN', NP), L(1, "Potential Hy's law", NP)],
       footnotes: FOOT_SAF + '\nAESI categories defined by sponsor-specified MedDRA search list v3.0.\n' + srcLine('ADSL, ADAE (AESIFL = "Y")', 'tfl_14_3_1_5_aesi.R'),
       program: 'tfl_14_3_1_5_aesi.R', sapRef: 'SAP 12.1.5', templateKey: 'AESI' }); },
-    '14.3.1.6': function () { return lay({ title: 'Time to first Grade ≥ 3 treatment-emergent adverse event — Kaplan–Meier plot', subtitle: SAF, labelHeader: 'Figure element', columns: ['Specification'],
-      rows: figRows([['Figure type', 'Kaplan–Meier cumulative incidence (1 − KM) by arm with censor marks (+)'], ['X-axis', 'Time since first dose (weeks); 0 to 52 by 4'],
-        ['Y-axis', 'Cumulative probability of first Grade ≥ 3 TEAE; 0.0 to 1.0'], ['Legend', 'Placebo (N=xx) — solid; Drug X 10 mg (N=xx) — dashed'],
+    '14.3.1.6': function () { return lay({ title: 'Time to first Grade ≥ 3 treatment-emergent adverse event - Kaplan-Meier plot', subtitle: SAF, labelHeader: 'Figure element', columns: ['Specification'],
+      rows: figRows([['Figure type', 'Kaplan-Meier cumulative incidence (1 − KM) by arm with censor marks (+)'], ['X-axis', 'Time since first dose (weeks); 0 to 52 by 4'],
+        ['Y-axis', 'Cumulative probability of first Grade ≥ 3 TEAE; 0.0 to 1.0'], ['Legend', 'Placebo (N=xx) - solid; Drug X 10 mg (N=xx) - dashed'],
         ['Inset statistics', 'Median time (95% CI) per arm; HR (95% CI) = x.xx (x.xx, x.xx)'], ['Number at risk', 'Table below x-axis every 4 weeks, one line per arm']]),
       footnotes: 'Subjects without a Grade ≥ 3 TEAE are censored at end of treatment-emergent period.\n' + srcLine('ADSL, ADTTE (PARAMCD = "TTAEG3")', 'tfl_14_3_1_6_ae_ttf.R'),
       program: 'tfl_14_3_1_6_ae_ttf.R', sapRef: 'SAP 12.1.6', templateKey: 'AE time-to-event' }); },
@@ -1014,33 +1014,33 @@
         footnotes: 'Includes all deaths during study and within 90 days of last dose.\n' + srcLine('ADSL, ADAE (AEOUT = "FATAL"), ADDS', 'tfl_14_3_2_2_death_list.R'),
         program: 'tfl_14_3_2_2_death_list.R', sapRef: 'SAP 12.2', templateKey: 'Death listing' }); },
     '14.3.3': function () { return lay({ title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', subtitle: SAF,
-      columns: ['Placebo Gr 1–2 (N=xx)', 'Placebo Gr ≥ 3 (N=xx)', 'Drug X Gr 1–2 (N=xx)', 'Drug X Gr ≥ 3 (N=xx)'],
+      columns: ['Placebo Gr 1-2 (N=xx)', 'Placebo Gr ≥ 3 (N=xx)', 'Drug X Gr 1-2 (N=xx)', 'Drug X Gr ≥ 3 (N=xx)'],
       rows: [L(0, 'Subjects with any TEAE', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Gastrointestinal disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
         L(0, 'General disorders and administration site conditions', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']), L(0, 'Investigations', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)']),
         L(0, 'Skin and subcutaneous tissue disorders', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)'])],
       footnotes: FOOT_SAF + '\nSubjects are counted once per SOC at their maximum grade.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_3_ae_sev.R'),
       program: 'tfl_14_3_3_ae_sev.R', sapRef: 'SAP 12.1.7', templateKey: 'AE by severity' }); },
-    '14.3.4': function () { return lay({ title: 'Common adverse events (≥ 5% in any arm) by Preferred Term — descending frequency', subtitle: SAF, columns: ARMS,
+    '14.3.4': function () { return lay({ title: 'Common adverse events (≥ 5% in any arm) by Preferred Term - descending frequency', subtitle: SAF, columns: ARMS,
       rows: [L(0, 'Subjects with any common TEAE', NP), L(1, 'Fatigue', NP), L(1, 'Diarrhoea', NP), L(1, 'Nausea', NP), L(1, 'Decreased appetite', NP), L(1, 'Rash', NP), L(1, 'Anaemia', NP), L(1, 'Pruritus', NP)],
       footnotes: FOOT_SAF + '\nPTs with incidence ≥ 5% in any treatment arm, sorted by descending frequency in Drug X 10 mg.\n' + srcLine('ADSL, ADAE', 'tfl_14_3_4_ae_common.R'),
       program: 'tfl_14_3_4_ae_common.R', sapRef: 'SAP 12.1.8', templateKey: 'Common AEs' }); },
     '14.3.5.1': function () { return lay({ title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade', subtitle: SAF,
       colGroups: [], columns: ['Worst Gr 0', 'Worst Gr 1', 'Worst Gr 2', 'Worst Gr 3', 'Worst Gr 4', 'Total'],
-      rows: [L(0, 'ALT increased — Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
+      rows: [L(0, 'ALT increased - Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
         L(1, 'Baseline Grade 1', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']), L(1, 'Baseline Grade ≥ 2', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
-        L(0, 'ALT increased — Placebo (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
-        L(0, 'Creatinine increased — Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx'])],
+        L(0, 'ALT increased - Placebo (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx']),
+        L(0, 'Creatinine increased - Drug X 10 mg (N=xx)', blankCells(6)), L(1, 'Baseline Grade 0', ['xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx (xx.x)', 'xx'])],
       footnotes: 'Grades per CTCAE v5.0. Percentages based on subjects with baseline and ≥ 1 post-baseline value.\nWorst post-baseline = highest grade on treatment through 30 days after last dose.\n' + srcLine('ADLB (PARCAT1 = "CHEMISTRY")', 'tfl_14_3_5_1_lb_chem.sas'),
       program: 'tfl_14_3_5_1_lb_chem.sas', sapRef: 'SAP 12.3 Laboratory', templateKey: 'Lab chemistry shifts' }); },
     '14.3.5.2': function () { return lay({ title: 'Hematology parameters: change from baseline over time', subtitle: SAF, columns: ARMS2,
-      rows: [].concat([L(0, 'Hemoglobin (g/L)', ['', ''])], [['Baseline', 'xx.x (xx.xx)'], ['Week 6 — change from baseline', 'xx.x (xx.xx)'], ['Week 12 — change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
-        [L(0, 'Platelets (10^9/L)', ['', ''])], [['Baseline', 'xxx.x (xx.xx)'], ['Week 6 — change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
-        [L(0, 'Neutrophils (10^9/L)', ['', ''])], [['Baseline', 'x.xx (x.xxx)'], ['Week 6 — change from baseline', 'x.xx (x.xxx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); })),
+      rows: [].concat([L(0, 'Hemoglobin (g/L)', ['', ''])], [['Baseline', 'xx.x (xx.xx)'], ['Week 6 - change from baseline', 'xx.x (xx.xx)'], ['Week 12 - change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
+        [L(0, 'Platelets (10^9/L)', ['', ''])], [['Baseline', 'xxx.x (xx.xx)'], ['Week 6 - change from baseline', 'xx.x (xx.xx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); }),
+        [L(0, 'Neutrophils (10^9/L)', ['', ''])], [['Baseline', 'x.xx (x.xxx)'], ['Week 6 - change from baseline', 'x.xx (x.xxx)']].map(function (r) { return L(1, r[0] + ', mean (SD)', [r[1], r[1]]); })),
       footnotes: 'Only subjects with a value at both baseline and the visit are included in change from baseline.\n' + srcLine('ADLB (PARCAT1 = "HEMATOLOGY")', 'tfl_14_3_5_2_lb_heme.R'),
       program: 'tfl_14_3_5_2_lb_heme.R', sapRef: 'SAP 12.3 Laboratory', templateKey: 'Hematology' }); },
     '14.3.7': function () { return lay({ title: 'Vital signs: summary of values and change from baseline by visit', subtitle: SAF, columns: ARMS2,
-      rows: [].concat(contRows('Systolic blood pressure — Baseline', 'mmHg', 2), contRows('Systolic blood pressure — Week 12 change from baseline', 'mmHg', 2).slice(0, 3),
-        contRows('Heart rate — Baseline', 'beats/min', 2).slice(0, 3), contRows('Body temperature — Baseline', '°C', 2).slice(0, 3)),
+      rows: [].concat(contRows('Systolic blood pressure - Baseline', 'mmHg', 2), contRows('Systolic blood pressure - Week 12 change from baseline', 'mmHg', 2).slice(0, 3),
+        contRows('Heart rate - Baseline', 'beats/min', 2).slice(0, 3), contRows('Body temperature - Baseline', '°C', 2).slice(0, 3)),
       footnotes: 'Baseline = last non-missing value before first dose.\n' + srcLine('ADVS', 't_14_3_7_vs.sas'),
       program: 't_14_3_7_vs.sas', sapRef: 'SAP 12.4 Vital signs', templateKey: 'Vital signs' }); },
     '14.3.8': function () { return lay({ title: 'Concomitant medications by ATC class and preferred name', subtitle: SAF, columns: ARMS,
@@ -1095,21 +1095,21 @@
       return [
         makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics and baseline characteristics of the Safety analysis set', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
         makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline disease characteristics and prior anticancer therapies (ITT)', status: 'Final', locked: false, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
-        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint — Objective response rate (ORR) by BICR assessment', status: 'In Review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint — ORR' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint - Objective response rate (ORR) by BICR assessment', status: 'In Review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint - ORR' }),
         makeShell({ id: '14.2.3', number: '14.2.3', type: 'Table', title: 'Duration of response and time to response among confirmed responders (FAS)', status: 'Draft', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Duration of response' }),
-        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary — treatment-emergent adverse events (Safety analysis set)', status: 'In Review', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
-        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events — overview of TEAE, SAE, Grade ≥3, and discontinuations', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events — overview', automate: true, metadata: AE_OVERVIEW_META }),
+        makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary - treatment-emergent adverse events (Safety analysis set)', status: 'In Review', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
+        makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events - overview of TEAE, SAE, Grade ≥3, and discontinuations', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events - overview', automate: true, metadata: AE_OVERVIEW_META }),
         makeShell({ id: '14.3.1.1', number: '14.3.1.1', type: 'Table', title: 'Treatment-emergent adverse events by System Organ Class and Preferred Term (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by SOC/PT', automate: true, metadata: AE_OVERVIEW_META }),
         makeShell({ id: '14.3.1.2', number: '14.3.1.2', type: 'Table', title: 'Serious adverse events by SOC/PT and relationship to study drug', status: 'In Review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE by relationship' }),
         makeShell({ id: '14.3.1.3', number: '14.3.1.3', type: 'Table', title: 'Adverse events leading to permanent discontinuation of study treatment by Preferred Term', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE discontinuation' }),
         makeShell({ id: '14.3.1.4', number: '14.3.1.4', type: 'Table', title: 'Grade 3 or higher treatment-emergent adverse events by System Organ Class and Preferred Term', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE Grade 3+' }),
         makeShell({ id: '14.3.1.5', number: '14.3.1.5', type: 'Table', title: 'Adverse events of special interest: immune-mediated events, infusion reactions, and hepatic toxicity', status: 'Final', locked: false, analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AESI' }),
-        makeShell({ id: '14.3.1.6', number: '14.3.1.6', type: 'Figure', title: 'Time to first Grade ≥3 treatment-emergent adverse event — Kaplan–Meier (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE time-to-event' }),
+        makeShell({ id: '14.3.1.6', number: '14.3.1.6', type: 'Figure', title: 'Time to first Grade ≥3 treatment-emergent adverse event - Kaplan-Meier (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE time-to-event' }),
         makeShell({ id: '14.3.2.1', number: '14.3.2.1', type: 'Listing', title: 'Listing of serious adverse events with onset, duration, outcome, and action taken', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'SAE listing' }),
         makeShell({ id: '14.3.2.2', number: '14.3.2.2', type: 'Listing', title: 'Listing of deaths and adverse events with fatal outcome including primary cause of death', status: 'In Review', qc: 'In review', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Death listing' }),
         makeShell({ id: '14.3.3', number: '14.3.3', type: 'Table', title: 'Adverse events by maximum severity grade (CTCAE v5.0) and System Organ Class', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'AE by severity' }),
-        makeShell({ id: '14.3.4', number: '14.3.4', type: 'Table', title: 'Common adverse events (≥5% in any arm) by Preferred Term — descending frequency', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Common AEs' }),
-        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan–Meier overall survival — full analysis set with landmark rates at 12 and 24 months', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan–Meier overall survival' }),
+        makeShell({ id: '14.3.4', number: '14.3.4', type: 'Table', title: 'Common adverse events (≥5% in any arm) by Preferred Term - descending frequency', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', templateKey: 'Common AEs' }),
+        makeShell({ id: '14.3.2', number: '14.3.2', type: 'Figure', title: 'Kaplan-Meier overall survival - full analysis set with landmark rates at 12 and 24 months', status: 'Draft', analysisSet: 'ITT', sap: 'Efficacy', templateKey: 'Kaplan-Meier overall survival' }),
         makeShell({ id: '14.3.5.1', number: '14.3.5.1', type: 'Table', title: 'Laboratory chemistry shifts from baseline to worst post-baseline CTCAE grade (Safety)', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Lab chemistry shifts' }),
         makeShell({ id: '14.3.5.2', number: '14.3.5.2', type: 'Table', title: 'Hematology parameters: change from baseline over time', status: 'Draft', analysisSet: 'Safety', sap: 'Labs', templateKey: 'Hematology' }),
         makeShell({ id: '14.1.3', number: '14.1.3', type: 'Table', title: 'Subject disposition', status: 'Final', version: '1.0', analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Disposition' }),
@@ -1456,7 +1456,7 @@
       html += '<div class="sap-section-body" id="' + bid + '"' + (collapsed ? ' hidden' : '') + ' aria-hidden="' + (collapsed ? 'true' : 'false') + '">';
       html += '<table class="catalog-section-table"><tbody>';
       if (!list.length) {
-        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="3"><span class="catalog-empty-hint">No shells yet — drag a shell here or use + Add</span></td></tr>';
+        html += '<tr class="catalog-drop-pad" data-sap="' + escapeHtml(sap) + '"><td colspan="3"><span class="catalog-empty-hint">No shells yet - drag a shell here or use + Add</span></td></tr>';
       }
       list.forEach(function (sh) {
         var classes = [];
@@ -1794,7 +1794,7 @@
           html += groupTh(g2);
           i = g2.end + 1;
         } else {
-          /* under L1 but no L2 — leaf spans L2 + leaf rows */
+          /* under L1 but no L2 - leaf spans L2 + leaf rows */
           html += leafTh(i, hasL1 ? 2 : rowCount);
           covered[i] = true;
           i++;
@@ -1893,7 +1893,7 @@
     toolbar.style.top = (rowRect.top - wrapRect.top + wrap.scrollTop + (rowRect.height - 32) / 2) + 'px';
   }
 
-  /* —— editing —— */
+  /* -- editing -- */
   function startCellEdit(td) {
     if (!td || td.classList.contains('col-idx') || td.classList.contains('col-add')) return;
     if (td.querySelector('input.cell-input')) return;
@@ -2055,7 +2055,7 @@
     });
   });
 
-  /* —— row selection + toolbar —— */
+  /* -- row selection + toolbar -- */
   bodyEl.addEventListener('mouseover', function (e) {
     var tr = e.target.closest('tr.sheet-row');
     if (!tr) return;
@@ -2338,7 +2338,7 @@
     });
   }
 
-  /* —— context menu —— */
+  /* -- context menu -- */
   function hideCtx() { ctxMenu.hidden = true; }
   function showCtx(x, y, ri, ci) {
     state.ctx = { row: ri, col: ci };
@@ -2415,7 +2415,7 @@
     }
   });
 
-  /* —— catalog selection, SAP collapse, search/filter, drag-and-drop —— */
+  /* -- catalog selection, SAP collapse, search/filter, drag-and-drop -- */
   function markCatalogDragConsumed() {
     catalogJustDragged = true;
     catalogDragClickUntil = Date.now() + 200;
@@ -2672,7 +2672,7 @@
     showToast('New shell ' + number + ' created (Draft) · set Status to Final, then click + in the list to send it to the Tracker');
   });
 
-  /* —— Demo flow: clean new-shell template, autosave, Send to Tracker (+ in TOC) —— */
+  /* -- Demo flow: clean new-shell template, autosave, Send to Tracker (+ in TOC) -- */
   var TRACKER_LINKED = ['14.1.1', '14.1.2', '14.2.1', '14.2.3', '14.3.1', '14.3.1.1', '14.3.1.2', '14.3.1.3', '14.3.1.4', '14.3.1.5', '14.3.1.6', '14.3.2', '14.3.2.1', '14.3.2.2', '14.3.3', '14.3.4', '14.3.5', '14.3.5.1', '14.3.5.2', '14.3.8'];
   var SAP_PREFIX = { 'Demographics': '14.1', 'Efficacy': '14.2', 'Safety TLFs': '14.3', 'Labs': '14.3', 'Unassigned': '14.9' };
 
@@ -2712,7 +2712,7 @@
         r(0, 'Objective response rate (CR + PR)', np),
         r(1, '95% CI', ['(xx.x, xx.x)', '(xx.x, xx.x)', '(xx.x, xx.x)'])
       ];
-      foot = 'Response assessed per RECIST v1.1. 95% CI by Clopper–Pearson method.\nSource: ADSL, ADRS.';
+      foot = 'Response assessed per RECIST v1.1. 95% CI by Clopper-Pearson method.\nSource: ADSL, ADRS.';
     } else if (sap === 'Demographics') {
       title = 'New demographics table';
       rows = [
@@ -2748,7 +2748,7 @@
     };
   }
 
-  /* —— Shared SAP sections: create / rename / reorder (synced with Tracker) —— */
+  /* -- Shared SAP sections: create / rename / reorder (synced with Tracker) -- */
   var sectionEditName = null;
   function openSectionModal(name) {
     if (!window.SPHERE_DEMO) return;
@@ -2867,7 +2867,7 @@
     }
     if (!isSendable(sh)) {
       return '<button type="button" class="toc-sync is-disabled" aria-disabled="true" data-sync-id="' + escapeHtml(sh.id) + '"' +
-        ' title="Set status to Final to send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker — set status to Final first">' + PLUS_ICON + '</button>';
+        ' title="Set status to Final to send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker - set status to Final first">' + PLUS_ICON + '</button>';
     }
     return '<button type="button" class="toc-sync is-ready" data-sync-id="' + escapeHtml(sh.id) + '"' +
       ' title="Send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker">' + PLUS_ICON + '</button>';
@@ -3131,7 +3131,7 @@
 
   if (window.SPHERE_DEMO && SPHERE_DEMO.justReset) setTimeout(function () { showToast('Demo data reset'); }, 300);
 
-  /* —— Metadata (SAS macro spec prototype) —— */
+  /* -- Metadata (SAS macro spec prototype) -- */
   var metadataModal = document.getElementById('metadataModal');
   var metadataBody = document.getElementById('metadataBody');
   var metadataTitleEl = document.getElementById('metadataTitle');
@@ -3181,14 +3181,14 @@
       btnMetadata.hidden = false;
       btnMetadata.disabled = false;
       btnMetadata.removeAttribute('aria-disabled');
-      btnMetadata.title = 'Metadata — output ID, population, datasets, key variables, status, version';
+      btnMetadata.title = 'Metadata - output ID, population, datasets, key variables, status, version';
       btnMetadata.setAttribute('aria-label', 'Metadata');
     } else {
       btnMetadata.hidden = false;
       btnMetadata.disabled = true;
       btnMetadata.setAttribute('aria-disabled', 'true');
       btnMetadata.title = 'Select a shell first';
-      btnMetadata.setAttribute('aria-label', 'Metadata — select a shell first');
+      btnMetadata.setAttribute('aria-label', 'Metadata - select a shell first');
     }
   }
 
@@ -3231,9 +3231,9 @@
       var num = (sh.number || '').trim();
       var title = (sh.title || state.title || '').replace(/^Table\s+/i, '').trim();
       if (num && title.indexOf(num) === 0) {
-        metadataTitleEl.textContent = 'Metadata — ' + title;
+        metadataTitleEl.textContent = 'Metadata - ' + title;
       } else {
-        metadataTitleEl.textContent = 'Metadata — ' + (num ? num + ' ' : '') + title;
+        metadataTitleEl.textContent = 'Metadata - ' + (num ? num + ' ' : '') + title;
       }
     }
     renderMetadataGrid(metadataRowsFor(sh));
@@ -3305,7 +3305,7 @@
     });
   }
 
-  /* —— Copy to study —— */
+  /* -- Copy to study -- */
   var copyModal = document.getElementById('copyModal');
   var copyStudyList = document.getElementById('copyStudyList');
   var copyTemplateWarn = document.getElementById('copyTemplateWarn');
@@ -3341,7 +3341,7 @@
   }
 
   function targetHasTemplate(targetId, templateKey) {
-    if (!templateKey) return true; /* Custom / blank — no template required */
+    if (!templateKey) return true; /* Custom / blank - no template required */
     var meta = studyMeta(targetId);
     if (!meta || !meta.templates) return true;
     return meta.templates.indexOf(templateKey) >= 0;
@@ -3672,7 +3672,7 @@
     document.getElementById('templateWarnBanner').classList.remove('show');
   });
 
-  /* —— resizable TOC / editor split —— */
+  /* -- resizable TOC / editor split -- */
   (function initShellSplitter() {
     var workspace = document.querySelector('.shell-workspace');
     var catalog = document.querySelector('.shell-catalog');
@@ -3757,7 +3757,7 @@
     loadWidth();
   })();
 
-  /* —— Shell metadata form (flow1) —— */
+  /* -- Shell metadata form (flow1) -- */
   function metaField(id, label, html, wide) {
     return '<label class="smf-field' + (wide ? ' is-wide' : '') + '" for="' + id + '"><span>' + label + '</span>' + html + '</label>';
   }
@@ -3783,7 +3783,7 @@
       metaField('smfSort', 'Sort order', metaInput('smfSort', sh.sortOrder), true) +
       metaField('smfFoot', 'Footnotes', '<textarea id="smfFoot" rows="3">' + escapeHtml(lay.footnotes || '') + '</textarea>', true) +
       metaField('smfVersion', 'Version', metaInput('smfVersion', sh.version || '0.1')) +
-      metaField('smfModified', 'Last modified', metaInput('smfModified', (sh.modifiedBy || '—') + ' · ' + (sh.modifiedAt || '—'), true)) +
+      metaField('smfModified', 'Last modified', metaInput('smfModified', (sh.modifiedBy || '-') + ' · ' + (sh.modifiedAt || '-'), true)) +
       metaField('smfTracker', 'Tracker', metaInput('smfTracker', tracker, true), true);
   }
   function bumpVersion(v) {
@@ -3851,7 +3851,7 @@
     }
     var xl = spec('x-axis') || 'Time (months)';
     var yl = spec('y-axis') || 'Probability';
-    var leg = (spec('legend') || 'Placebo — solid; Drug X 10 mg — dashed').split(';');
+    var leg = (spec('legend') || 'Placebo - solid; Drug X 10 mg - dashed').split(';');
     fig.hidden = false;
     fig.innerHTML = '<svg viewBox="0 0 560 250" role="img" aria-label="Figure placeholder: ' + escapeHtml(yl) + ' by ' + escapeHtml(xl) + '">' +
       '<rect x="0" y="0" width="560" height="250" fill="none"/>' +
@@ -3863,8 +3863,8 @@
       '<text x="300" y="228" class="fp-lbl" text-anchor="middle">' + escapeHtml(xl) + '</text>' +
       '<text x="16" y="105" class="fp-lbl" text-anchor="middle" transform="rotate(-90 16 105)">' + escapeHtml(yl.split(';')[0]) + '</text>' +
       '<g transform="translate(350,28)"><rect x="0" y="0" width="180" height="40" rx="4" class="fp-leg"/>' +
-      '<line x1="10" y1="14" x2="34" y2="14" class="fp-c1"/><text x="40" y="17" class="fp-tick">' + escapeHtml((leg[0] || '').replace(/—.*$/, '').trim()) + '</text>' +
-      '<line x1="10" y1="30" x2="34" y2="30" class="fp-c2"/><text x="40" y="33" class="fp-tick">' + escapeHtml((leg[1] || '').replace(/—.*$/, '').trim()) + '</text></g>' +
+      '<line x1="10" y1="14" x2="34" y2="14" class="fp-c1"/><text x="40" y="17" class="fp-tick">' + escapeHtml((leg[0] || '').replace(/-.*$/, '').trim()) + '</text>' +
+      '<line x1="10" y1="30" x2="34" y2="30" class="fp-c2"/><text x="40" y="33" class="fp-tick">' + escapeHtml((leg[1] || '').replace(/-.*$/, '').trim()) + '</text></g>' +
       '<text x="70" y="236" class="fp-tick">Number at risk: xx  xx  xx  xx  xx  xx  xx</text>' +
       '</svg>';
   }

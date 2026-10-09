@@ -1,4 +1,4 @@
-/* SPHERE demo flow store — Mock Shells → Tracker → QC → Stats → Released to MW.
+/* SPHERE demo flow store - Mock Shells → Tracker → QC → Stats → Released to MW.
    Front-end only; state lives in localStorage so it survives page navigation.
    Reset: add ?reset=1 to any page URL (or Admin → Reset demo data). */
 (function () {
@@ -47,7 +47,7 @@
 
   function qcName(prog) {
     prog = String(prog || '').split('/').pop();
-    if (!prog || prog === '—') return '';
+    if (!prog || prog === '-') return '';
     if (/^qc-/i.test(prog)) return prog;
     return 'qc-' + prog;
   }

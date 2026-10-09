@@ -16,11 +16,11 @@
     { compound: 'XP-118', protocol: 'ONC-118-402', deliverable: 'CSR', name: 'ONC-118-402', row: true, created: '2024-01-10' },
     { compound: 'XV-302', protocol: 'VAC-302-011', deliverable: 'CSR', name: 'VAC-302-011', row: true, created: '2024-05-02' },
     { compound: 'XH-220', protocol: 'HEM-220-015', deliverable: 'CSR', name: 'HEM-220-015', row: true, created: '2024-09-12' },
-    { compound: 'XP-204', protocol: 'ONC-204-301', deliverable: 'DSUR', name: 'Metastatic NSCLC — DSUR 2026', phase: '3', created: '2026-07-15' },
-    { compound: 'XP-204', protocol: 'ONC-204-302', deliverable: 'CSR', name: 'NSCLC 1L combination — CSR', phase: '3', created: '2026-08-01' },
-    { compound: 'CMP-101', protocol: 'PRO-001', deliverable: 'CSR', name: 'CMP-101 Phase 2 — CSR', phase: '2', created: '2026-03-10' },
-    { compound: 'CMP-101', protocol: 'PRO-001', deliverable: 'DSUR', name: 'CMP-101 — DSUR 2026', phase: '2', created: '2026-05-20' },
-    { compound: 'CMP-101', protocol: 'PRO-002', deliverable: 'CSR', name: 'CMP-101 Phase 3 — CSR', phase: '3', created: '2026-08-18' }
+    { compound: 'XP-204', protocol: 'ONC-204-301', deliverable: 'DSUR', name: 'Metastatic NSCLC - DSUR 2026', phase: '3', created: '2026-07-15' },
+    { compound: 'XP-204', protocol: 'ONC-204-302', deliverable: 'CSR', name: 'NSCLC 1L combination - CSR', phase: '3', created: '2026-08-01' },
+    { compound: 'CMP-101', protocol: 'PRO-001', deliverable: 'CSR', name: 'CMP-101 Phase 2 - CSR', phase: '2', created: '2026-03-10' },
+    { compound: 'CMP-101', protocol: 'PRO-001', deliverable: 'DSUR', name: 'CMP-101 - DSUR 2026', phase: '2', created: '2026-05-20' },
+    { compound: 'CMP-101', protocol: 'PRO-002', deliverable: 'CSR', name: 'CMP-101 Phase 3 - CSR', phase: '3', created: '2026-08-18' }
   ];
 
   try { if (/[?&]reset=1\b/.test(location.search)) { localStorage.removeItem(REG_KEY); localStorage.removeItem(LAYOUT_KEY); } } catch (e) {}
@@ -191,7 +191,7 @@
       var crumb = document.querySelector('.crumb strong');
       if (crumb) crumb.textContent = label;
       var foot = document.querySelector('.nav-footer');
-      if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '—');
+      if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '-');
     }
     var qs = 'study=' + encodeURIComponent(studyId(e)) + '&path=' + encodeURIComponent(path);
     document.querySelectorAll('a[href^="files.html"]').forEach(function (a) {

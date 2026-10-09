@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Studies</title>
+<title>SPHERE - Studies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -151,7 +151,7 @@
 
       <div class="success-banner" id="structureSuccess" role="status">
           <span class="note-label" style="color:var(--ok)">Done</span>
-          <div><strong>Folder tree created</strong> for <span data-study-name>study</span> — raw, sdtm, adam, programs, tlf, logs (X Pharma template).</div>
+          <div><strong>Folder tree created</strong> for <span data-study-name>study</span> - raw, sdtm, adam, programs, tlf, logs (X Pharma template).</div>
         </div>
 
       <div class="studies-grid" id="studiesCards">
@@ -196,8 +196,8 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">FPFV</span> 2024-01-08</span>
-            <span><span class="k">LPLV</span> —</span>
-            <span><span class="k">DB lock</span> —</span>
+            <span><span class="k">LPLV</span> -</span>
+            <span><span class="k">DB lock</span> -</span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v2.0 · SAP draft · 186 subjects</span>
@@ -209,7 +209,7 @@
           <div class="study-card-top">
             <div>
               <div class="study-id">VAC-302-011</div>
-              <div class="study-title">RSV vaccine — adults ≥60</div>
+              <div class="study-title">RSV vaccine - adults ≥60</div>
             </div>
             <span class="badge running">Startup</span>
           </div>
@@ -221,8 +221,8 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">FPFV</span> 2025-09-01</span>
-            <span><span class="k">LPLV</span> —</span>
-            <span><span class="k">DB lock</span> —</span>
+            <span><span class="k">LPLV</span> -</span>
+            <span><span class="k">DB lock</span> -</span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v1.1 · libraries provisioning</span>
@@ -305,23 +305,23 @@
               <td>Alex Rivera</td>
               <td>Dana Brooks</td>
               <td class="num">2024-01-08</td>
-              <td class="num">—</td>
-              <td class="num">—</td>
+              <td class="num">-</td>
+              <td class="num">-</td>
               <td>2</td>
               <td><span class="badge locked">Active</span></td>
             </tr>
             <tr class="row-link" data-href="study-home.html?study=VAC-302-011" data-folder="VAC-302-011">
               <td class="num">VAC-302-011</td>
               <td>
-                <div class="study-name-cell">RSV vaccine — adults ≥60</div>
+                <div class="study-name-cell">RSV vaccine - adults ≥60</div>
                 <div class="study-sub muted">Interim analysis · RSV prevention</div>
               </td>
               <td><span class="tag-chip">Interim analysis</span></td>
               <td>Sam Okonkwo</td>
               <td>Taylor Kim</td>
               <td class="num">2025-09-01</td>
-              <td class="num">—</td>
-              <td class="num">—</td>
+              <td class="num">-</td>
+              <td class="num">-</td>
               <td>3</td>
               <td><span class="badge running">Startup</span></td>
             </tr>
@@ -364,7 +364,7 @@
         <div class="new-study-grid">
           <label class="field">
             <span class="field-label">Study name</span>
-            <input class="field-input" id="nsName" name="name" type="text" required placeholder="e.g. Metastatic NSCLC — first-line" />
+            <input class="field-input" id="nsName" name="name" type="text" required placeholder="e.g. Metastatic NSCLC - first-line" />
           </label>
           <input type="hidden" id="nsFolder" name="folder" value="" />
           <div class="ns-location" id="nsLocation">
@@ -387,7 +387,7 @@
               <select class="field-input" id="nsDeliverableSel" aria-label="Deliverable"></select>
               <input class="field-input" id="nsDeliverableNew" type="text" placeholder="Custom deliverable, e.g. ISS" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,48}" hidden aria-label="Custom deliverable" />
             </div>
-            <div class="ns-exists" id="nsExists" hidden role="alert">This folder already exists — pick another protocol / deliverable.</div>
+            <div class="ns-exists" id="nsExists" hidden role="alert">This folder already exists - pick another protocol / deliverable.</div>
           </div>
           <div class="new-study-preview field-span-2">
             <p class="hint" style="margin:0 0 6px">Study folder path</p>
@@ -724,7 +724,7 @@
     }
 
     function fmtDate(v) {
-      return v ? v : '—';
+      return v ? v : '-';
     }
 
     function esc(s) {
@@ -748,8 +748,8 @@
           '<div class="study-sub muted">' + esc(data.type) + (data.indication ? ' · ' + esc(data.indication) : '') + '</div>' +
           (data.path ? '<div class="study-path-line" title="Folder path">' + esc(data.path) + '</div>' : '') + '</td>' +
           '<td><span class="tag-chip">' + esc(data.type) + '</span></td>' +
-          '<td>' + esc(data.lead || '—') + '</td>' +
-          '<td>' + esc(data.statistician || '—') + '</td>' +
+          '<td>' + esc(data.lead || '-') + '</td>' +
+          '<td>' + esc(data.statistician || '-') + '</td>' +
           '<td class="num">' + esc(fmtDate(data.fpfv)) + '</td>' +
           '<td class="num">' + esc(fmtDate(data.lplv)) + '</td>' +
           '<td class="num">' + esc(fmtDate(data.dblock)) + '</td>' +
@@ -774,10 +774,10 @@
           '<div class="study-title">' + esc(data.name) + '</div></div>' +
           '<span class="badge running">Startup</span></div>' +
           '<div class="study-meta-row">' +
-          '<span><span class="k">Lead Programmer</span> ' + esc(data.lead || '—') + '</span>' +
+          '<span><span class="k">Lead Programmer</span> ' + esc(data.lead || '-') + '</span>' +
           '<span><span class="k">Deliverable</span> ' + esc(data.type) + '</span>' +
           '<span><span class="k">Phase</span> ' + esc(data.phase) + '</span>' +
-          '<span><span class="k">Lead Statistician</span> ' + esc(data.statistician || '—') + '</span></div>' +
+          '<span><span class="k">Lead Statistician</span> ' + esc(data.statistician || '-') + '</span></div>' +
           '<div class="study-meta-row">' +
           '<span><span class="k">FPFV</span> ' + esc(fmtDate(data.fpfv)) + '</span>' +
           '<span><span class="k">LPLV</span> ' + esc(fmtDate(data.lplv)) + '</span>' +
@@ -831,7 +831,7 @@
         }
         addStudy({
           folder: id, path: path, name: e.name, description: e.description, type: e.type || e.deliverable || 'CSR',
-          phase: e.phase || '—', indication: e.indication, lead: e.lead, statistician: e.statistician,
+          phase: e.phase || '-', indication: e.indication, lead: e.lead, statistician: e.statistician,
           fpfv: e.fpfv, lplv: e.lplv, dblock: e.dblock, status: e.seedStatus || (e.created < '2026-09-01' ? 'Active' : 'Startup')
         }, { append: true, silent: true });
       });

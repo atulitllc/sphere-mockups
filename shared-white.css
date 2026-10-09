@@ -86,7 +86,7 @@ html { --ui-zoom: 1; }
   --radius-sm: 8px;
 }
 
-/* —— Accent themes (data-accent on <html>) ——
+/* -- Accent themes (data-accent on <html>) --
    Colored left-nav chrome + accent for active/buttons/links/focus.
    Content surfaces stay from data-theme light/dark. Default: blue. */
 :root,
@@ -457,11 +457,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .app {
   display: grid;
   grid-template-columns: var(--nav-w) 1fr;
-  /* html { zoom } shrinks 100vh visually — stretch so the rail still fills the viewport */
+  /* html { zoom } shrinks 100vh visually - stretch so the rail still fills the viewport */
   min-height: calc(100vh / var(--ui-zoom, 1));
 }
 
-/* —— Nav —— */
+/* -- Nav -- */
 .nav {
   background: var(--nav-bg, #1e3a8a);
   border-right: 1px solid var(--nav-border);
@@ -544,7 +544,7 @@ a.logo { text-decoration: none; color: inherit; display: block; }
 
 .logo img.logo-mark { display: none; }
 
-/* —— Desktop nav collapse (icons-only rail) —— */
+/* -- Desktop nav collapse (icons-only rail) -- */
 html.nav-collapsed,
 html.nav-collapsed[data-theme="light"],
 html.nav-collapsed[data-theme="dark"],
@@ -613,7 +613,7 @@ body.nav-collapsed {
   }
 }
 
-/* —— Main —— */
+/* -- Main -- */
 .main { display: flex; flex-direction: column; min-width: 0; }
 
 .top {
@@ -705,7 +705,7 @@ body.nav-collapsed {
 [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 
-/* —— Accent theme dropdown (compact) —— */
+/* -- Accent theme dropdown (compact) -- */
 .accent-picker {
   position: relative;
   flex-shrink: 0;
@@ -872,7 +872,7 @@ body.nav-collapsed {
 
 /* Collapsed = zero-height; expanded = pull-down (max-height/opacity) */
 .note-banner.note-collapsible {
-  display: none; /* out of flow when collapsed — no stack gap */
+  display: none; /* out of flow when collapsed - no stack gap */
   overflow: hidden;
   max-height: 0;
   opacity: 0;
@@ -928,7 +928,7 @@ body.nav-collapsed {
   width: 100%;
 }
 
-/* —— Cards (reserve for complex widgets: editors, file panes, primary tables) —— */
+/* -- Cards (reserve for complex widgets: editors, file panes, primary tables) -- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -949,7 +949,7 @@ body.nav-collapsed {
   flex-wrap: wrap;
 }
 
-/* Open page sections — title + content on page background (no outer card) */
+/* Open page sections - title + content on page background (no outer card) */
 .section {
   display: grid;
   gap: 12px;
@@ -1042,7 +1042,7 @@ body.nav-collapsed {
   width: 128px;
 }
 
-/* —— Form controls —— */
+/* -- Form controls -- */
 input, select, textarea {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1061,7 +1061,7 @@ input:focus, select:focus, textarea:focus {
 
 textarea { min-height: 72px; resize: vertical; }
 
-/* —— Table —— */
+/* -- Table -- */
 .table-wrap { overflow-x: auto; }
 
 table { width: 100%; border-collapse: collapse; }
@@ -1089,7 +1089,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 .num { font-variant-numeric: tabular-nums; font-weight: 550; color: var(--text); }
 
-/* —— Badges —— */
+/* -- Badges -- */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -1115,7 +1115,7 @@ tbody tr:last-child td { border-bottom: none; }
 .badge.listing { color: var(--purple); background: var(--purple-soft); border-color: var(--purple-border); }
 .badge.figure { color: var(--pink); background: var(--pink-soft); border-color: var(--pink-border); }
 
-/* —— Buttons —— */
+/* -- Buttons -- */
 .btn {
   border: 1px solid var(--border);
   background: var(--surface);
@@ -1176,7 +1176,7 @@ tbody tr:last-child td { border-bottom: none; }
 .btn.icon-btn.row-edit svg { width: 14px; height: 14px; color: inherit; fill: currentColor; }
 .btn.sm.icon-btn { width: 26px; height: 26px; }
 
-/* —— Form —— */
+/* -- Form -- */
 .form { padding: 16px; display: grid; gap: 14px; }
 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -1263,7 +1263,7 @@ label .req::after { content: " *"; color: var(--danger); }
   z-index: 35;
 }
 
-/* —— Responsive —— */
+/* -- Responsive -- */
 @media (max-width: 1100px) {
   .content.cols-2,
   .workspace.cols-2 { grid-template-columns: 1fr; }
@@ -1315,7 +1315,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 
-/* —— Module layout helpers —— */
+/* -- Module layout helpers -- */
 .content.stack { display: grid; gap: 18px; }
 .stack { display: grid; gap: 18px; }
 .split {
@@ -1417,7 +1417,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 .meta-item .v { font-size: 14.5px; font-weight: 600; line-height: 1.35; }
 
-/* Library shortcuts — soft chips, not mini-cards */
+/* Library shortcuts - soft chips, not mini-cards */
 .lib-row {
   display: flex;
   flex-wrap: wrap;
@@ -1569,7 +1569,7 @@ label .req::after { content: " *"; color: var(--danger); }
   .search { width: 140px; }
 }
 
-/* —— Tracker: SAP groups, title bands, soft meta, bulk bar, modal —— */
+/* -- Tracker: SAP groups, title bands, soft meta, bulk bar, modal -- */
 .tag-chip {
   display: inline-flex;
   align-items: center;
@@ -1585,7 +1585,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 .chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
 
-/* Plain text meta (Type / Status) — not pills */
+/* Plain text meta (Type / Status) - not pills */
 .meta-plain {
   font-size: 13px;
   color: var(--text);
@@ -1756,7 +1756,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 
-/* Tracker column header — once at top, light accent */
+/* Tracker column header - once at top, light accent */
 .tracker-col-head {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
@@ -1775,7 +1775,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .tracker-col-head .artifact-main { gap: 0; }
 .tracker-col-head .artifact-title-band,
 .tracker-col-head .col-head-title-spacer {
-  display: none; /* title/tags headers removed — don't reserve empty band height */
+  display: none; /* title/tags headers removed - don't reserve empty band height */
 }
 .col-head-label {
   font-size: 10.5px;
@@ -1990,7 +1990,7 @@ label .req::after { content: " *"; color: var(--danger); }
   }
 }
 
-/* Soft status cue without full pill — Frozen only when needed */
+/* Soft status cue without full pill - Frozen only when needed */
 .files-frozen-chip {
   display: inline-flex;
   align-items: center;
@@ -2142,7 +2142,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .redirect-card h1 { margin: 0 0 8px; font-size: 22px; }
 .redirect-card p { color: var(--muted); margin: 0 0 16px; line-height: 1.5; }
 
-/* —— Studies selection —— */
+/* -- Studies selection -- */
 .nav-divider {
   height: 1px;
   background: var(--nav-border);
@@ -2251,7 +2251,7 @@ label .req::after { content: " *"; color: var(--danger); }
   .cols-3, .grid3 { grid-template-columns: 1fr; }
 }
 
-/* —— Admin —— */
+/* -- Admin -- */
 .admin-layout {
   display: grid;
   grid-template-columns: 180px 1fr;
@@ -2406,7 +2406,7 @@ label .req::after { content: " *"; color: var(--danger); }
   }
 }
 
-/* —— Files browser —— */
+/* -- Files browser -- */
 .files-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -2539,7 +2539,7 @@ label .req::after { content: " *"; color: var(--danger); }
 .type-pill.rtf { color: var(--warn); background: var(--warn-soft); border-color: var(--warn-border); }
 .type-pill.dir { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
 
-/* —— Layout template editor (Admin) —— */
+/* -- Layout template editor (Admin) -- */
 .layout-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .layout-list li {
   display: flex;
@@ -2603,7 +2603,7 @@ label .req::after { content: " *"; color: var(--danger); }
   .files-layout { grid-template-columns: 1fr; }
 }
 
-/* —— Files: Manage access, context menu, QC freeze on share —— */
+/* -- Files: Manage access, context menu, QC freeze on share -- */
 .tree-item-wrap {
   display: flex;
   align-items: center;
@@ -2814,7 +2814,7 @@ label .req::after { content: " *"; color: var(--danger); }
   flex-wrap: wrap;
 }
 
-/* —— Mock Shells: spreadsheet editor —— */
+/* -- Mock Shells: spreadsheet editor -- */
 .shell-workspace {
   --shell-toc-width: 280px;
   display: flex;
@@ -3528,7 +3528,7 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 
-/* —— Mock Shells: Copy to study —— */
+/* -- Mock Shells: Copy to study -- */
 .warn-banner {
   display: none;
   align-items: flex-start;
@@ -4233,7 +4233,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 .list-tools { flex-wrap: wrap; }
 
 
-/* Tracker toolbar: one row — actions left, filters right */
+/* Tracker toolbar: one row - actions left, filters right */
 .tracker-section > .section-head.tracker-tools-only {
   display: block;
   width: 100%;
@@ -4584,7 +4584,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 }
 
 
-/* Custom Lists — large popup (not fullscreen) */
+/* Custom Lists - large popup (not fullscreen) */
 .setlist-backdrop {
   padding: 16px !important;
   align-items: center !important;
@@ -5253,7 +5253,7 @@ button.badge.file-edit-link:focus-visible {
 
 
 
-/* —— Accessibility dropdown —— */
+/* -- Accessibility dropdown -- */
 .a11y-picker {
   position: relative;
   flex-shrink: 0;
@@ -5391,7 +5391,7 @@ button.badge.file-edit-link:focus-visible {
   border-top: 1px solid var(--border);
 }
 
-/* High contrast: sharper text/colors only — keep normal border weight */
+/* High contrast: sharper text/colors only - keep normal border weight */
 html[data-contrast="high"][data-theme="light"] {
   --bg: #ffffff;
   --surface: #ffffff;
@@ -5426,7 +5426,7 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* SAP section Select control — kept next to title/count (not far-right) */
+/* SAP section Select control - kept next to title/count (not far-right) */
 .sap-section-bar {
   display: flex;
   align-items: center;
@@ -5665,7 +5665,7 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* Studies — wide table + new study form */
+/* Studies - wide table + new study form */
 .studies-table-wide {
   min-width: 1080px;
 }
@@ -5815,7 +5815,7 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* Keep Tracker Actions on-screen — parent .content uses overflow-x: clip */
+/* Keep Tracker Actions on-screen - parent .content uses overflow-x: clip */
 .content:has(.tracker-board) {
   overflow-x: auto;
 }
@@ -5886,7 +5886,7 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* Study home — darker accordion card for label + meta (Feedback #12) */
+/* Study home - darker accordion card for label + meta (Feedback #12) */
 .study-hero {
   border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
   border-radius: var(--radius);
