@@ -35,6 +35,7 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4d"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -150,15 +151,17 @@
                 <th>Label</th>
                 <th>Received</th>
                 <th>Target lib</th>
+                <th>User</th>
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="snapshotBody">
               <tr class="selected">
                 <td>eClinical Solutions</td>
                 <td>elluminate · ONC-204-301 domains (DM, AE, LB)</td>
                 <td>6 Sep 2026 · 11:02 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge ok">Complete</span></td>
               </tr>
               <tr>
@@ -166,6 +169,7 @@
                 <td>EDC cut 2026-08-28</td>
                 <td>28 Aug 2026 · 9:14 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge ok">Complete</span></td>
               </tr>
               <tr>
@@ -173,6 +177,7 @@
                 <td>Vendor labs · chemistry</td>
                 <td>27 Aug 2026 · 4:02 PM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge review">In review</span></td>
               </tr>
               <tr>
@@ -180,6 +185,7 @@
                 <td>EDC cut 2026-07-15</td>
                 <td>15 Jul 2026 · 10:30 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge locked">Archived</span></td>
               </tr>
               <tr>
@@ -187,6 +193,7 @@
                 <td>PK concentration CSV</td>
                 <td>12 Aug 2026 · 1:45 PM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge draft">Uploaded</span></td>
               </tr>
               <tr>
@@ -194,6 +201,7 @@
                 <td>Central ECG transfer</td>
                 <td>20 Aug 2026 · 8:05 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge danger">Needs fix</span></td>
               </tr>
             </tbody>
@@ -537,6 +545,26 @@
     document.body.appendChild(el);
     setTimeout(function () { el.remove(); }, 3200);
   }
+  function loggedInUsername() {
+    var name = window.SPHERE_ACCESS && SPHERE_ACCESS.username ? SPHERE_ACCESS.username() : '';
+    return name || 'jpatel';
+  }
+  function stampNow() {
+    var d = new Date();
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var h = d.getHours();
+    var hr = h % 12 || 12;
+    var min = (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + hr + ':' + min + ' ' + (h >= 12 ? 'PM' : 'AM') + ' ET';
+  }
+  function appendSnapshot(source, label, targetLib, statusHtml) {
+    var body = document.getElementById('snapshotBody');
+    if (!body) return;
+    var user = loggedInUsername();
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + esc(source) + '</td><td>' + esc(label) + '</td><td>' + esc(stampNow()) + '</td><td>' + esc(targetLib) + '</td><td class="snapshot-user">' + esc(user) + '</td><td>' + statusHtml + '</td>';
+    body.insertBefore(tr, body.firstChild);
+  }
   function doManualUpload() {
     var destEl = document.getElementById('manualDest');
     var dest = destEl ? destEl.value : 'Raw';
@@ -576,6 +604,9 @@
       }
     });
     if (window.SPHERE_INGEST && stored.length) SPHERE_INGEST.add(stored);
+    if (stored.length) {
+      appendSnapshot('Manual upload', stored.map(function (s) { return s.name; }).join(', '), dest, '<span class="badge draft">Uploaded</span>');
+    }
     if (wrap) wrap.hidden = false;
     if (results) {
       results.innerHTML = rows.map(function (r) {
@@ -656,7 +687,8 @@
     btn.addEventListener('click', function () {
       if (sel.value === 'manual') { doManualUpload(); return; }
       if (sel.value !== 'eclinical') {
-        toast('Upload queued for ' + (study ? study.value : 'the study') + ' into ' + (target ? target.value : 'Raw') + '.');
+        appendSnapshot(sel.value === 'rave' ? 'Rave export' : 'Snapshot', (study ? study.value : 'Study') + ' file upload', target ? target.value : 'Raw', '<span class="badge draft">Uploaded</span>');
+        toast('Upload recorded for ' + (study ? study.value : 'the study') + ' into ' + (target ? target.value : 'Raw') + '.');
         return;
       }
       var cfg = connectorConfig();
@@ -671,6 +703,7 @@
       setTimeout(function () {
         btn.disabled = false;
         btn.textContent = prev;
+        appendSnapshot('eClinical Solutions', (study ? study.value : '') + ' · ' + picked.join(', '), target ? target.value : 'Raw', '<span class="badge ok">Complete</span>');
         toast('Pulled ' + picked.join(', ') + ' for ' + (study ? study.value : '') + ' from ' + cfg.url + ' into ' + (target ? target.value : 'Raw') + '.');
         sync();
       }, 900);
