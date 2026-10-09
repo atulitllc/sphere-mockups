@@ -927,6 +927,54 @@
   if (cardBtn) cardBtn.addEventListener('click', function () { apply('cards'); });
 })();
 </script>
+<script>
+(function () {
+  var tbody = document.getElementById('studiesTableBody');
+  var L = window.SPHERE_LAYOUT;
+  if (!tbody || !L) return;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  var groups = {};
+  L.registry().forEach(function (e) {
+    var p = e.protocol || e.compound || '';
+    if (!p) return;
+    if (!groups[p]) groups[p] = [];
+    groups[p].push(e);
+  });
+  tbody.innerHTML = '';
+  Object.keys(groups).sort().forEach(function (p) {
+    var rows = groups[p];
+    var first = rows[0];
+    var tr = document.createElement('tr');
+    tr.className = 'protocol-row';
+    tr.innerHTML =
+      '<td class="num"><button type="button" class="proto-plus" aria-expanded="false" aria-label="Show folders for ' + esc(p) + '">+</button> ' + esc(p) + '</td>' +
+      '<td><div class="study-name-cell">' + esc(first.name || p) + '</div></td>' +
+      '<td colspan="8" class="muted">' + rows.length + ' folder' + (rows.length === 1 ? '' : 's') + '</td>';
+    tbody.appendChild(tr);
+    var folderRows = rows.map(function (e) {
+      var fr = document.createElement('tr');
+      fr.className = 'protocol-folder';
+      fr.hidden = true;
+      var folder = e.deliverable || 'CSR';
+      fr.innerHTML = '<td></td><td colspan="9" class="protocol-folder-name">' + esc(folder) + '</td>';
+      fr.addEventListener('click', function () {
+        location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p);
+      });
+      tbody.appendChild(fr);
+      return fr;
+    });
+    tr.querySelector('.proto-plus').addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      var open = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', open ? 'false' : 'true');
+      this.textContent = open ? '+' : '\u2212';
+      folderRows.forEach(function (fr) { fr.hidden = open; });
+    });
+  });
+})();
+</script>
 <script src="shared-chrome.js?v=flow3j"></script>
 </body>
 </html>
