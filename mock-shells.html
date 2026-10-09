@@ -490,6 +490,7 @@
 
 <!-- Catalog TOC context menu -->
 <div class="sheet-ctx" id="catalogCtxMenu" hidden role="menu">
+  <button type="button" data-cat-cmd="copy" role="menuitem">Copy</button>
   <button type="button" data-cat-cmd="duplicate" role="menuitem">Duplicate</button>
   <button type="button" data-cat-cmd="delete" role="menuitem" class="danger">Delete</button>
 </div>
@@ -2497,7 +2498,8 @@
       var cmd = btn.getAttribute('data-cat-cmd');
       var ids = catalogTargets();
       hideCatalogCtx();
-      if (cmd === 'duplicate') duplicateCatalogShells(ids);
+      if (cmd === 'copy') openCopyModal(ids);
+      else if (cmd === 'duplicate') duplicateCatalogShells(ids);
       else if (cmd === 'delete') deleteCatalogShells(ids);
     });
   }
