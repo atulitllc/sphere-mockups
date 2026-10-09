@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Define</title>
+<title>SPHERE - Define</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -163,7 +163,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">CDISC Define-XML for SDTM / ADaM — generated from study metadata and dataset specs in the study tree, not freehand XML. Shell lock (Mock Shells) and Tracker statuses stay separate.</p>
+        <p class="page-sub">CDISC Define-XML for SDTM / ADaM - generated from study metadata and dataset specs in the study tree, not freehand XML. Shell lock (Mock Shells) and Tracker statuses stay separate.</p>
       </div>
 
         <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
@@ -340,10 +340,10 @@
                 <table>
                   <thead><tr><th>Dataset</th><th>Variable</th><th>Where</th><th>Data type</th><th>Codelist</th></tr></thead>
                   <tbody>
-                    <tr><td>LB</td><td>LBORRES</td><td>LBTESTCD = ALT</td><td>text</td><td>—</td></tr>
-                    <tr><td>LB</td><td>LBORRES</td><td>LBTESTCD = AST</td><td>text</td><td>—</td></tr>
-                    <tr><td>ADLB</td><td>AVAL</td><td>PARAMCD = ALT</td><td>float</td><td>—</td></tr>
-                    <tr><td>ADAE</td><td>AESEV</td><td>—</td><td>text</td><td>CL.AESEV</td></tr>
+                    <tr><td>LB</td><td>LBORRES</td><td>LBTESTCD = ALT</td><td>text</td><td>-</td></tr>
+                    <tr><td>LB</td><td>LBORRES</td><td>LBTESTCD = AST</td><td>text</td><td>-</td></tr>
+                    <tr><td>ADLB</td><td>AVAL</td><td>PARAMCD = ALT</td><td>float</td><td>-</td></tr>
+                    <tr><td>ADAE</td><td>AESEV</td><td>-</td><td>text</td><td>CL.AESEV</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -356,7 +356,7 @@
                     <tr><td>CL.SEX</td><td>Sex</td><td>C66731</td><td>F, M, U</td></tr>
                     <tr><td>CL.AESEV</td><td>Severity / Intensity</td><td>C66769</td><td>MILD, MODERATE, SEVERE</td></tr>
                     <tr><td>CL.NY</td><td>No Yes Response</td><td>C66742</td><td>N, Y</td></tr>
-                    <tr><td>CL.ARM</td><td>Description of Planned Arm</td><td>—</td><td>Placebo, Drug X 100mg</td></tr>
+                    <tr><td>CL.ARM</td><td>Description of Planned Arm</td><td>-</td><td>Placebo, Drug X 100mg</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -521,14 +521,14 @@
     { domain: 'DM', cls: 'Special Purpose', pkg: 'sdtm', src: 'sdtm/dm.sas7bdat', label: 'Demographics', spec: 'specs/sdtm_dm.xlsx', status: 'Mapped' },
     { domain: 'AE', cls: 'Events', pkg: 'sdtm', src: 'sdtm/ae.sas7bdat', label: 'Adverse Events', spec: 'specs/sdtm_ae.xlsx', status: 'Mapped' },
     { domain: 'LB', cls: 'Findings', pkg: 'sdtm', src: 'sdtm/lb.sas7bdat', label: 'Laboratory Test Results', spec: 'specs/sdtm_lb.xlsx', status: 'Mapped' },
-    { domain: 'VS', cls: 'Findings', pkg: 'sdtm', src: 'sdtm/vs.sas7bdat', label: 'Vital Signs', spec: '—', status: 'Stub' },
-    { domain: 'EX', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/ex.sas7bdat', label: 'Exposure', spec: '—', status: 'Stub' },
-    { domain: 'CM', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/cm.sas7bdat', label: 'Concomitant Meds', spec: '—', status: 'Stub' },
+    { domain: 'VS', cls: 'Findings', pkg: 'sdtm', src: 'sdtm/vs.sas7bdat', label: 'Vital Signs', spec: '-', status: 'Stub' },
+    { domain: 'EX', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/ex.sas7bdat', label: 'Exposure', spec: '-', status: 'Stub' },
+    { domain: 'CM', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/cm.sas7bdat', label: 'Concomitant Meds', spec: '-', status: 'Stub' },
     { domain: 'ADSL', cls: 'Subject Level', pkg: 'adam', src: 'adam/adsl.sas7bdat', label: 'Subject-Level Analysis', spec: 'specs/adam_adsl.xlsx', status: 'Mapped' },
     { domain: 'ADAE', cls: 'Occurrence', pkg: 'adam', src: 'adam/adae.sas7bdat', label: 'Adverse Events Analysis', spec: 'specs/adam_adae.xlsx', status: 'Mapped' },
-    { domain: 'ADLB', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adlb.sas7bdat', label: 'Laboratory Analysis', spec: '—', status: 'Stub' },
-    { domain: 'ADTTE', cls: 'Time-to-Event', pkg: 'adam', src: 'adam/adtte.sas7bdat', label: 'Time-to-Event', spec: '—', status: 'Stub' },
-    { domain: 'ADRS', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adrs.sas7bdat', label: 'Response Analysis', spec: '—', status: 'Stub' }
+    { domain: 'ADLB', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adlb.sas7bdat', label: 'Laboratory Analysis', spec: '-', status: 'Stub' },
+    { domain: 'ADTTE', cls: 'Time-to-Event', pkg: 'adam', src: 'adam/adtte.sas7bdat', label: 'Time-to-Event', spec: '-', status: 'Stub' },
+    { domain: 'ADRS', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adrs.sas7bdat', label: 'Response Analysis', spec: '-', status: 'Stub' }
   ];
 
   var catalogBody = document.getElementById('catalogBody');
@@ -610,7 +610,7 @@
       var r = map[d];
       if (!r) return '';
       return '<tr><td>IG.' + d + '</td><td>' + d + '</td><td>' + (d === 'ADSL' || d === 'DM' ? 'No' : 'Yes') +
-        '</td><td>' + r.label + '</td><td>' + (keys[d] || '—') + '</td></tr>';
+        '</td><td>' + r.label + '</td><td>' + (keys[d] || '-') + '</td></tr>';
     }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No domains selected</td></tr>';
   }
 

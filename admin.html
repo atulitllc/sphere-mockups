@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Admin</title>
+<title>SPHERE - Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -34,6 +34,7 @@
 })();
 </script>
 <script src="study-layout.js?v=flow3j"></script>
+<script src="sphere-access.js?v=flow4b"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -126,11 +127,11 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
         </div>
-        <p class="page-sub">Thin config for this client org — modules, branding, SSO, connectors. Do not gold-plate.</p>
+        <p class="page-sub">Thin config for this client org - modules, branding, SSO, connectors. Do not gold-plate.</p>
       </div>
 
         <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
-        <div class="note-banner-inner"><div><strong>One SPHERE build; layout is tenant config.</strong> Customization = tenant config + feature flags, not per-client repos. Study folder tree defaults come from this tenant’s Study layout — not a free-form chaos of libs. Spine always on; modules are pick-and-choose.</div></div>
+        <div class="note-banner-inner"><div><strong>One SPHERE build; layout is tenant config.</strong> Customization = tenant config + feature flags, not per-client repos. Study folder tree defaults come from this tenant’s Study layout - not a free-form chaos of libs. Spine always on; modules are pick-and-choose.</div></div>
       </div>
 
         <div class="admin-layout">
@@ -189,7 +190,7 @@
                 <div class="card-body" style="padding-top:4px;padding-bottom:8px">
                   <div class="note-banner" role="note" style="margin-bottom:8px">
                     <span class="note-label">Spine</span>
-                    <div>Tenant, SSO, study, layout map, and Part 11 audit are <strong>always on</strong> — not toggled here.</div>
+                    <div>Tenant, SSO, study, layout map, and Part 11 audit are <strong>always on</strong> - not toggled here.</div>
                   </div>
 
                   <div class="toggle-row">
@@ -367,7 +368,7 @@
                   <label>
                     <span>ACS URL (SP)</span>
                     <input type="text" readonly value="https://xpharma.sphere.app/sso/acs/ten_x_pharma" />
-                    <span class="hint">Read-only SP endpoint — copy to IdP</span>
+                    <span class="hint">Read-only SP endpoint - copy to IdP</span>
                   </label>
                   <div class="form-actions">
                     <button class="btn primary" type="button" disabled title="Not wired">Save SSO</button>
@@ -415,9 +416,9 @@
                   <label>
                     <span>Sync mode</span>
                     <select>
-                      <option selected>Reference only — paths &amp; catalog (recommended when SAS/data stay on elluminate)</option>
+                      <option selected>Reference only - paths &amp; catalog (recommended when SAS/data stay on elluminate)</option>
                       <option>Copy selected domains into SPHERE Raw/</option>
-                      <option>Hybrid — register all, copy on demand</option>
+                      <option>Hybrid - register all, copy on demand</option>
                     </select>
                   </label>
                   <label>
@@ -534,7 +535,7 @@
               <div class="card-body" style="padding-top:4px">
                 <div class="note-banner" role="note" style="margin-bottom:12px">
                   <span class="note-label">History</span>
-                  <div>History + restore in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>. Snapshots on save, handoff, restore, and promote. Same UX either backend — this toggle only chooses where snapshots live.</div>
+                  <div>History + restore in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>. Snapshots on save, handoff, restore, and promote. Same UX either backend - this toggle only chooses where snapshots live.</div>
                 </div>
                 <p class="muted" style="font-size:12.5px;margin:0 0 10px">Storage backend for this tenant. Default is Local history. Enterprise GitHub is a stub in this demo.</p>
                 <div class="radio-cards" id="wfVcsMode" role="radiogroup" aria-label="Program version control">
@@ -549,7 +550,7 @@
                     <input type="radio" name="versionControl" value="github" />
                     <div>
                       <strong>Enterprise GitHub</strong>
-                      <div class="hint">Same History + restore UI. GitHub is the storage backend (org / repo). MVP: Admin stub only — no OAuth in this demo.</div>
+                      <div class="hint">Same History + restore UI. GitHub is the storage backend (org / repo). MVP: Admin stub only - no OAuth in this demo.</div>
                     </div>
                   </label>
                 </div>
@@ -627,16 +628,23 @@
                         <td>r.nguyen@xpharma.example</td>
                         <td><span class="badge review">Reviewer</span></td>
                         <td><span class="badge warn">Invited</span></td>
-                        <td>—</td>
+                        <td>-</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
                 <div class="card-body" style="padding-top:0">
-                  <p class="hint">Roles: programmer · reviewer · admin. Invite is stub — SSO will map groups later.</p>
+                  <p class="hint">Roles: programmer · reviewer · admin. Invite is stub - SSO will map groups later.</p>
                 </div>
               </div>
 
+              <div class="card" style="margin-top:14px" id="compoundLeadsCard">
+                <div class="card-head">
+                  <span class="title-row">Compound leads</span>
+                </div>
+                <p class="hint" style="margin:0 16px 10px">Only Admin can assign or remove compound leads. The label in File Explorer stays Manage Access.</p>
+                <div id="compoundLeads"></div>
+              </div>
               <div class="card" style="margin-top:14px">
                 <div class="card-head">
                   <span class="title-row">Teams</span>
@@ -679,7 +687,7 @@
                   </table>
                 </div>
                 <div class="card-body" style="padding-top:0">
-                  <p class="hint">Stub only — membership sync from SSO groups later. Same teams appear in Files Manage access picker.</p>
+                  <p class="hint">Stub only - membership sync from SSO groups later. Same teams appear in Files Manage access picker.</p>
                 </div>
               </div>
             </div>
@@ -695,7 +703,7 @@
                 <div class="form">
                   <div class="note-banner" role="note">
                     <span class="note-label">Lock</span>
-                    <div>Base tree is <code>{study folder}/data/raw | sdtm | adam | programs | tlf | logs | docs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base — not free-form chaos. Every new study gets this tree; in this demo, <strong>Save layout</strong> re-renders every study's folder path from its compound / protocol / deliverable metadata.</div>
+                    <div>Base tree is <code>{study folder}/data/raw | sdtm | adam | programs | tlf | logs | docs</code>. Admin may <strong>add / remove / rename</strong> template subfolders from that base - not free-form chaos. Every new study gets this tree; in this demo, <strong>Save layout</strong> re-renders every study's folder path from its compound / protocol / deliverable metadata.</div>
                   </div>
                   <div class="note-banner" role="note" style="margin-top:8px">
                     <span class="note-label">Programs</span>
@@ -806,7 +814,7 @@
 
                   <div class="form-actions">
                     <button class="btn primary" type="button" id="saveLayoutBtn">Save layout</button>
-                    <button class="btn" type="button" id="applyLayoutBtn" title="Stub — does not rewrite existing studies unless confirmed">Apply to existing…</button>
+                    <button class="btn" type="button" id="applyLayoutBtn" title="Stub - does not rewrite existing studies unless confirmed">Apply to existing…</button>
                   </div>
                   <p class="hint">Save updates the tenant template for <strong>new</strong> studies only. Apply is a separate, explicit action (stub).</p>
                 </div>
@@ -855,7 +863,7 @@
         <div class="page-title-row">
           <h1 class="page-title">Audit trail</h1>
         </div>
-        <p class="page-sub">Part 11–style timeline · append-only · includes locks and rejected Copilot suggestions</p>
+        <p class="page-sub">Part 11-style timeline · append-only · includes locks and rejected Copilot suggestions</p>
       </div>
         <div class="list-tools">
           <input class="search" placeholder="Search actor, entity…" style="width:200px" aria-label="Search audit" />
@@ -946,7 +954,7 @@
               <div class="when">Tue<br>3:18:02 PM ET</div>
               <div><div class="dot"></div><div class="line"></div></div>
               <div>
-                <div class="evt">Shell saved · 14.3.1 Adverse events — overview</div>
+                <div class="evt">Shell saved · 14.3.1 Adverse events - overview</div>
                 <div class="detail">Draft update by J. Patel. Columns and footnotes revised. Generated Word shell artifact stored.</div>
                 <div class="stat-pills" style="margin-top:8px"><span class="badge draft">Shell edit</span><span class="badge">Actor · J. Patel</span></div>
               </div>
@@ -1305,7 +1313,7 @@
   var applyLayoutBtn = document.getElementById('applyLayoutBtn');
   if (applyLayoutBtn) {
     applyLayoutBtn.addEventListener('click', function () {
-      showToast('Apply to existing studies — not run (stub)');
+      showToast('Apply to existing studies - not run (stub)');
     });
   }
 
@@ -1353,15 +1361,58 @@
       SPHERE.setModuleFlag(id, inp.checked);
       toast(inp.checked
         ? 'Demo: Metadata module ON for this tenant'
-        : 'Demo: Metadata module OFF — Mock Shells will hide Metadata');
+        : 'Demo: Metadata module OFF - Mock Shells will hide Metadata');
     });
   });
-  // shared-chrome loads after this if we put before it — wait for SPHERE
+  // shared-chrome loads after this if we put before it - wait for SPHERE
   function boot() {
     if (window.SPHERE && SPHERE.getModuleFlag) syncModuleToggles();
     else setTimeout(boot, 30);
   }
   boot();
+})();
+</script>
+<script>
+(function () {
+  var A = window.SPHERE_ACCESS;
+  var L = window.SPHERE_LAYOUT;
+  var box = document.getElementById('compoundLeads');
+  if (!A || !box) return;
+  function paint() {
+    var me = A.current();
+    var compounds = [];
+    if (L) L.registry().forEach(function (e) { if (compounds.indexOf(e.compound) < 0) compounds.push(e.compound); });
+    if (!me.admin) {
+      box.innerHTML = '<p class="hint" style="margin:0 16px 12px">Signed in as ' + me.name + '. No control to add or remove compound leads.</p>';
+      return;
+    }
+    box.innerHTML = '<p class="hint" style="margin:0 16px 8px">Signed in as ' + me.name + ' (Admin).</p>' + compounds.map(function (c) {
+      var leads = A.leads(c);
+      var opts = A.users().map(function (u) {
+        return '<option value="' + u.id + '">' + u.name + '</option>';
+      }).join('');
+      return '<div style="padding:8px 16px" data-compound="' + c + '"><strong>' + c + '</strong> leads: ' +
+        (leads.map(function (id) {
+          var u = A.users().filter(function (x) { return x.id === id; })[0];
+          return (u ? u.name : id) + ' <button type="button" class="btn sm" data-remove="' + id + '">Remove</button>';
+        }).join(' ') || 'none') +
+        ' <select data-add>' + opts + '</select> <button type="button" class="btn sm" data-assign>Assign</button></div>';
+    }).join('');
+  }
+  box.addEventListener('click', function (e) {
+    var row = e.target.closest('[data-compound]');
+    if (!row) return;
+    var c = row.getAttribute('data-compound');
+    try {
+      if (e.target.getAttribute('data-assign') != null) A.assignLead(c, row.querySelector('[data-add]').value);
+      var rm = e.target.getAttribute('data-remove');
+      if (rm) A.removeLead(c, rm);
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+    }
+    paint();
+  });
+  paint();
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>

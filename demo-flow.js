@@ -1,4 +1,4 @@
-/* SPHERE demo flow store — Mock Shells → Tracker → QC → Stats → Released to MW.
+/* SPHERE demo flow store - Mock Shells → Tracker → QC → Stats → Released to MW.
    Front-end only; state lives in localStorage so it survives page navigation.
    Reset: add ?reset=1 to any page URL (or Admin → Reset demo data). */
 (function () {
@@ -18,6 +18,7 @@
     s.roles = s.roles || {};        /* row key -> {prod,qc,stats,mw} role overrides (Roles editor) */
     s.shellSync = s.shellSync || {}; /* study|number -> {title, footnotes, changedAt, why} */
     s.lastRun = s.lastRun || {};     /* program -> ISO time of last completed run */
+    s.qcStatus = s.qcStatus || {};   /* shell number -> automatic In Review from Tracker QC */
     return s;
   }
   function write(s) {
@@ -47,7 +48,7 @@
 
   function qcName(prog) {
     prog = String(prog || '').split('/').pop();
-    if (!prog || prog === '—') return '';
+    if (!prog || prog === '-') return '';
     if (/^qc-/i.test(prog)) return prog;
     return 'qc-' + prog;
   }
@@ -381,6 +382,15 @@
       });
       write(s);
     },
+    noteQc: function (number) {
+      if (!number) return null;
+      var s = read();
+      var rec = { status: 'In Review', at: new Date().toISOString(), user: CURRENT_USER, cause: 'Tracker record sent to QC' };
+      s.qcStatus[String(number)] = rec;
+      write(s);
+      return rec;
+    },
+    qcFor: function (number) { return (read().qcStatus || {})[String(number)] || null; },
     lastRun: function (prog) {
       var name = String(prog || '').split('/').pop();
       var s = read();

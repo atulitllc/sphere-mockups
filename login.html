@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Sign in</title>
+<title>SPHERE - Sign in</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -36,7 +36,7 @@
     grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
   }
 
-  /* —— Brand panel —— */
+  /* -- Brand panel -- */
   .login-brand {
     position: relative;
     overflow: hidden;
@@ -158,7 +158,7 @@
     font-weight: 600;
   }
 
-  /* —— Form panel —— */
+  /* -- Form panel -- */
   .login-panel {
     display: flex;
     flex-direction: column;
@@ -227,6 +227,18 @@
     font-size: 12.5px;
     font-weight: 600;
     color: var(--text);
+  }
+  .login-password-wrap { display: grid; gap: 6px; }
+  .login-show-pw {
+    justify-self: start;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 650;
+    padding: 0;
+    cursor: pointer;
   }
   .login-field input {
     width: 100%;
@@ -391,7 +403,7 @@
         <p class="login-kicker">Statistical computing for regulated studies</p>
         <h1 class="login-headline">One controlled environment for programs, QC, and delivery.</h1>
         <p class="login-lead">
-          SPHERE gives biometrics teams a governed workspace for statistical programming —
+          SPHERE gives biometrics teams a governed workspace for statistical programming -
           from study setup through Tracker runs and PDF packages.
         </p>
         <ul class="login-points">
@@ -432,7 +444,7 @@
 
           <div class="login-tenant" title="Active tenant">
             <span class="login-tenant-dot" aria-hidden="true"></span>
-            <span><strong>X Pharma</strong> · ten_x_pharma</span>
+            <span><strong>X Pharma</strong> ten_x_pharma</span>
           </div>
 
           <div class="login-error" id="loginError" role="alert">Enter a work email and password to continue.</div>
@@ -444,7 +456,10 @@
             </div>
             <div class="login-field">
               <label for="loginPassword">Password</label>
-              <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+              <span class="login-password-wrap">
+                <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+                <button type="button" class="login-show-pw" id="showPassword" aria-pressed="false">Show password</button>
+              </span>
             </div>
             <div class="login-row">
               <label class="login-remember">
@@ -463,7 +478,7 @@
             Continue with company SSO
           </button>
 
-          <p class="login-hint">Demo mock — any email/password signs you in to the Studies workspace. SSO uses the same path.</p>
+          <p class="login-hint">Demo mock - any email/password signs you in to the Studies workspace. SSO uses the same path.</p>
         </div>
       </div>
 
@@ -528,6 +543,16 @@
       }
       if (err) err.classList.remove('is-visible');
       goIn();
+    });
+  }
+  var showPw = document.getElementById('showPassword');
+  var pw = document.getElementById('loginPassword');
+  if (showPw && pw) {
+    showPw.addEventListener('click', function () {
+      var show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      showPw.textContent = show ? 'Hide password' : 'Show password';
+      showPw.setAttribute('aria-pressed', show ? 'true' : 'false');
     });
   }
   var sso = document.getElementById('ssoBtn');

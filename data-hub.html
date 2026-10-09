@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Extract data</title>
+<title>SPHERE - Extract data</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -35,6 +35,7 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
+<script src="sphere-access.js?v=flow4b"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -150,6 +151,7 @@
                 <th>Label</th>
                 <th>Received</th>
                 <th>Target lib</th>
+                <th>User</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -159,6 +161,7 @@
                 <td>elluminate · ONC-204-301 domains (DM, AE, LB)</td>
                 <td>6 Sep 2026 · 11:02 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge ok">Complete</span></td>
               </tr>
               <tr>
@@ -166,6 +169,7 @@
                 <td>EDC cut 2026-08-28</td>
                 <td>28 Aug 2026 · 9:14 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge ok">Complete</span></td>
               </tr>
               <tr>
@@ -173,6 +177,7 @@
                 <td>Vendor labs · chemistry</td>
                 <td>27 Aug 2026 · 4:02 PM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge review">In review</span></td>
               </tr>
               <tr>
@@ -180,6 +185,7 @@
                 <td>EDC cut 2026-07-15</td>
                 <td>15 Jul 2026 · 10:30 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge locked">Archived</span></td>
               </tr>
               <tr>
@@ -187,6 +193,7 @@
                 <td>PK concentration CSV</td>
                 <td>12 Aug 2026 · 1:45 PM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge draft">Uploaded</span></td>
               </tr>
               <tr>
@@ -194,6 +201,7 @@
                 <td>Central ECG transfer</td>
                 <td>20 Aug 2026 · 8:05 AM ET</td>
                 <td>Raw</td>
+                <td>jpatel</td>
                 <td><span class="badge danger">Needs fix</span></td>
               </tr>
             </tbody>
@@ -209,19 +217,31 @@
           <div class="form" id="ingestForm">
             <label><span class="req">Source type</span>
               <select id="ingestSourceType" aria-label="Source type">
-                <option value="eclinical" selected>eClinical Solutions (elluminate)</option>
+                <option value="">Select source type</option>
+                <option value="eclinical">eClinical Solutions (elluminate)</option>
                 <option value="rave">Rave export</option>
                 <option value="snapshot">Snapshot file</option>
                 <option value="manual">Manual upload</option>
               </select>
             </label>
-            <label><span class="req">Label</span>
-              <input id="ingestLabel" placeholder="e.g. elluminate pull 2026-09-06" value="elluminate · ONC-204-301 raw domains" />
+            <label id="ingestStudyLabel">Study
+              <select id="ingestStudy" disabled>
+                <option value="">Select study</option>
+                <option>ONC-204-301</option>
+                <option>ONC-118-402</option>
+              </select>
+            </label>
+            <label id="ingestSchemaLabel">Source schema
+              <select id="ingestSchema" disabled>
+                <option value="">Select schema</option>
+                <option>Clinical (raw + curated)</option>
+                <option>Raw only</option>
+              </select>
             </label>
             <label id="ingestTargetLabel">Target library
               <select id="ingestTargetLib">
                 <option selected>Raw</option>
-                <option>SDTM (derived — usually via programs)</option>
+                <option>SDTM (derived - usually via programs)</option>
               </select>
             </label>
 
@@ -251,24 +271,10 @@
             </div>
 
             <div id="eclinicalFields" class="connector-panel">
-              <div class="hint" style="margin-bottom:10px"><strong>Connector pull (demo).</strong> Uses the client’s elluminate API credentials to copy selected study domains into SPHERE study storage under <code>Raw/</code>. Does not replace elluminate review — this is an ingest into our file share for programming.</div>
-              <label>elluminate tenant URL
-                <input placeholder="https://xpharma.eclinicalsol.com" value="https://demo.eclinicalsol.com" />
-              </label>
-              <label>Study
-                <select>
-                  <option selected>ONC-204-301</option>
-                  <option>ONC-204-201</option>
-                </select>
-              </label>
-              <label>Schema / datastore
-                <select>
-                  <option selected>Clinical (raw + curated)</option>
-                  <option>Raw only</option>
-                </select>
-              </label>
+              <div class="hint" style="margin-bottom:10px"><strong>Connector pull (demo).</strong> Uses the client’s elluminate API credentials to copy selected study domains into SPHERE study storage under <code>Raw/</code>. Does not replace elluminate review - this is an ingest into our file share for programming.</div>
+              <p class="hint">Connector and company URL are set in Admin. This pull uses those saved settings.</p>
               <label>Domains
-                <select multiple size="4" aria-label="Domains to pull" style="min-height:88px">
+                <select id="ingestDomains" multiple size="4" aria-label="Domains to pull" style="min-height:88px" disabled>
                   <option selected>DM</option>
                   <option selected>AE</option>
                   <option selected>LB</option>
@@ -345,7 +351,7 @@
         </table>
         </div>
         <div class="card-body">
-          <div class="hint">No Mapping Assist grid on day one. SAP/aCRF live as uploads on Mock Shells / Extract data. Browse the study folder tree in <a href="files.html">Files</a> (libname/setwd layout — not a second data store).</div>
+          <div class="hint">No Mapping Assist grid on day one. SAP/aCRF live as uploads on Mock Shells / Extract data. Browse the study folder tree in <a href="files.html">Files</a> (libname/setwd layout - not a second data store).</div>
         </div>
       </div>
       </div>
@@ -458,7 +464,10 @@
   var manual = document.getElementById('manualUploadFields');
   var targetLabel = document.getElementById('ingestTargetLabel');
   var btn = document.getElementById('ingestPrimaryBtn');
-  var label = document.getElementById('ingestLabel');
+  var studyEl = document.getElementById('ingestStudy');
+  var schemaEl = document.getElementById('ingestSchema');
+  var domainsEl = document.getElementById('ingestDomains');
+  var targetEl = document.querySelector('#ingestTargetLabel select');
   var pending = [];
   if (!sel) return;
 
@@ -501,6 +510,17 @@
     el.textContent = msg;
     document.body.appendChild(el);
     setTimeout(function () { el.remove(); }, 3200);
+  }
+  function addSnapshot(source, dest, label) {
+    var body = document.querySelector('.table-wrap tbody');
+    if (!body) return;
+    var d = new Date();
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var when = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    var who = window.SPHERE_ACCESS ? SPHERE_ACCESS.username() : 'jpatel';
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + esc(source) + '</td><td>' + esc(label) + '</td><td>' + when + '</td><td>' + esc(dest) + '</td><td>' + esc(who) + '</td><td><span class="badge ok">Complete</span></td>';
+    body.insertBefore(tr, body.firstChild);
   }
   function doManualUpload() {
     var destEl = document.getElementById('manualDest');
@@ -551,6 +571,7 @@
     }
     var ok = stored.length;
     var bad = rows.length - ok;
+    if (ok) addSnapshot('Manual upload', dest, ok + ' file' + (ok === 1 ? '' : 's'));
     toast('Upload ' + (bad ? (ok + ' copied, ' + bad + ' failed') : (ok + ' file' + (ok === 1 ? '' : 's') + ' copied to ' + dest)));
     pending = [];
     paintSelected();
@@ -568,11 +589,15 @@
     if (manual) manual.hidden = !isManual;
     if (targetLabel) targetLabel.hidden = isManual;
     if (btn) btn.textContent = isE ? 'Pull into Raw' : 'Upload';
-    if (label && !label.dataset.touched) {
-      label.placeholder = isE ? 'e.g. elluminate pull 2026-09-06' : 'e.g. EDC cut 2026-09-01';
-    }
+    var hasSource = !!sel.value;
+    if (studyEl) studyEl.disabled = !hasSource;
+    if (schemaEl) schemaEl.disabled = !hasSource || !studyEl || !studyEl.value;
+    if (targetEl) targetEl.disabled = !schemaEl || !schemaEl.value;
+    if (domainsEl) domainsEl.disabled = !targetEl || !targetEl.value;
   }
-  if (label) label.addEventListener('input', function () { label.dataset.touched = '1'; });
+  if (studyEl) studyEl.addEventListener('change', sync);
+  if (schemaEl) schemaEl.addEventListener('change', sync);
+  if (targetEl) targetEl.addEventListener('change', sync);
   sel.addEventListener('change', sync);
   sync();
 
@@ -596,6 +621,7 @@
         btn.disabled = false;
         btn.textContent = prev;
         toast('Demo: pulled DM, AE, LB from elluminate into Raw/ (mock).');
+        addSnapshot('eClinical Solutions', 'Raw', 'elluminate pull');
       }, 900);
     });
   }

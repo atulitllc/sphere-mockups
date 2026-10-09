@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SPHERE — Study Home</title>
+<title>SPHERE - Study Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -123,7 +123,7 @@
         <button type="button" class="study-hero-toggle" id="studyHeroToggle" aria-expanded="true" aria-controls="studyHeroBody">
           <div class="study-hero-heading">
             <div class="study-hero-title-row">
-              <h1 class="page-title study-hero-title">ONC-204-301 — Metastatic NSCLC</h1>
+              <h1 class="page-title study-hero-title">ONC-204-301 - Metastatic NSCLC</h1>
               <span class="badge locked">Active</span>
             </div>
             <p class="page-sub study-hero-sub">Phase 3 · Randomized, double-blind · Protocol v4.1 · SAP v2.0</p>
@@ -133,15 +133,17 @@
           </span>
         </button>
         <div class="study-hero-body" id="studyHeroBody">
-          <div class="meta-grid study-hero-meta">
-            <div class="meta-item"><div class="k">Sponsor</div><div class="v">X Pharma</div></div>
+          <div class="meta-grid study-hero-meta" id="studyMetaGrid">
             <div class="meta-item"><div class="k">Indication</div><div class="v">NSCLC 2L+</div></div>
-            <div class="meta-item"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
-            <div class="meta-item"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
+            <div class="meta-item" data-meta="cutoff"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
+            <div class="meta-item" data-meta="subjects"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
             <div class="meta-item"><div class="k">Lead programmer</div><div class="v">J. Patel</div></div>
             <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
-            <div class="meta-item"><div class="k">SAP status</div><div class="v">Locked</div></div>
-            <div class="meta-item"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+            <div class="meta-item" data-meta="sap"><div class="k">SAP status</div><div class="v">Locked</div></div>
+            <div class="meta-item" data-meta="delivery"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+          </div>
+          <div class="study-meta-edit">
+            <button type="button" class="btn sm" id="metaEditBtn">Edit</button>
           </div>
         </div>
       </section>
@@ -200,19 +202,19 @@
           </a>
           <a class="module-card" href="data-hub.html">
             <div class="title">Extract data</div>
-            <div class="desc">Pull / register data from elluminate and uploads into Raw.</div>
+            <div class="desc">Pull register data from source (Illuminate, Rave EDC) and upload into Raw. Other sources: spreadsheets, CSV, Excel and vendors.</div>
           </a>
           <a class="module-card" href="tracker.html">
             <div class="title">Tracker</div>
-            <div class="desc">Programs, TLFs &amp; datasets — tags, SAP sections, check-out/QC, and Run selected (Compute folded in).</div>
+            <div class="desc">Programs, TLFs &amp; datasets - tags, SAP sections, check-out/QC, and Run selected (Compute folded in).</div>
           </a>
           <a class="module-card" href="define.html">
             <div class="title">Define</div>
-            <div class="desc">CDISC Define-XML for SDTM/ADaM from study metadata + dataset specs — human review before publish.</div>
+            <div class="desc">CDISC Define-XML for SDTM/ADaM from study metadata + dataset specs - human review before publish.</div>
           </a>
           <a class="module-card" href="publisher.html">
             <div class="title">Generate PDF Package</div>
-            <div class="desc">Bundle locked shells and outputs into PDF/Word — also available from Tracker.</div>
+            <div class="desc">Bundle locked shells and outputs into PDF/Word - also available from Tracker.</div>
           </a>
           <a class="module-card" href="audit.html">
             <div class="title">Audit</div>
@@ -221,37 +223,47 @@
         </div>
       </div>
 
-      <section class="section">
+      <section class="section modules-block is-collapsed" id="activityBlock">
         <div class="section-head">
-          <h2 class="section-heading">Recent activity</h2>
+          <button type="button" class="modules-toggle" id="activityToggle" aria-expanded="false" aria-controls="activityList">
+            <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            Recent activity
+          </button>
         </div>
+        <div class="activity-scroll" id="activityList">
         <ul class="activity">
-          <li>
+          <li title="Shell Tracker">
             <span class="when">Today · 4:12 PM ET</span>
-            <span><strong>Shell 14.1.2 locked</strong> — Baseline characteristics</span>
+            <span><strong>Shell 14.1.2 locked</strong> - Baseline characteristics</span>
             <span class="who">M. Chen</span>
           </li>
-          <li>
+          <li title="Copilot">
             <span class="when">Today · 2:40 PM ET</span>
-            <span><strong>Copilot suggestion rejected</strong> — Mapping Assist for AE.AETERM</span>
+            <span><strong>Copilot suggestion rejected</strong> - Mapping Assist for AE.AETERM</span>
             <span class="who">J. Patel</span>
           </li>
-          <li>
+          <li title="Snapshot">
             <span class="when">Yesterday · 6:05 PM ET</span>
-            <span><strong>Snapshot ingest complete</strong> — Raw lib updated (snapshot 2026-08-28)</span>
+            <span><strong>Snapshot ingest complete</strong> - Raw lib updated (snapshot 2026-08-28)</span>
             <span class="who">System</span>
           </li>
-          <li>
+          <li title="Define PDF">
             <span class="when">Yesterday · 11:20 AM ET</span>
-            <span><strong>Job finished</strong> — adam_adsl.R · QC ready</span>
+            <span><strong>Job finished</strong> - adam_adsl.R · QC ready</span>
             <span class="who">Compute</span>
           </li>
-          <li>
+          <li title="Shell Tracker">
             <span class="when">Tue · 3:18 PM ET</span>
-            <span><strong>Shell 14.3.1 saved</strong> — Adverse events overview (draft)</span>
+            <span><strong>Shell 14.3.1 saved</strong> - Adverse events overview (draft)</span>
+            <span class="who">J. Patel</span>
+          </li>
+          <li title="Shell Tracker">
+            <span class="when">Mon · 9:02 AM ET</span>
+            <span><strong>Shell 14.2.1 sent to review</strong> - ORR by BICR</span>
             <span class="who">J. Patel</span>
           </li>
         </ul>
+        </div>
       </section>
       </div>
     </div>
@@ -395,15 +407,15 @@
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
   if (!defaultHero) {
     var t = document.querySelector('.study-hero-title');
-    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' — ' + (e.name || '');
+    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' - ' + (e.name || '');
     var sub = document.querySelector('.study-hero-sub');
-    if (sub) sub.textContent = 'Phase ' + (e.phase || '—') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
+    if (sub) sub.textContent = 'Phase ' + (e.phase || '-') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
     var badge = document.querySelector('.study-hero-title-row .badge');
     if (badge) { badge.className = 'badge running'; badge.textContent = 'Startup'; }
-    var map = { 'Sponsor': e.sponsor, 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': e.deliverable || e.type };
+    var map = { 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': e.subjects, 'SAP status': e.sapStatus, 'Delivery target': e.studyType || e.type || e.deliverable };
     if (grid) grid.querySelectorAll('.meta-item').forEach(function (m) {
       var k = m.querySelector('.k'), v = m.querySelector('.v');
-      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '—';
+      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '-';
     });
   }
   if (grid) {
@@ -412,6 +424,63 @@
     if (shared.length > 1) items.push(['Shares folder with', shared.filter(function (x) { return x !== e; }).map(function (x) { return x.protocol + ' · ' + x.deliverable; }).join(', ')]);
     grid.insertAdjacentHTML('afterbegin', '<div class="meta-item meta-item-path" style="grid-column:1/-1"><div class="k">Folder path</div><div class="v"><a class="study-path-line" style="font-size:12.5px" href="files.html?path=' + encodeURIComponent(path) + '">' + esc(path) + '</a> <span class="muted" style="font-size:11.5px">· layout ' + esc(L.levelLabel()) + ' · ' + esc(L.get().subfolders.join(' · ')) + '</span></div></div>' +
       items.map(function (it) { return '<div class="meta-item"><div class="k">' + it[0] + '</div><div class="v">' + esc(it[1]) + '</div></div>'; }).join(''));
+  }
+})();
+</script>
+<script>
+(function () {
+  var grid = document.getElementById('studyMetaGrid');
+  var btn = document.getElementById('metaEditBtn');
+  if (!grid || !btn) return;
+  var key = 'sphere-study-meta-' + location.search;
+  function dash(v) { v = (v || '').trim(); return v || '-'; }
+  function apply(saved) {
+    ['cutoff', 'subjects', 'sap', 'delivery'].forEach(function (name) {
+      var el = grid.querySelector('[data-meta="' + name + '"] .v');
+      if (el && saved && Object.prototype.hasOwnProperty.call(saved, name)) el.textContent = dash(saved[name]);
+      else if (el && !el.textContent.trim()) el.textContent = '-';
+    });
+  }
+  try { apply(JSON.parse(localStorage.getItem(key) || 'null')); } catch (e) {}
+  btn.addEventListener('click', function () {
+    if (btn.textContent === 'Edit') {
+      ['cutoff', 'subjects', 'sap', 'delivery'].forEach(function (name) {
+        var el = grid.querySelector('[data-meta="' + name + '"] .v');
+        if (!el) return;
+        var input = document.createElement('input');
+        input.value = el.textContent === '-' ? '' : el.textContent;
+        input.setAttribute('data-edit', name);
+        el.textContent = '';
+        el.appendChild(input);
+      });
+      btn.textContent = 'Save';
+      var cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'btn sm';
+      cancel.id = 'metaCancelBtn';
+      cancel.textContent = 'Cancel';
+      cancel.addEventListener('click', function () {
+        location.reload();
+      });
+      btn.insertAdjacentElement('afterend', cancel);
+      return;
+    }
+    var saved = {};
+    ['cutoff', 'subjects', 'sap', 'delivery'].forEach(function (name) {
+      var input = grid.querySelector('[data-edit="' + name + '"]');
+      saved[name] = input ? input.value : '';
+    });
+    try { localStorage.setItem(key, JSON.stringify(saved)); } catch (e) {}
+    location.reload();
+  });
+  var act = document.getElementById('activityBlock');
+  var actBtn = document.getElementById('activityToggle');
+  if (act && actBtn) {
+    actBtn.addEventListener('click', function () {
+      var open = act.classList.contains('is-collapsed');
+      act.classList.toggle('is-collapsed', !open);
+      actBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
   }
 })();
 </script>

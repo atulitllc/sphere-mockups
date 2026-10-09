@@ -198,7 +198,7 @@
     launch.type = 'button';
     launch.id = 'copilotLaunch';
     launch.className = 'copilot-launch';
-    launch.title = 'Ask Copilot — help for ' + screenLabel;
+    launch.title = 'Ask Copilot - help for ' + screenLabel;
     launch.setAttribute('aria-haspopup', 'dialog');
     launch.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg><span>Ask Copilot</span>';
     topRight.insertBefore(launch, topRight.firstChild);
@@ -263,19 +263,19 @@
     var chips = CHIP_MAP[page] || CHIP_MAP.generic;
 
     var replies = {
-      'draft-shell': 'Draft suggestion (demo): create shell <strong>14.3.5 Laboratory — chemistry shifts</strong> from SAP 11.4. Columns Placebo / Drug X; rows AST, ALT, ALP, BILI. Status stays <em>Draft</em> until you lock — Copilot cannot lock or run.',
+      'draft-shell': 'Draft suggestion (demo): create shell <strong>14.3.5 Laboratory - chemistry shifts</strong> from SAP 11.4. Columns Placebo / Drug X; rows AST, ALT, ALP, BILI. Status stays <em>Draft</em> until you lock - Copilot cannot lock or run.',
       'fill-meta': 'For automatable safety tables, metadata could include: analysis dataset, population flag, treatment variable, sort vars, subgroup, and denominator. Open <strong>Metadata</strong> (if the module is on) to edit the spreadsheet stub.',
       'footnotes': 'Suggested footnotes (demo): “Baseline = last non-missing before first dose.” “N = subjects in Safety population.” Accept would create a Draft note on the shell only.',
       'explain-fail': 'Demo read of a typical fail: missing treatment label for TRT01A = “Drug X 200mg” (n=2). Suggested action: add a label map entry, then re-run from Tracker. Copilot will not re-run for you.',
-      'fix-note': 'Fix note (demo): “Add TRT01A label for Drug X 200mg before re-run of tfl_14_3_1_ae.R.” Accept lands in the governed Suggestions inbox — human lock still required.',
+      'fix-note': 'Fix note (demo): “Add TRT01A label for Drug X 200mg before re-run of tfl_14_3_1_ae.R.” Accept lands in the governed Suggestions inbox - human lock still required.',
       'run-order': 'Suggested order for a First-look list (demo): ADSL → ADAE → 14.1.1 Demographics → 14.3.1 AE summary. Save as a <strong>custom list</strong> on Tracker to reuse for Run and Generate PDF Package.',
       'bundle-toc': 'Package order tip (demo): keep SAP section order; put figures after related tables. Use a Tracker custom list so Run and PDF share one sequence.',
-      'missing-out': 'Demo check: if a list program has no locked output under tlf/, flag it before packaging. Copilot only suggests — it does not assemble the PDF.',
+      'missing-out': 'Demo check: if a list program has no locked output under tlf/, flag it before packaging. Copilot only suggests - it does not assemble the PDF.',
       'map-assist': 'Mapping Assist (demo): LB_CHEM.LBTESTCD = AST → SDTM LB.LBTESTCD = AST with units IU/L. Accept opens as Pending review in Copilot inbox.',
       'where-file': 'Land raw vendor extracts under <code>raw/</code>, derived under <code>sdtm/</code> or <code>adam/</code> per the tenant template. Extract data is the pull entry point from File Explorer.',
       'define-vars': 'Define gap check (demo): ADSL is missing <code>RACE</code> value-level metadata for “Other, specify”. Add a ValueList and link it before freeze.',
-      'define-codelist': 'Codelist tip (demo): reuse tenant list <strong>CL.NY</strong> for Yes/No flags instead of study-local duplicates — keeps Define.xml smaller.',
-      'study-next': 'Next step (demo): open <strong>Tracker</strong> and clear In&nbsp;dev programs for First look, then lock shells on Mock Shells. Copilot only suggests order — it cannot lock.',
+      'define-codelist': 'Codelist tip (demo): reuse tenant list <strong>CL.NY</strong> for Yes/No flags instead of study-local duplicates - keeps Define.xml smaller.',
+      'study-next': 'Next step (demo): open <strong>Tracker</strong> and clear In&nbsp;dev programs for First look, then lock shells on Mock Shells. Copilot only suggests order - it cannot lock.',
       'study-modules': 'For CSR-ready delivery (demo): enable Mock Shells, Tracker, Define, and Generate PDF Package. File Explorer stays on for raw/SDTM landing.',
       'studies-find': 'Active studies tip (demo): use the list/grid toggle and filter Phase 3 · Ongoing. Pin ONC-204-301 if it is your daily study.',
       'studies-phase': 'Phase filter (demo): set Phase = 3 to shrink the portfolio. Status badges on each card show open Tracker jobs.',
@@ -287,9 +287,9 @@
       'compute-cost': 'Cost tip (demo): batch First-look list runs overnight to use off-peak capacity. Figures are illustrative only.',
       'inbox-triage': 'Triage (demo): accept mapping and footnote drafts first; leave run-order suggestions until the custom list is reviewed on Tracker.',
       'inbox-reject': 'Reject when the suggestion would write outside Draft, change locked outputs, or skip human QC. Rejection is audited.',
-      'generic-help': 'This screen’s Copilot offers Draft suggestions only — never locks, runs, or publishes. Use the chips for common tasks, or ask in the box below.',
+      'generic-help': 'This screen’s Copilot offers Draft suggestions only - never locks, runs, or publishes. Use the chips for common tasks, or ask in the box below.',
       'generic-nav': 'Typical path (demo): Studies → Study home → Mock Shells / Tracker → Define → Generate PDF Package. Admin is for tenant config.',
-      'default': 'I can help with <strong>' + screenLabel + '</strong> as Draft suggestions only. Writes still need a human lock — Copilot cannot lock or run programs. Open the full <a href="copilot.html">Suggestions inbox</a> to accept or reject.'
+      'default': 'I can help with <strong>' + screenLabel + '</strong> as Draft suggestions only. Writes still need a human lock - Copilot cannot lock or run programs. Open the full <a href="copilot.html">Suggestions inbox</a> to accept or reject.'
     };
 
     var panel = document.createElement('aside');
@@ -489,7 +489,7 @@
       stages.push({ id: 'mw', label: 'Released to MW', short: 'Released to MW', role: 'Medical writer', statuses: ['In MW'], final: true });
     } else {
       /* Legacy tenants without the MW stage keep an explicit approval end state. */
-      stages.push({ id: 'done', label: 'Approved', short: 'Done', role: '—', statuses: ['Approved', 'Frozen'], final: true });
+      stages.push({ id: 'done', label: 'Approved', short: 'Done', role: '-', statuses: ['Approved', 'Frozen'], final: true });
     }
     return { flags: f, stages: stages };
   }
