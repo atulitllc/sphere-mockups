@@ -133,15 +133,17 @@
           </span>
         </button>
         <div class="study-hero-body" id="studyHeroBody">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+            <button class="btn sm" type="button" id="btnEditStudyMeta">Edit</button>
+          </div>
           <div class="meta-grid study-hero-meta">
-            <div class="meta-item"><div class="k">Sponsor</div><div class="v">X Pharma</div></div>
             <div class="meta-item"><div class="k">Indication</div><div class="v">NSCLC 2L+</div></div>
-            <div class="meta-item"><div class="k">Cutoff</div><div class="v">15 Aug 2026</div></div>
-            <div class="meta-item"><div class="k">Subjects</div><div class="v">428 randomized</div></div>
+            <div class="meta-item" data-meta="cutoff"><div class="k">Cutoff</div><div class="v" id="metaCutoff">15 Aug 2026</div></div>
+            <div class="meta-item" data-meta="subjects"><div class="k">Subjects</div><div class="v" id="metaSubjects">428 randomized</div></div>
             <div class="meta-item"><div class="k">Lead programmer</div><div class="v">J. Patel</div></div>
             <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
-            <div class="meta-item"><div class="k">SAP status</div><div class="v">Locked</div></div>
-            <div class="meta-item"><div class="k">Delivery target</div><div class="v">CSR package · Q4</div></div>
+            <div class="meta-item" data-meta="sap"><div class="k">SAP status</div><div class="v" id="metaSap">Locked</div></div>
+            <div class="meta-item" data-meta="delivery"><div class="k">Delivery target</div><div class="v" id="metaDelivery">CSR package · Q4</div></div>
           </div>
         </div>
       </section>
@@ -257,6 +259,24 @@
     </div>
   </section>
 
+<div class="modal-backdrop" id="studyMetaModal" hidden role="dialog" aria-modal="true" aria-labelledby="studyMetaTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="studyMetaTitle">Edit study details</h2>
+      <button class="btn ghost sm" type="button" id="studyMetaClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Cutoff <input id="editCutoff" type="text" /></label>
+      <label>Subjects <input id="editSubjects" type="text" /></label>
+      <label>SAP status <input id="editSap" type="text" /></label>
+      <label>Delivery target <input id="editDelivery" type="text" /></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="studyMetaCancel">Cancel</button>
+      <button class="btn primary" type="button" id="studyMetaSave">Save</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -400,10 +420,10 @@
     if (sub) sub.textContent = 'Phase ' + (e.phase || '—') + ' · ' + (e.type || e.deliverable || 'Study') + ' · created ' + (e.created || '');
     var badge = document.querySelector('.study-hero-title-row .badge');
     if (badge) { badge.className = 'badge running'; badge.textContent = 'Startup'; }
-    var map = { 'Sponsor': e.sponsor, 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': e.deliverable || e.type };
+    var map = { 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': e.deliverable || e.type };
     if (grid) grid.querySelectorAll('.meta-item').forEach(function (m) {
       var k = m.querySelector('.k'), v = m.querySelector('.v');
-      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '—';
+      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '-';
     });
   }
   if (grid) {
@@ -413,6 +433,68 @@
     grid.insertAdjacentHTML('afterbegin', '<div class="meta-item meta-item-path" style="grid-column:1/-1"><div class="k">Folder path</div><div class="v"><a class="study-path-line" style="font-size:12.5px" href="files.html?path=' + encodeURIComponent(path) + '">' + esc(path) + '</a> <span class="muted" style="font-size:11.5px">· layout ' + esc(L.levelLabel()) + ' · ' + esc(L.get().subfolders.join(' · ')) + '</span></div></div>' +
       items.map(function (it) { return '<div class="meta-item"><div class="k">' + it[0] + '</div><div class="v">' + esc(it[1]) + '</div></div>'; }).join(''));
   }
+})();
+</script>
+<script>
+(function () {
+  var KEY = 'sphere-study-home-meta';
+  var fields = [
+    { id: 'metaCutoff', edit: 'editCutoff', key: 'cutoff' },
+    { id: 'metaSubjects', edit: 'editSubjects', key: 'subjects' },
+    { id: 'metaSap', edit: 'editSap', key: 'sap' },
+    { id: 'metaDelivery', edit: 'editDelivery', key: 'delivery' }
+  ];
+  function studyKey() {
+    var q = new URLSearchParams(location.search);
+    return q.get('study') || 'ONC-204-301';
+  }
+  function readAll() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function show(v) {
+    var s = String(v == null ? '' : v).trim();
+    return s ? s : '-';
+  }
+  function paint() {
+    var saved = readAll()[studyKey()] || {};
+    fields.forEach(function (f) {
+      var el = document.getElementById(f.id);
+      if (!el) return;
+      if (Object.prototype.hasOwnProperty.call(saved, f.key)) el.textContent = show(saved[f.key]);
+      else if (!el.textContent.trim()) el.textContent = '-';
+    });
+  }
+  function open() {
+    var saved = readAll()[studyKey()] || {};
+    fields.forEach(function (f) {
+      var view = document.getElementById(f.id);
+      var input = document.getElementById(f.edit);
+      if (!input || !view) return;
+      var current = Object.prototype.hasOwnProperty.call(saved, f.key) ? saved[f.key] : view.textContent;
+      input.value = current === '-' ? '' : current;
+    });
+    document.getElementById('studyMetaModal').hidden = false;
+  }
+  function close() { document.getElementById('studyMetaModal').hidden = true; }
+  paint();
+  var btn = document.getElementById('btnEditStudyMeta');
+  if (btn) btn.addEventListener('click', open);
+  ['studyMetaClose', 'studyMetaCancel'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener('click', close);
+  });
+  var save = document.getElementById('studyMetaSave');
+  if (save) save.addEventListener('click', function () {
+    var all = readAll();
+    var rec = {};
+    fields.forEach(function (f) {
+      rec[f.key] = document.getElementById(f.edit).value.trim();
+      document.getElementById(f.id).textContent = show(rec[f.key]);
+    });
+    all[studyKey()] = rec;
+    localStorage.setItem(KEY, JSON.stringify(all));
+    close();
+  });
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>
