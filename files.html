@@ -152,6 +152,7 @@
                 <span class="here" id="crumbHere">raw</span>
               </div>
               <div class="files-actions folder-share-status">
+                <input type="search" id="filesSearch" placeholder="Search this folder and subfolders" aria-label="Search files" />
                 <a class="btn icon-text-btn accent-icon" id="btnExtractData" href="data-hub.html" title="Extract data" aria-label="Extract data">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
                   <span>Extract data</span>
@@ -166,10 +167,11 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th><button type="button" class="sort-h" data-sort="name">Name</button></th>
                     <th>Type</th>
+                    <th><button type="button" class="sort-h" data-sort="date">Date</button></th>
+                    <th><button type="button" class="sort-h" data-sort="modified">Modified</button></th>
                     <th>Size</th>
-                    <th>Modified</th>
                     <th class="col-access">Access</th>
                     <th class="col-more" aria-label="Actions"></th>
                   </tr>
@@ -531,6 +533,12 @@
     return '<span class="badge share-view" title="Inherits folder ACL">View · Edit (inherited)</span>';
   }
 
+  var sortKey = 'name';
+  var sortDir = 1;
+  var searchQ = '';
+  var NESTED = [
+    { folder: 'programs', path: 'programs/dev/qc/ae.sas', name: 'ae.sas', type: 'sas', size: '4 KB', modified: '2026-10-09 14:05', text: 'proc freq data=adam.adae;\nrun;\n' }
+  ];
   function render(folder) {
     current = folder;
     crumbHere.textContent = folder;
@@ -538,7 +546,31 @@
       b.classList.toggle('active', b.getAttribute('data-folder') === folder);
     });
 
-    var rows = TREE[folder] || [];
+    var rows = (TREE[folder] || []).map(function (f) { return Object.assign({ path: folder + '/' + f.name }, f); });
+    if (searchQ) {
+      var q = searchQ.toLowerCase();
+      rows = [];
+      Object.keys(TREE).forEach(function (fid) {
+        if (fid !== folder && fid.indexOf(folder + '/') !== 0) return;
+        (TREE[fid] || []).forEach(function (f) {
+          var path = fid + '/' + f.name;
+          if ((f.name + ' ' + path).toLowerCase().indexOf(q) >= 0) rows.push(Object.assign({ path: path }, f));
+        });
+      });
+      NESTED.forEach(function (f) {
+        if ((f.folder === folder || f.path.indexOf(folder + '/') === 0) && (f.name + ' ' + f.path).toLowerCase().indexOf(q) >= 0) rows.push(f);
+      });
+    }
+    rows.sort(function (a, b) {
+      var av = sortKey === 'name' ? a.name : a.modified;
+      var bv = sortKey === 'name' ? b.name : b.modified;
+      return String(av).localeCompare(String(bv)) * sortDir;
+    });
+    document.querySelectorAll('.sort-h').forEach(function (h) {
+      var label = h.getAttribute('data-sort');
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      h.textContent = label + (h.getAttribute('data-sort') === sortKey ? (sortDir > 0 ? ' ↑' : ' ↓') : '');
+    });
     bodyEl.innerHTML = rows.map(function (f) {
       var tc = typeClass(f.type);
       var icon = f.type === 'dir'
@@ -553,10 +585,11 @@
         : (f.frozen
           ? '<button type="button" class="row-more" data-name="' + f.name + '" aria-label="Actions for ' + f.name + '" aria-haspopup="menu">⋯</button>'
           : '<button type="button" class="row-more" data-name="' + f.name + '" aria-label="Actions for ' + f.name + '" aria-haspopup="menu">⋯</button>');
+      var shown = searchQ && f.path ? f.path : f.name;
       return '<tr' + cls + ' data-name="' + f.name + '" data-type="' + f.type + '"' + (f.frozen ? ' data-frozen="1"' : '') + '>' +
-        '<td><div class="fname-cell">' + icon + '<span>' + f.name + '</span></div></td>' +
+        '<td><div class="fname-cell">' + icon + '<span>' + shown + '</span></div></td>' +
         '<td><span class="type-pill ' + tc + '">.' + f.type + '</span></td>' +
-        '<td>' + f.size + '</td><td>' + f.modified + '</td>' +
+        '<td>' + String(f.modified || '').split('·')[0].trim() + '</td><td>' + f.modified + '</td><td>' + f.size + '</td>' +
         '<td class="col-access">' + accessBadge(f) + '</td>' +
         '<td class="col-more">' + moreBtn + '</td></tr>';
     }).join('');
@@ -997,6 +1030,19 @@
     if (typeof syncManage === 'function') syncManage();
   })();
 
+  document.querySelectorAll('.sort-h').forEach(function (h) {
+    h.addEventListener('click', function () {
+      var key = h.getAttribute('data-sort');
+      if (sortKey === key) sortDir = -sortDir;
+      else { sortKey = key; sortDir = 1; }
+      render(current);
+    });
+  });
+  var searchBox = document.getElementById('filesSearch');
+  if (searchBox) searchBox.addEventListener('input', function () {
+    searchQ = searchBox.value.trim();
+    render(current);
+  });
   buildTree();
   render(window.SPHERE_filesStartFolder || 'programs');
   window.SPHERE_filesTree = TREE;
