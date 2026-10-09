@@ -223,34 +223,42 @@
         </div>
       </div>
 
-      <section class="section">
-        <div class="section-head">
-          <h2 class="section-heading">Recent activity</h2>
+      <section class="section activity-block is-collapsed" id="activityBlock">
+        <div class="section-title" style="margin-bottom:10px">
+          <button type="button" class="modules-toggle" id="activityToggle" aria-expanded="false" aria-controls="activityList">
+            <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            Recent activity
+          </button>
         </div>
-        <ul class="activity">
-          <li>
+        <ul class="activity" id="activityList">
+          <li title="Shell Tracker">
             <span class="when">Today · 4:12 PM ET</span>
-            <span><strong>Shell 14.1.2 locked</strong> — Baseline characteristics</span>
+            <span><strong>Shell 14.1.2 updated</strong> - Baseline characteristics</span>
             <span class="who">M. Chen</span>
           </li>
-          <li>
+          <li title="Define PDF">
             <span class="when">Today · 2:40 PM ET</span>
-            <span><strong>Copilot suggestion rejected</strong> — Mapping Assist for AE.AETERM</span>
+            <span><strong>Define PDF reviewed</strong> - SDTM define package</span>
             <span class="who">J. Patel</span>
           </li>
-          <li>
+          <li title="Snapshot">
             <span class="when">Yesterday · 6:05 PM ET</span>
-            <span><strong>Snapshot ingest complete</strong> — Raw lib updated (snapshot 2026-08-28)</span>
+            <span><strong>Snapshot ingest complete</strong> - Raw lib updated (snapshot 2026-08-28)</span>
             <span class="who">System</span>
           </li>
-          <li>
+          <li title="Shell Tracker">
             <span class="when">Yesterday · 11:20 AM ET</span>
-            <span><strong>Job finished</strong> — adam_adsl.R · QC ready</span>
+            <span><strong>Job finished</strong> - adam_adsl.R · QC ready</span>
             <span class="who">Compute</span>
           </li>
-          <li>
+          <li title="Shell Tracker">
             <span class="when">Tue · 3:18 PM ET</span>
-            <span><strong>Shell 14.3.1 saved</strong> — Adverse events overview (draft)</span>
+            <span><strong>Shell 14.3.1 saved</strong> - Adverse events overview (draft)</span>
+            <span class="who">J. Patel</span>
+          </li>
+          <li title="Snapshot">
+            <span class="when">Mon · 9:02 AM ET</span>
+            <span><strong>Manual upload</strong> - dm.csv copied to SDTM</span>
             <span class="who">J. Patel</span>
           </li>
         </ul>
@@ -393,6 +401,18 @@
   apply(saved);
   btn.addEventListener('click', function () {
     apply(!block.classList.contains('is-collapsed'));
+  });
+})();
+</script>
+<script>
+(function () {
+  var block = document.getElementById('activityBlock');
+  var btn = document.getElementById('activityToggle');
+  if (!block || !btn) return;
+  btn.addEventListener('click', function () {
+    var collapsed = !block.classList.contains('is-collapsed');
+    block.classList.toggle('is-collapsed', collapsed);
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
   });
 })();
 </script>

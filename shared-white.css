@@ -1465,6 +1465,8 @@ label .req::after { content: " *"; color: var(--danger); }
 .module-card .title { font-weight: 600; margin-bottom: 6px; }
 .module-card .desc { color: var(--muted); font-size: 12px; line-height: 1.4; }
 
+.activity-block.is-collapsed #activityList { display: none; }
+.activity-block #activityList { max-height: 168px; overflow-y: auto; }
 .activity { list-style: none; margin: 0; padding: 0; }
 .activity li {
   display: grid; grid-template-columns: 140px 1fr auto;
@@ -4006,7 +4008,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 }
 
 /* Study home modules collapse */
-.modules-block .modules-toggle {
+.modules-block .modules-toggle,
+.activity-block .modules-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
