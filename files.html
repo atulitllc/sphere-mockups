@@ -704,6 +704,17 @@
       openCtx(e, { kind: type === 'dir' ? 'folder' : 'file', folder: current, name: name, frozen: frozen });
       return;
     }
+    var nameCell = e.target.closest('.fname-cell');
+    if (nameCell) {
+      var row = nameCell.closest('tr');
+      var fname = row.getAttribute('data-name');
+      var ftype = (row.getAttribute('data-type') || '').toLowerCase();
+      if (ftype === 'sas' || ftype === 'r' || ftype === 'log') {
+        var found = (TREE[current] || []).filter(function (f) { return f.name === fname; })[0];
+        if (found) openViewer(found);
+        return;
+      }
+    }
     var dirRow = e.target.closest('tr.dir-row');
     if (dirRow) {
       var next = current + '/' + dirRow.getAttribute('data-name');
@@ -721,6 +732,42 @@
     openCtx(e, { kind: type === 'dir' ? 'folder' : 'file', folder: current, name: name, frozen: frozen });
   });
 
+  function openViewer(file) {
+    var ext = String(file.type || '').toLowerCase();
+    if (['sas', 'r', 'log'].indexOf(ext) < 0) return;
+    var key = 'sphere-file-text:' + current + '/' + file.name;
+    var stored = '';
+    try { stored = localStorage.getItem(key) || ''; } catch (err) {}
+    var text = stored || file.text || ('* ' + file.name + '\n* prototype text\n');
+    var can = !window.SPHERE_ACCESS || SPHERE_ACCESS.canEdit((window.SPHERE_filesPath || '') + current);
+    var back = document.createElement('div');
+    back.className = 'modal-backdrop';
+    back.innerHTML = '<div class="modal" role="dialog"><div class="modal-head"><h2></h2></div><div class="modal-body"><textarea id="fileViewerBody" style="width:100%;min-height:220px;font-family:ui-monospace,monospace"></textarea></div><div class="modal-foot"></div></div>';
+    back.querySelector('h2').textContent = file.name;
+    document.body.appendChild(back);
+    var area = back.querySelector('#fileViewerBody');
+    area.value = text;
+    if (!can) area.readOnly = true;
+    var foot = back.querySelector('.modal-foot');
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'btn';
+    closeBtn.type = 'button';
+    closeBtn.textContent = 'Close';
+    closeBtn.addEventListener('click', function () { back.remove(); });
+    foot.appendChild(closeBtn);
+    if (can) {
+      var save = document.createElement('button');
+      save.className = 'btn primary';
+      save.type = 'button';
+      save.textContent = 'Save';
+      save.addEventListener('click', function () {
+        file.text = area.value;
+        try { localStorage.setItem(key, area.value); } catch (err) {}
+        back.remove();
+      });
+      foot.appendChild(save);
+    }
+  }
   var clip = null;
   function pasteClip() {
     if (!clip) return;
