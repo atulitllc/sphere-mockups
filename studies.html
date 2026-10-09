@@ -400,6 +400,16 @@
             <span class="field-label">Description</span>
             <textarea class="field-input" id="nsDesc" name="description" rows="2" placeholder="CRO, purpose, population, or analysis scope"></textarea>
           </label>
+          <label class="field" id="nsStudyTypeField">
+            <span class="field-label">Study Type</span>
+            <select class="field-input" id="nsStudyType" name="studyType" required aria-describedby="nsStudyTypeError">
+              <option value="">Select study type</option>
+              <option value="Submission">Submission</option>
+              <option value="DMC">DMC</option>
+              <option value="Custom">Custom</option>
+            </select>
+            <span class="field-error" id="nsStudyTypeError" hidden style="color:var(--danger);font-size:12px;font-weight:650">Study Type is required.</span>
+          </label>
           <label class="field" id="nsTypeField">
             <span class="field-label">Deliverable Type</span>
             <select class="field-input" id="nsType" name="type" required>
@@ -709,6 +719,10 @@
       fillProtocols();
       fillDeliverables();
       syncPath();
+      var studyTypeEl = document.getElementById('nsStudyType');
+      var studyTypeErr = document.getElementById('nsStudyTypeError');
+      if (studyTypeEl) studyTypeEl.removeAttribute('aria-invalid');
+      if (studyTypeErr) studyTypeErr.hidden = true;
     }
 
     function openNewStudyModal() {
@@ -775,7 +789,7 @@
           '<span class="badge running">Startup</span></div>' +
           '<div class="study-meta-row">' +
           '<span><span class="k">Lead Programmer</span> ' + esc(data.lead || '-') + '</span>' +
-          '<span><span class="k">Deliverable</span> ' + esc(data.type) + '</span>' +
+          '<span><span class="k">Delivery type</span> ' + esc(data.studyType || '-') + '</span>' +
           '<span><span class="k">Phase</span> ' + esc(data.phase) + '</span>' +
           '<span><span class="k">Lead Statistician</span> ' + esc(data.statistician || '-') + '</span></div>' +
           '<div class="study-meta-row">' +
@@ -854,6 +868,17 @@
         var name = (document.getElementById('nsName').value || '').trim();
         var entry = pendingEntry();
         var path = L ? L.pathFor(entry) : folder + '/';
+        var studyTypeEl = document.getElementById('nsStudyType');
+        var studyTypeErr = document.getElementById('nsStudyTypeError');
+        var studyType = studyTypeEl ? studyTypeEl.value : '';
+        if (!studyType) {
+          if (studyTypeEl) studyTypeEl.setAttribute('aria-invalid', 'true');
+          if (studyTypeErr) studyTypeErr.hidden = false;
+          if (studyTypeEl) studyTypeEl.focus();
+          return;
+        }
+        if (studyTypeEl) studyTypeEl.removeAttribute('aria-invalid');
+        if (studyTypeErr) studyTypeErr.hidden = true;
         if (!folder || !name || /\{/.test(path)) {
           showToast('Study name and every folder level are required');
           return;
@@ -873,6 +898,7 @@
           name: name,
           description: (document.getElementById('nsDesc').value || '').trim(),
           type: document.getElementById('nsType').value,
+          studyType: studyType,
           phase: document.getElementById('nsPhase').value,
           indication: (document.getElementById('nsIndication').value || '').trim(),
           lead: (document.getElementById('nsLead') && document.getElementById('nsLead').value || '').trim(),
@@ -882,10 +908,11 @@
           dblock: document.getElementById('nsDblock').value
         };
         data.type = type;
+        data.studyType = studyType;
         if (L) L.addStudy({
           compound: entry.compound, protocol: entry.protocol, deliverable: entry.deliverable,
           name: data.name, description: data.description, phase: data.phase, indication: data.indication,
-          lead: data.lead, statistician: data.statistician, type: type,
+          lead: data.lead, statistician: data.statistician, type: type, studyType: studyType,
           fpfv: data.fpfv, lplv: data.lplv, dblock: data.dblock
         });
         addStudy(data);
@@ -951,9 +978,11 @@
       fr.className = 'protocol-folder';
       fr.hidden = true;
       var folder = e.deliverable || 'CSR';
-      fr.innerHTML = '<td></td><td colspan="9" class="protocol-folder-name">' + esc(folder) + '</td>';
+      var delivery = e.studyType || '-';
+      fr.innerHTML = '<td></td><td colspan="9" class="protocol-folder-name">' + esc(folder) + ' · Delivery type ' + esc(delivery) + '</td>';
       fr.addEventListener('click', function () {
-        location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p);
+        var path = L.entryPath(e);
+        location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p) + '&path=' + encodeURIComponent(path);
       });
       tbody.appendChild(fr);
       return fr;
