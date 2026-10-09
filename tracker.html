@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3n" />
+<link rel="stylesheet" href="shared-white.css?v=flow4style" />
 <script>
 (function () {
   try {
@@ -123,7 +123,6 @@
         <div class="page-intro page-intro-compact" style="margin-bottom:0">
         <div class="page-title-row">
           <h1 class="page-title">Tracker - programs, TLFs &amp; datasets</h1>
-          <button class="btn primary" type="button" id="btnNewRecord">New Record</button>
           <button type="button" class="btn icon-btn accent-icon page-note-toggle" aria-expanded="false" aria-controls="pageNoteBanner" title="Show note" aria-label="Show note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
@@ -160,6 +159,10 @@
               <button class="action-icon-btn" type="button" id="btnExportCsv" title="Export CSV" aria-label="Export CSV">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
                 <span class="label">Export CSV</span>
+              </button>
+              <button class="action-icon-btn" type="button" id="btnNewRecord" title="New Record" aria-label="New Record">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <span class="label">New Record</span>
               </button>
             </div>
         </div>
@@ -301,7 +304,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Demographics" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.1.1 · Demographics</div>
+                  <div class="artifact-title">14.1.1 · Demographics and baseline characteristics</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -895,7 +898,7 @@
             <option>Locked</option>
             <option>Available</option>
             <option selected>n/a</option>
-            <option>-</option>
+            <option value="-">None</option>
           </select>
         </label>
       </div>
@@ -1883,32 +1886,23 @@
     if (j.state === 'queued') {
       var pos = queuePosition(j);
       key = 'q|' + pos;
-      html = '<span class="run-st is-queued" title="Queued · ' + runEsc(modeLabel(j.mode)) + ' · ' + j.lang + '">' +
-        '<span class="run-st-line"><span class="run-ic">' + RUN_ICONS.clock + '</span><span class="run-st-txt">Queued</span></span>' +
-        '<span class="run-st-sub">' + runEsc(modeLabel(j.mode)) + ' · #' + pos + '</span></span>';
+      var qFull = 'Queued · ' + modeLabel(j.mode) + ' · #' + pos + ' · ' + j.lang;
+      html = '<span class="run-st is-queued" title="' + runEsc(qFull) + '">' +
+        '<span class="run-st-line"><span class="run-ic">' + RUN_ICONS.clock + '</span><span class="run-st-txt">Queued</span></span></span>';
     } else if (j.state === 'running') {
-      key = 'r|' + j.phase;
-      if (cell._runKey === key) {
-        var sub = cell.querySelector('[data-run-sub]');
-        var bar = cell.querySelector('[data-run-bar]');
-        if (sub) sub.textContent = runningSub(j, now);
-        if (bar) bar.style.width = runningPct(j, now) + '%';
-        return;
-      }
+      key = 'r|' + j.phase + '|' + Math.floor((now - j.phaseAt) / 1000);
       var phKind = phaseDisplay(j.phases[j.phase].kind);
-      html = '<span class="run-st is-running" title="Running ' + j.lang + ' · ' + phKind + ' program' + (j.mode === 'both' ? ' (Prod then QC)' : '') + '">' +
-        '<span class="run-st-line"><span class="run-ic">' + RUN_ICONS.spin + '</span><span class="run-st-txt">Running ' + j.lang + '…</span></span>' +
-        '<span class="run-st-sub" data-run-sub>' + runEsc(runningSub(j, now)) + '</span>' +
-        '<span class="run-bar" aria-hidden="true"><i data-run-bar style="width:' + runningPct(j, now) + '%"></i></span></span>';
+      var runFull = 'Running ' + j.lang + ' · ' + phKind + (j.mode === 'both' ? ' (Prod then QC)' : '') + ' · ' + runningSub(j, now);
+      html = '<span class="run-st is-running" title="' + runEsc(runFull) + '">' +
+        '<span class="run-st-line"><span class="run-ic">' + RUN_ICONS.spin + '</span><span class="run-st-txt">' + runEsc(runningSub(j, now)) + '</span></span></span>';
     } else {
       key = 'd|' + j.id;
       if (cell._runKey === key) return;
       var dur = fmtDur(j.endedAt - j.startedAt);
       var full = (j.warn ? 'Completed with warnings' : 'Completed') + ' ' + hhmm(j.endDate) + ' · ' + dur;
       html = '<button type="button" class="run-st ' + (j.warn ? 'is-warn' : 'is-done') + '" data-run-log ' +
-        'title="' + full + ' · ' + j.lang + ' · ' + runEsc(modeLabel(j.mode)) + ' - view log" aria-label="' + full + '. View ' + j.lang + ' log">' +
-        '<span class="run-st-line"><span class="run-ic">' + (j.warn ? RUN_ICONS.warn : RUN_ICONS.check) + '</span><span class="run-st-txt">' + (j.warn ? 'With warnings' : 'Completed') + '</span></span>' +
-        '<span class="run-st-sub">' + hhmm(j.endDate) + ' · ' + dur + '</span></button>';
+        'title="' + full + ' · ' + j.lang + ' · ' + runEsc(modeLabel(j.mode)) + '. View log" aria-label="' + full + '. View ' + j.lang + ' log">' +
+        '<span class="run-st-line"><span class="run-ic">' + (j.warn ? RUN_ICONS.warn : RUN_ICONS.check) + '</span><span class="run-st-txt">' + hhmm(j.endDate) + '</span></span></button>';
     }
     if (cell._runKey === key) return;
     cell._runKey = key;
@@ -4884,6 +4878,24 @@
     dot.title = why;
     dot.setAttribute('aria-label', why);
   }
+  function tidyVisible(text) {
+    return String(text || '')
+      .replace(/characteristicsq1/gi, 'characteristics')
+      .replace(/\u2014/g, ' · ')
+      .replace(/\u2013/g, '-');
+  }
+  function shellNotesForRow(row) {
+    if (!window.SPHERE_DEMO) return null;
+    var num = rowOutputId(row);
+    if (!num) return null;
+    var sync = SPHERE_DEMO.shellContent ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
+    var shells = SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells('ONC-204-301') : null;
+    var sh = shells && shells.filter(function (s) { return String(s.number) === String(num); })[0];
+    var title = tidyVisible((sync && sync.title) || (sh && ((sh.layout && sh.layout.title) || sh.title)) || '');
+    var footnotes = (sync && sync.footnotes) || (sh && sh.layout && sh.layout.footnotes) || '';
+    if (!title && !footnotes) return null;
+    return { title: title, footnotes: footnotes };
+  }
   function applyShellChrome() {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.shellContent) return;
     allRows().forEach(function (row) {
@@ -4896,25 +4908,17 @@
           if (progCell && progCell.parentNode) paintProgramCell(row, progCell.parentNode, row.getAttribute('data-status') || '');
         }
       }
-      var rec = num ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
-      if (rec) {
-        var titleEl = row.querySelector('.artifact-title');
-        if (titleEl && rec.title) titleEl.textContent = num + ' · ' + rec.title;
-        var band = row.querySelector('.artifact-title-band');
-        if (band) {
-          var fn = band.querySelector('.artifact-footnotes');
-          if (rec.footnotes) {
-            if (!fn) {
-              fn = document.createElement('div');
-              fn.className = 'artifact-footnotes';
-              var t = band.querySelector('.artifact-title');
-              if (t) t.insertAdjacentElement('afterend', fn);
-              else band.appendChild(fn);
-            }
-            fn.textContent = rec.footnotes;
-            fn.title = rec.footnotes;
-          } else if (fn) fn.remove();
-        }
+      var rec = shellNotesForRow(row);
+      var titleEl = row.querySelector('.artifact-title');
+      if (rec && titleEl && rec.title) titleEl.textContent = num + ' · ' + rec.title;
+      if (rec && rec.footnotes) row.setAttribute('data-footnotes', rec.footnotes);
+      else row.removeAttribute('data-footnotes');
+      var band = row.querySelector('.artifact-title-band');
+      var fn = band && band.querySelector('.artifact-footnotes');
+      if (fn) fn.remove();
+      if (titleEl) {
+        var base = (titleEl.textContent || '').trim();
+        titleEl.title = rec && rec.footnotes ? (base + '\n' + rec.footnotes) : base;
       }
       decorateRerunDot(row);
     });
@@ -4941,7 +4945,12 @@
     var band = row.querySelector('.artifact-title-band');
     if (!band) return;
     var ttl = band.querySelector('.artifact-title');
-    if (ttl) ttl.title = (ttl.textContent || '').trim() + ((row.getAttribute('data-tags') || '') ? ' · ' + row.getAttribute('data-tags').split(',').join(', ') : '');
+    if (ttl) {
+      var tip = (ttl.textContent || '').trim() + ((row.getAttribute('data-tags') || '') ? ' · ' + row.getAttribute('data-tags').split(',').join(', ') : '');
+      var notes = row.getAttribute('data-footnotes') || '';
+      if (notes) tip += '\n' + notes;
+      ttl.title = tip;
+    }
     var host = band.querySelector('.row-roles-inline');
     if (!host) {
       host = document.createElement('div');

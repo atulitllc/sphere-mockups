@@ -1,5 +1,5 @@
 ---
-title: "SPHERE — Product Requirements Document"
+title: "SPHERE: Product Requirements Document"
 subtitle: "Statistical Programming Hub for Execution and Reporting Environment"
 author: "SPHERE"
 date: "2026-09-27"
@@ -121,7 +121,7 @@ SPHERE is built for four groups in biometrics (the part of a pharma company that
 - Live connectors to clinical data systems (for example eClinical Solutions elluminate, Medidata Rave) beyond settings and file-based loads; running programs on SAS hosted inside those systems.
 - Automatic population of shells from macro metadata (full "automatable TLF" generation).
 - Syncing teams from SSO groups automatically.
-- Audit record of Copy to study (source and target) — shown as "later release" in the mockups.
+- Audit record of Copy to study (source and target): shown as "later release" in the mockups.
 - "Apply to existing studies" for a changed folder layout (currently a stub that needs explicit confirmation).
 - Split program folders `programs/dev`, `programs/qc`, `programs/prod` beyond the settings stub (single `programs/` is the MVP default).
 - Portfolio dashboards across studies.
@@ -205,21 +205,21 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - As a lead, I want to create a new study that automatically gets our standard folders.
 - As anyone on a study, I want a home page that summarises the study and its recent activity.
 
-**Requirements — Studies list**
+**Requirements: Studies list**
 
 - **PRD-STU-001** (MVP) Studies list with list and card views, search, and status filter (Active, Startup, Closed).
 - **PRD-STU-002** (MVP) Key columns: Protocol, Study name, Deliverable type, Lead programmer, Statistician, first patient first visit (FPFV), last patient last visit (LPLV), database lock, Phase, Status. Cards show the same details plus protocol/SAP version and subject count, with "Open workspace".
 - **PRD-STU-003** (MVP) Closed studies open as a read-only archive.
 
-**Requirements — New study**
+**Requirements: New study**
 
 - **PRD-STU-010** (MVP) "+ New study" opens a form that follows the saved company study layout (see LAY). Fields: study name; Compound and Protocol (each pick existing or "+ New…"); Deliverable (folder level in layouts 2 and 3; existing deliverables for that protocol are disabled); description; deliverable type (Submission, DMC, Interim analysis, Regulatory, CSR, Exploratory, Other); phase; indication; lead programmer; statistician; sponsor; FPFV; LPLV; planned database lock.
 - **PRD-STU-011** (MVP) Compound is always captured. When it is not part of the folder path (layouts 1 and 2) it is labelled "metadata · not in path". In layout 1 the deliverable type is kept as metadata only.
 - **PRD-STU-012** (MVP) The form shows the layout in use ("Tenant layout: … · change in Admin"), a live folder path, and a tree preview of the folders that will be created (new folders highlighted).
-- **PRD-STU-013** (MVP) If the resulting folder already exists, Create is blocked with "This folder already exists — pick another protocol / deliverable". Exception: in layout 1, several deliverables of one protocol intentionally share one folder.
+- **PRD-STU-013** (MVP) If the resulting folder already exists, Create is blocked with "This folder already exists: pick another protocol / deliverable". Exception: in layout 1, several deliverables of one protocol intentionally share one folder.
 - **PRD-STU-014** (MVP) On Create, the study folder and standard subfolders are created on the customer's file system and the study is added to the study registry. The action is audited.
 
-**Requirements — Study home**
+**Requirements: Study home**
 
 - **PRD-STU-020** (MVP) Study summary: study ID and name, status, phase, design, protocol and SAP versions, sponsor, indication, data cut-off, subjects, lead programmer, lead biostatistician, SAP status, delivery target.
 - **PRD-STU-021** (MVP) Study details from the registry: Compound, Protocol, Deliverable, layout label, and **Folder path** (linked to File Explorer). In layout 1, "Shares folder with" lists other deliverables using the same protocol folder.
@@ -242,9 +242,9 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 **Requirements**
 
 - **PRD-LAY-001** (MVP) Admin → Study layout offers three options as cards with small folder-tree previews:
-    1. `{protocol}/{subfolders}` — **default**. One folder per protocol; all deliverables share it.
-    2. `{protocol}/{deliverable}/{subfolders}` — separate CSR, DSUR, ISS and so on per protocol.
-    3. `{compound}/{protocol}/{deliverable}/{subfolders}` — many protocols per compound and many deliverables per protocol.
+    1. `{protocol}/{subfolders}`: **default**. One folder per protocol; all deliverables share it.
+    2. `{protocol}/{deliverable}/{subfolders}`: separate CSR, DSUR, ISS and so on per protocol.
+    3. `{compound}/{protocol}/{deliverable}/{subfolders}`: many protocols per compound and many deliverables per protocol.
 - **PRD-LAY-002** (MVP) Choosing a card marks the page "Unsaved changes". "Save layout" (beside the cards and at the bottom) stores the choice for the company, shows "Layout saved" and a "View in File Explorer →" link.
 - **PRD-LAY-003** (MVP) Standard subfolders are editable: add (with `/` for nesting, for example `data/raw`), rename, remove, drag to reorder, and "Reset to base". Default list: `data/raw, sdtm, adam, programs, tlf, logs, docs`. Saved together with the layout.
 - **PRD-LAY-004** (MVP) **Paths are derived, not stored.** Each study keeps its compound, protocol and deliverable; its folder path is calculated from the saved layout and shown consistently in File Explorer (tree and breadcrumb), the information bar, Studies, Study home and the New study preview.
@@ -269,7 +269,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-FE-001** (MVP) A **Studies tree** on the left lists all studies the user can open, arranged by the company layout (compound → protocol → deliverable as applicable), expanding into the study's subfolders.
 - **PRD-FE-002** (MVP) A single **compact information bar** above the file list shows the study (name and path) and the programs folder mode (single `programs/` or `programs/dev`, `programs/qc`, `programs/prod`) with a link to Admin.
 - **PRD-FE-003** (MVP) File list with Name, Type, Size, Modified and Share access; path breadcrumb; actions Upload, New folder, Download, Open (according to permissions).
-- **PRD-FE-004** (MVP) File Explorer shows the customer's real study folders — the same folders SAS `libname` and R `setwd` statements point to. It is not a second copy of data.
+- **PRD-FE-004** (MVP) File Explorer shows the customer's real study folders: the same folders SAS `libname` and R `setwd` statements point to. It is not a second copy of data.
 - **PRD-FE-005** (MVP) **Manage access** on any folder (right-click or ⋯): add users or teams with **View** or **Edit**. Permissions pass down to subfolders unless overridden.
 - **PRD-FE-006** (MVP) Where a workflow stage makes program files read-only, File Explorer shows them as read-only ("Frozen / View only").
 - **PRD-FE-007** (MVP) The Extract data entry point lives in File Explorer on the raw folder.
@@ -305,16 +305,16 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - As a lead, I want a clear status on every shell and to lock shells after sign-off so they cannot change silently.
 - As a programmer, I want a Final shell to create its Tracker record and program headers for me.
 
-**Requirements — shell content**
+**Requirements: shell content**
 
-- **PRD-MS-001** (MVP) Shells follow CDISC and ICH E3 conventions: output ID (for example Table 14.3.1), title, population subtitle (Safety, ITT, mITT, PP), treatment columns with `N=xx` (for example Placebo, Drug X 10 mg, Total), rows with placeholder cells (`xx (xx.x)`, `xx.x (xx.xx)`, median, min–max), footnotes, and a `Source: … Program: …` line.
+- **PRD-MS-001** (MVP) Shells follow CDISC and ICH E3 conventions: output ID (for example Table 14.3.1), title, population subtitle (Safety, ITT, mITT, PP), treatment columns with `N=xx` (for example Placebo, Drug X 10 mg, Total), rows with placeholder cells (`xx (xx.x)`, `xx.x (xx.xx)`, median, min to max), footnotes, and a `Source: … Program: …` line.
 - **PRD-MS-002** (MVP) Figure shells show axes, legend and number-at-risk placeholders. Listing shells show column headers and placeholder rows.
 - **PRD-MS-003** (MVP) Spreadsheet-like editor: double-click to edit cells; add, delete, indent, outdent and move rows; insert and delete columns; group column headers under a parent (up to two levels); right-click menu; footnotes and programming notes blocks; program name as editable text; SAP/aCRF references.
 - **PRD-MS-004** (MVP) The shell list (table of contents) shows Number and Title grouped by SAP section, with search and type filter, multi-select, right-click Duplicate/Delete, drag between sections, and a resizable split with the editor. The list fills the window height and stays visible while the editor scrolls; it stacks on narrow screens and works at 125% zoom.
 - **PRD-MS-005** (MVP) **+ Add** creates a new shell from a clean, SAP-aware template, auto-numbered in its section (for example 14.1.x Demographics, 14.2.x Efficacy, 14.3.x Safety), starting as Draft v0.1. If a template is not available in the study, the shell is set to Custom with a notice.
 - **PRD-MS-006** (MVP) Edits **autosave**. A neutral version label sits next to the title (for example "v1.0 · In Tracker").
 
-**Requirements — status and lock**
+**Requirements: status and lock**
 
 - **PRD-MS-010** (MVP) A clearly visible, colour-coded **Status** dropdown in the shell header: **Draft, In review, Final, Locked**. The toolbar keeps only **Metadata**, **Copy to study** and **Lock** (no separate Save draft, Save & generate or Finalize buttons).
 - **PRD-MS-011** (MVP) Setting Final raises a version below 1.0 to v1.0.
@@ -322,25 +322,25 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-MS-013** (MVP) Shell lock freezes titles, columns and footnotes only. It is separate from program freezing in the Tracker and from Define approval.
 - **PRD-MS-014** (MVP) Status changes, locks and unlocks are audited with user, time and optional reason; Copilot can never lock.
 
-**Requirements — metadata**
+**Requirements: metadata**
 
 - **PRD-MS-020** (MVP) **Metadata** panel available on every shell (module on by default; the administrator can switch it off). Editable and saved with the shell. Fields: output ID, title, type, population, analysis datasets, key variables, sort order, footnotes, status, version, last modified by/at, and a table of SAS macro parameters (parameter, value, notes).
 - **PRD-MS-021** (MVP) Metadata feeds the Tracker record and the generated program headers.
 
-**Requirements — shared SAP sections**
+**Requirements: shared SAP sections**
 
 - **PRD-MS-030** (MVP) SAP sections are **one shared list** for Mock Shells and Tracker (seed: Demographics SAP 14.1, Efficacy 14.2, Safety TLFs 14.3, Labs 14.3.5).
 - **PRD-MS-031** (MVP) "+ New section" (bottom of the list) asks for name, optional SAP reference (defaults to the next 14.x) and order. The ⋯ on a section header renames, changes the reference or reorders. A numeric reference drives auto-numbering (14.4 → 14.4.1, 14.4.2…).
-- **PRD-MS-032** (MVP) Empty sections show "No shells yet — drag a shell here or use + Add"; clicking that line targets + Add at the section.
+- **PRD-MS-032** (MVP) Empty sections show "No shells yet: drag a shell here or use + Add"; clicking that line targets + Add at the section.
 - **PRD-MS-033** (MVP) Renaming a section updates every shell and Tracker record that uses it. SAP references are written without "§" (for example "SAP 14.1").
 
-**Requirements — Send to Tracker**
+**Requirements: Send to Tracker**
 
 - **PRD-MS-040** (MVP) Each shell not yet in the Tracker has a **+** button in the list, **enabled only when Status is Final** (or Locked), with tooltip "Send to Tracker". Otherwise it is muted with tooltip "Set status to Final to send to Tracker". It updates immediately when the status changes; it has a larger invisible click area.
 - **PRD-MS-041** (MVP) Clicking + shows a short spinner, then a **synced icon** (accent colour, tooltip "Synced to Tracker · time") and a toast with "View in Tracker". A synced shell keeps its synced icon whatever its later status.
 - **PRD-MS-042** (MVP) The Tracker record is created in the matching SAP section with output ID, title, program name (`t_`, `f_` or `l_` + number + short name + `.sas`), language SAS, status In dev, assigned roles, and a "New" chip until its first workflow move.
 
-**Requirements — Copy to study**
+**Requirements: Copy to study**
 
 - **PRD-MS-050** (MVP) "Copy to study…" creates a new **Draft** in another study of the same company that the user can open and create in. Copies: layout, title, type, analysis set, footnotes, programming notes, program name as plain text. Never copies: lock, QC or approval state, generated Word/RTF files, programs, or anything across companies. Optional new number and title; SAP/aCRF references cleared by default.
 - **PRD-MS-051** (Later) Copy to study records source and target in the audit trail.
@@ -362,14 +362,14 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - As a statistician, I want to approve and release outputs to medical writing with a clear record.
 - As a medical writer, I want to know exactly which outputs are released.
 
-**Requirements — records and programs**
+**Requirements: records and programs**
 
 - **PRD-TRK-001** (MVP) Records are created from Final shells (MS-040) or by **Import programs**, which lists R and SAS files in the study `programs/` folder and creates records for the ones selected. Records can also be added and edited in an Edit form (title, program file name, type, status, SAP section, shell status, tags, Assigned To).
 - **PRD-TRK-002** (MVP) Every record has a production program and a **QC program named `qc-<production program>`** (for example `t_14_3_1_ae.sas` → `qc-t_14_3_1_ae.sas`).
 - **PRD-TRK-003** (MVP) An **automatic SAS program header** is generated for both programs: Program, Study/Protocol, Output ID, Title, Population, Source data, Key variables, Sort order, Output file, Mock shell reference and version, Author, QC programmer, Date created, SAS version, and a Modification history table; followed by a starter macro body based on the shell layout. The QC header is marked **QC / VALIDATION PROGRAM** with purpose (independent double programming), production program reference and a PROC COMPARE starter.
 - **PRD-TRK-004** (MVP) Clicking the **production program name** opens a viewer scoped to production with tabs **Program · Log · RTF**. Clicking the **QC program name** opens the same pattern for QC. The Program tab keeps edit/view + save (Production editable in In dev and Revise; QC editable up to and including QC; every other stage read-only). Each save creates a version and a History entry. Log reuses the simulated run log; RTF shows TLF output as HTML (datasets and QC note when there is no TLF RTF).
 
-**Requirements — board layout**
+**Requirements: board layout**
 
 - **PRD-TRK-010** (MVP) Records are grouped by **SAP section** (shared list, in shared order, showing the SAP reference), collapsible, each with a count and "Select all". Empty sections show "No outputs yet". "+ New SAP section" under the board writes to the shared list.
 - **PRD-TRK-011** (MVP) Row layout: first cell has output ID + title (+ tags) on line 1 and **role chips** on line 2. Columns: **Programs** (production on top, `QC qc-…` muted below; each opens a scoped Program · Log · RTF viewer), Type, Status, **Assigned To**, Shell, Job, Actions. There is no Files column. Actions stay visible on the right when the board scrolls sideways.
@@ -378,7 +378,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-014** (MVP) Filters: search by ID or title, type, status, tag, SAP section, Assigned To. Light zebra striping aids reading of long titles.
 - **PRD-TRK-015** (MVP) The **Shell** cell links to Mock Shells when the row has a real shell state (Locked, Draft, Synced, and any other state). The link opens that output's shell (`mock-shells.html?shell=` plus the output ID). Blank and **n/a** stay plain text.
 
-**Requirements — roles**
+**Requirements: roles**
 
 - **PRD-TRK-020** (MVP) **Role chips** under every title: **PR** (production programmer), **QC**, **Stats**, **MW**, each with the role label and short name (for example "PR J. Patel"); full name on hover; no initials avatars; wrap or shorten with "…" at large zoom. The signed-in user's chips are highlighted.
 - **PRD-TRK-021** (MVP) The chip for the **current stage is highlighted** (In dev/Revise → PR, QC → QC, Stats review → Stats, Released to MW → MW; none for Not started, Approved, Frozen). Other chips stay muted. It updates immediately on any status change; tooltip for example "Currently with QC · P. Shah".
@@ -386,7 +386,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-023** (MVP) **Bulk Assign roles** from the selection bar applies roles to all selected rows; roles left empty are unchanged.
 - **PRD-TRK-024** (MVP) **My Assignments** toggle shows only records where I am Assigned To or hold any role, with a count badge, active state and a one-click clear (×).
 
-**Requirements — workflow**
+**Requirements: workflow**
 
 - **PRD-TRK-030** (MVP) Stages: **Not started → In dev → QC → Stats review → Released to MW**, with **Revise** as the return path. The company can switch off Stats review and/or Released to MW in Admin; production programmer and QC are always in the path.
 - **PRD-TRK-031** (MVP) **Released to MW is the final stage**: no further actions, stepper shows complete, row gets a subtle green "Released" look. For companies with the MW stage switched off, the end stage is Approved (and Frozen when frozen).
@@ -394,7 +394,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-033** (MVP) Only the person holding the role for the current stage (or a lead) can move a record on. Each move changes the pill colour, records time and user in History, and shows a toast.
 - **PRD-TRK-034** (MVP) Send to QC makes production files read-only (and, in split-folder mode, copies them to `programs/qc`). Approval/promotion copies to `programs/prod` in split mode.
 
-**Requirements — toolbar and selection**
+**Requirements: toolbar and selection**
 
 - **PRD-TRK-040** (MVP) Toolbar buttons with labels: **My Assignments, Custom Lists, Import programs, Export CSV**. No separators, equal size. **Solid blue means "on/active" only** (My Assignments filtering; Custom Lists panel open), announced to screen readers as pressed. Action buttons stay neutral.
 - **PRD-TRK-041** (MVP) Delete and Generate PDF Package icons in the header bar are enabled only when rows are selected.
@@ -402,7 +402,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-043** (MVP) **Custom Lists**: named, ordered lists of programs (drag to reorder several at once) used for "Run list" and for the order of PDF packages.
 - **PRD-TRK-044** (MVP) Export CSV of the current (filtered) board.
 
-**Requirements — running programs**
+**Requirements: running programs**
 
 - **PRD-TRK-050** (MVP) Run from a row (Execute: Production, QC, or Both) or from the selection bar. Runs go to the customer's own SAS or R servers. (Mockups: simulated runs, "no compute engine attached".)
 - **PRD-TRK-051** (MVP) **Both** runs the production program first, then the QC program. The menu label is **Both (Prod then QC)**. Toasts, job text, background-job lines, log tabs, and run summaries use the same order (production, then QC).
@@ -411,7 +411,7 @@ Module codes: GEN (shared interface), AUTH (sign-in), STU (Studies and Study hom
 - **PRD-TRK-054** (MVP) **Logs** open from the job; the viewer scrolls to the first WARNING or ERROR, wraps long lines, and offers Copy log. Logs are stored in the study `logs/` folder.
 - **PRD-TRK-055** (MVP) Every run records program, version, mode, language, user, start and end time, and result in the audit trail.
 
-**Requirements — history**
+**Requirements: history**
 
 - **PRD-TRK-060** (MVP) Per-row **History** popup with tabs: **Log** (workflow timeline with stepper and date/time of each stage, role changes, runs) and **Versions** (list of program versions, side-by-side view, difference against current, "Restore as current" in editable stages).
 - **PRD-TRK-061** (MVP) Program names open a **scoped artifact viewer** (not an Actions icon). Production name → **Program · Log · RTF** for prod; QC name → the same for QC. Default tab is Program. Title/subtitle name the file and side (Prod vs QC). TLF RTF is rendered as HTML (demo table/listing/figure files ship with the mockup). Dataset rows and the QC RTF tab show a clear empty state when there is no TLF RTF. Logs use the same simulated SAS/R text as the job log. There is no single crowded viewer that dumps prod + QC + output together.
@@ -574,7 +574,7 @@ If a company switches off Stats review, step 12 is skipped. If it switches off R
 | Stats review | Stats approved · release to MW | Released to MW | Stats |
 | Stats review | Return to Revise | Revise | Stats |
 | Revise | Send to QC | QC | PR |
-| Released to MW | — (final) | — | — |
+| Released to MW | no (final) | no | no |
 
 ## 8.3 Other workflows
 
@@ -601,34 +601,34 @@ Study roles (PR, QC, Stats, MW) are given per record in the Tracker; the other r
 
 ## 9.2 Permissions matrix
 
-Key: Lead = lead programmer; DM = data manager; Viewer = viewer or auditor. **Y** = allowed; **Own** = only on records where the person holds that role; **—** = not allowed.
+Key: Lead = lead programmer; DM = data manager; Viewer = viewer or auditor. **Y** = allowed; **Own** = only on records where the person holds that role; **: ** = not allowed.
 
 | Action | Admin | Lead | PR | QC | Stats | MW | DM | Viewer |
 |---------|---|---|--|--|---|--|--|---|
-| Change company settings (modules, SSO, layout, workflow) | Y | — | — | — | — | — | — | — |
-| Manage users and teams | Y | — | — | — | — | — | — | — |
-| Create study | Y | Y | — | — | — | — | — | — |
-| Manage folder access | Y | Y | — | — | — | — | — | — |
-| Create/edit shells (Draft, In review) | — | Y | Y | — | Y | — | — | — |
-| Set shell to Final | — | Y | — | — | Y | — | — | — |
-| Lock shell | — | Y | — | — | Y | — | — | — |
-| Unlock shell | — | Y | — | — | — | — | — | — |
-| Send shell to Tracker | — | Y | Y | — | Y | — | — | — |
-| Edit/create SAP sections | — | Y | — | — | Y | — | — | — |
-| Assign roles (single or bulk) | — | Y | — | — | — | — | — | — |
-| Edit production program (In dev / Revise) | — | Y | Own | — | — | — | — | — |
-| Edit QC program (up to QC) | — | Y | — | Own | — | — | — | — |
-| Run programs | — | Y | Own | Own | — | — | — | — |
-| Send to QC | — | Y | Own | — | — | — | — | — |
-| QC passed / Return to Revise from QC | — | Y | — | Own | — | — | — | — |
-| Stats approved / Return to Revise from Stats | — | Y | — | — | Own | — | — | — |
-| Build PDF/Word package | — | Y | — | — | Y | Y | — | — |
-| Generate Define-XML | — | Y | Y | — | — | — | — | — |
-| Approve Define-XML | — | Y | — | Y | Y | — | — | — |
-| Load data into raw | — | Y | — | — | — | — | Y | — |
-| Accept/reject Copilot suggestions | — | Y | Y | Y | Y | Y | Y | — |
+| Change company settings (modules, SSO, layout, workflow) | Y | no | no | no | no | no | no | no |
+| Manage users and teams | Y | no | no | no | no | no | no | no |
+| Create study | Y | Y | no | no | no | no | no | no |
+| Manage folder access | Y | Y | no | no | no | no | no | no |
+| Create/edit shells (Draft, In review) | no | Y | Y | no | Y | no | no | no |
+| Set shell to Final | no | Y | no | no | Y | no | no | no |
+| Lock shell | no | Y | no | no | Y | no | no | no |
+| Unlock shell | no | Y | no | no | no | no | no | no |
+| Send shell to Tracker | no | Y | Y | no | Y | no | no | no |
+| Edit/create SAP sections | no | Y | no | no | Y | no | no | no |
+| Assign roles (single or bulk) | no | Y | no | no | no | no | no | no |
+| Edit production program (In dev / Revise) | no | Y | Own | no | no | no | no | no |
+| Edit QC program (up to QC) | no | Y | no | Own | no | no | no | no |
+| Run programs | no | Y | Own | Own | no | no | no | no |
+| Send to QC | no | Y | Own | no | no | no | no | no |
+| QC passed / Return to Revise from QC | no | Y | no | Own | no | no | no | no |
+| Stats approved / Return to Revise from Stats | no | Y | no | no | Own | no | no | no |
+| Build PDF/Word package | no | Y | no | no | Y | Y | no | no |
+| Generate Define-XML | no | Y | Y | no | no | no | no | no |
+| Approve Define-XML | no | Y | no | Y | Y | no | no | no |
+| Load data into raw | no | Y | no | no | no | no | Y | no |
+| Accept/reject Copilot suggestions | no | Y | Y | Y | Y | Y | Y | no |
 | View study content | Y | Y | Y | Y | Y | Y | Y | Y |
-| View and export audit trail | Y | Y | — | — | — | — | — | Y |
+| View and export audit trail | Y | Y | no | no | no | no | no | Y |
 
 Folder access (View / Edit) set in File Explorer further limits what a person can open or change on the file system, and read-only stages always win over folder Edit rights.
 
@@ -808,8 +808,8 @@ Rules:
 | 2026-09-27 | flow1: Final shell → Send to Tracker; generated SAS/QC headers; `qc-` naming; workflow stepper; My Assignments; inline roles; "Owner" renamed "Assigned To"; realistic shells; shell Metadata. "Create study structure" removed from Study home. |
 | 2026-09-27 | flow2: Released to MW is the final stage (no Approve/Revise after it). |
 | 2026-09-27 | flow3: + gated by Status dropdown (Final); autosave; tenant study layout; Programs column; roles under the title. |
-| 2026-09-27 | flow3c–3e: shared SAP sections between Mock Shells and Tracker; File Explorer single compact information bar; layout options revised with protocol as default; saved layout drives derived paths; locked shells read-only and muted. |
-| 2026-09-27 | flow3f–3j: toolbar blue = active only; status pill only; Roles popup with searchable pickers and bulk Assign roles; stage-highlighted role chip; "§" dropped from SAP references. |
+| 2026-09-27 | flow3c to 3e: shared SAP sections between Mock Shells and Tracker; File Explorer single compact information bar; layout options revised with protocol as default; saved layout drives derived paths; locked shells read-only and muted. |
+| 2026-09-27 | flow3f to 3j: toolbar blue = active only; status pill only; Roles popup with searchable pickers and bulk Assign roles; stage-highlighted role chip; "§" dropped from SAP references. |
 | 2026-09-27 | Deployment: installed in the customer's environment, using their SAS/R, file systems and SSO; hosted-cloud wording retired. |
 | 2026-09-27 | Validation: GAMP 5 Category 4; Part 11/Annex 11 support; automated OQ evidence; customer-owned UAT. |
 | 2026-09-27 | Operating constraint: no paid tools until the first paying customer. |

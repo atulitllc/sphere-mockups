@@ -453,6 +453,20 @@ body {
 }
 
 button, input, select, textarea { font: inherit; color: inherit; }
+/* Root cause of native gray buttons: the line above only inherited font and color,
+   so any <button> without a component class kept the browser border, background, and padding.
+   Reset those here. Component classes (.btn, .action-icon-btn, menus, toggles) set their own box. */
+button {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 0;
+  text-align: inherit;
+}
 
 .app {
   display: grid;
@@ -1132,6 +1146,7 @@ tbody tr:last-child td { border-bottom: none; }
   transition: background .12s ease, border-color .12s ease;
 }
 
+a.btn { text-decoration: none; color: var(--text); }
 .btn svg {
   width: 15px; height: 15px;
   stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
@@ -6156,9 +6171,9 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 /* Largest UI zoom: tighter Tracker tracks so Actions stay on screen */
 html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta {
-  grid-template-columns: minmax(96px, 1fr) 62px 78px 98px 56px 116px 76px 152px;
-  column-gap: 10px;
-  min-width: 800px;
+  grid-template-columns: 72px 124px 76px 108px minmax(140px, 1.2fr) 128px;
+  column-gap: 8px;
+  min-width: 0;
 }
 
 /* Tracker bulk bar: pinned under the app header while rows are selected and the page is scrolled */
@@ -6506,9 +6521,11 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .col-head-sub { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .col-head-sub::before { content: '· '; }
 
+/* Six visible columns. Assigned To (nth-child 4) is display:none and must not consume a track.
+   Fixed tracks are in visual order: Type, Status, Shell, Job, Programs, Actions. */
 .tracker-col-head .artifact-meta,
 .artifact-row .artifact-meta {
-  grid-template-columns: 54px 112px 96px 54px 112px minmax(130px, 160px) 136px;
+  grid-template-columns: 78px 136px 84px 118px minmax(156px, 1.3fr) 136px;
   column-gap: 10px;
   min-width: 0;
 }
@@ -6516,13 +6533,17 @@ html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta,
 html[data-ui-zoom="150"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="150"] .artifact-row .artifact-meta {
-  grid-template-columns: 50px 108px 88px 50px 106px minmax(124px, 150px) 136px;
+  grid-template-columns: 72px 124px 76px 108px minmax(140px, 1.2fr) 128px;
   column-gap: 8px;
   min-width: 0;
 }
 html[data-ui-zoom="125"] .artifact-row .artifact-main, html[data-ui-zoom="125"] .tracker-col-head .artifact-main { grid-template-columns: minmax(180px, 1fr) auto; }
-.artifact-meta > .meta-cell:first-child { order: 1; }
-.artifact-meta > .meta-cell:nth-child(7) { order: 2; }
+.artifact-meta > .meta-cell:nth-child(1) { grid-column: 5; order: 0; } /* Programs */
+.artifact-meta > .meta-cell:nth-child(2) { grid-column: 1; order: 0; } /* Type */
+.artifact-meta > .meta-cell:nth-child(3) { grid-column: 2; order: 0; } /* Status */
+.artifact-meta > .meta-cell:nth-child(5) { grid-column: 3; order: 0; } /* Shell */
+.artifact-meta > .meta-cell:nth-child(6) { grid-column: 4; order: 0; } /* Job */
+.artifact-meta > .meta-cell:nth-child(7) { grid-column: 6; order: 0; } /* Actions */
 .artifact-row .artifact-meta .program-name { font-size: 11px; line-height: 1.35; }
 .artifact-row .artifact-meta .qc-program-name { margin-top: 2px; }
 .artifact-row { padding-top: 11px; padding-bottom: 11px; }
@@ -6784,4 +6805,164 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   max-width: 100%;
   height: auto;
   margin: 10px auto 6px;
+}
+
+/* ===== Shared controls (flow4style) =====
+   Reuse .btn / .btn.primary / .btn.ghost / .btn.sm / .btn.icon-btn,
+   .action-icon-btn, .badge / .tag-chip, .cell-empty, .sort-h, and .menu-pop.
+   Do not add unclassed buttons or one-off borders. See DESIGN.md. */
+
+.cell-empty {
+  color: var(--muted-2);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Sortable headers match plain <th> labels */
+.sort-h {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.sort-h:hover { color: var(--text); background: transparent; }
+.sort-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sort-h .sort-arrow { font-size: 10px; line-height: 1; opacity: 0.8; text-transform: none; }
+.files-table-wrap th { white-space: nowrap; }
+.files-actions .btn { height: 34px; }
+
+/* Studies expand control */
+.proto-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  vertical-align: middle;
+}
+.proto-toggle:hover { background: var(--row-hover); color: var(--text); border-color: var(--border-strong); }
+.proto-toggle .sap-chevron { width: 14px; height: 14px; transform: rotate(-90deg); }
+.proto-toggle[aria-expanded="true"] .sap-chevron { transform: rotate(0deg); }
+.proto-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+tr.protocol-folder { cursor: pointer; }
+tr.protocol-folder td { background: color-mix(in srgb, var(--accent) 4%, var(--surface)); }
+
+/* Tracker: New Record matches the toolbar, primary fill */
+#trackerListsBar #btnNewRecord.action-icon-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+#trackerListsBar #btnNewRecord.action-icon-btn:hover,
+#trackerListsBar #btnNewRecord.action-icon-btn:focus-visible {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+#trackerListsBar #btnNewRecord.action-icon-btn svg { stroke: currentColor; }
+
+/* Tracker rows: one height, columns share the header tracks */
+.tracker-board .artifact-row {
+  align-items: center;
+  min-height: 68px;
+}
+.artifact-title-band .artifact-footnotes { display: none !important; }
+.job-cell .run-st {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.job-cell .run-st-line { max-width: 100%; }
+.job-cell .run-st-txt { overflow: visible; text-overflow: clip; }
+.job-cell .run-st-sub,
+.job-cell .run-bar { display: none; }
+
+/* Mock Shells toolbar: one control height, export menu */
+.shell-props { align-items: center; }
+.shell-props .meta-field { align-items: center; }
+.shell-props .meta-field select,
+.status-field select,
+.shell-actions .btn,
+.shell-actions .btn.sm,
+.shell-actions .export-trigger {
+  height: 32px;
+  box-sizing: border-box;
+}
+.status-field { height: 32px; align-items: center; }
+.shell-actions .btn.icon-btn,
+.status-field .btn.icon-btn {
+  width: 32px;
+  height: 32px;
+}
+.export-wrap { position: relative; display: inline-flex; align-items: center; }
+.export-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 80;
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 2px;
+}
+html[data-theme="dark"] .export-menu {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.export-menu[hidden] { display: none !important; }
+.export-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.export-menu button:hover,
+.export-menu button:focus-visible { background: var(--accent-soft); color: var(--accent); outline: none; }
+.export-menu svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.export-wrap.is-open .export-trigger {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent);
 }
