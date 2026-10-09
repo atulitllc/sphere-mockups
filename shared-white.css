@@ -5579,8 +5579,8 @@ html[data-contrast="low"][data-theme="dark"] {
 .artifact-meta .meta-cell:has(.row-actions),
 .artifact-meta .meta-cell.actions-cell {
   display: flex;
-  width: 100%;
-  min-width: 152px;
+  width: auto;
+  min-width: 0;
   overflow: visible;
   justify-content: flex-end;
   align-items: center;
@@ -6180,7 +6180,7 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 /* Largest UI zoom: tighter Tracker tracks so Actions stay on screen. Job stays wide enough for "Completed". */
 html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta {
-  grid-template-columns: 64px 96px 68px 176px minmax(124px, 1fr) 116px;
+  grid-template-columns: 64px 96px 68px 176px minmax(124px, 1fr) 152px;
   column-gap: 8px;
   min-width: 0;
 }
@@ -6536,7 +6536,7 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
    auto-placement will not move backward, so the next cell wraps to row 2. */
 .tracker-col-head .artifact-meta,
 .artifact-row .artifact-meta {
-  grid-template-columns: 68px 104px 72px 176px minmax(136px, 1.15fr) 124px;
+  grid-template-columns: 68px 104px 72px 176px minmax(136px, 1.15fr) 152px;
   column-gap: 10px;
   align-items: center;
   min-width: 0;
@@ -6545,7 +6545,7 @@ html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="125"] .artifact-row .artifact-meta,
 html[data-ui-zoom="150"] .tracker-col-head .artifact-meta,
 html[data-ui-zoom="150"] .artifact-row .artifact-meta {
-  grid-template-columns: 64px 96px 68px 176px minmax(124px, 1fr) 116px;
+  grid-template-columns: 64px 96px 68px 176px minmax(124px, 1fr) 152px;
   column-gap: 8px;
   min-width: 0;
 }
