@@ -2053,9 +2053,23 @@
     block.addEventListener('dblclick', function () {
       var field = block.dataset.field;
       var valEl = block.querySelector('.block-value');
+      if (field === 'program') {
+        var sh = selectedShell();
+        if (sh && canonStatus(sh.status) === 'Final') {
+          showToast('Program name is locked while the shell is Final.');
+          return;
+        }
+      }
       startTextEdit(valEl, function () { return state[field]; }, function (v) {
+        if (field === 'program') {
+          var name = String(v || '').trim();
+          if (name && !/^[A-Za-z]/.test(name)) {
+            showToast('Program name must start with a letter.');
+            return;
+          }
+        }
         state[field] = v;
-        if (field === 'footnotes') persistEditorToSelected();
+        if (field === 'footnotes' || field === 'program') persistEditorToSelected();
       });
     });
   });
@@ -2934,6 +2948,12 @@
     var badge = document.getElementById('shellStatusBadge');
     var stSel = document.getElementById('metaStatus');
     if (stSel && sh) stSel.setAttribute('data-status', (sh.status || 'Draft').toLowerCase().replace(/\s+/g, '-'));
+    var progBlock = document.querySelector('.sheet-block[data-field="program"]');
+    if (progBlock) {
+      var lockedName = !!(sh && canonStatus(sh.status) === 'Final');
+      progBlock.classList.toggle('is-locked-field', lockedName);
+      progBlock.title = lockedName ? 'Program name is locked while the shell is Final.' : '';
+    }
     if (badge) {
       var v = 'v' + ((sh && sh.version) || '0.1');
       var locked = sh && sh.status === 'Locked';
