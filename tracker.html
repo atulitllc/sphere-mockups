@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4bar" />
+<link rel="stylesheet" href="shared-white.css?v=flow4merge1" />
 <script>
 (function () {
   try {
@@ -1258,7 +1258,7 @@
 
 <script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4keys"></script>
+<script src="demo-flow.js?v=flow4round4"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -1467,11 +1467,11 @@
       });
     });
     var keys = Object.keys(groups);
+    var approvedRows = sel.filter(function (row) { return (row.getAttribute('data-status') || '') === 'Approved'; });
     if (!keys.length) {
       var allReleased = sel.every(function (r) { return r.getAttribute('data-status') === 'In MW'; });
       if (hint) hint.textContent = sel.length + ' selected · ' + (allReleased ? 'Released to MW is the final stage' : 'no Send actions for these statuses');
-      return;
-    }
+    } else {
     keys.sort(function (a, b) {
       var ha = groups[a].hand;
       var hb = groups[b].hand;
@@ -1512,6 +1512,45 @@
       });
       host.appendChild(btn);
     });
+    }
+    var freezeBtn = document.createElement('button');
+    freezeBtn.type = 'button';
+    freezeBtn.className = 'btn';
+    var freezeCount = approvedRows.length;
+    freezeBtn.textContent = 'Freeze' + (freezeCount && freezeCount !== sel.length ? ' (' + freezeCount + ')' : '');
+    if (!freezeCount) {
+      freezeBtn.disabled = true;
+      freezeBtn.title = 'Frozen is only available from Approved';
+    } else {
+      freezeBtn.title = '';
+      freezeBtn.addEventListener('click', function () {
+        var hand = { action: 'freeze', label: 'Freeze', nextStatus: 'Frozen' };
+        var items = [];
+        sel.forEach(function (row) {
+          if ((row.getAttribute('data-status') || '') !== 'Approved') return;
+          items.push({ row: row, from: 'Approved', to: 'Frozen', hand: hand });
+        });
+        var skipped = sel.length - items.length;
+        if (!items.length) {
+          showToast('Frozen is only available from Approved');
+          return;
+        }
+        items.freezeSkipped = skipped;
+        askStageChange(items, function (info) {
+          var applied = 0;
+          items.forEach(function (it) {
+            if ((it.row.getAttribute('data-status') || '') !== 'Approved') return;
+            if (applyTransition(it.row, hand, info) !== false) applied++;
+          });
+          var msg = 'Frozen · ' + applied + ' record' + (applied === 1 ? '' : 's');
+          if (skipped) msg += ' · ' + skipped + ' skipped';
+          showToast(msg);
+          applyFilters();
+          syncBulk();
+        }, null, freezeBtn);
+      });
+    }
+    host.appendChild(freezeBtn);
   }
 
 
@@ -2021,26 +2060,177 @@
       : '<span class="run-st ' + face.cls + '" title="' + runEsc(title) + '">' + inner + '</span>';
   }
 
+  /* Study-tree files, saved sources, and finished runs. Not filename patterns. */
+  var programFileSet = {};
+  function programFileKey(scope, name) {
+    return String(scope || TRACKER_HOME) + '|' + String(name || '').split('/').pop();
+  }
+  function noteProgramFile(scope, name) {
+    var n = String(name || '').split('/').pop();
+    if (!n || n === '-') return;
+    programFileSet[programFileKey(scope, n)] = 1;
+    if (window.SPHERE_DEMO && SPHERE_DEMO.noteFile) SPHERE_DEMO.noteFile(scope, n);
+  }
+  function qcProgramName(row) {
+    var marked = row && row.getAttribute ? row.getAttribute('data-qc') : null;
+    if (marked === '' || marked === 'not-created') return '';
+    if (marked) return String(marked).split('/').pop();
+    var prog = runProgName(row);
+    if (!prog) return '';
+    if (window.SPHERE_DEMO && SPHERE_DEMO.qcName) return SPHERE_DEMO.qcName(prog);
+    if (/^qc[-_]/i.test(prog)) return prog;
+    return 'qc-' + prog;
+  }
+  function programWritten(row, scope) {
+    var side = scope === 'qc' ? 'qc' : 'prod';
+    var name = side === 'qc' ? qcProgramName(row) : runProgName(row);
+    if (!name) return false;
+    if (programFileSet[programFileKey(rowStudyScope(row), name)]) return true;
+    if (typeof savedSource === 'function' && savedSource(row, side)) return true;
+    return false;
+  }
+  function logExists(row, scope) {
+    var side = scope === 'qc' ? 'qc' : 'prod';
+    return !!(row && (side === 'qc' ? row._qcRan : row._prodRan));
+  }
+  function rtfExists(row, scope) {
+    if (scope === 'qc') return false;
+    var type = row ? (row.getAttribute('data-type') || '') : '';
+    if (type !== 'Table' && type !== 'Listing' && type !== 'Figure') return false;
+    return !!(row && row._outputReady);
+  }
+  function sourceLooksGenerated(text) {
+    return /Initial (?:version|QC program) generated from mock shell/.test(String(text || ''));
+  }
+  function savedSource(row, side) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.getSource || !row) return '';
+    var which = side === 'qc' ? 'qc' : 'prod';
+    var name = which === 'qc' ? qcProgramName(row) : runProgName(row);
+    var scope = rowStudyScope(row);
+    var direct = name ? (SPHERE_DEMO.getSource(scope + '|' + name + ':' + which) || '') : '';
+    var legacy = '';
+    var fk = flowKey(row);
+    if (fk) legacy = SPHERE_DEMO.getSource(scope + '|' + fk + ':' + which) || '';
+    if (!legacy && which === 'qc') {
+      var prodName = runProgName(row);
+      if (prodName && prodName !== name) legacy = SPHERE_DEMO.getSource(scope + '|' + prodName + ':' + which) || '';
+    }
+    if (legacy && (!direct || (sourceLooksGenerated(direct) && !sourceLooksGenerated(legacy)))) return legacy;
+    return direct || '';
+  }
+  function storeSource(row, side, text) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.setSource || !row) return;
+    var which = side === 'qc' ? 'qc' : 'prod';
+    var name = which === 'qc' ? qcProgramName(row) : runProgName(row);
+    if (!name) return;
+    SPHERE_DEMO.setSource(rowStudyScope(row) + '|' + name + ':' + which, text);
+  }
+  function sealPhase(j, idx, ok) {
+    var phase = j && j.phases ? j.phases[idx] : null;
+    var row = j && j.row;
+    if (!phase || !row || phase._sealed) return;
+    phase._sealed = true;
+    var isQc = phase.kind === 'QC';
+    if (isQc) row._qcRan = true;
+    else row._prodRan = true;
+    if (!isQc && ok) row._outputReady = true;
+    var name = isQc ? qcProgramName(row) : runProgName(row);
+    if (name) noteProgramFile(rowStudyScope(row), name);
+    row._sideLogs = row._sideLogs || {};
+    row._sideLogs[isQc ? 'qc' : 'prod'] = { lang: j.lang, text: runLogText(j, idx) };
+    if (typeof refreshArtifactPresence === 'function') refreshArtifactPresence(row);
+  }
+  function sealFinishedJob(j) {
+    if (!j || !j.phases) return;
+    var ok = j.state !== 'error';
+    j.phases.forEach(function (p, i) { sealPhase(j, i, ok); });
+  }
+  function registerStudyFiles() {
+    allRows().forEach(function (row) {
+      var id = row.getAttribute('data-record-id') || '';
+      if (id.indexOf('seed-') !== 0) return;
+      var prog = runProgName(row);
+      if (prog) noteProgramFile(TRACKER_HOME, prog);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#folderList .import-file'), function (f) {
+      var name = String(f.value || '').split('/').pop();
+      if (name) noteProgramFile(TRACKER_HOME, name);
+    });
+    if (window.SPHERE_DEMO && SPHERE_DEMO.records) {
+      SPHERE_DEMO.records().forEach(function (rec) {
+        if (!rec || !rec.program) return;
+        var scope = rec.study || TRACKER_HOME;
+        if (recordSideExists(scope, rec, rec.program, 'prod')) noteProgramFile(scope, rec.program);
+        var qc = SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(rec.program) : '';
+        if (qc && recordSideExists(scope, rec, qc, 'qc')) noteProgramFile(scope, qc);
+      });
+    }
+  }
+  function recordSideExists(scope, rec, name, side) {
+    if (!name || !window.SPHERE_DEMO) return false;
+    if (SPHERE_DEMO.getSource && SPHERE_DEMO.getSource(scope + '|' + name + ':' + side)) return true;
+    if (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, name)) return true;
+    var hist = (rec && rec.history) || [];
+    var i;
+    for (i = 0; i < hist.length; i++) {
+      var blob = String((hist[i] && hist[i].action) || '') + ' ' + String((hist[i] && hist[i].note) || '');
+      if (/header generated/i.test(blob) && blob.indexOf(name) >= 0) return true;
+    }
+    return false;
+  }
+  function rememberFinishedSide(row, scope, ok) {
+    if (!row) return;
+    if (scope === 'qc') row._qcRan = true;
+    else {
+      row._prodRan = true;
+      if (ok) row._outputReady = true;
+    }
+    var name = scope === 'qc' ? qcProgramName(row) : runProgName(row);
+    if (name) noteProgramFile(rowStudyScope(row), name);
+  }
+
   /* Seeded jobs are finished. Running and Queued exist only after the user clicks Run. */
   allRows().forEach(function (row) {
+    var saved = null;
+    var rid = row.getAttribute('data-record-id') || '';
+    if (rid && window.SPHERE_DEMO && SPHERE_DEMO.rowState) saved = SPHERE_DEMO.rowState(rid);
+    if (saved && saved.program) row.setAttribute('data-program', saved.program);
     var st = row.getAttribute('data-job');
     var prog = runProgName(row);
     if (!prog || !st) return;
-    var spec = SEED_JOBS[prog] || { outcome: 'completed', days: 1, h: 9, m: 0, dur: 15 };
+    if (saved && (saved.job === 'done' || saved.job === 'error' || saved.job === 'completed')) {
+      restoreFinishedJob(row, {
+        job: saved.job === 'completed' ? 'done' : saved.job,
+        jobMode: saved.jobMode || row.getAttribute('data-job-mode') || 'prod',
+        jobWarn: saved.jobWarn,
+        lastRun: saved.lastRun || row.getAttribute('data-last-run') || '',
+        prodRan: saved.prodRan,
+        qcRan: saved.qcRan,
+        outputReady: saved.outputReady
+      });
+      if (saved.qcRan) {
+        var savedQc = qcProgramName(row);
+        if (savedQc) noteProgramFile(rowStudyScope(row), savedQc);
+      }
+      return;
+    }
+    var spec = SEED_JOBS[prog] || (saved && saved.origProgram && SEED_JOBS[saved.origProgram]) || { outcome: 'completed', days: 1, h: 9, m: 0, dur: 15 };
     var durMs = spec.dur * 1000;
     var end = seedStamp(spec);
     var outcome = spec.outcome === 'error' ? 'error' : 'completed';
     var j = {
       id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: 'prod',
       phases: [{ kind: 'Prod', dur: durMs }], phase: 0, state: outcome === 'error' ? 'error' : 'done',
-      warn: outcome !== 'error' && spec.outcome === 'warning', warnPhase: 0,
+      warn: outcome !== 'error' && (spec.outcome === 'warning' || !!(saved && saved.jobWarn)), warnPhase: 0,
       batch: null, startedAt: end - durMs, endedAt: end, endDate: new Date(end), logs: {}
     };
     row._runJob = j;
     row.setAttribute('data-job', j.state);
     row.setAttribute('data-last-run', j.endDate.toISOString());
     renderJobCell(row);
+    sealFinishedJob(j);
   });
+  registerStudyFiles();
 
   var JOB_SEQ_KEY = 'sphere-tracker-job-seq';
   function nextJobBatchId() {
@@ -2105,8 +2295,11 @@
     runJobs.forEach(function (j) {
       if (j.state !== 'running') return;
       if (now - j.phaseAt >= j.phases[j.phase].dur) {
-        if (j.phase < j.phases.length - 1) { j.phase++; j.phaseAt = now; }
-        else finishRunJob(j, now);
+        if (j.phase < j.phases.length - 1) {
+          sealPhase(j, j.phase, true);
+          j.phase++;
+          j.phaseAt = now;
+        } else finishRunJob(j, now);
       }
     });
     var running = runJobs.filter(function (j) { return j.state === 'running'; }).length;
@@ -2132,7 +2325,11 @@
     j.endDate = new Date(now);
     var row = j.row;
     row.setAttribute('data-job', 'done');
+    row.setAttribute('data-job-mode', j.mode || 'prod');
     row.setAttribute('data-last-run', j.endDate.toISOString());
+    sealFinishedJob(j);
+    if (typeof persistRuntimeRowFromDom === 'function') persistRuntimeRowFromDom(row);
+    if (typeof persistFlowRowRun === 'function') persistFlowRowRun(row);
     if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row), rowStudyScope(row));
     if (typeof decorateRerunDot === 'function') decorateRerunDot(row);
     renderJobCell(row);
@@ -2325,20 +2522,20 @@
     var prog = String((j && j.prog) || '').split('/').pop();
     if (!isQc) return prog;
     if (window.SPHERE_DEMO && SPHERE_DEMO.qcName) return SPHERE_DEMO.qcName(prog);
-    if (!prog || /^qc-/i.test(prog)) return prog;
+    if (!prog || /^qc[-_]/i.test(prog)) return prog;
     return 'qc-' + prog;
   }
   function logOutputStem(j) {
+    var row = j && j.row;
+    var id = row ? rowOutputId(row) : '';
+    if (id) return logNamed('t_' + String(id).replace(/\./g, '_').replace(/-/g, '_'), logRowType(j));
     var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '');
     var fromTfl = runOutId(prog);
     var stem = fromTfl;
     if (fromTfl === 'out') {
       stem = prog.replace(/\.[^.]+$/, '');
       if (!/^[tfl]_\d/i.test(stem)) {
-        var row = j && j.row;
-        var id = row ? rowOutputId(row) : '';
-        if (id) stem = 't_' + String(id).replace(/\./g, '_');
-        else if (!stem || stem.toLowerCase() === 'out') stem = fromTfl;
+        if (!stem || stem.toLowerCase() === 'out') stem = fromTfl;
       }
     }
     return logNamed(stem, logRowType(j));
@@ -2925,10 +3122,18 @@
     var statusNow = row.getAttribute('data-status') || 'Not started';
     document.getElementById('reStatus').value = statusNow;
     Array.prototype.forEach.call(document.getElementById('reStatus').options, function (opt) {
-      if (opt.value !== 'Draft') return;
-      var showDraft = statusNow === 'Draft';
-      opt.hidden = !showDraft;
-      opt.disabled = !showDraft;
+      if (opt.value === 'Draft') {
+        var showDraft = statusNow === 'Draft';
+        opt.hidden = !showDraft;
+        opt.disabled = !showDraft;
+        opt.title = '';
+        return;
+      }
+      if (opt.value !== 'Frozen') return;
+      var allowFrozen = statusNow === 'Approved' || statusNow === 'Frozen';
+      opt.hidden = false;
+      opt.disabled = !allowFrozen;
+      opt.title = allowFrozen ? '' : 'Frozen is only available from Approved';
     });
     document.getElementById('reSap').value = row.getAttribute('data-sap') || 'Demographics';
     var shellTxt = cells[4] ? (cells[4].textContent || '').trim() : 'n/a';
@@ -2967,13 +3172,119 @@
     dragState = null;
   }
 
+  function clearRunArtifacts(row) {
+    if (!row) return;
+    var rid = row.getAttribute('data-record-id') || '';
+    if (rid && window.SPHERE_DEMO && SPHERE_DEMO.getEvents && SPHERE_DEMO.addEvent) {
+      var fromKey = flowKey(row);
+      if (fromKey && fromKey !== rid) {
+        var have = {};
+        (SPHERE_DEMO.getEvents(rid) || []).forEach(function (ev) {
+          have[(ev.at || '') + '|' + (ev.action || '') + '|' + (ev.note || '')] = 1;
+        });
+        (SPHERE_DEMO.getEvents(fromKey) || []).forEach(function (ev) {
+          var k = (ev.at || '') + '|' + (ev.action || '') + '|' + (ev.note || '');
+          if (have[k]) return;
+          have[k] = 1;
+          SPHERE_DEMO.addEvent(rid, ev);
+        });
+      }
+    }
+    row._prodRan = false;
+    row._qcRan = false;
+    row._outputReady = false;
+    row._sideLogs = null;
+    row._runJob = null;
+    row.removeAttribute('data-job');
+    row.removeAttribute('data-job-mode');
+    row.removeAttribute('data-last-run');
+    row.removeAttribute('data-program-file');
+    var jobCell = row.querySelector('.job-cell');
+    if (jobCell) {
+      jobCell._runKey = '';
+      jobCell.innerHTML = '<span class="meta-v muted">-</span>';
+    }
+  }
+
   function writeRowEditor() {
     if (!editingRow) return;
     var row = editingRow;
     var title = document.getElementById('reTitle').value.trim();
     var program = document.getElementById('reProgram').value.trim();
+    var oldName = (row.getAttribute('data-program') || '').split('/').pop();
+    var newName = (program || '').split('/').pop();
+    if (oldName && newName && oldName !== newName && window.SPHERE_DEMO && SPHERE_DEMO.moveProgramStorage) {
+      var scope = rowStudyScope(row);
+      var oldQc = qcProgramName(row);
+      var newQc = SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(newName) : (newName ? ('qc-' + newName) : '');
+      var recordId = row.getAttribute('data-record-id') || row.getAttribute('data-flow-id') || '';
+      var prior = recordId && SPHERE_DEMO.rowState ? SPHERE_DEMO.rowState(recordId) : null;
+      var job = row._runJob;
+      var hadProd = !!(programFileSet[programFileKey(scope, oldName)] || (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, oldName)) || savedSource(row, 'prod'));
+      var hadQc = !!(oldQc && (programFileSet[programFileKey(scope, oldQc)] || (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, oldQc)) || savedSource(row, 'qc')));
+      SPHERE_DEMO.moveProgramStorage({
+        scope: scope,
+        oldName: oldName,
+        newName: newName,
+        oldQc: oldQc,
+        newQc: newQc,
+        recordId: recordId,
+        origProgram: (prior && prior.origProgram) || oldName,
+        state: {
+          job: row.getAttribute('data-job') || (job && job.state) || '',
+          jobMode: row.getAttribute('data-job-mode') || (job && job.mode) || '',
+          jobWarn: job && job.warn ? 1 : 0,
+          lastRun: row.getAttribute('data-last-run') || '',
+          prodRan: row._prodRan ? 1 : 0,
+          qcRan: row._qcRan ? 1 : 0,
+          outputReady: row._outputReady ? 1 : 0
+        }
+      });
+      delete programFileSet[programFileKey(scope, oldName)];
+      if (oldQc && oldQc !== newQc) delete programFileSet[programFileKey(scope, oldQc)];
+      row.setAttribute('data-program', program || newName);
+      if (hadProd) noteProgramFile(scope, newName);
+      if (hadQc && newQc) noteProgramFile(scope, newQc);
+      if (job) {
+        job.prog = newName;
+        job.lang = programLang(newName, row);
+        job.logs = {};
+        if (job.phases) job.phases.forEach(function (p) { delete p._sealed; });
+        row._sideLogs = null;
+        if (job.state === 'done' || job.state === 'error') sealFinishedJob(job);
+        var jobCell = row.querySelector('.job-cell');
+        if (jobCell) jobCell._runKey = '';
+        renderJobCell(row);
+      }
+      var canon = stageHistoryKey(row);
+      var renamed = {
+        id: SPHERE_DEMO.newEventId ? SPHERE_DEMO.newEventId() : ('ev-' + Date.now().toString(36)),
+        at: stageStampET(),
+        action: 'Renamed from ' + oldName + ' to ' + newName,
+        status: row.getAttribute('data-status') || '',
+        person: stageUser(),
+        note: ''
+      };
+      var owned = flowRecord(row);
+      if (owned && SPHERE_DEMO.updateRecord) {
+        SPHERE_DEMO.updateRecord(owned.id, function (x) {
+          x.program = newName;
+          x.history = x.history || [];
+          if (renamed.id && x.history.some(function (ev) { return ev && ev.id && ev.id === renamed.id; })) return;
+          x.history.push(renamed);
+        });
+      } else {
+        if (SPHERE_DEMO.mergeEvents) {
+          SPHERE_DEMO.mergeEvents(canon, [oldName, newName, flowKey(row), row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '']);
+        }
+        SPHERE_DEMO.addEvent(canon, renamed);
+      }
+    }
+    var fromStatus = row.getAttribute('data-status') || '';
+    var statusPick = document.getElementById('reStatus').value;
+    if (statusPick === 'Frozen' && fromStatus !== 'Approved' && fromStatus !== 'Frozen') statusPick = fromStatus;
     var type = document.getElementById('reType').value;
-    var status = document.getElementById('reStatus').value;
+    var status = statusPick;
     var sap = document.getElementById('reSap').value;
     var shell = document.getElementById('reShell').value;
     var tagsRaw = document.getElementById('reTags').value;
@@ -3108,9 +3419,17 @@
     var row = editingRow;
     var next = document.getElementById('reStatus').value;
     var from = row.getAttribute('data-status') || '';
+    if (next === 'Frozen' && from !== 'Approved' && from !== 'Frozen') {
+      showToast('Frozen is only available from Approved');
+      var back = document.getElementById('reStatus');
+      if (back) back.value = from;
+      return;
+    }
     if (next && next !== from) {
-      askStageChange([{ row: row, from: from, to: next, hand: null }], function (info) {
-        applyTransition(row, { action: 'status', label: 'Change stage', nextStatus: next }, info);
+      var stageHand = next === 'Frozen' ? { action: 'freeze', label: 'Freeze', nextStatus: next } : null;
+      askStageChange([{ row: row, from: from, to: next, hand: stageHand }], function (info) {
+        var stageAction = next === 'Frozen' ? 'freeze' : 'status';
+        if (applyTransition(row, { action: stageAction, label: next === 'Frozen' ? 'Freeze' : 'Change stage', nextStatus: next }, info) === false) return;
         writeRowEditor();
       }, function () {
         var sel = document.getElementById('reStatus');
@@ -3471,7 +3790,7 @@
         var ev = { at: SPHERE_DEMO.stamp(), action: 'Roles updated by ' + FLOW_ME, status: row.getAttribute('data-status') || '', person: FLOW_ME, note: diffs.join(' · ') };
         var rec = flowRecord(row);
         if (rec) SPHERE_DEMO.updateRecord(rec.id, function (x) { x.history.push(ev); });
-        else SPHERE_DEMO.addEvent(flowKey(row), ev);
+        else SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
       }
       var wrap = row.querySelector('.row-people-wrap');
       if (wrap) wrap.removeAttribute('data-filled');
@@ -3560,6 +3879,8 @@
       var type = f.getAttribute('data-type');
       var sap = f.getAttribute('data-sap');
       var recordId = mintRecordId();
+      var scope = runtimeScopeId();
+      noteProgramFile(scope, fname);
       var spec = {
         type: type,
         status: 'Not started',
@@ -3569,11 +3890,15 @@
         path: 'programs/' + f.value,
         title: title,
         note: 'imported from programs/',
-        recordId: recordId
+        recordId: recordId,
+        scope: scope,
+        programFile: 1
       };
       rememberRuntimeRow(spec);
       var row = buildArtifactRow(spec);
+      row.setAttribute('data-program-file', '1');
       moveRowToSap(row, sap);
+      refreshRowWorkflowUI(row);
       f.checked = false;
     });
     closeImport();
@@ -4188,13 +4513,11 @@
     };
     var recordId = row.getAttribute('data-record-id') || '';
     var events = recordId.indexOf('seed-') === 0 ? (byStatus[status] || base).slice() : [];
-    if (window.SPHERE_DEMO && SPHERE_DEMO.getEvents) {
-      var seenKey = {};
-      [flowKey(row), row.getAttribute('data-record-id') || ''].forEach(function (k) {
-        if (!k || seenKey[k]) return;
-        seenKey[k] = 1;
-        events = events.concat(SPHERE_DEMO.getEvents(k) || []);
-      });
+    if (window.SPHERE_DEMO && SPHERE_DEMO.mergeEvents) {
+      var canon = stageHistoryKey(row);
+      events = events.concat(SPHERE_DEMO.mergeEvents(canon, [flowKey(row), row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '', (row.getAttribute('data-program') || '').split('/').pop()]) || []);
+    } else if (window.SPHERE_DEMO && SPHERE_DEMO.getEvents) {
+      events = events.concat(SPHERE_DEMO.getEvents(stageHistoryKey(row)) || []);
     }
     return { title: title.trim(), program: prog, status: row.getAttribute('data-status') || status, owner: owner || 'Jordan Patel', events: events };
   }
@@ -4497,6 +4820,7 @@
   };
   var rtfCache = {};
   var artifactGen = 0;
+  var artifactOpener = null;
   function rtfSampleFor(row) {
     return RTF_SAMPLES[row.getAttribute('data-type') || ''] || null;
   }
@@ -4525,19 +4849,24 @@
     var dom = prog ? runDomain(prog) : null;
     var sample = rtfSampleFor(row);
     var outRel = '';
+    var qcOutRel = '';
     if (type === 'Dataset') {
-      var base = (dom || stem || '').toLowerCase();
-      if (base) outRel = 'data/adam/' + base + (lang === 'R' ? '.xpt' : '.sas7bdat');
-    } else if (sample) {
-      outRel = 'output/tlf/' + sample.file.split('/').pop();
-    } else if (prog) {
-      outRel = 'output/tlf/' + runOutId(prog) + '.rtf';
+      var base = (dom || stem || '').toLowerCase().replace(/^qc[-_]/, '');
+      if (base) {
+        var ext = lang === 'R' ? '.xpt' : '.sas7bdat';
+        outRel = 'data/adam/' + base + ext;
+        qcOutRel = 'data/adam/qc/qc_' + base + ext;
+      }
+    } else {
+      var outStem = logOutputStem({ prog: prog, row: row });
+      if (outStem) outRel = 'output/tlf/' + outStem + '.rtf';
     }
     return {
       prog: prog, qc: qc, lang: lang, type: type, dom: dom, sample: sample,
       progPath: prog ? studyPath('programs/' + folder + '/' + prog, row) : '',
       logPath: prog ? studyPath('logs/' + stem + '.log', row) : '',
       outPath: studyPath(outRel, row),
+      qcOutPath: studyPath(qcOutRel || outRel, row),
       qcProgPath: qc ? studyPath('programs/' + folder + '/qc/' + qc, row) : '',
       qcLogPath: qc ? studyPath('logs/' + qc.replace(/\.[^.]+$/, '') + '.log', row) : ''
     };
@@ -4547,16 +4876,6 @@
   }
   function artifactFileName(meta, scope) {
     return scope === 'qc' ? (meta.qc || '') : (meta.prog || '');
-  }
-  function artifactTabDefs(meta, scope) {
-    var file = artifactFileName(meta, scope);
-    var progPath = scope === 'qc' ? meta.qcProgPath : meta.progPath;
-    var logPath = scope === 'qc' ? meta.qcLogPath : meta.logPath;
-    return [
-      { id: 'prog', label: 'Program', path: progPath, file: file },
-      { id: 'log', label: 'Log', path: logPath, file: file },
-      { id: 'rtf', label: 'RTF', path: meta.outPath, file: file }
-    ];
   }
   function programEditableFor(row, scope) {
     var status = (row && row.getAttribute('data-status')) || '';
@@ -4578,14 +4897,18 @@
     var body = lang ? highlightLog(text, lang) : escapeHtml(text);
     return '<pre class="run-log-pre artifact-code" tabindex="0">' + body + '</pre>';
   }
-  function demoLogPack(row, kind) {
+  function sideLogPack(row, scope) {
+    var key = scope === 'qc' ? 'qc' : 'prod';
+    if (row._sideLogs && row._sideLogs[key]) return row._sideLogs[key];
     var job = row._runJob;
-    if (job && job.state === 'done' && job.phases) {
+    var kind = scope === 'qc' ? 'QC' : 'Prod';
+    if (job && (job.state === 'done' || job.state === 'error') && job.phases) {
       for (var i = 0; i < job.phases.length; i++) {
         if (job.phases[i].kind === kind) return { lang: job.lang, text: runLogText(job, i) };
       }
     }
-    var prog = runProgName(row);
+    if (!logExists(row, scope)) return null;
+    var prog = scope === 'qc' ? qcProgramName(row) : runProgName(row);
     if (!prog) return null;
     var lang = programLang(prog, row);
     var fake = {
@@ -4602,13 +4925,63 @@
     };
     return { lang: lang, text: lang === 'SAS' ? buildSasLog(fake, 0) : buildRLog(fake, 0) };
   }
+  function availableArtifactTabs(row, scope) {
+    var meta = artifactMeta(row);
+    var file = artifactFileName(meta, scope);
+    var progPath = scope === 'qc' ? meta.qcProgPath : meta.progPath;
+    var logPath = scope === 'qc' ? meta.qcLogPath : meta.logPath;
+    var tabs = [];
+    if (programWritten(row, scope)) tabs.push({ id: 'prog', label: 'Program', path: progPath, file: file });
+    if (logExists(row, scope)) tabs.push({ id: 'log', label: 'Log', path: logPath, file: file });
+    if (rtfExists(row, scope)) tabs.push({ id: 'rtf', label: 'RTF', path: meta.outPath, file: file });
+    return tabs;
+  }
+  function paintArtifactTabButtons(scope, tabs, selected) {
+    var host = document.getElementById('artifactTabs');
+    if (!host) return;
+    host.innerHTML = '';
+    host.setAttribute('aria-label', artifactSideLabel(scope) + ' artifacts');
+    tabs.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'artifact-tab';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('data-art-tab', t.id);
+      b.setAttribute('aria-selected', t.id === selected ? 'true' : 'false');
+      b.tabIndex = t.id === selected ? 0 : -1;
+      b.textContent = t.label;
+      if (t.path) b.title = t.path;
+      host.appendChild(b);
+    });
+  }
+  function rtfEscapeText(s) {
+    return String(s || '').replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
+  }
+  function personalizeSampleRtf(rtf, row, meta) {
+    var typeWord = meta.type === 'Listing' ? 'Listing' : (meta.type === 'Figure' ? 'Figure' : 'Table');
+    var num = rowOutputId(row) || '';
+    var rawTitle = (((row && row.querySelector('.artifact-title')) || {}).textContent || '').trim().replace(/\s*New$/, '').trim();
+    var title = rawTitle.replace(/^\s*[0-9][0-9.]*[a-z]*\s*·\s*/i, '').trim() || typeWord;
+    var heading = typeWord + (num ? ' ' + num : '');
+    var sample = '\\qc\\i Sample output\\i0\\par';
+    var line1 = '\\fs22\\qc\\b ' + rtfEscapeText(heading) + '\\b0\\par';
+    var line2 = '\\qc\\b ' + rtfEscapeText(title) + '\\b0\\par';
+    var n = 0;
+    return String(rtf || '').replace(/(?:\\fs\d+)?\\qc\\b [^\r\n]*\\b0\\par/g, function (hit) {
+      n += 1;
+      if (n === 1) return sample + '\n' + line1;
+      if (n === 2) return line2;
+      return hit;
+    });
+  }
+  function datasetOutputPath(meta, scope) {
+    if (scope === 'qc' && meta && meta.qcOutPath) return meta.qcOutPath;
+    return (meta && meta.outPath) || '';
+  }
   function renderArtifactRtf(pane, row, meta, gen, scope) {
-    if (scope === 'qc') {
-      pane.innerHTML = emptyArtifact('No QC RTF on this record. QC programs validate production output; open the production program name to preview the TLF RTF.');
-      return;
-    }
     if (meta.type === 'Dataset') {
-      pane.innerHTML = emptyArtifact('No TLF RTF for this dataset. Production writes an analysis dataset' + (meta.outPath ? ' at ' + meta.outPath : '') + '.');
+      var dsPath = datasetOutputPath(meta, scope);
+      pane.innerHTML = emptyArtifact('No TLF RTF for this dataset. ' + (scope === 'qc' ? 'QC writes' : 'Production writes') + ' an analysis dataset' + (dsPath ? ' at ' + dsPath : '') + '.');
       return;
     }
     var sample = meta.sample;
@@ -4616,14 +4989,14 @@
       pane.innerHTML = emptyArtifact('No output file on this record.');
       return;
     }
-    var fileName = sample.file.split('/').pop();
+    var fileName = (meta.outPath || '').split('/').pop() || 'output.rtf';
     var apply = function (rtf) {
       if (gen !== artifactGen) return;
       if (!window.SPHERE_RTF || !SPHERE_RTF.rtfToHtml) {
         pane.innerHTML = emptyArtifact('RTF converter did not load.');
         return;
       }
-      pane.innerHTML = '<div class="rtf-preview">' + SPHERE_RTF.rtfToHtml(rtf) + '</div>';
+      pane.innerHTML = '<div class="rtf-preview">' + SPHERE_RTF.rtfToHtml(personalizeSampleRtf(rtf, row, meta)) + '</div>';
     };
     if (rtfCache[sample.file]) { apply(rtfCache[sample.file]); return; }
     pane.innerHTML = emptyArtifact('Reading ' + escapeHtml(fileName) + '…');
@@ -4641,12 +5014,12 @@
     var side = artifactSideLabel(scope);
     var file = artifactFileName(meta, scope);
     if (tab.id === 'rtf') {
-      if (scope === 'qc') return side + ' · ' + (file || 'QC program') + ' · no QC RTF';
-      if (meta.type === 'Dataset') return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (meta.outPath ? ' · ' + meta.outPath : '');
-      if (!meta.sample) return side + ' · No output file on this record';
-      var id = rowOutputId(row);
-      if (id && id !== meta.sample.id) return side + ' · Demo ' + meta.sample.label + ' sample · ' + meta.outPath + ' · RTF converted to HTML';
-      return side + ' · ' + meta.outPath + ' · RTF converted to HTML';
+      if (meta.type === 'Dataset') {
+        var dsPath = datasetOutputPath(meta, scope);
+        return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (dsPath ? ' · ' + dsPath : '');
+      }
+      if (!meta.outPath) return side + ' · No output file on this record';
+      return side + ' · ' + meta.outPath + ' · Sample output · RTF converted to HTML';
     }
     if (tab.id === 'log') return side + ' · ' + (tab.path || 'Not on this record');
     return side + ' · ' + (tab.path || 'Not on this record');
@@ -4660,14 +5033,17 @@
     var ro = document.getElementById('artifactRoNote');
     if (!modal || !row || !pane) return;
     var meta = artifactMeta(row);
-    var tabs = artifactTabDefs(meta, scope);
+    var tabs = availableArtifactTabs(row, scope);
     var tab = null;
     tabs.forEach(function (t) { if (t.id === id) tab = t; });
     if (!tab) tab = tabs[0];
+    if (!tab) return;
     modal._tab = tab.id;
     var gen = ++artifactGen;
     Array.prototype.forEach.call(document.querySelectorAll('#artifactTabs .artifact-tab'), function (b) {
-      b.setAttribute('aria-selected', b.getAttribute('data-art-tab') === tab.id ? 'true' : 'false');
+      var on = b.getAttribute('data-art-tab') === tab.id;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
     });
     if (sub) sub.textContent = artifactSubtitle(tab, row, meta, scope);
     if (ro) { ro.hidden = true; ro.textContent = ''; }
@@ -4702,7 +5078,7 @@
     }
     setArtifactFoot(false, false);
     if (tab.id === 'log') {
-      var pack = demoLogPack(row, scope === 'qc' ? 'QC' : 'Prod');
+      var pack = sideLogPack(row, scope);
       if (!pack) {
         pane.innerHTML = emptyArtifact('No ' + (scope === 'qc' ? 'QC' : 'production') + ' program on this record, so there is no log.');
         return;
@@ -4712,49 +5088,82 @@
     }
     renderArtifactRtf(pane, row, meta, gen, scope);
   }
-  function openArtifactViewer(row, scope) {
+  function openArtifactViewer(row, scope, openerEl) {
     var modal = document.getElementById('rtfModal');
     var titleEl = document.getElementById('rtfModalTitle');
     var host = document.getElementById('artifactTabs');
     if (!modal || !host || !row) return;
-    if (!row.getAttribute('data-program')) {
+    if (!row.getAttribute('data-program') && scope !== 'qc') {
       showToast('No program file linked to this row yet');
       return;
     }
     scope = scope === 'qc' ? 'qc' : 'prod';
+    var tabs = availableArtifactTabs(row, scope);
+    if (!tabs.length) {
+      if (!modal.hasAttribute('hidden')) closeRtfPreview();
+      showToast('No program, log or output yet');
+      return;
+    }
+    artifactOpener = (openerEl && openerEl.nodeType === 1) ? openerEl
+      : (document.activeElement && document.activeElement !== document.body ? document.activeElement : null);
     modal._row = row;
     modal._scope = scope;
     var meta = artifactMeta(row);
-    var file = artifactFileName(meta, scope) || (scope === 'qc' ? 'QC program' : 'Program');
-    var title = ((row.querySelector('.artifact-title') || {}).textContent || '').trim();
-    var editable = programEditableFor(row, scope);
-    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + file + ' · ' + artifactSideLabel(scope);
-    host.innerHTML = '';
-    host.setAttribute('aria-label', artifactSideLabel(scope) + ' artifacts');
-    artifactTabDefs(meta, scope).forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'artifact-tab';
-      b.setAttribute('role', 'tab');
-      b.setAttribute('data-art-tab', t.id);
-      b.setAttribute('aria-selected', 'false');
-      b.textContent = t.label;
-      if (t.path) b.title = t.path;
-      host.appendChild(b);
-    });
+    var file = artifactFileName(meta, scope) || (scope === 'qc' ? 'QC' : 'Program');
+    var editable = tabs[0].id === 'prog' && programEditableFor(row, scope);
+    var heading = programWritten(row, scope) ? file : tabs.map(function (t) { return t.label; }).join(' · ');
+    if (titleEl) titleEl.textContent = (editable ? 'Edit · ' : 'View · ') + heading + ' · ' + artifactSideLabel(scope);
+    paintArtifactTabButtons(scope, tabs, tabs[0].id);
     modal.removeAttribute('hidden');
-    showArtifactTab('prog');
+    showArtifactTab(tabs[0].id);
+    var codeFocus = document.getElementById('artifactProgramCode');
+    if (!codeFocus || codeFocus.readOnly) {
+      var selectedTab = host.querySelector('[role="tab"][aria-selected="true"]');
+      if (selectedTab) selectedTab.focus();
+    }
+  }
+  function refreshArtifactTabs(row) {
+    var modal = document.getElementById('rtfModal');
+    if (!modal || modal.hasAttribute('hidden') || modal._row !== row) return;
+    var scope = modal._scope || 'prod';
+    var tabs = availableArtifactTabs(row, scope);
+    if (!tabs.length) {
+      closeRtfPreview();
+      showToast('No program, log or output yet');
+      return;
+    }
+    var current = modal._tab;
+    var still = false;
+    tabs.forEach(function (t) { if (t.id === current) still = true; });
+    paintArtifactTabButtons(scope, tabs, still ? current : tabs[0].id);
+    if (!still) showArtifactTab(tabs[0].id);
+  }
+  function refreshArtifactPresence(row) {
+    if (!row) return;
+    var cells = row.querySelectorAll('.artifact-meta > .meta-cell');
+    if (cells[0] && typeof paintProgramCell === 'function') paintProgramCell(row, cells[0], row.getAttribute('data-status') || '');
+    if (typeof refreshArtifactTabs === 'function') refreshArtifactTabs(row);
   }
   function closeRtfPreview() {
     var modal = document.getElementById('rtfModal');
+    var back = artifactOpener;
+    artifactOpener = null;
+    if (modal && document.activeElement && modal.contains(document.activeElement)) {
+      try { document.activeElement.blur(); } catch (eBlur) {}
+    }
     if (modal) {
       modal.setAttribute('hidden', '');
       modal._row = null;
       modal._scope = null;
       modal._tab = null;
     }
+    var host = document.getElementById('artifactTabs');
+    if (host) host.innerHTML = '';
+    var pane = document.getElementById('artifactPane');
+    if (pane) pane.innerHTML = '';
     setArtifactFoot(false, false);
     artifactGen++;
+    if (back) focusIfVisible(back);
   }
   function saveArtifactProgram() {
     var modal = document.getElementById('rtfModal');
@@ -4766,12 +5175,13 @@
     var prog = (row.getAttribute('data-program') || 'program').split('/').pop();
     var file = scope === 'qc' ? (window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog) : prog;
     var len = code ? code.value.length : 0;
+    if (file) noteProgramFile(rowStudyScope(row), file);
     if (window.SPHERE_DEMO && code) {
-      SPHERE_DEMO.setSource(flowKey(row) + ':' + scope, code.value);
+      storeSource(row, scope, code.value);
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
       var rec = flowRecord(row);
       if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
-      else SPHERE_DEMO.addEvent(flowKey(row), ev);
+      else SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
     }
     showToast('Saved ' + file + ' (' + len + ' chars) · new version sealed');
     closeRtfPreview();
@@ -4784,10 +5194,29 @@
   if (artifactCancel) artifactCancel.addEventListener('click', closeRtfPreview);
   var rtfModal = document.getElementById('rtfModal');
   if (rtfModal) {
+    trapModalTab(rtfModal);
     rtfModal.addEventListener('click', function (e) {
       if (e.target === rtfModal) closeRtfPreview();
       var tab = e.target.closest('[data-art-tab]');
       if (tab && rtfModal.contains(tab)) showArtifactTab(tab.getAttribute('data-art-tab'));
+    });
+    rtfModal.addEventListener('keydown', function (e) {
+      if (rtfModal.hidden || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      var el = e.target;
+      if (!el || !el.tagName) return;
+      var tag = el.tagName.toUpperCase();
+      if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || el.isContentEditable) return;
+      var tabs = Array.prototype.slice.call(rtfModal.querySelectorAll('#artifactTabs [role="tab"]'));
+      if (!tabs.length) return;
+      var idx = tabs.indexOf(document.activeElement);
+      if (idx < 0) {
+        tabs.forEach(function (t, i) { if (t.getAttribute('aria-selected') === 'true') idx = i; });
+      }
+      if (idx < 0) idx = 0;
+      var next = e.key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+      e.preventDefault();
+      showArtifactTab(tabs[next].getAttribute('data-art-tab'));
+      if (tabs[next]) tabs[next].focus();
     });
   }
   document.addEventListener('keydown', function (e) {
@@ -4893,8 +5322,7 @@
   }
   function programSourceFor(row, which) {
     var rec = flowPseudoRecord(row);
-    var key = flowKey(row) + ':' + which;
-    var saved = window.SPHERE_DEMO && SPHERE_DEMO.getSource(key);
+    var saved = savedSource(row, which);
     if (saved) return saved;
     if (!window.SPHERE_DEMO) return demoProgramSource(row).body;
     var header = SPHERE_DEMO.programHeader(rec, which);
@@ -4934,7 +5362,7 @@
     var pf = document.getElementById('progTabProdFile'); if (pf) pf.textContent = prog;
     var qf = document.getElementById('progTabQcFile'); if (qf) qf.textContent = qc;
     var rtitle = (((row.querySelector('.artifact-title')) || {}).textContent || '').replace(/\s*New$/, '').trim();
-    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + file;
+    if (titleEl) titleEl.textContent = (editable ? 'Edit · ' : 'View · ') + file;
     if (sub) sub.textContent = rtitle + ' · ' + flowStatusLabel(status) + (which === 'qc' ? ' · QC / validation program' : ' · Production program') + (editable ? ' · Save seals a new version (demo)' : '');
     if (ro) {
       ro.hidden = editable;
@@ -4986,14 +5414,15 @@
     var code = document.getElementById('programEditCode');
     if (code && code.readOnly) { closeProgramEditor(); return; }
     var prog = (row.getAttribute('data-program') || 'program').split('/').pop();
-    var file = programEditWhich === 'qc' ? SPHERE_DEMO.qcName(prog) : prog;
+    var file = programEditWhich === 'qc' ? (window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : ('qc-' + prog)) : prog;
     var len = code ? code.value.length : 0;
+    if (file) noteProgramFile(rowStudyScope(row), file);
     if (window.SPHERE_DEMO && code) {
-      SPHERE_DEMO.setSource(flowKey(row) + ':' + programEditWhich, code.value);
+      storeSource(row, programEditWhich, code.value);
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
       var rec = flowRecord(row);
       if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
-      else SPHERE_DEMO.addEvent(flowKey(row), ev);
+      else SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
     }
     showToast('Saved ' + file + ' (' + len + ' chars) · new version sealed');
     closeProgramEditor();
@@ -5143,6 +5572,7 @@
     if (hand.action === 'to-qc') return 'Send to QC';
     if (hand.action === 'to-stats') return 'QC passed · send to Stats';
     if (hand.action === 'to-mw') return from === 'In QC' ? 'QC passed · release to MW' : 'Stats approved · release to MW';
+    if (hand.action === 'freeze') return 'Freeze';
     return hand.label;
   }
   function flowActionName(hand, from) {
@@ -5153,6 +5583,7 @@
     if (hand.action === 'to-mw') return (from === 'In QC' ? 'QC passed' : 'Stats approved') + ' → Released to MW';
     if (hand.action === 'revise') return 'Returned for revise';
     if (hand.action === 'approve') return 'Approved';
+    if (hand.action === 'freeze') return 'Frozen';
     return hand.label;
   }
   function flowSteps() {
@@ -5192,19 +5623,52 @@
         '<span class="wf-lbl">' + s.label + '</span>' + (when && i <= idx ? '<span class="wf-when">' + when + '</span>' : '') + '</li>';
     }).join('') + '</ol>';
   }
+  function artifactOpenTitle(row, scope) {
+    var bits = [];
+    if (programWritten(row, scope)) bits.push('Program');
+    if (logExists(row, scope)) bits.push('Log');
+    if (rtfExists(row, scope)) bits.push('RTF');
+    var side = scope === 'qc' ? 'QC' : 'production';
+    if (!bits.length) return 'No program, log or output yet';
+    var title = 'Open ' + side + ' · ' + bits.join(' · ');
+    if (!programWritten(row, scope)) title = 'not created · ' + title;
+    return title;
+  }
+  function programLinkHtml(row, scope, cls, inner) {
+    var unwritten = !programWritten(row, scope);
+    var file = scope === 'qc' ? qcProgramName(row) : runProgName(row);
+    var title = artifactOpenTitle(row, scope);
+    if (file) title = file + ' · ' + title;
+    return '<a href="#" class="' + cls + ' program-open-link' + (unwritten ? ' is-unwritten' : '') + '" data-which="' + (scope === 'qc' ? 'qc' : 'prod') + '" title="' + escapeHtml(title) + '">' +
+      '<span class="prog-file">' + inner + '</span>' + (unwritten ? '<span class="unwritten-mark">not created</span>' : '') + '</a>';
+  }
   function paintProgramCell(row, cell, status) {
     if (!cell) return;
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
     if (!prog) return;
-    var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
+    var qc = qcProgramName(row);
     var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
-    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
-      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    var prod = programLinkHtml(row, 'prod', 'meta-v program-name', escapeHtml(prog));
+    var qcHtml = qc
+      ? programLinkHtml(row, 'qc', 'qc-program-name', '<b>QC</b>' + escapeHtml(qc))
+      : '<span class="qc-program-name is-unwritten" title="not created"><span class="prog-file"><b>QC</b></span><span class="unwritten-mark">not created</span></span>';
+    cell.innerHTML = prod + qcHtml;
+    var prodLink = cell.querySelector('[data-which="prod"]');
+    if (prodLink) {
+      var prodTitle = prog + ' · ' + artifactOpenTitle(row, 'prod');
+      if (hint) prodTitle += ' · ' + hint;
+      prodLink.setAttribute('title', prodTitle);
+    }
+    var qcLink = cell.querySelector('[data-which="qc"]');
+    if (qcLink && qc) qcLink.setAttribute('title', qc + ' · ' + artifactOpenTitle(row, 'qc'));
     decorateRerunDot(row);
   }
   function rowStudyScope(row) {
-    var stamped = row && row.getAttribute ? (row.getAttribute('data-shell-study') || '') : '';
+    var stamped = row && row.getAttribute ? (row.getAttribute('data-shell-study') || row.getAttribute('data-runtime-scope') || '') : '';
     if (stamped) return stamped;
+    /* Static seed rows belong to the home study even when this page is another scope. */
+    var id = row && row.getAttribute ? (row.getAttribute('data-record-id') || '') : '';
+    if (id.indexOf('seed-') === 0) return TRACKER_HOME;
     return trackerStoreId();
   }
   function shellInScope(row) {
@@ -5477,8 +5941,22 @@
   }
   function stageHistoryKey(row) {
     var rid = row.getAttribute('data-record-id') || '';
-    if (rid.indexOf('rec-runtime-') === 0) return rid;
+    if (rid) return rid;
+    var fid = row.getAttribute('data-flow-id') || '';
+    if (fid) return fid;
     return flowKey(row);
+  }
+  function adoptStoredStatus(row, from) {
+    var key = stageHistoryKey(row);
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.rememberStatus) return key;
+    var st = SPHERE_DEMO.getStatus ? SPHERE_DEMO.getStatus(key) : null;
+    if (st == null) {
+      var alias = flowKey(row);
+      if (alias && alias !== key && SPHERE_DEMO.getStatus) st = SPHERE_DEMO.getStatus(alias);
+    }
+    if (st == null) st = from || row.getAttribute('data-status') || '';
+    if (st) SPHERE_DEMO.rememberStatus(key, st);
+    return key;
   }
   var stagePending = null;
   var stageOpener = null;
@@ -5522,19 +6000,41 @@
     });
     return froms;
   }
+  function stageIsForwardFreeze(from, to) {
+    return from === 'Approved' && to === 'Frozen';
+  }
+  function stageLeavesLocked(from, to) {
+    if (from !== 'Approved' && from !== 'Frozen') return false;
+    if (!to || to === from) return false;
+    if (stageIsForwardFreeze(from, to)) return false;
+    return true;
+  }
+  function stageNeedsJustify(items, to) {
+    if (to === 'Revise') return true;
+    return (items || []).some(function (it) { return stageLeavesLocked(it.from, to); });
+  }
+  function stageNeedsComment(items, to, justify) {
+    if ((items || []).some(function (it) { return stageLeavesLocked(it.from, to); })) return true;
+    return to === 'Revise' && justify === 'Other';
+  }
   function syncStageConfirm() {
     var btn = document.getElementById('stageModalConfirm');
     var justify = (document.getElementById('stageJustify') || {}).value || '';
     var comment = String((document.getElementById('stageComment') || {}).value || '').trim();
     var to = stagePending ? stagePending.to : '';
-    var revise = to === 'Revise';
-    var needComment = revise && justify === 'Other';
-    var ok = !(revise && !justify) && !(needComment && !comment);
+    var items = stagePending ? stagePending.items : [];
+    var needJustify = stageNeedsJustify(items, to);
+    var needComment = stageNeedsComment(items, to, justify);
+    var leaving = (items || []).some(function (it) { return stageLeavesLocked(it.from, to); });
+    var ok = !(needJustify && !justify) && !(needComment && !comment);
     if (btn) btn.disabled = !ok;
     var hint = document.getElementById('stageCommentHint');
     if (hint) hint.textContent = needComment ? '(required)' : '(optional)';
     var err = document.getElementById('stageCommentError');
-    if (err) err.hidden = !(needComment && !comment);
+    if (err) {
+      err.textContent = leaving ? 'A comment is required.' : 'A comment is required when the justification is Other.';
+      err.hidden = !(needComment && !comment);
+    }
     var commentEl = document.getElementById('stageComment');
     if (commentEl) {
       if (needComment && !comment) commentEl.setAttribute('aria-invalid', 'true');
@@ -5570,10 +6070,13 @@
     var modal = document.getElementById('stageModal');
     if (!modal) return;
     var to = items[0].to;
+    var pendingTo = to;
+    var pendingItems = items.slice();
     var froms = stageFromLabels(items);
     var hand = items[0].hand;
     var title = 'Change stage';
     if (hand) title = froms.length === 1 ? (flowHandLabel(hand, items[0].from) || hand.label || title) : (hand.label || title);
+    var needJustify = stageNeedsJustify(pendingItems, pendingTo);
     stageOpener = opener || null;
     stagePending = {
       to: to,
@@ -5583,7 +6086,7 @@
       onCancel: onCancel || null,
       info: function () {
         return {
-          justification: to === 'Revise' ? ((document.getElementById('stageJustify') || {}).value || '') : '',
+          justification: stageNeedsJustify(pendingItems, pendingTo) ? ((document.getElementById('stageJustify') || {}).value || '') : '',
           comment: String((document.getElementById('stageComment') || {}).value || '').trim(),
           user: stageUser()
         };
@@ -5595,19 +6098,27 @@
     if (line) line.textContent = 'From ' + froms.join(', ') + ' to ' + flowStatusLabel(to);
     var count = document.getElementById('stageModalCount');
     if (count) {
-      count.hidden = items.length < 2;
-      count.textContent = items.length + ' records';
+      if (typeof items.freezeSkipped === 'number' && to === 'Frozen') {
+        var nFreeze = items.length;
+        var freezeLine = 'Freeze ' + nFreeze + ' record' + (nFreeze === 1 ? '' : 's') + '.';
+        if (items.freezeSkipped) freezeLine += ' ' + items.freezeSkipped + ' not Approved will be skipped.';
+        count.hidden = false;
+        count.textContent = freezeLine;
+      } else {
+        count.hidden = items.length < 2;
+        count.textContent = items.length + ' record' + (items.length === 1 ? '' : 's');
+      }
     }
     var justifyWrap = document.getElementById('stageJustifyWrap');
     var justify = document.getElementById('stageJustify');
     if (justify) justify.value = '';
-    if (justifyWrap) justifyWrap.hidden = to !== 'Revise';
+    if (justifyWrap) justifyWrap.hidden = !needJustify;
     var commentEl = document.getElementById('stageComment');
     if (commentEl) commentEl.value = '';
     document.body.appendChild(modal);
     modal.hidden = false;
     syncStageConfirm();
-    var focusEl = to === 'Revise' ? justify : commentEl;
+    var focusEl = needJustify ? justify : commentEl;
     if (stageFocusTimer) clearTimeout(stageFocusTimer);
     stageFocusTimer = setTimeout(function () {
       stageFocusTimer = null;
@@ -5645,13 +6156,14 @@
   })();
 
   function applyTransition(row, hand, info) {
-    if (!hand || !window.SPHERE_DEMO) return;
+    if (!hand || !window.SPHERE_DEMO) return false;
     info = info || {};
     var from = row.getAttribute('data-status') || '';
     var to = hand.nextStatus;
-    if (!to || to === from) return;
+    if (!to || to === from) return false;
+    if (to === 'Frozen' && from !== 'Approved') return false;
     var comment = String(info.comment || '').replace(/\s+/g, ' ').trim();
-    var justification = to === 'Revise' ? String(info.justification || '').trim() : '';
+    var justification = String(info.justification || '').trim();
     var ev = {
       at: stageStampET(),
       action: flowActionName(hand, from),
@@ -5663,14 +6175,17 @@
       comment: comment,
       justification: justification
     };
-    if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
-    row.setAttribute('data-status', to);
     var rec = flowRecord(row);
     if (rec) {
+      if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
+      row.setAttribute('data-status', to);
       SPHERE_DEMO.updateRecord(rec.id, function (x) { x.status = to; x.isNew = false; x.history = x.history || []; x.history.push(ev); });
     } else {
-      SPHERE_DEMO.setStatus(flowKey(row), to);
-      SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
+      var key = adoptStoredStatus(row, from);
+      if (SPHERE_DEMO.setStatus(key, to) == null) return false;
+      if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
+      row.setAttribute('data-status', to);
+      SPHERE_DEMO.addEvent(key, ev);
     }
     row.classList.remove('is-flow-new');
     var chip = row.querySelector('.new-chip');
@@ -5678,6 +6193,7 @@
     refreshRowWorkflowUI(row);
     flashRow(row, false);
     persistRuntimeRowFromDom(row);
+    return true;
   }
 
   /* Workflow popover (status pill) */
@@ -5711,10 +6227,14 @@
         '<div><strong>' + flowHandLabel(confirmHand, status) + '?</strong><br>' + flowStatusLabel(status) + ' → ' + flowStatusLabel(confirmHand.nextStatus) + '. Recorded in History with time and user.</div>' +
         '<div class="wf-pop-actions"><button type="button" class="btn primary sm" data-wf="confirm">Confirm</button><button type="button" class="btn sm" data-wf="cancel">Cancel</button></div></div>';
     } else {
+      var freezeBtn = '';
+      if (status === 'Approved') freezeBtn = '<button type="button" class="btn sm" data-wf="freeze">Freeze</button>';
+      else if (status !== 'Frozen') freezeBtn = '<button type="button" class="btn sm" data-wf="freeze" disabled title="Frozen is only available from Approved">Freeze</button>';
       html += '<div class="wf-pop-actions">' +
         (next ? '<button type="button" class="btn primary sm" data-wf="next">' + flowHandLabel(next, status) + '</button>'
-          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage - no further workflow actions</span>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>')) +
+          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage - no further workflow actions</span>' : (status === 'Approved' ? '' : '<span class="muted" style="font-size:12px">No further workflow step.</span>'))) +
         (ret ? '<button type="button" class="btn sm" data-wf="revise">Return to Revise</button>' : '') +
+        freezeBtn +
         '<button type="button" class="btn sm" data-wf="history">History</button></div>';
     }
     wfPop.innerHTML = html;
@@ -5738,7 +6258,7 @@
     paintWfPop(null);
     wfPop.hidden = false;
     positionWfPop();
-    var first = wfPop.querySelector('[data-wf="next"], [data-wf="history"]');
+    var first = wfPop.querySelector('[data-wf="next"], [data-wf="freeze"]:not([disabled]), [data-wf="history"]');
     if (first) first.focus();
   }
   wfPop.addEventListener('click', function (e) {
@@ -5749,6 +6269,19 @@
     var status = row.getAttribute('data-status') || '';
     if (act === 'close') { closeWfPop(); return; }
     if (act === 'history') { closeWfPop(); openHistoryModal(row); return; }
+    if (act === 'freeze') {
+      if (status !== 'Approved' || b.disabled) return;
+      var freezeHand = { action: 'freeze', label: 'Freeze', nextStatus: 'Frozen' };
+      var freezeOpener = wfPopAnchor;
+      closeWfPop();
+      askStageChange([{ row: row, from: status, to: 'Frozen', hand: freezeHand }], function (info) {
+        applyTransition(row, freezeHand, info);
+        var bitsF = (((row.querySelector('.artifact-title')) || {}).textContent || '').trim().split(' · ');
+        showToast('Frozen · ' + (bitsF[0] || 'record'));
+        applyFilters();
+      }, null, freezeOpener);
+      return;
+    }
     if (act === 'next' || act === 'revise') {
       var hand = act === 'next'
         ? (window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null)
@@ -5787,7 +6320,7 @@
     var link = e.target.closest('.program-open-link');
     if (link) {
       e.preventDefault();
-      openArtifactViewer(link.closest('.artifact-row'), link.getAttribute('data-which'));
+      openArtifactViewer(link.closest('.artifact-row'), link.getAttribute('data-which'), link);
     }
   });
 
@@ -5921,6 +6454,19 @@
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
       row.classList.add('is-flow-new');
     }
+    var savedFlow = rec.id && window.SPHERE_DEMO && SPHERE_DEMO.rowState ? SPHERE_DEMO.rowState(rec.id) : null;
+    if (savedFlow && savedFlow.program) row.setAttribute('data-program', savedFlow.program);
+    if (savedFlow && (savedFlow.job === 'done' || savedFlow.job === 'error' || savedFlow.job === 'completed')) {
+      restoreFinishedJob(row, {
+        job: savedFlow.job === 'completed' ? 'done' : savedFlow.job,
+        jobMode: savedFlow.jobMode || 'prod',
+        jobWarn: savedFlow.jobWarn,
+        lastRun: savedFlow.lastRun || '',
+        prodRan: savedFlow.prodRan,
+        qcRan: savedFlow.qcRan,
+        outputReady: savedFlow.outputReady
+      });
+    }
     return row;
   }
   /* Shared SAP sections (same list as Mock Shells TOC) */
@@ -6038,7 +6584,15 @@
       shell: spec.shell || 'n/a',
       shellId: spec.shellId || '',
       assigned: spec.assigned || '',
-      job: spec.job || ''
+      job: spec.job || '',
+      jobMode: spec.jobMode || '',
+      lastRun: spec.lastRun || '',
+      programFile: spec.programFile ? 1 : 0,
+      qcFile: spec.qcFile ? 1 : 0,
+      prodRan: spec.prodRan ? 1 : 0,
+      qcRan: spec.qcRan ? 1 : 0,
+      outputReady: spec.outputReady ? 1 : 0,
+      jobWarn: spec.jobWarn ? 1 : 0
     };
     var idx = -1;
     for (var i = 0; i < list.length; i++) if (list[i] && list[i].recordId === spec.recordId) idx = i;
@@ -6058,6 +6612,22 @@
         });
       }
     }
+  }
+  function persistFlowRowRun(row) {
+    if (!row || !window.SPHERE_DEMO || !SPHERE_DEMO.setRowState) return;
+    var id = row.getAttribute('data-flow-id') || '';
+    if (!id) return;
+    var job = row._runJob;
+    SPHERE_DEMO.setRowState(id, {
+      program: (row.getAttribute('data-program') || '').split('/').pop(),
+      job: row.getAttribute('data-job') || (job && job.state) || '',
+      jobMode: row.getAttribute('data-job-mode') || (job && job.mode) || '',
+      jobWarn: job && job.warn ? 1 : 0,
+      lastRun: row.getAttribute('data-last-run') || '',
+      prodRan: row._prodRan ? 1 : 0,
+      qcRan: row._qcRan ? 1 : 0,
+      outputReady: row._outputReady ? 1 : 0
+    });
   }
   function persistRuntimeRowFromDom(row) {
     if (!row) return;
@@ -6080,7 +6650,15 @@
       shell: shell || 'n/a',
       shellId: row.getAttribute('data-shell-id') || '',
       assigned: assigned,
-      job: row.getAttribute('data-job') || ''
+      job: row.getAttribute('data-job') || '',
+      jobMode: row.getAttribute('data-job-mode') || '',
+      lastRun: row.getAttribute('data-last-run') || '',
+      programFile: programWritten(row, 'prod') ? 1 : 0,
+      qcFile: programWritten(row, 'qc') ? 1 : 0,
+      prodRan: row._prodRan ? 1 : 0,
+      qcRan: row._qcRan ? 1 : 0,
+      outputReady: row._outputReady ? 1 : 0,
+      jobWarn: row._runJob && row._runJob.warn ? 1 : 0
     };
     var list = readRuntimeRows();
     var found = false;
@@ -6095,6 +6673,33 @@
     writeRuntimeRows(list);
   }
 
+  function restoreFinishedJob(row, spec) {
+    var mode = spec.jobMode;
+    if (mode !== 'prod' && mode !== 'qc' && mode !== 'both') return;
+    var prog = runProgName(row);
+    if (!prog) return;
+    var jobState = String(spec.job || '').toLowerCase() === 'error' ? 'error' : 'done';
+    var end = spec.lastRun ? new Date(spec.lastRun) : new Date();
+    if (isNaN(end.getTime())) end = new Date();
+    var phases = mode === 'both'
+      ? [{ kind: 'Prod', dur: 4000 }, { kind: 'QC', dur: 4000 }]
+      : [{ kind: mode === 'qc' ? 'QC' : 'Prod', dur: 4000 }];
+    var j = {
+      id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: mode,
+      phases: phases, phase: phases.length - 1, state: jobState, warn: !!spec.jobWarn, warnPhase: spec.jobWarn ? 0 : -1,
+      batch: null, startedAt: end.getTime() - 4000, endedAt: end.getTime(), endDate: end, logs: {}
+    };
+    row._runJob = j;
+    row.setAttribute('data-job', j.state);
+    row.setAttribute('data-job-mode', mode);
+    if (spec.lastRun) row.setAttribute('data-last-run', end.toISOString());
+    sealFinishedJob(j);
+    if (spec.prodRan) row._prodRan = true;
+    if (spec.qcRan) row._qcRan = true;
+    if (spec.outputReady) row._outputReady = true;
+    renderJobCell(row);
+  }
+
   function hydrateRuntimeRows() {
     var scope = runtimeScopeId();
     readRuntimeRows().forEach(function (spec) {
@@ -6102,7 +6707,28 @@
       if ((spec.scope || RUNTIME_HOME) !== scope) return;
       var id = String(spec.recordId).replace(/"/g, '');
       if (board.querySelector('.artifact-row[data-record-id="' + id + '"]')) return;
-      moveRowToSap(buildArtifactRow(spec), spec.sap || 'Demographics');
+      var built = buildArtifactRow(spec);
+      if (spec.programFile && spec.program) {
+        noteProgramFile(spec.scope || scope, spec.program);
+        built.setAttribute('data-program-file', '1');
+      }
+      if (spec.qcFile && spec.program) {
+        var qn = qcProgramName(built);
+        if (qn) noteProgramFile(spec.scope || scope, qn);
+      }
+      if (spec.prodRan) built._prodRan = true;
+      if (spec.qcRan) built._qcRan = true;
+      if (spec.outputReady) built._outputReady = true;
+      moveRowToSap(built, spec.sap || 'Demographics');
+      var job = String(spec.job || '').toLowerCase();
+      var mode = spec.jobMode || '';
+      if ((job === 'done' || job === 'error') && (mode === 'prod' || mode === 'qc' || mode === 'both')) {
+        restoreFinishedJob(built, spec);
+      }
+      if (window.SPHERE_DEMO) {
+        if (SPHERE_DEMO.rememberStatus) SPHERE_DEMO.rememberStatus(id, built.getAttribute('data-status') || spec.status || '');
+        if (SPHERE_DEMO.mergeEvents) SPHERE_DEMO.mergeEvents(id, [spec.program || '', runProgName(built)]);
+      }
     });
   }
 
@@ -6251,10 +6877,17 @@
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
     allRows().forEach(function (row) {
-      var st = SPHERE_DEMO.getStatus(flowKey(row));
+      var key = stageHistoryKey(row);
+      var alias = flowKey(row);
+      var st = SPHERE_DEMO.getStatus(key);
+      if (st == null && alias && alias !== key) st = SPHERE_DEMO.getStatus(alias);
       if (st) {
         row.setAttribute('data-orig-status', row.getAttribute('data-status') || '');
         row.setAttribute('data-status', st);
+      }
+      adoptStoredStatus(row, row.getAttribute('data-status') || '');
+      if (SPHERE_DEMO.mergeEvents) {
+        SPHERE_DEMO.mergeEvents(key, [alias, row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '', runProgName(row)]);
       }
     });
     var trackerStore = trackerStoreId();

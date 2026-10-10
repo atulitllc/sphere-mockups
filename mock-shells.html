@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4bar" />
+<link rel="stylesheet" href="shared-white.css?v=flow4merge1" />
 <script>
 (function () {
   try {
@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4keys"></script>
+<script src="demo-flow.js?v=flow4round4"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -3661,6 +3661,72 @@
     lay.sapRef = '';
     return lay;
   }
+  function copyScopeBits(id) {
+    var raw = String(id || 'ONC-204-301');
+    var cut = raw.indexOf('::');
+    return {
+      study: cut < 0 ? raw : raw.slice(0, cut),
+      deliverable: cut < 0 ? 'CSR' : (raw.slice(cut + 2) || 'CSR')
+    };
+  }
+  function copyActorName() {
+    try {
+      if (window.SPHERE_ACCESS && SPHERE_ACCESS.current) {
+        var who = SPHERE_ACCESS.current();
+        if (who && who.name) return who.name;
+      }
+    } catch (eActor) {}
+    return (window.SPHERE_DEMO && SPHERE_DEMO.CURRENT_USER) || 'Jordan Patel';
+  }
+  function readCopiedSource(scope, name, side, legacyId) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.getSource || !name) return '';
+    var hit = SPHERE_DEMO.getSource(scope + '|' + name + ':' + side);
+    if (hit) return hit;
+    if (legacyId && scope === 'ONC-204-301') {
+      hit = SPHERE_DEMO.getSource('ONC-204-301|' + legacyId + ':' + side);
+      if (hit) return hit;
+    }
+    return '';
+  }
+  function copySideExists(scope, name, side, legacyId, rec) {
+    if (!name || !window.SPHERE_DEMO) return false;
+    if (readCopiedSource(scope, name, side, legacyId)) return true;
+    if (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, name)) return true;
+    if (SPHERE_DEMO.seedFile && SPHERE_DEMO.seedFile(scope, name)) return true;
+    var hist = (rec && rec.history) || [];
+    var i;
+    for (i = 0; i < hist.length; i++) {
+      var blob = String((hist[i] && hist[i].action) || '') + ' ' + String((hist[i] && hist[i].note) || '');
+      if (/header generated/i.test(blob) && blob.indexOf(name) >= 0) return true;
+    }
+    return false;
+  }
+  function uniqueCopyProgram(scope, name) {
+    var file = String(name || '').split('/').pop();
+    if (!file || !window.SPHERE_DEMO) return file;
+    var dot = file.lastIndexOf('.');
+    var stem = dot > 0 ? file.slice(0, dot) : file;
+    var ext = dot > 0 ? file.slice(dot) : '';
+    var n = 2;
+    var candidate = file;
+    function taken(nm) {
+      if (SPHERE_DEMO.seedFile && SPHERE_DEMO.seedFile(scope, nm)) return true;
+      if (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, nm)) return true;
+      if (SPHERE_DEMO.getSource && SPHERE_DEMO.getSource(scope + '|' + nm + ':prod')) return true;
+      var list = SPHERE_DEMO.records ? SPHERE_DEMO.records() : [];
+      var i;
+      for (i = 0; i < list.length; i++) {
+        if (!list[i]) continue;
+        if ((list[i].study || 'ONC-204-301') === scope && list[i].program === nm) return true;
+      }
+      return false;
+    }
+    while (taken(candidate)) {
+      candidate = stem + '_c' + n + ext;
+      n++;
+    }
+    return candidate;
+  }
   function copyTrackerDraft(src, draft, targetId) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.addRecord) return;
     var linked = src.syncedAt || src.recordId || isTrackerLinked(src);
@@ -3685,19 +3751,89 @@
       roles: { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' }
     };
     if (!rec.roles) rec.roles = { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' };
+    var origProgram = String(rec.program || (draft.layout && draft.layout.program) || '').split('/').pop();
+    var origQc = origProgram && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(origProgram) : '';
+    var legacyId = existing && existing.id ? existing.id : '';
     rec.id = 'rec-copy-' + draft.id;
     rec.shellId = draft.id;
     rec.number = draft.number;
     rec.title = draft.title;
     rec.status = 'Draft';
-    rec.history = [{ at: SPHERE_DEMO.stamp(), action: 'Copied as Draft', status: 'Draft', person: SPHERE_DEMO.CURRENT_USER, note: 'Copied with shell ' + src.number }];
+    rec.isNew = false;
     rec.syncedAt = SPHERE_DEMO.stamp();
     delete rec.study;
     if (targetId && targetId !== sourceId) rec.study = targetId;
     else if (sourceId !== 'ONC-204-301') rec.study = sourceId;
+    var destScope = rec.study || 'ONC-204-301';
+    var program = uniqueCopyProgram(destScope, origProgram);
+    rec.program = program;
+    if (draft.layout) draft.layout.program = program;
+    var qc = program && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(program) : '';
+    var bits = copyScopeBits(sourceId);
+    var shellNo = src.number || draft.number || '';
+    var sentence = 'Copied as Draft from ' + bits.study + ' / ' + bits.deliverable + ' / ' + shellNo + ' (' + (origProgram || program) + ')';
+    rec.history = [{
+      at: SPHERE_DEMO.stamp(),
+      action: sentence,
+      status: 'Draft',
+      person: copyActorName(),
+      note: ''
+    }];
+    function rewriteProgramName(text, fromName, toName) {
+      if (!text || !fromName || !toName || fromName === toName) return text || '';
+      var fromStem = fromName.replace(/\.[^.]+$/, '');
+      var toStem = toName.replace(/\.[^.]+$/, '');
+      function esc(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+      return String(text).split('\n').map(function (row) {
+        if (/Output file/.test(row)) return row;
+        var next = row.split(fromName).join(toName);
+        if (fromStem && toStem && fromStem !== toStem) next = next.replace(new RegExp(esc(fromStem) + '(?![A-Za-z0-9_])', 'g'), toStem);
+        return next;
+      }).join('\n');
+    }
+    function stampOutputLine(text, side) {
+      if (!text || !SPHERE_DEMO.outputFilePath) return text || '';
+      var headerRec = JSON.parse(JSON.stringify(rec));
+      headerRec.study = destScope;
+      headerRec.program = program;
+      var path = SPHERE_DEMO.outputFilePath(headerRec, side === 'qc');
+      if (!path) return text;
+      return String(text).split('\n').map(function (row) {
+        if (!/Output file/.test(row)) return row;
+        var idx = row.indexOf(':');
+        if (idx < 0) return row;
+        return row.slice(0, idx + 1) + ' ' + path;
+      }).join('\n');
+    }
+    function textFor(sourceName, side, destName) {
+      if (!copySideExists(sourceId, sourceName, side, legacyId, existing)) return '';
+      var stored = readCopiedSource(sourceId, sourceName, side, legacyId);
+      var text = '';
+      if (stored) {
+        var moved = SPHERE_DEMO.retargetProgramText ? SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope) : stored;
+        text = rewriteProgramName(moved, sourceName, destName);
+      } else if (SPHERE_DEMO.programHeader) {
+        var headerRec = JSON.parse(JSON.stringify(rec));
+        headerRec.study = destScope;
+        headerRec.program = program;
+        text = SPHERE_DEMO.programHeader(headerRec, side);
+      }
+      return stampOutputLine(text, side);
+    }
+    var prodText = origProgram ? textFor(origProgram, 'prod', program) : '';
+    var qcText = origQc ? textFor(origQc, 'qc', qc) : '';
+    if (program && prodText) {
+      SPHERE_DEMO.setSource(destScope + '|' + program + ':prod', prodText);
+      if (SPHERE_DEMO.noteFile) SPHERE_DEMO.noteFile(destScope, program);
+    }
+    if (qc && qcText) {
+      SPHERE_DEMO.setSource(destScope + '|' + qc + ':qc', qcText);
+      if (SPHERE_DEMO.noteFile) SPHERE_DEMO.noteFile(destScope, qc);
+    }
     SPHERE_DEMO.addRecord(rec);
     draft.recordId = rec.id;
     draft.syncedAt = rec.syncedAt;
+    draft.generatedOutputs = [];
   }
   function performCopy() {
     var dest = copyDestinations().filter(function (d) { return copyDeliverable && d.id === copyDeliverable.value; })[0];
@@ -4228,6 +4364,13 @@
     render();
     paintMissingEditor();
   }
+  document.addEventListener('keydown', function (e) {
+    if (!shellMissingId || e.key !== 'Enter') return;
+    var editor = document.querySelector('.shell-editor.is-missing');
+    if (!editor || !editor.contains(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
   (function bootFromShellQuery() {
     if (shellQueryMissing) return;
     var requested = '';

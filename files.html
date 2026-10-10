@@ -36,7 +36,7 @@
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
 <script src="sphere-access.js?v=acct1"></script>
-<script src="demo-flow.js?v=flow4keys"></script>
+<script src="demo-flow.js?v=flow4round4"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -545,7 +545,7 @@
   function applyStoredFileRenames() {
     if (fileRenamesApplied || !window.SPHERE_DEMO || !SPHERE_DEMO.fileRenames) return;
     fileRenamesApplied = true;
-    var map = SPHERE_DEMO.fileRenames();
+    var map = SPHERE_DEMO.fileRenames(window.SPHERE_filesScope || 'ONC-204-301');
     Object.keys(TREE).forEach(function (key) {
       (TREE[key] || []).forEach(function (f) {
         if (f && map[f.name]) f.name = map[f.name];
@@ -1092,6 +1092,9 @@
     window.SPHERE_filesCompound = active.compound || '';
     window.SPHERE_filesPath = activePath;
     var demoFiles = active.protocol === 'ONC-204-301' && active.deliverable === 'CSR';
+    window.SPHERE_filesScope = (!active.deliverable || active.deliverable === 'CSR')
+      ? active.protocol
+      : (active.protocol + '::' + active.deliverable);
     function link(e) { return 'files.html?path=' + encodeURIComponent(L.entryPath(e)); }
     var box = document.createElement('div');
     box.className = 'files-studies';
