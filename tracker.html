@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4focus" />
+<link rel="stylesheet" href="shared-white.css?v=flow4qc" />
 <script>
 (function () {
   try {
@@ -1245,7 +1245,7 @@
         <span>Comment <span class="hint" id="stageCommentHint">(optional)</span></span>
         <textarea id="stageComment" rows="3"></textarea>
       </label>
-      <p class="hint" id="stageCommentError" hidden>A comment is required when the justification is Other.</p>
+      <p class="section-form-err" id="stageCommentError" hidden>A comment is required when the justification is Other.</p>
     </form>
     <div class="modal-foot">
       <button class="btn" type="button" id="stageModalCancel">Cancel</button>
@@ -1508,7 +1508,7 @@
           showToast(flowHandLabel(g.hand, '') + ' · ' + flowStatusLabel(g.hand.nextStatus) + ' · ' + items.length + ' record' + (items.length === 1 ? '' : 's') + ' · recorded in History');
           applyFilters();
           syncBulk();
-        });
+        }, null, btn);
       });
       host.appendChild(btn);
     });
@@ -2309,21 +2309,36 @@
     var nums = m[1].split('_');
     return 't_' + nums.slice(0, 4).join('_');
   }
+  function logRowType(j) {
+    var row = j && j.row;
+    return row ? (row.getAttribute('data-type') || 'Table') : 'Table';
+  }
+  function logNamed(name, type) {
+    var s = String(name || '');
+    var pre = type === 'Figure' ? 'f_' : (type === 'Listing' ? 'l_' : '');
+    if (!pre) return s;
+    if (/^tfl_/i.test(s)) return pre + s.slice(4);
+    if (/^t_/i.test(s)) return pre + s.slice(2);
+    return s;
+  }
+  function logProgramBase(j) {
+    var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '').replace(/\.[^.]+$/, '');
+    return logNamed(prog, logRowType(j));
+  }
   function logOutputStem(j) {
     var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '');
     var fromTfl = runOutId(prog);
-    if (fromTfl !== 'out') return fromTfl;
-    var stem = prog.replace(/\.[^.]+$/, '');
-    if (/^[tfl]_\d/i.test(stem)) return stem;
-    var row = j && j.row;
-    var id = row ? rowOutputId(row) : '';
-    if (id) {
-      var type = row.getAttribute('data-type') || 'Table';
-      var pre = type === 'Figure' ? 'f_' : (type === 'Listing' ? 'l_' : 't_');
-      return pre + String(id).replace(/\./g, '_');
+    var stem = fromTfl;
+    if (fromTfl === 'out') {
+      stem = prog.replace(/\.[^.]+$/, '');
+      if (!/^[tfl]_\d/i.test(stem)) {
+        var row = j && j.row;
+        var id = row ? rowOutputId(row) : '';
+        if (id) stem = 't_' + String(id).replace(/\./g, '_');
+        else if (!stem || stem.toLowerCase() === 'out') stem = fromTfl;
+      }
     }
-    if (stem && stem.toLowerCase() !== 'out') return stem;
-    return fromTfl;
+    return logNamed(stem, logRowType(j));
   }
   function runRowTitle(row) { return (((row && row.querySelector('.artifact-title')) || {}).textContent || '').trim(); }
   function secs(x) { return x.toFixed(2) + ' seconds'; }
@@ -2347,7 +2362,7 @@
     var t = phaseTimes(j, idx);
     var rnd = seeded(j.id * 97 + idx * 13 + hashStr(j.prog));
     var total = t.dur / 1000;
-    var prog = (isQc ? 'qc-' : '') + j.prog.replace(/\.[^.]+$/, '') + '.sas';
+    var prog = (isQc ? 'qc-' : '') + logProgramBase(j) + '.sas';
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var title = runRowTitle(j.row);
@@ -2514,7 +2529,7 @@
     var t = phaseTimes(j, idx);
     var rnd = seeded(j.id * 89 + idx * 7 + hashStr(j.prog));
     var total = t.dur / 1000;
-    var base = j.prog.replace(/\.[^.]+$/, '');
+    var base = logProgramBase(j);
     var prog = (isQc ? 'qc-' : '') + base + '.R';
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
@@ -2905,7 +2920,14 @@
     document.getElementById('reTitle').value = (row.querySelector('.artifact-title') || {}).textContent || '';
     document.getElementById('reProgram').value = row.getAttribute('data-program') || '';
     document.getElementById('reType').value = row.getAttribute('data-type') || 'Table';
-    document.getElementById('reStatus').value = row.getAttribute('data-status') || 'Not started';
+    var statusNow = row.getAttribute('data-status') || 'Not started';
+    document.getElementById('reStatus').value = statusNow;
+    Array.prototype.forEach.call(document.getElementById('reStatus').options, function (opt) {
+      if (opt.value !== 'Draft') return;
+      var showDraft = statusNow === 'Draft';
+      opt.hidden = !showDraft;
+      opt.disabled = !showDraft;
+    });
     document.getElementById('reSap').value = row.getAttribute('data-sap') || 'Demographics';
     var shellTxt = cells[4] ? (cells[4].textContent || '').trim() : 'n/a';
     var shellSel = document.getElementById('reShell');
@@ -3091,7 +3113,7 @@
       }, function () {
         var sel = document.getElementById('reStatus');
         if (sel) sel.value = from;
-      });
+      }, row.querySelector('.row-edit') || document.getElementById('btnSaveRowEditor'));
       return;
     }
     writeRowEditor();
@@ -3559,9 +3581,15 @@
   (function bindNewRecord() {
     var modal = document.getElementById('newRecordModal');
     var openBtn = document.getElementById('btnNewRecord');
+    var nrOpener = null;
     if (!modal || !openBtn) return;
+    trapModalTab(modal);
     function field(id) { return document.getElementById(id); }
-    function close() { modal.hidden = true; }
+    function close() {
+      modal.hidden = true;
+      focusIfVisible(nrOpener);
+      nrOpener = null;
+    }
     function clearFlags() {
       ['nrTitle', 'nrProgram'].forEach(function (id) {
         var el = field(id);
@@ -3576,6 +3604,7 @@
       var form = field('newRecordForm');
       if (form) form.reset();
       clearFlags();
+      nrOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : openBtn;
       modal.hidden = false;
       if (field('nrTitle')) field('nrTitle').focus();
     }
@@ -4149,7 +4178,8 @@
         { at: '2026-09-01 08:00', action: 'Frozen', status: 'Frozen', person: 'System', note: 'Files ACL freeze' }
       ])
     };
-    var events = (byStatus[status] || base).slice();
+    var recordId = row.getAttribute('data-record-id') || '';
+    var events = recordId.indexOf('seed-') === 0 ? (byStatus[status] || base).slice() : [];
     if (window.SPHERE_DEMO && SPHERE_DEMO.getEvents) {
       var seenKey = {};
       [flowKey(row), row.getAttribute('data-record-id') || ''].forEach(function (k) {
@@ -4161,7 +4191,13 @@
     return { title: title.trim(), program: prog, status: row.getAttribute('data-status') || status, owner: owner || 'Jordan Patel', events: events };
   }
 
+  function stampETLabel(at) {
+    var s = String(at || '').trim();
+    if (!s || /\bET$/.test(s)) return s;
+    return s + ' ET';
+  }
   function demoVersionsForRow(row) {
+    if ((row.getAttribute('data-record-id') || '').indexOf('seed-') !== 0) return [];
     var data = demoHistoryForRow(row);
     var owner = data.owner;
     var prog = data.program || 'program.R';
@@ -4299,7 +4335,7 @@
         '<div class="txn-dot" aria-hidden="true"></div>' +
         '<div class="txn-body">' +
           '<div class="txn-top"><strong>' + escapeHtml(ev.action || '') + '</strong><span class="txn-status">' + escapeHtml(flowStatusLabel(ev.status || '')) + '</span></div>' +
-          '<div class="txn-meta"><span>' + escapeHtml(ev.at || '') + '</span><span>' + escapeHtml(ev.person || '') + '</span></div>' +
+          '<div class="txn-meta"><span>' + escapeHtml(stampETLabel(ev.at || '')) + '</span><span>' + escapeHtml(ev.person || '') + '</span></div>' +
           fromTo + just + comment + legacy +
         '</div></li>';
     }).join('');
@@ -4321,7 +4357,7 @@
           '<div class="ver-top"><strong>v' + v.n + '</strong>' +
             (v.current ? '<span class="ver-badge">Current</span>' : '') +
             '<span class="ver-trigger">' + v.trigger + '</span></div>' +
-          '<div class="ver-meta"><span>' + v.at + '</span><span>' + v.person + '</span></div>' +
+          '<div class="ver-meta"><span>' + escapeHtml(stampETLabel(v.at)) + '</span><span>' + escapeHtml(v.person || '') + '</span></div>' +
           '<div class="ver-note">' + v.note + '</div>' +
         '</div>' +
         '<div class="ver-actions">' +
@@ -4350,7 +4386,7 @@
     if (!v) return;
     histSelectedVer = v;
     var current = list._versions.find(function (x) { return x.current; }) || list._versions[0];
-    if (title) title.textContent = 'v' + v.n + ' · ' + v.at + ' · ' + v.trigger;
+    if (title) title.textContent = 'v' + v.n + ' · ' + stampETLabel(v.at) + ' · ' + v.trigger;
     if (codeEl) codeEl.textContent = String(v.body || '');
     if (v.current) {
       if (legend) legend.textContent = 'This is the current version - no differences.';
@@ -5431,6 +5467,35 @@
     return flowKey(row);
   }
   var stagePending = null;
+  var stageOpener = null;
+  function modalFocusable(root) {
+    var list = root.querySelectorAll('a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled])');
+    var out = [];
+    var i;
+    for (i = 0; i < list.length; i++) {
+      if (!list[i].closest('[hidden]')) out.push(list[i]);
+    }
+    return out;
+  }
+  function trapModalTab(modal) {
+    modal.addEventListener('keydown', function (e) {
+      if (modal.hidden || e.key !== 'Tab') return;
+      var nodes = modalFocusable(modal);
+      if (!nodes.length) { e.preventDefault(); return; }
+      var first = nodes[0];
+      var last = nodes[nodes.length - 1];
+      var idx = nodes.indexOf(document.activeElement);
+      if (e.shiftKey) {
+        if (idx <= 0) { e.preventDefault(); last.focus(); }
+      } else if (idx < 0 || idx === nodes.length - 1) {
+        e.preventDefault(); first.focus();
+      }
+    });
+  }
+  function focusIfVisible(el) {
+    if (!el || !el.isConnected || el.closest('[hidden]')) return;
+    try { el.focus(); } catch (eFocus) {}
+  }
   function stageFromLabels(items) {
     var froms = [];
     items.forEach(function (it) {
@@ -5461,13 +5526,16 @@
   function closeStageModal(commit) {
     var modal = document.getElementById('stageModal');
     var pending = stagePending;
+    var opener = stageOpener;
     stagePending = null;
+    stageOpener = null;
     if (modal) modal.hidden = true;
-    if (!pending) return;
+    if (!pending) { focusIfVisible(opener); return; }
     if (commit && pending.onOk) pending.onOk(pending.info());
     else if (pending.onCancel) pending.onCancel();
+    focusIfVisible(opener);
   }
-  function askStageChange(items, onOk, onCancel) {
+  function askStageChange(items, onOk, onCancel, opener) {
     if (!items || !items.length || stagePending) return;
     var modal = document.getElementById('stageModal');
     if (!modal) return;
@@ -5476,6 +5544,7 @@
     var hand = items[0].hand;
     var title = 'Change stage';
     if (hand) title = froms.length === 1 ? (flowHandLabel(hand, items[0].from) || hand.label || title) : (hand.label || title);
+    stageOpener = opener || null;
     stagePending = {
       to: to,
       onOk: onOk,
@@ -5536,6 +5605,7 @@
       e.preventDefault();
       closeStageModal(false);
     });
+    trapModalTab(modal);
   })();
 
   function applyTransition(row, hand, info) {
@@ -5648,13 +5718,14 @@
         ? (window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null)
         : (window.SPHERE && SPHERE.returnHandoff ? SPHERE.returnHandoff(status) : null);
       if (!hand || hand.nextStatus === status) return;
+      var opener = wfPopAnchor;
       closeWfPop();
       askStageChange([{ row: row, from: status, to: hand.nextStatus, hand: hand }], function (info) {
         applyTransition(row, hand, info);
         var bits = (((row.querySelector('.artifact-title')) || {}).textContent || '').trim().split(' · ');
         showToast(flowActionName(hand, status) + ' · ' + (bits[0] || 'record'));
         applyFilters();
-      });
+      }, null, opener);
       return;
     }
     if (act === 'cancel' || act === 'confirm') { paintWfPop(null); positionWfPop(); return; }

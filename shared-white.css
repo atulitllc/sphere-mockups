@@ -2076,6 +2076,7 @@ label .req::after { content: " *"; color: var(--danger); }
   padding: 20px;
 }
 .modal-backdrop[hidden] { display: none !important; }
+#stageJustifyWrap[hidden] { display: none; }
 .modal {
   width: min(560px, 100%);
   max-height: min(80vh, 640px);
