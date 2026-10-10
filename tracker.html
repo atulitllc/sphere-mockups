@@ -278,14 +278,14 @@
             </label>
           </div>
           <div class="artifact-main">
-            <div class="col-head-output"><button type="button" class="sort-h" data-sort="output" aria-sort="none">Output</button><span class="col-head-sub">Roles</span></div>
+            <div class="col-head-output"><span class="col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="output">Output</button></span><span class="col-head-sub">Roles</span></div>
             <div class="artifact-meta">
-              <div class="meta-cell col-head-program-spacer"><button type="button" class="sort-h" data-sort="programs" aria-sort="none">Programs</button></div>
-              <div class="meta-cell"><button type="button" class="sort-h" data-sort="type" aria-sort="none">Type</button></div>
-              <div class="meta-cell"><button type="button" class="sort-h" data-sort="status" aria-sort="none">Status</button></div>
+              <div class="meta-cell col-head-program-spacer col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="programs">Programs</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="type">Type</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="status">Status</button></div>
               <div class="meta-cell"><span class="col-head-label">Assigned To</span></div>
-              <div class="meta-cell"><button type="button" class="sort-h" data-sort="shell" aria-sort="none">Shell</button></div>
-              <div class="meta-cell"><button type="button" class="sort-h" data-sort="job" aria-sort="none">Job</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="shell">Shell</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="job">Job</button></div>
               <div class="meta-cell"><span class="col-head-label">Actions</span></div>
             </div>
           </div>
@@ -5375,14 +5375,27 @@
     return '';
   }
 
+  var TRACKER_STATUS_ORDER = ['Draft', 'Not started', 'In dev', 'Revise', 'In QC', 'In Stats', 'Released to MW', 'Approved', 'Frozen'];
+  function statusSortRank(row) {
+    var st = row.getAttribute('data-status') || '';
+    if (st === 'In MW') st = 'Released to MW';
+    var i = TRACKER_STATUS_ORDER.indexOf(st);
+    return i < 0 ? TRACKER_STATUS_ORDER.length : i;
+  }
+
   function compareTrackerRows(a, b) {
     var dir = trackerSort.dir === -1 ? -1 : 1;
+    var cmp = 0;
     if (trackerSort.key === 'job') {
-      var byStatus = cmpNatural(jobSortWord(a), jobSortWord(b));
-      if (byStatus) return byStatus * dir;
-      return (jobSortTime(a) - jobSortTime(b)) * dir;
+      cmp = cmpNatural(jobSortWord(a), jobSortWord(b));
+      if (!cmp) cmp = jobSortTime(a) - jobSortTime(b);
+    } else if (trackerSort.key === 'status') {
+      cmp = statusSortRank(a) - statusSortRank(b);
+    } else {
+      cmp = cmpNatural(rowSortText(a, trackerSort.key), rowSortText(b, trackerSort.key));
     }
-    return cmpNatural(rowSortText(a, trackerSort.key), rowSortText(b, trackerSort.key)) * dir;
+    if (!cmp) return 0;
+    return cmp * dir;
   }
 
   function paintTrackerSortHeaders() {
@@ -5392,7 +5405,9 @@
       var active = key === trackerSort.key;
       var arrow = active ? (trackerSort.dir > 0 ? '↑' : '↓') : '';
       h.innerHTML = '<span>' + label + '</span>' + (arrow ? '<span class="sort-arrow" aria-hidden="true">' + arrow + '</span>' : '');
-      h.setAttribute('aria-sort', active ? (trackerSort.dir > 0 ? 'ascending' : 'descending') : 'none');
+      h.removeAttribute('aria-sort');
+      var head = h.closest('[role="columnheader"]');
+      if (head) head.setAttribute('aria-sort', active ? (trackerSort.dir > 0 ? 'ascending' : 'descending') : 'none');
     });
   }
 

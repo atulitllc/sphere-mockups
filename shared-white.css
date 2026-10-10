@@ -7006,6 +7006,15 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   cursor: pointer;
   border-radius: 4px;
 }
+/* Tracker headers keep the blue 10.5px label; .sort-h only supplies the button reset, arrow, and hover. */
+.tracker-col-head .sort-h {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  text-transform: inherit;
+}
 .sort-h:hover { color: var(--text); background: transparent; }
 .sort-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sort-h .sort-arrow { font-size: 10px; line-height: 1; opacity: 0.8; text-transform: none; }
