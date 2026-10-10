@@ -1148,6 +1148,10 @@
       studyStore[s.id] = { shells: seedCatalog(s.id), selectedId: null };
     }
   });
+  /* Every Study Admin deliverable gets a store, including ones outside STUDY_DIRECTORY. */
+  adminStudies().forEach(function (s) {
+    if (!studyStore[s.id]) studyStore[s.id] = { shells: seedCatalog(s.id), selectedId: null };
+  });
   function canonStatus(st) {
     if (st === 'In review' || st === 'In Review') return 'In Review';
     if (st === 'Final' || st === 'Locked') return 'Final';
@@ -1229,11 +1233,18 @@
     toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2800);
   }
 
+  function studyChromeLabel(id) {
+    var raw = String(id || '');
+    var cut = raw.indexOf('::');
+    if (cut < 0) return raw;
+    return raw.slice(0, cut) + ' / ' + raw.slice(cut + 2);
+  }
   function updateStudyChrome() {
+    var label = studyChromeLabel(CURRENT_STUDY);
     var crumb = document.querySelector('.crumb');
-    if (crumb) crumb.innerHTML = 'Studies / <strong>' + CURRENT_STUDY + '</strong> / Mock Shells';
+    if (crumb) crumb.innerHTML = 'Studies / <strong>' + escapeHtml(label) + '</strong> / Mock Shells';
     var foot = document.querySelector('.nav-footer');
-    if (foot) foot.textContent = CURRENT_STUDY + ' · Phase 3';
+    if (foot) foot.textContent = label + ' · Phase 3';
   }
 
   function statusBadge(status) {
@@ -1534,7 +1545,7 @@
         html += '<td class="num">' + catalogGripHtml() + escapeHtml(sh.number) + '</td>';
         html += '<td>' + escapeHtml(sh.title);
         if (sh.copiedFrom) {
-          html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(sh.copiedFrom.study) + '</span>';
+          html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(studyChromeLabel(sh.copiedFrom.study)) + '</span>';
         }
 
         html += '</td><td class="sync-cell">' + syncButtonHtml(sh) + '</td></tr>';
@@ -2977,14 +2988,14 @@
 
   function syncButtonHtml(sh) {
     if (isTrackerLinked(sh)) {
-      return '<button type="button" class="toc-sync is-synced" data-sync-id="' + escapeHtml(sh.id) + '" title="In Tracker – click to open" aria-label="In Tracker – click to open">' + SYNC_ICON + '</button>';
+      return '<button type="button" class="toc-sync is-synced" data-sync-id="' + escapeHtml(sh.id) + '" title="In Tracker: click to open" aria-label="In Tracker: click to open">' + SYNC_ICON + '</button>';
     }
     if (!isSendable(sh)) {
       return '<button type="button" class="toc-sync is-disabled" aria-disabled="true" data-sync-id="' + escapeHtml(sh.id) + '"' +
         ' title="Set to Final to send" aria-label="Set to Final to send">' + PLUS_ICON + '</button>';
     }
     return '<button type="button" class="toc-sync is-ready" data-sync-id="' + escapeHtml(sh.id) + '"' +
-      ' title="Ready – send to Tracker" aria-label="Ready – send to Tracker">' + PLUS_ICON + '</button>';
+      ' title="Ready: send to Tracker" aria-label="Ready: send to Tracker">' + PLUS_ICON + '</button>';
   }
 
   var CAN_UNLOCK = true; /* demo: signed-in lead programmer may unlock */
@@ -3610,7 +3621,10 @@
     rec.title = draft.title;
     rec.status = 'Draft';
     rec.history = [{ at: SPHERE_DEMO.stamp(), action: 'Copied as Draft', status: 'Draft', person: SPHERE_DEMO.CURRENT_USER, note: 'Copied with shell ' + src.number }];
+    rec.syncedAt = SPHERE_DEMO.stamp();
     SPHERE_DEMO.addRecord(rec);
+    draft.recordId = rec.id;
+    draft.syncedAt = rec.syncedAt;
   }
   function performCopy() {
     var dest = copyDestinations().filter(function (d) { return copyDeliverable && d.id === copyDeliverable.value; })[0];
@@ -4056,6 +4070,7 @@
 
   /* boot */
   updateStudyChrome();
+  document.addEventListener('DOMContentLoaded', updateStudyChrome);
   renderCatalog();
   (function bootFromShellQuery() {
     var requested = '';

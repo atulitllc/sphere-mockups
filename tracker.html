@@ -5250,6 +5250,10 @@
     var cells = metaCells(row);
     if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml((rec.roles && rec.roles.prod) || '') + '</span>';
     if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row));
+    if (rec.shellId === '14.1.3' || rec.number === '14.1.3') {
+      var emptyTags = row.querySelector('.title-tags-empty');
+      if (emptyTags) emptyTags.textContent = '';
+    }
     if (rec.isNew) {
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
