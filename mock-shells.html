@@ -1239,6 +1239,39 @@
     if (cut < 0) return raw;
     return raw.slice(0, cut) + ' / ' + raw.slice(cut + 2);
   }
+  function storeIdFromParts(protocol, deliverable) {
+    if (!protocol) return '';
+    if (!deliverable || deliverable === 'CSR') return protocol;
+    return protocol + '::' + deliverable;
+  }
+  function storeIdFromSession() {
+    try {
+      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
+      if (!saved || !saved.p) return '';
+      return storeIdFromParts(saved.p, saved.d || 'CSR');
+    } catch (err) { return ''; }
+  }
+  function publishOpenStudy(storeId) {
+    var L = window.SPHERE_LAYOUT;
+    if (!L || !L.registry || !L.setCurrent) return;
+    var raw = String(storeId || '');
+    var cut = raw.indexOf('::');
+    var protocol = cut < 0 ? raw : raw.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : raw.slice(cut + 2);
+    var entry = L.registry().filter(function (e) {
+      return e.protocol === protocol && (e.deliverable || 'CSR') === deliverable;
+    })[0];
+    if (entry) L.setCurrent(entry);
+  }
+  function trackerHref(storeId, focus) {
+    var raw = String(storeId || CURRENT_STUDY || 'ONC-204-301');
+    var cut = raw.indexOf('::');
+    var study = cut < 0 ? raw : raw.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : raw.slice(cut + 2);
+    var href = 'tracker.html?study=' + encodeURIComponent(study) + '&deliverable=' + encodeURIComponent(deliverable);
+    if (focus) href += '&focus=' + encodeURIComponent(focus);
+    return href;
+  }
   function updateStudyChrome() {
     var label = studyChromeLabel(CURRENT_STUDY);
     var crumb = document.querySelector('.crumb');
@@ -1735,6 +1768,7 @@
     if (!studyStore[studyId]) return;
     persistEditorToSelected();
     CURRENT_STUDY = studyId;
+    publishOpenStudy(studyId);
     updateStudyChrome();
     var store = studyStore[studyId];
     if (!store.selectedId && store.shells.length) store.selectedId = store.shells[0].id;
@@ -3202,7 +3236,7 @@
     var span = document.createElement('span');
     span.textContent = 'Shell ' + sh.number + ' synced to Tracker · ' + rec.program + ' created ';
     var a = document.createElement('a');
-    a.href = 'tracker.html?focus=' + encodeURIComponent(rec.id);
+    a.href = trackerHref(CURRENT_STUDY, rec.id);
     a.className = 'toast-link';
     a.textContent = 'View in Tracker →';
     toastEl.appendChild(span);
@@ -3224,7 +3258,7 @@
     if (!sh) return;
     if (isTrackerLinked(sh)) {
       var target = sh.recordId || ('num:' + sh.number);
-      location.href = 'tracker.html?focus=' + encodeURIComponent(target);
+      location.href = trackerHref(CURRENT_STUDY, target);
       return;
     }
     if (!isSendable(sh)) {
@@ -3238,7 +3272,7 @@
     btn.innerHTML = '<span class="toc-spin" aria-hidden="true"></span>';
     setTimeout(function () {
       if (studyStore[CURRENT_STUDY].selectedId === sh.id) persistEditorToSelected();
-      var rec = SPHERE_DEMO.syncShell(sh);
+      var rec = SPHERE_DEMO.syncShell(sh, CURRENT_STUDY);
       sh.syncedAt = rec.syncedAt;
       sh.recordId = rec.id;
       sh.program = rec.program;
@@ -4085,19 +4119,47 @@
   renderCatalog();
   (function bootFromShellQuery() {
     var requested = '';
-    var requestedStudy = '';
+    var explicitStore = '';
     try {
       var qs = new URLSearchParams(location.search);
       requested = qs.get('shell') || '';
-      requestedStudy = qs.get('study') || '';
+      var qStudy = qs.get('study') || '';
+      var qDel = qs.get('deliverable') || '';
+      if (qStudy.indexOf('::') >= 0) explicitStore = qStudy;
+      else if (qStudy) explicitStore = storeIdFromParts(qStudy, qDel || 'CSR');
     } catch (e) {}
-    if (requestedStudy && studyStore[requestedStudy]) {
-      CURRENT_STUDY = requestedStudy;
+    var requestedStore = explicitStore;
+    if (!requestedStore && !requested) requestedStore = storeIdFromSession();
+    if (requestedStore && studyStore[requestedStore]) {
+      CURRENT_STUDY = requestedStore;
+      publishOpenStudy(requestedStore);
       updateStudyChrome();
     }
     var found = requested ? locateShell(requested) : null;
-    var id = found ? found.shell.id : '14.1.1';
-    selectShell(id, true);
+    if (found && found.studyId === CURRENT_STUDY) {
+      selectShell(found.shell.id, true);
+    } else if (requested && found && !explicitStore) {
+      selectShell(found.shell.id, true);
+    } else {
+      var shells = (studyStore[CURRENT_STUDY] && studyStore[CURRENT_STUDY].shells) || [];
+      var stay = null;
+      var i;
+      if (requested) {
+        for (i = 0; i < shells.length; i++) if (shells[i].id === requested) stay = shells[i];
+      }
+      if (!stay && shells.length) stay = shells[0];
+      if (stay) {
+        studyStore[CURRENT_STUDY].selectedId = stay.id;
+        catalogSelectedIds = [stay.id];
+        catalogAnchorId = stay.id;
+        renderCatalog();
+        loadShellIntoEditor(stay);
+      } else {
+        updateStudyChrome();
+        renderCatalog();
+      }
+    }
+    var id = (studyStore[CURRENT_STUDY] && studyStore[CURRENT_STUDY].selectedId) || '';
     if (!requested || !found || !catalogBody) return;
     var tr = null;
     var rows = catalogBody.querySelectorAll('tr[data-id]');

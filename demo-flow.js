@@ -288,14 +288,17 @@
       return r;
     },
     /* Create (or return existing) tracker record from a finalized mock shell. */
-    syncShell: function (shell) {
+    syncShell: function (shell, study) {
       var s = read();
-      var ex = s.records.filter(function (x) { return x.shellId === shell.id; })[0];
+      var home = study || STUDY;
+      var ex = s.records.filter(function (x) {
+        return x.shellId === shell.id && (x.study || STUDY) === home;
+      })[0];
       if (ex) return ex;
       var lay = shell.layout || {};
       var now = new Date();
       var rec = {
-        id: 'rec-' + String(shell.id).replace(/[^A-Za-z0-9]+/g, '-'),
+        id: 'rec-' + String(home).replace(/[^A-Za-z0-9]+/g, '-') + '-' + String(shell.id).replace(/[^A-Za-z0-9]+/g, '-'),
         shellId: shell.id,
         number: shell.number,
         title: shell.title,
@@ -314,7 +317,8 @@
         roles: rolesFor(shell),
         syncedAt: stamp(now),
         isNew: true,
-        history: []
+        history: [],
+        study: home
       };
       rec.history.push({ at: stamp(now), action: 'Synced from Mock Shells', status: 'Not started', person: CURRENT_USER, note: 'Shell ' + shell.number + ' finalized → tracker record created' });
       rec.history.push({ at: stamp(now), action: 'SAS header generated', status: 'In dev', person: 'SPHERE', note: rec.program + ' + ' + qcName(rec.program) + ' created with standard header' });

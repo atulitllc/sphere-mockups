@@ -206,9 +206,21 @@
     try {
       var q = new URLSearchParams(location.search);
       var reg = registry();
-      function pick(list) { return list.filter(function (x) { return x.current; })[0] || list[0]; }
-      var e = (q.get('path') && pick(reg.filter(function (x) { return entryPath(x) === q.get('path'); }))) ||
-        (q.get('study') && pick(reg.filter(function (x) { return studyId(x) === q.get('study'); })));
+      function pick(list) {
+        if (!list || !list.length) return null;
+        return list.filter(function (x) { return x.current; })[0] || list[0];
+      }
+      var del = q.get('deliverable') || '';
+      function narrow(list) {
+        if (!del) return list;
+        var exact = list.filter(function (x) { return x.deliverable === del; });
+        return exact.length ? exact : list;
+      }
+      var e = (q.get('path') && pick(narrow(reg.filter(function (x) { return entryPath(x) === q.get('path'); })))) ||
+        (q.get('study') && pick(narrow(reg.filter(function (x) {
+          var id = q.get('study');
+          return studyId(x) === id || x.protocol === id || x.compound === id;
+        }))));
       if (e) return setCurrent(e) || e;
       if (/studies\.html/.test(location.pathname)) return null;
       var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
@@ -220,19 +232,26 @@
     var e = openedStudy();
     if (!e) return;
     var path = entryPath(e);
-    var label = studyId(e) + (getLayout().level >= 2 && e.deliverable ? ' · ' + e.deliverable : '');
+    var label = studyId(e) + (e.deliverable && e.deliverable !== 'CSR' ? ' / ' + e.deliverable : '');
     if (!/studies\.html/.test(location.pathname)) {
       var crumb = document.querySelector('.crumb strong');
       if (crumb) crumb.textContent = label;
       var foot = document.querySelector('.nav-footer');
       if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '-');
     }
-    var qs = 'study=' + encodeURIComponent(studyId(e)) + '&path=' + encodeURIComponent(path);
+    var scope = 'study=' + encodeURIComponent(studyId(e)) + '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR');
+    var qs = scope + '&path=' + encodeURIComponent(path);
     document.querySelectorAll('a[href^="files.html"]').forEach(function (a) {
       a.setAttribute('href', a.getAttribute('href').split('?')[0] + '?' + qs);
     });
-    document.querySelectorAll('.nav a[href^="study-home.html"]').forEach(function (a) {
+    document.querySelectorAll('a[href^="study-home.html"]').forEach(function (a) {
       a.setAttribute('href', 'study-home.html?' + qs);
+    });
+    document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+      a.setAttribute('href', 'mock-shells.html?' + scope);
+    });
+    document.querySelectorAll('a[href^="tracker.html"]').forEach(function (a) {
+      a.setAttribute('href', 'tracker.html?' + scope);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintOpenedStudy);

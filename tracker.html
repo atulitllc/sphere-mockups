@@ -1548,6 +1548,7 @@
     });
     syncSectionCounts();
     syncBulk();
+    paintStatPills();
   }
 
   ['searchInput', 'filterType', 'filterStatus', 'filterTag', 'filterSap', 'filterAssigned'].forEach(function (id) {
@@ -5281,6 +5282,45 @@
     }
     var foot = document.querySelector('.nav-footer');
     if (foot) foot.textContent = label + ' · Phase 3';
+    var study = cut < 0 ? raw : raw.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : raw.slice(cut + 2);
+    var scope = 'study=' + encodeURIComponent(study) + '&deliverable=' + encodeURIComponent(deliverable);
+    document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+      a.setAttribute('href', 'mock-shells.html?' + scope);
+    });
+    document.querySelectorAll('a[href^="study-home.html"]').forEach(function (a) {
+      a.setAttribute('href', 'study-home.html?' + scope);
+    });
+  }
+  function paintStatPills() {
+    var box = document.getElementById('statPills');
+    if (!box) return;
+    var counts = {};
+    allRows().forEach(function (row) {
+      var st = row.getAttribute('data-status') || '';
+      if (st === 'In MW') st = 'Released to MW';
+      if (!st) return;
+      counts[st] = (counts[st] || 0) + 1;
+    });
+    var specs = [
+      ['Draft', 'draft', ''],
+      ['Not started', 'not-started', ''],
+      ['In dev', 'in-dev', ''],
+      ['Revise', '', 'revise'],
+      ['In QC', 'qc', ''],
+      ['In Stats', '', 'stats'],
+      ['Released to MW', '', 'mw'],
+      ['Approved', 'approved', ''],
+      ['Frozen', 'frozen', '']
+    ];
+    box.innerHTML = specs.filter(function (s) { return counts[s[0]]; }).map(function (s) {
+      var cls = 'badge' + (s[1] ? ' ' + s[1] : '');
+      var attr = s[2] ? ' data-stat="' + s[2] + '"' : '';
+      return '<span class="' + cls + '"' + attr + '>' + counts[s[0]] + ' ' + s[0] + '</span>';
+    }).join('');
+    var flags = (window.SPHERE && SPHERE.getTrackerWorkflowFlags) ? SPHERE.getTrackerWorkflowFlags() : { stats: true, mw: true };
+    document.querySelectorAll('#statPills [data-stat="stats"]').forEach(function (el) { el.hidden = !flags.stats; });
+    document.querySelectorAll('#statPills [data-stat="mw"]').forEach(function (el) { el.hidden = !flags.mw; });
   }
 
   /* Build rows for records synced from Mock Shells + apply persisted statuses */
@@ -5399,6 +5439,7 @@
       board.querySelectorAll('.artifact-row.is-flow-new').forEach(function (r) { if (r !== target) flashRow(r, false); });
     }, 350);
     if (SPHERE_DEMO.justReset) setTimeout(function () { showToast('Demo data reset'); }, 400);
+    paintStatPills();
   })();
   window.addEventListener('sphere-workflow-change', function () { paintMyAssign(); });
   window.addEventListener('load', function () { refreshAllWorkflowUI(); paintMyAssign(); applyFilters(); });

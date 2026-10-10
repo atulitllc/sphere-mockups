@@ -432,13 +432,22 @@
   }
   var q = new URLSearchParams(location.search);
   var reg = L.registry();
-  var e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
+  var e = null;
+  if (q.get('deliverable') && q.get('study')) {
+    e = reg.filter(function (x) {
+      return (x.protocol === q.get('study') || L.studyId(x) === q.get('study')) && x.deliverable === q.get('deliverable');
+    })[0] || null;
+  }
+  if (!e) e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
     reg.filter(function (x) { return x.current; })[0];
   if (!e) return;
   if (L.setCurrent) e = L.setCurrent(e) || e;
   var path = L.entryPath(e);
-  var filesHref = 'files.html?study=' + encodeURIComponent(L.studyId(e)) + '&path=' + encodeURIComponent(path);
+  var scope = 'study=' + encodeURIComponent(L.studyId(e)) + '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR');
+  var filesHref = 'files.html?' + scope + '&path=' + encodeURIComponent(path);
   document.querySelectorAll('a[href^="files.html"]').forEach(function (a) { a.setAttribute('href', filesHref); });
+  document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) { a.setAttribute('href', 'mock-shells.html?' + scope); });
+  document.querySelectorAll('a[href^="tracker.html"]').forEach(function (a) { a.setAttribute('href', 'tracker.html?' + scope); });
   var grid = document.querySelector('.study-hero-meta');
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
   if (!defaultHero) {
