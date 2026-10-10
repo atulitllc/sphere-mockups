@@ -843,7 +843,7 @@
         study: info.study || STUDY,
         shellId: info.shellId || '',
         number: info.number || '',
-        action: 'Program renamed'
+        action: 'Renamed from ' + (info.oldName || '') + ' to ' + info.newName
       };
       s.programTx.push(tx);
       if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
@@ -864,7 +864,7 @@
         if (!hit) return;
         r.program = info.newName;
         r.history = r.history || [];
-        r.history.push({ at: when, action: 'Program renamed', person: user, oldName: tx.oldName, newName: info.newName, note: tx.oldName + ' -> ' + info.newName });
+        r.history.push({ at: when, action: tx.action, person: user, oldName: tx.oldName, newName: info.newName, note: '' });
       });
       if (info.oldName && s.status[info.oldName]) {
         s.status[info.newName] = s.status[info.oldName];
@@ -872,9 +872,52 @@
       }
       if (info.oldName) {
         (s.events[info.newName] = s.events[info.newName] || s.events[info.oldName] || []).push({
-          at: stamp(new Date()), action: 'Program renamed', person: user, status: '', note: tx.oldName + ' -> ' + info.newName, oldName: tx.oldName, newName: info.newName
+          id: 'ev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
+          at: stamp(new Date()), action: tx.action, person: user, status: '', note: '', oldName: tx.oldName, newName: info.newName
         });
       }
+      function moveStoredName(oldName, newName) {
+        if (!oldName || !newName || oldName === newName) return;
+        var scope = info.study || STUDY;
+        var fromFile = scope + '|' + oldName;
+        var toFile = scope + '|' + newName;
+        var existed = !!s.files[fromFile] || seedFile(scope, oldName);
+        if (s.files[fromFile] && !s.files[toFile]) s.files[toFile] = s.files[fromFile];
+        if (s.files[fromFile]) delete s.files[fromFile];
+        if (existed) s.files[toFile] = s.files[toFile] || 1;
+        ['prod', 'qc'].forEach(function (side) {
+          var from = scope + '|' + oldName + ':' + side;
+          var to = scope + '|' + newName + ':' + side;
+          if (s.sources[from] == null) return;
+          var text = String(s.sources[from]);
+          if (s.sources[to] == null) s.sources[to] = text.split(oldName).join(newName);
+          delete s.sources[from];
+        });
+        if (s.lastRun[fromFile] && !s.lastRun[toFile]) s.lastRun[toFile] = s.lastRun[fromFile];
+        if (scope === STUDY && s.lastRun[oldName] && !s.lastRun[newName]) s.lastRun[newName] = s.lastRun[oldName];
+      }
+      function pinProgram(id) {
+        if (!id) return;
+        var prev = s.rowState[id] || {};
+        s.rowState[id] = Object.assign({}, prev, {
+          program: info.newName,
+          origProgram: prev.origProgram || info.oldName || ''
+        });
+      }
+      if (info.oldName) {
+        moveStoredName(info.oldName, info.newName);
+        moveStoredName(qcName(info.oldName), qcName(info.newName));
+      }
+      pinProgram(info.recordId);
+      pinProgram(info.shellId);
+      if (info.number) {
+        pinProgram('num:' + info.number);
+        pinProgram('seed-' + info.number);
+        pinProgram('rec-' + String(info.number).replace(/\./g, '-'));
+      }
+      (s.records || []).forEach(function (r) {
+        if (r && r.program === info.newName && (r.study || STUDY) === (info.study || STUDY)) pinProgram(r.id);
+      });
       write(s);
       return tx;
     },

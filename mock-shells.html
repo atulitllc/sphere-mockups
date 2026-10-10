@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4round4"></script>
+<script src="demo-flow.js?v=progname2"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -2145,7 +2145,7 @@
     input.focus();
     input.select();
     function commit() {
-      setVal(input.value.trim());
+      setVal(opts.raw ? input.value : input.value.trim());
       render();
     }
     input.addEventListener('blur', commit);
@@ -2188,7 +2188,7 @@
       startTextEdit(valEl, function () { return state[field]; }, function (v) {
         if (field === 'program') {
           var sh = selectedShell();
-          var name = String(v || '').trim();
+          var name = String(v == null ? '' : v);
           var problem = validateProgramName(name, sh && sh.id);
           if (problem) {
             showToast(problem);
@@ -2202,7 +2202,7 @@
         }
         state[field] = v;
         if (field === 'footnotes') persistEditorToSelected();
-      });
+      }, field === 'program' ? { raw: true } : null);
     });
   });
 
@@ -3029,6 +3029,7 @@
       SPHERE_DEMO.renameProgram({
         study: CURRENT_STUDY,
         shellId: sh.id,
+        recordId: sh.recordId || '',
         number: sh.number,
         oldName: oldName,
         newName: newName,
