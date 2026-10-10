@@ -6690,9 +6690,10 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .artifact-row .artifact-title-band .artifact-tags { grid-column: 2; flex: none; min-width: 0; overflow: hidden; }
 .artifact-row .artifact-title-band .row-roles-inline { grid-column: 1 / -1; justify-content: flex-start; margin-left: 0; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
 /* Tags sit inline right after the title. Tracks size to content and pack to the start;
-   a long title ellipsizes and the tags stay fully visible after it. The roles line
-   spans both tracks but is kept out of track sizing. */
-.artifact-row .artifact-title-band { grid-template-columns: minmax(0, max-content) max-content; justify-content: start; }
+   a long title ellipsizes and the tags stay fully visible after it. The third track
+   takes the spare width, so the roles line (which spans all tracks but is kept out
+   of track sizing) always gets the full band width, with or without tags. */
+.artifact-row .artifact-title-band { grid-template-columns: minmax(0, max-content) max-content minmax(0, 1fr); }
 .artifact-row .artifact-title-band .row-roles-inline { contain: inline-size; }
 .artifact-row .artifact-meta, .tracker-col-head .artifact-meta { grid-column: 2; }
 .tracker-col-head .col-head-output { grid-column: 1; display: flex; align-items: baseline; gap: 6px; }
@@ -6804,9 +6805,12 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .tracker-board .sap-section.is-vacant .sap-section-count { opacity: .6; }
 .sap-section-bar .sap-section-ref { margin-left: 8px; }
 .tracker-add-section { margin: 6px 0 4px; }
-/* Role chips: label + name only (no initials), names always shown; wrap/ellipsis instead of initials (flow3) */
-.artifact-row .artifact-title-band .row-roles-inline { flex-wrap: wrap; overflow: visible; row-gap: 3px; column-gap: 4px; }
-.artifact-row .role-chip { padding: 0 7px 0 2px; max-width: 100%; min-width: 0; }
+/* Role chips: label + name only (no initials), names always shown. Always one line:
+   when space is tight the names ellipsize instead of wrapping (flow3) */
+.artifact-row .artifact-title-band .row-roles-inline { flex-wrap: nowrap; overflow: hidden; column-gap: 4px; }
+.artifact-row .role-chip { padding: 0 7px 0 2px; max-width: 100%; min-width: 0; flex: 0 1 auto; overflow: hidden; }
+.artifact-row .role-chip b { flex: none; }
+.artifact-row .role-chip .role-nm { min-width: 0; flex: 0 1 auto; }
 .artifact-row .role-chip .role-nm,
 html[data-ui-zoom="125"] .artifact-row .role-chip .role-nm,
 html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-block; max-width: 11ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
@@ -6840,8 +6844,8 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   .artifact-row .artifact-title-band .row-roles-inline {
     grid-column: 1;
     grid-row: 3;
-    flex-wrap: wrap;
-    overflow: visible;
+    flex-wrap: nowrap;
+    overflow: hidden;
     justify-content: flex-start;
     margin-left: 0;
     max-width: 100%;
