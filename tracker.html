@@ -5243,6 +5243,42 @@
     }
   });
 
+  var TRACKER_HOME = 'ONC-204-301';
+  function storeIdFromParts(protocol, deliverable) {
+    if (!protocol) return TRACKER_HOME;
+    if (!deliverable || deliverable === 'CSR') return protocol;
+    return protocol + '::' + deliverable;
+  }
+  function trackerStoreId() {
+    var qStudy = '';
+    var qDel = '';
+    try {
+      var q = new URLSearchParams(location.search);
+      qStudy = q.get('study') || '';
+      qDel = q.get('deliverable') || '';
+    } catch (e) {}
+    if (qStudy.indexOf('::') >= 0) return qStudy;
+    if (qStudy) return storeIdFromParts(qStudy, qDel || 'CSR');
+    try {
+      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
+      if (saved && saved.p) return storeIdFromParts(saved.p, saved.d || 'CSR');
+    } catch (e2) {}
+    return TRACKER_HOME;
+  }
+  function paintTrackerChrome(store) {
+    var raw = String(store || TRACKER_HOME);
+    var cut = raw.indexOf('::');
+    var label = cut < 0 ? raw : (raw.slice(0, cut) + ' / ' + raw.slice(cut + 2));
+    var crumb = document.querySelector('.crumb');
+    if (crumb) {
+      crumb.innerHTML = cut < 0
+        ? ('Studies / <strong>' + escapeHtml(raw) + '</strong> / Tracker')
+        : ('Studies / <strong>' + escapeHtml(raw.slice(0, cut)) + '</strong> / ' + escapeHtml(raw.slice(cut + 2)) + ' / Tracker');
+    }
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = label + ' · Phase 3';
+  }
+
   /* Build rows for records synced from Mock Shells + apply persisted statuses */
   function buildFlowRow(rec) {
     var row = buildArtifactRow({ type: rec.type, status: rec.status, tags: '', sap: rec.sap, job: '', program: rec.program, title: escapeHtml(rec.number + ' · ' + rec.title) });
@@ -5317,51 +5353,8 @@
     if (typeof syncSectionCounts === 'function') syncSectionCounts();
   }
 
-  var TRACKER_HOME = 'ONC-204-301';
-  function storeIdFromParts(protocol, deliverable) {
-    if (!protocol) return TRACKER_HOME;
-    if (!deliverable || deliverable === 'CSR') return protocol;
-    return protocol + '::' + deliverable;
-  }
-  function trackerStoreId() {
-    var qStudy = '';
-    var qDel = '';
-    try {
-      var q = new URLSearchParams(location.search);
-      qStudy = q.get('study') || '';
-      qDel = q.get('deliverable') || '';
-    } catch (e) {}
-    if (qStudy.indexOf('::') >= 0) return qStudy;
-    if (qStudy) return storeIdFromParts(qStudy, qDel || 'CSR');
-    try {
-      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
-      if (saved && saved.p) return storeIdFromParts(saved.p, saved.d || 'CSR');
-    } catch (e2) {}
-    return TRACKER_HOME;
-  }
-  function paintTrackerChrome(store) {
-    var raw = String(store || TRACKER_HOME);
-    var cut = raw.indexOf('::');
-    var label = cut < 0 ? raw : (raw.slice(0, cut) + ' / ' + raw.slice(cut + 2));
-    var crumb = document.querySelector('.crumb');
-    if (crumb) {
-      crumb.innerHTML = cut < 0
-        ? ('Studies / <strong>' + escapeHtml(raw) + '</strong> / Tracker')
-        : ('Studies / <strong>' + escapeHtml(raw.slice(0, cut)) + '</strong> / ' + escapeHtml(raw.slice(cut + 2)) + ' / Tracker');
-    }
-    var foot = document.querySelector('.nav-footer');
-    if (foot) foot.textContent = label + ' · Phase 3';
-  }
-
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
-    var trackerStore = trackerStoreId();
-    paintTrackerChrome(trackerStore);
-    if (trackerStore !== TRACKER_HOME) {
-      allRows().forEach(function (row) {
-        if (!row.getAttribute('data-flow-id')) row.remove();
-      });
-    }
     allRows().forEach(function (row) {
       var st = SPHERE_DEMO.getStatus(flowKey(row));
       if (st) {
@@ -5369,6 +5362,13 @@
         row.setAttribute('data-status', st);
       }
     });
+    var trackerStore = trackerStoreId();
+    paintTrackerChrome(trackerStore);
+    if (trackerStore !== TRACKER_HOME) {
+      allRows().forEach(function (row) {
+        if (!row.getAttribute('data-flow-id')) row.remove();
+      });
+    }
     applySharedSections();
     var listRecords = SPHERE_DEMO.recordsFor ? SPHERE_DEMO.recordsFor(trackerStore) : SPHERE_DEMO.records();
     listRecords.forEach(function (rec) {
