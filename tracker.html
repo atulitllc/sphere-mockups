@@ -2321,9 +2321,12 @@
     if (/^t_/i.test(s)) return pre + s.slice(2);
     return s;
   }
-  function logProgramBase(j) {
-    var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '').replace(/\.[^.]+$/, '');
-    return logNamed(prog, logRowType(j));
+  function logProgramFile(j, isQc) {
+    var prog = String((j && j.prog) || '').split('/').pop();
+    if (!isQc) return prog;
+    if (window.SPHERE_DEMO && SPHERE_DEMO.qcName) return SPHERE_DEMO.qcName(prog);
+    if (!prog || /^qc-/i.test(prog)) return prog;
+    return 'qc-' + prog;
   }
   function logOutputStem(j) {
     var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '');
@@ -2362,7 +2365,7 @@
     var t = phaseTimes(j, idx);
     var rnd = seeded(j.id * 97 + idx * 13 + hashStr(j.prog));
     var total = t.dur / 1000;
-    var prog = (isQc ? 'qc-' : '') + logProgramBase(j) + '.sas';
+    var prog = logProgramFile(j, isQc);
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var title = runRowTitle(j.row);
@@ -2529,8 +2532,7 @@
     var t = phaseTimes(j, idx);
     var rnd = seeded(j.id * 89 + idx * 7 + hashStr(j.prog));
     var total = t.dur / 1000;
-    var base = logProgramBase(j);
-    var prog = (isQc ? 'qc-' : '') + base + '.R';
+    var prog = logProgramFile(j, isQc);
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var warn = j.warn && j.warnPhase === idx;
@@ -3113,7 +3115,7 @@
       }, function () {
         var sel = document.getElementById('reStatus');
         if (sel) sel.value = from;
-      }, row.querySelector('.row-edit') || document.getElementById('btnSaveRowEditor'));
+      }, document.getElementById('btnSaveRowEditor'));
       return;
     }
     writeRowEditor();
@@ -3161,13 +3163,14 @@
   rowEditorDrag.addEventListener('pointercancel', endDrag);
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      var stage = document.getElementById('stageModal');
-      if (stage && !stage.hidden) return;
-      setOpen(false);
-      closeImport();
-      closeRowEditor();
-    }
+    if (e.key !== 'Escape') return;
+    var stage = document.getElementById('stageModal');
+    if (stage && !stage.hidden) return;
+    var nr = document.getElementById('newRecordModal');
+    if (nr && !nr.hidden) return;
+    setOpen(false);
+    closeImport();
+    closeRowEditor();
   });
 
 
@@ -3614,6 +3617,11 @@
       if (b) b.addEventListener('click', close);
     });
     modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || modal.hidden) return;
+      e.preventDefault();
+      close();
+    });
     var save = field('newRecordSave');
     if (save) save.addEventListener('click', function () {
       var title = (field('nrTitle').value || '').trim();
@@ -4324,7 +4332,12 @@
   function paintWorkflowTimeline(data) {
     var tl = document.getElementById('historyTimeline');
     if (!tl) return;
-    tl.innerHTML = data.events.map(function (ev) {
+    var events = (data && data.events) || [];
+    if (!events.length) {
+      tl.innerHTML = '<li class="txn-item"><div class="txn-body"><div class="txn-note">No history yet</div></div></li>';
+      return;
+    }
+    tl.innerHTML = events.map(function (ev) {
       var fromTo = (ev.from && (ev.to || ev.status))
         ? '<div class="txn-note">From ' + escapeHtml(flowStatusLabel(ev.from)) + ' to ' + escapeHtml(flowStatusLabel(ev.to || ev.status)) + '</div>'
         : '';
@@ -5478,6 +5491,8 @@
     return out;
   }
   function trapModalTab(modal) {
+    if (!modal || modal._tabTrap) return;
+    modal._tabTrap = 1;
     modal.addEventListener('keydown', function (e) {
       if (modal.hidden || e.key !== 'Tab') return;
       var nodes = modalFocusable(modal);
@@ -5493,8 +5508,9 @@
     });
   }
   function focusIfVisible(el) {
-    if (!el || !el.isConnected || el.closest('[hidden]')) return;
-    try { el.focus(); } catch (eFocus) {}
+    if (!el || !el.isConnected || el.closest('[hidden]')) return false;
+    try { el.focus(); } catch (eFocus) { return false; }
+    return document.activeElement === el;
   }
   function stageFromLabels(items) {
     var froms = [];
@@ -5532,7 +5548,18 @@
     if (modal) modal.hidden = true;
     if (!pending) { focusIfVisible(opener); return; }
     if (commit && pending.onOk) pending.onOk(pending.info());
-    else if (pending.onCancel) pending.onCancel();
+    else if (!commit && pending.onCancel) pending.onCancel();
+    if (commit && pending.focusKind === 'bulk') {
+      var host = document.getElementById('bulkHandoffs');
+      var first = host && host.querySelector('button');
+      if (focusIfVisible(first)) return;
+      if (focusIfVisible(document.getElementById('btnRun'))) return;
+    }
+    if (commit && pending.items && pending.items.length === 1) {
+      var row = pending.items[0].row;
+      var pill = row && row.querySelector('.wf-pill');
+      if (focusIfVisible(pill)) return;
+    }
     focusIfVisible(opener);
   }
   function askStageChange(items, onOk, onCancel, opener) {
@@ -5547,6 +5574,8 @@
     stageOpener = opener || null;
     stagePending = {
       to: to,
+      items: items,
+      focusKind: (opener && opener.closest && opener.closest('#bulkHandoffs')) ? 'bulk' : 'single',
       onOk: onOk,
       onCancel: onCancel || null,
       info: function () {
@@ -6006,9 +6035,22 @@
     };
     var idx = -1;
     for (var i = 0; i < list.length; i++) if (list[i] && list[i].recordId === spec.recordId) idx = i;
+    var isNew = idx < 0;
     if (idx >= 0) list[idx] = row;
     else list.push(row);
     writeRuntimeRows(list);
+    if (isNew && row.recordId && window.SPHERE_DEMO && SPHERE_DEMO.addEvent) {
+      var prior = SPHERE_DEMO.getEvents ? (SPHERE_DEMO.getEvents(row.recordId) || []) : [];
+      if (!prior.length) {
+        SPHERE_DEMO.addEvent(row.recordId, {
+          at: stageStampET(),
+          action: 'Created',
+          status: row.status || 'Draft',
+          person: stageUser(),
+          note: ''
+        });
+      }
+    }
   }
   function persistRuntimeRowFromDom(row) {
     if (!row) return;
