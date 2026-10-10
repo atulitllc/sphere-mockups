@@ -2098,6 +2098,22 @@ label .req::after { content: " *"; color: var(--danger); }
 .bulk-bar .sel-count { font-weight: 600; font-size: 13px; color: var(--accent); }
 
 .job-panel-wrap { margin-top: 4px; }
+/* Job status panel: collapsed by default, chevron toggle in the header */
+.job-panel-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.job-panel-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus-ring); border-radius: 4px; }
+.job-panel-toggle .sap-chevron { stroke: currentColor; stroke-width: 2; }
+.job-panel-wrap.is-collapsed .job-panel-toggle .sap-chevron { transform: rotate(-90deg); }
+.job-panel-wrap.is-collapsed #jobPanelBody { display: none; }
 
 .modal-backdrop {
   position: fixed;

@@ -763,12 +763,17 @@
 
       </section>
 
-      <section class="section job-panel-wrap" id="jobPanel">
+      <section class="section job-panel-wrap is-collapsed" id="jobPanel">
         <div class="section-head">
-          <h2 class="section-heading">Job status (from Tracker)</h2>
+          <h2 class="section-heading">
+            <button type="button" class="job-panel-toggle" id="jobPanelToggle" aria-expanded="false" aria-controls="jobPanelBody">
+              <svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              Job status (from Tracker)
+            </button>
+          </h2>
           <span class="meta-v" id="jobRunningBadge" style="color:var(--accent)">1 running</span>
         </div>
-        <div class="table-panel">
+        <div class="table-panel" id="jobPanelBody">
           <div class="table-wrap">
             <table>
               <thead>
@@ -2348,6 +2353,18 @@
       showToast(msg);
     }
   }
+
+  /* Job status panel starts collapsed on every load; the header chevron toggles it. */
+  (function () {
+    var panel = document.getElementById('jobPanel');
+    var btn = document.getElementById('jobPanelToggle');
+    if (!panel || !btn) return;
+    btn.addEventListener('click', function () {
+      var collapsed = !panel.classList.contains('is-collapsed');
+      panel.classList.toggle('is-collapsed', collapsed);
+      btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    });
+  })();
 
   /* Job status table under the tracker */
   function addJobTableRow(b) {
