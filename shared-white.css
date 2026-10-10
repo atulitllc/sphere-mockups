@@ -7760,3 +7760,44 @@ body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
 .fe-new-error { margin: 2px 0 0; color: var(--danger); font-size: 12.5px; line-height: 1.4; }
 .fe-new-error[hidden] { display: none; }
 .audit-pills { margin-top: 8px; }
+
+/* Tenant branding: accent from Admin > Branding (tenant-brand.js sets --tenant-accent
+   on the root). A personal accent picked later in the header menu removes it. */
+:root[data-tenant-accent] {
+  --accent: var(--tenant-accent);
+  --accent-hover: color-mix(in srgb, var(--tenant-accent) 84%, #000);
+  --accent-soft: color-mix(in srgb, var(--tenant-accent) 9%, #fff);
+  --brand: var(--tenant-accent);
+  --focus-ring: color-mix(in srgb, var(--tenant-accent) 16%, transparent);
+  --row-selected: color-mix(in srgb, var(--tenant-accent) 9%, #fff);
+  --nav-bg: color-mix(in srgb, var(--tenant-accent) 62%, #0b1220);
+  --nav-shadow: color-mix(in srgb, var(--tenant-accent) 35%, transparent);
+}
+:root[data-theme="dark"][data-tenant-accent] {
+  --accent: color-mix(in srgb, var(--tenant-accent) 78%, #fff);
+  --accent-hover: color-mix(in srgb, var(--tenant-accent) 65%, #fff);
+  --accent-soft: color-mix(in srgb, var(--tenant-accent) 20%, #11161d);
+  --brand: color-mix(in srgb, var(--tenant-accent) 78%, #fff);
+  --focus-ring: color-mix(in srgb, var(--tenant-accent) 26%, transparent);
+  --row-selected: color-mix(in srgb, var(--tenant-accent) 20%, #11161d);
+  --nav-bg: color-mix(in srgb, var(--tenant-accent) 40%, #0b1220);
+  --nav-active-bg: color-mix(in srgb, var(--tenant-accent) 30%, transparent);
+}
+/* Tenant logo inside the tenant pill */
+.tenant-pill.has-tenant-logo,
+.company-pill.has-tenant-logo { padding-left: 7px; }
+.tenant-logo { height: 18px; width: auto; max-width: 64px; object-fit: contain; border-radius: 4px; vertical-align: middle; margin: -3px 7px -1px 0; }
+/* Admin > Branding */
+.brand-logo-row { display: flex; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
+.logo-placeholder.has-logo { border-style: solid; background: var(--surface); padding: 6px; }
+.logo-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.brand-logo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.brand-logo-hint { margin-top: 8px; }
+.brand-logo-error { margin-top: 6px; color: var(--danger); font-size: 12.5px; }
+.brand-logo-error[hidden] { display: none; }
+.brand-saved { color: var(--ok); font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.brand-saved[hidden] { display: none; }
+.brand-saved svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.field-error-text { color: var(--danger); font-size: 12px; }
+.field-error-text[hidden] { display: none; }
+.brand-save-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

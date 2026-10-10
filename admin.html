@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010d" />
+<link rel="stylesheet" href="shared-white.css?v=20261010e" />
+<script src="tenant-brand.js?v=20261010e"></script>
 <script>
 (function () {
   try {
@@ -304,33 +305,43 @@
                   <span class="title-row">Branding</span>
                   <span class="badge">Tenant chrome</span>
                 </div>
-                <div class="form">
+                <div class="form" id="brandForm">
                   <div class="grid2">
                     <label>
                       <span>Display name</span>
-                      <input type="text" value="Northwind Biopharma" />
+                      <input type="text" id="brandName" value="Northwind Biopharma" maxlength="60" autocomplete="off" />
+                      <span class="field-error-text" id="brandNameError" hidden>Display name is required.</span>
                     </label>
                     <label>
                       <span>Accent color</span>
                       <div class="color-swatch">
-                        <input type="color" value="#2563EB" aria-label="Accent color" />
-                        <input type="text" value="#2563EB" style="flex:1" aria-label="Accent hex" />
+                        <input type="color" id="brandAccent" value="#2563EB" aria-label="Accent color" />
+                        <input type="text" id="brandAccentHex" value="#2563EB" aria-label="Accent hex" maxlength="7" autocomplete="off" />
                       </div>
+                      <span class="field-error-text" id="brandAccentError" hidden>Use a hex color such as #2563EB.</span>
                     </label>
                   </div>
-                  <label>
+                  <div class="brand-logo-field">
                     <span>Logo</span>
-                    <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
-                      <div class="logo-placeholder">Logo<br/>placeholder</div>
+                    <div class="brand-logo-row">
+                      <div class="logo-placeholder" id="brandLogoPreview">Logo<br/>placeholder</div>
                       <div>
-                        <button class="btn" type="button">Upload logo</button>
-                        <div class="hint" style="margin-top:8px">PNG/SVG · light &amp; dark variants later · not wired</div>
+                        <div class="brand-logo-actions">
+                          <button class="btn" type="button" id="brandLogoBtn">Upload logo</button>
+                          <button class="btn ghost" type="button" id="brandLogoRemove" hidden>Remove logo</button>
+                        </div>
+                        <input type="file" id="brandLogoFile" accept="image/png,image/svg+xml,image/jpeg" hidden />
+                        <div class="hint brand-logo-hint">PNG, SVG or JPG up to 1 MB. Shown in the header next to the tenant name.</div>
+                        <div class="brand-logo-error" id="brandLogoError" role="alert" hidden></div>
                       </div>
                     </div>
-                  </label>
+                  </div>
                   <div class="form-actions">
-                    <button class="btn primary" type="button">Save branding</button>
-                    <button class="btn ghost" type="button">Reset</button>
+                    <div class="brand-save-group">
+                      <button class="btn primary" type="button" id="brandSave">Save branding</button>
+                      <span class="brand-saved" id="brandSaved" role="status" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Saved</span>
+                    </div>
+                    <button class="btn ghost" type="button" id="brandReset">Reset</button>
                   </div>
                 </div>
               </div>
@@ -1548,7 +1559,87 @@
   paint();
 })();
 </script>
-<script src="shared-chrome.js?v=flow4bar"></script>
+<script src="shared-chrome.js?v=20261010e"></script>
+<script>
+/* Admin > Branding: Save persists name, accent and logo (tenant-brand.js applies them on every page). */
+(function () {
+  var B = window.SPHERE_BRAND;
+  var nameEl = document.getElementById('brandName');
+  if (!B || !nameEl) return;
+  var color = document.getElementById('brandAccent');
+  var hex = document.getElementById('brandAccentHex');
+  var prev = document.getElementById('brandLogoPreview');
+  var file = document.getElementById('brandLogoFile');
+  var rm = document.getElementById('brandLogoRemove');
+  var logoErr = document.getElementById('brandLogoError');
+  var saved = document.getElementById('brandSaved');
+  var pendingLogo = null;
+  function showLogo(url) {
+    prev.classList.toggle('has-logo', !!url);
+    prev.innerHTML = url ? '<img alt="Tenant logo preview" />' : 'Logo<br/>placeholder';
+    if (url) prev.querySelector('img').src = url;
+    rm.hidden = !url;
+  }
+  function fill() {
+    var b = B.get();
+    nameEl.value = b.name;
+    color.value = b.accent;
+    hex.value = b.accent.toUpperCase();
+    pendingLogo = b.logo || '';
+    showLogo(pendingLogo);
+    logoErr.hidden = true;
+  }
+  fill();
+  color.addEventListener('input', function () { hex.value = color.value.toUpperCase(); });
+  hex.addEventListener('input', function () {
+    var v = hex.value.trim();
+    if (/^#?[0-9a-f]{6}$/i.test(v)) color.value = (v.charAt(0) === '#' ? v : '#' + v).toLowerCase();
+  });
+  document.getElementById('brandLogoBtn').addEventListener('click', function () { file.click(); });
+  file.addEventListener('change', function () {
+    var f = file.files && file.files[0];
+    file.value = '';
+    if (!f) return;
+    logoErr.hidden = true;
+    if (!/^image\/(png|svg\+xml|jpeg)$/.test(f.type) && !/\.(png|svg|jpe?g)$/i.test(f.name)) {
+      logoErr.textContent = 'Use a PNG, SVG or JPG file.'; logoErr.hidden = false; return;
+    }
+    if (f.size > 1024 * 1024) {
+      logoErr.textContent = 'That file is ' + (f.size / 1048576).toFixed(1) + ' MB. The limit is 1 MB.'; logoErr.hidden = false; return;
+    }
+    var r = new FileReader();
+    r.onload = function () { pendingLogo = String(r.result || ''); showLogo(pendingLogo); };
+    r.readAsDataURL(f);
+  });
+  rm.addEventListener('click', function () { pendingLogo = ''; showLogo(''); });
+  function flashSaved(text) {
+    saved.lastChild.textContent = text;
+    saved.hidden = false;
+    clearTimeout(flashSaved._t);
+    flashSaved._t = setTimeout(function () { saved.hidden = true; }, 2600);
+  }
+  document.getElementById('brandSave').addEventListener('click', function () {
+    var n = nameEl.value.replace(/\s+/g, ' ').trim();
+    var h = hex.value.trim();
+    if (h && h.charAt(0) !== '#') h = '#' + h;
+    var nameBad = !n;
+    var hexBad = !/^#[0-9a-f]{6}$/i.test(h);
+    document.getElementById('brandNameError').hidden = !nameBad;
+    document.getElementById('brandAccentError').hidden = !hexBad;
+    if (nameBad || hexBad) return;
+    var ok = B.save({ name: n, accent: h.toUpperCase(), logo: pendingLogo || '' });
+    if (!ok) { logoErr.textContent = 'Could not save: browser storage is full. Try a smaller logo.'; logoErr.hidden = false; return; }
+    fill();
+    flashSaved('Saved');
+  });
+  document.getElementById('brandReset').addEventListener('click', function () {
+    B.reset();
+    fill();
+    flashSaved('Defaults restored');
+  });
+})();
+</script>
+
 <script>
 
   /* Tracker workflow flags + program version control */

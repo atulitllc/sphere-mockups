@@ -102,6 +102,7 @@
       item.addEventListener('click', function (e) {
         e.stopPropagation();
         applyAccent(item.getAttribute('data-accent-value'));
+        if (window.SPHERE_BRAND && SPHERE_BRAND.personalAccentChosen) SPHERE_BRAND.personalAccentChosen();
         setOpen(false);
         btn.focus();
       });
