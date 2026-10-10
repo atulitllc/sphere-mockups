@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4style" />
+<link rel="stylesheet" href="shared-white.css?v=flow4scroll" />
 <script>
 (function () {
   try {
@@ -269,6 +269,8 @@
           </div>
         </div>
 
+        <div class="tracker-hscroll">
+        <div class="tracker-hscroll-inner">
         <div class="tracker-col-head" role="row">
           <div class="col-check">
             <label class="check-all-label check-all-in-head" title="Select all visible">
@@ -755,6 +757,8 @@
 
             </div>
           </section>
+        </div>
+        </div>
         </div>
 
       </section>
@@ -3408,6 +3412,7 @@
         shell: field('nrShell').value
       });
       moveRowToSap(row, field('nrSap').value);
+      refreshRowWorkflowUI(row);
       applyFilters();
       close();
       if (allRows().length === before) return;
@@ -4917,8 +4922,9 @@
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
     if (!prog) return;
     var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
-    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="' + escapeHtml(prog) + '">' + escapeHtml(prog) + '</a>' +
-      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
+    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
+      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
     decorateRerunDot(row);
   }
   function rerunWhyForRow(row) {
