@@ -1258,7 +1258,7 @@
 
 <script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4merge1"></script>
+<script src="demo-flow.js?v=flow4round4"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -2099,17 +2099,24 @@
     if (type !== 'Table' && type !== 'Listing' && type !== 'Figure') return false;
     return !!(row && row._outputReady);
   }
+  function sourceLooksGenerated(text) {
+    return /Initial (?:version|QC program) generated from mock shell/.test(String(text || ''));
+  }
   function savedSource(row, side) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.getSource || !row) return '';
     var which = side === 'qc' ? 'qc' : 'prod';
     var name = which === 'qc' ? qcProgramName(row) : runProgName(row);
     var scope = rowStudyScope(row);
-    if (name) {
-      var direct = SPHERE_DEMO.getSource(scope + '|' + name + ':' + which);
-      if (direct) return direct;
+    var direct = name ? (SPHERE_DEMO.getSource(scope + '|' + name + ':' + which) || '') : '';
+    var legacy = '';
+    var fk = flowKey(row);
+    if (fk) legacy = SPHERE_DEMO.getSource(scope + '|' + fk + ':' + which) || '';
+    if (!legacy && which === 'qc') {
+      var prodName = runProgName(row);
+      if (prodName && prodName !== name) legacy = SPHERE_DEMO.getSource(scope + '|' + prodName + ':' + which) || '';
     }
-    if (scope !== TRACKER_HOME) return '';
-    return SPHERE_DEMO.getSource(TRACKER_HOME + '|' + flowKey(row) + ':' + which) || '';
+    if (legacy && (!direct || (sourceLooksGenerated(direct) && !sourceLooksGenerated(legacy)))) return legacy;
+    return direct || '';
   }
   function storeSource(row, side, text) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.setSource || !row) return;
@@ -2322,6 +2329,7 @@
     row.setAttribute('data-last-run', j.endDate.toISOString());
     sealFinishedJob(j);
     if (typeof persistRuntimeRowFromDom === 'function') persistRuntimeRowFromDom(row);
+    if (typeof persistFlowRowRun === 'function') persistFlowRowRun(row);
     if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row), rowStudyScope(row));
     if (typeof decorateRerunDot === 'function') decorateRerunDot(row);
     renderJobCell(row);
@@ -3250,6 +3258,7 @@
       }
       var canon = stageHistoryKey(row);
       var renamed = {
+        id: SPHERE_DEMO.newEventId ? SPHERE_DEMO.newEventId() : ('ev-' + Date.now().toString(36)),
         at: stageStampET(),
         action: 'Renamed from ' + oldName + ' to ' + newName,
         status: row.getAttribute('data-status') || '',
@@ -3261,8 +3270,8 @@
         SPHERE_DEMO.updateRecord(owned.id, function (x) {
           x.program = newName;
           x.history = x.history || [];
-          var already = x.history.some(function (ev) { return ev && ev.action === renamed.action; });
-          if (!already) x.history.push(renamed);
+          if (renamed.id && x.history.some(function (ev) { return ev && ev.id && ev.id === renamed.id; })) return;
+          x.history.push(renamed);
         });
       } else {
         if (SPHERE_DEMO.mergeEvents) {
@@ -4840,9 +4849,14 @@
     var dom = prog ? runDomain(prog) : null;
     var sample = rtfSampleFor(row);
     var outRel = '';
+    var qcOutRel = '';
     if (type === 'Dataset') {
-      var base = (dom || stem || '').toLowerCase();
-      if (base) outRel = 'data/adam/' + base + (lang === 'R' ? '.xpt' : '.sas7bdat');
+      var base = (dom || stem || '').toLowerCase().replace(/^qc[-_]/, '');
+      if (base) {
+        var ext = lang === 'R' ? '.xpt' : '.sas7bdat';
+        outRel = 'data/adam/' + base + ext;
+        qcOutRel = 'data/adam/qc/qc_' + base + ext;
+      }
     } else {
       var outStem = logOutputStem({ prog: prog, row: row });
       if (outStem) outRel = 'output/tlf/' + outStem + '.rtf';
@@ -4852,6 +4866,7 @@
       progPath: prog ? studyPath('programs/' + folder + '/' + prog, row) : '',
       logPath: prog ? studyPath('logs/' + stem + '.log', row) : '',
       outPath: studyPath(outRel, row),
+      qcOutPath: studyPath(qcOutRel || outRel, row),
       qcProgPath: qc ? studyPath('programs/' + folder + '/qc/' + qc, row) : '',
       qcLogPath: qc ? studyPath('logs/' + qc.replace(/\.[^.]+$/, '') + '.log', row) : ''
     };
@@ -4959,9 +4974,14 @@
       return hit;
     });
   }
+  function datasetOutputPath(meta, scope) {
+    if (scope === 'qc' && meta && meta.qcOutPath) return meta.qcOutPath;
+    return (meta && meta.outPath) || '';
+  }
   function renderArtifactRtf(pane, row, meta, gen, scope) {
     if (meta.type === 'Dataset') {
-      pane.innerHTML = emptyArtifact('No TLF RTF for this dataset. Production writes an analysis dataset' + (meta.outPath ? ' at ' + meta.outPath : '') + '.');
+      var dsPath = datasetOutputPath(meta, scope);
+      pane.innerHTML = emptyArtifact('No TLF RTF for this dataset. ' + (scope === 'qc' ? 'QC writes' : 'Production writes') + ' an analysis dataset' + (dsPath ? ' at ' + dsPath : '') + '.');
       return;
     }
     var sample = meta.sample;
@@ -4994,7 +5014,10 @@
     var side = artifactSideLabel(scope);
     var file = artifactFileName(meta, scope);
     if (tab.id === 'rtf') {
-      if (meta.type === 'Dataset') return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (meta.outPath ? ' · ' + meta.outPath : '');
+      if (meta.type === 'Dataset') {
+        var dsPath = datasetOutputPath(meta, scope);
+        return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (dsPath ? ' · ' + dsPath : '');
+      }
       if (!meta.outPath) return side + ' · No output file on this record';
       return side + ' · ' + meta.outPath + ' · Sample output · RTF converted to HTML';
     }
@@ -6589,6 +6612,22 @@
         });
       }
     }
+  }
+  function persistFlowRowRun(row) {
+    if (!row || !window.SPHERE_DEMO || !SPHERE_DEMO.setRowState) return;
+    var id = row.getAttribute('data-flow-id') || '';
+    if (!id) return;
+    var job = row._runJob;
+    SPHERE_DEMO.setRowState(id, {
+      program: (row.getAttribute('data-program') || '').split('/').pop(),
+      job: row.getAttribute('data-job') || (job && job.state) || '',
+      jobMode: row.getAttribute('data-job-mode') || (job && job.mode) || '',
+      jobWarn: job && job.warn ? 1 : 0,
+      lastRun: row.getAttribute('data-last-run') || '',
+      prodRan: row._prodRan ? 1 : 0,
+      qcRan: row._qcRan ? 1 : 0,
+      outputReady: row._outputReady ? 1 : 0
+    });
   }
   function persistRuntimeRowFromDom(row) {
     if (!row) return;

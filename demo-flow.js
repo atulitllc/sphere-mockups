@@ -49,6 +49,100 @@
     });
   }
 
+  function sourceTextGenerated(text) {
+    return /Initial (?:version|QC program) generated from mock shell/.test(String(text || ''));
+  }
+  function copySourceIfBetter(s, fromKey, toKey) {
+    if (!fromKey || !toKey || fromKey === toKey) return;
+    var from = s.sources[fromKey];
+    if (from == null || from === '') return;
+    var to = s.sources[toKey];
+    if (to == null || to === '' || (sourceTextGenerated(to) && !sourceTextGenerated(from))) s.sources[toKey] = from;
+  }
+  /* Main saved 14.1.3 under the record id, and seed QC under the production program name. */
+  function aliasSavedSources(s) {
+    var home = 'ONC-204-301';
+    Object.keys(s.sources || {}).forEach(function (k) {
+      var cut = k.lastIndexOf(':');
+      if (cut < 0) return;
+      var side = k.slice(cut + 1);
+      if (side !== 'qc') return;
+      var left = k.slice(0, cut);
+      var bar = left.indexOf('|');
+      if (bar < 0) return;
+      var name = left.slice(bar + 1);
+      if (!name || /^qc[-_]/i.test(name)) return;
+      copySourceIfBetter(s, k, left.slice(0, bar) + '|' + qcName(name) + ':qc');
+    });
+    (s.records || []).forEach(function (rec) {
+      if (!rec || !rec.id || !rec.program) return;
+      var scope = rec.study || home;
+      var prog = String(rec.program).split('/').pop();
+      if (!prog) return;
+      copySourceIfBetter(s, scope + '|' + rec.id + ':prod', scope + '|' + prog + ':prod');
+      copySourceIfBetter(s, scope + '|' + rec.id + ':qc', scope + '|' + qcName(prog) + ':qc');
+      copySourceIfBetter(s, scope + '|' + prog + ':qc', scope + '|' + qcName(prog) + ':qc');
+    });
+  }
+  function scopeFileRenames(s) {
+    var home = 'ONC-204-301';
+    var raw = s.fileRenames || {};
+    var next = {};
+    var unscoped = {};
+    Object.keys(raw).forEach(function (k) {
+      var parts = String(k).split('|');
+      if (parts.length >= 3 && parts[0] && parts[parts.length - 1]) next[k] = raw[k];
+      else unscoped[k] = raw[k];
+    });
+    function follow(name) {
+      var seen = {};
+      var cur = name;
+      while (unscoped[cur] && !seen[cur]) {
+        seen[cur] = 1;
+        cur = unscoped[cur];
+      }
+      return cur;
+    }
+    Object.keys(unscoped).forEach(function (oldName) {
+      var direct = unscoped[oldName];
+      var latest = follow(oldName);
+      if (!latest || latest === oldName) return;
+      var hits = [];
+      function consider(rec) {
+        if (!rec || !rec.id) return;
+        var i;
+        for (i = 0; i < hits.length; i++) if (hits[i].id === rec.id) return;
+        hits.push(rec);
+      }
+      function owns(rec) {
+        if (!rec) return false;
+        if (rec.program === latest || rec.program === direct) return true;
+        var hist = rec.history || [];
+        var i;
+        for (i = 0; i < hist.length; i++) {
+          var act = String((hist[i] && hist[i].action) || '');
+          if (act.indexOf('Renamed from ' + oldName + ' to ') === 0 && (rec.program === latest || rec.program === direct)) return true;
+        }
+        var st = rec.id && s.rowState ? s.rowState[rec.id] : null;
+        return !!(st && (st.program === latest || st.program === direct));
+      }
+      (s.records || []).forEach(function (r) { if (owns(r)) consider(r); });
+      Object.keys(s.rowState || {}).forEach(function (id) {
+        var st = s.rowState[id];
+        if (!st || (st.program !== latest && st.program !== direct)) return;
+        var rec = (s.records || []).filter(function (r) { return r && r.id === id; })[0];
+        if (rec) consider(rec);
+        else if (id.indexOf('seed-') === 0) consider({ id: id, study: home, program: st.program });
+      });
+      var nonHome = hits.filter(function (r) { return (r.study || home) !== home; });
+      var owners = nonHome.length ? nonHome : hits;
+      owners.forEach(function (owner) {
+        var scope = owner.study || home;
+        next[scope + '|' + owner.id + '|' + oldName] = latest;
+      });
+    });
+    s.fileRenames = next;
+  }
   function read() {
     var s = null;
     var had = false;
@@ -72,7 +166,7 @@
     s.lastRun = s.lastRun || {};     /* program -> ISO time of last completed run */
     s.programTx = s.programTx || []; /* program renames: old, new, user, time */
     s.programByNumber = s.programByNumber || {}; /* study|number -> program file name */
-    s.fileRenames = s.fileRenames || {}; /* old file name -> new file name */
+    s.fileRenames = s.fileRenames || {}; /* scope|recordId|old file name -> new file name */
     s.files = s.files || {}; /* scope|filename -> 1 when that program file exists */
     s.rowState = s.rowState || {}; /* record id -> persisted program name and run flags */
     var upgraded = false;
@@ -86,6 +180,18 @@
       });
       s.sources = migrated;
       s.sourcesScoped = 1;
+      upgraded = true;
+    }
+    /* Carry main's record-id and program:qc saves onto the keys the viewer reads. */
+    if (!s.sourcesAliased) {
+      aliasSavedSources(s);
+      s.sourcesAliased = 1;
+      upgraded = true;
+    }
+    /* Unscoped renames belong to the non-home record that made them. Home keeps its own names. */
+    if (!s.renamesScoped) {
+      scopeFileRenames(s);
+      s.renamesScoped = 1;
       upgraded = true;
     }
     /* Template lookup keys only. Display dashes stay in storage and are tidied at render. */
@@ -217,7 +323,9 @@
     var prog = (rec && rec.program) || '';
     if (type === 'Dataset') {
       var ext = /\.r$/i.test(prog) ? '.xpt' : '.sas7bdat';
-      return scopeBits.root + 'data/adam/' + datasetFileBase(prog) + ext;
+      var base = datasetFileBase(prog);
+      if (isQc) return scopeBits.root + 'data/adam/qc/qc_' + base + ext;
+      return scopeBits.root + 'data/adam/' + base + ext;
     }
     var num = String((rec && rec.number) || '').replace(/\./g, '_').replace(/-/g, '_');
     if (!num) {
@@ -484,14 +592,17 @@
       if (ev.id) return String(ev.id);
       return [ev.at, ev.action, ev.status, ev.person, ev.note, ev.comment, ev.justification, ev.from, ev.to].join('\u0001');
     },
+    newEventId: function () {
+      return 'ev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    },
     addEvent: function (prog, ev) {
       if (!prog || !ev) return;
       var s = read();
-      if (!ev.id) ev.id = api.eventKey(ev);
+      if (!ev.id) ev.id = api.newEventId();
       var list = s.events[prog] = s.events[prog] || [];
-      var id = ev.id;
+      var id = String(ev.id);
       for (var i = 0; i < list.length; i++) {
-        if (api.eventKey(list[i]) === id) { write(s); return; }
+        if (list[i] && list[i].id && String(list[i].id) === id) return;
       }
       list.push(ev);
       write(s);
@@ -508,8 +619,9 @@
         if (!k) return;
         (s.events[k] || []).forEach(function (ev) {
           if (!ev) return;
-          var id = api.eventKey(ev);
-          if (!ev.id) { ev.id = id; changed = true; }
+          /* Id-less copies from older saves collapse once. A new rename always carries its own id. */
+          if (!ev.id) { ev.id = api.eventKey(ev); changed = true; }
+          var id = String(ev.id);
           if (seen[id]) { changed = true; return; }
           seen[id] = 1;
           out.push(ev);
@@ -642,7 +754,11 @@
           origProgram: prev.origProgram || info.origProgram || info.oldName
         });
       }
-      s.fileRenames[info.oldName] = info.newName;
+      var renamePrefix = scope + '|' + (info.recordId || '') + '|';
+      Object.keys(s.fileRenames).forEach(function (k) {
+        if (k.indexOf(renamePrefix) === 0 && s.fileRenames[k] === info.oldName) s.fileRenames[k] = info.newName;
+      });
+      s.fileRenames[renamePrefix + info.oldName] = info.newName;
       write(s);
       return s.rowState[info.recordId] || null;
     },
@@ -731,7 +847,15 @@
       };
       s.programTx.push(tx);
       if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
-      if (info.oldName) s.fileRenames[info.oldName] = info.newName;
+      if (info.oldName) {
+        var renameScope = info.study || STUDY;
+        var renameId = info.recordId || info.shellId || info.number || '';
+        var renamePrefix = renameScope + '|' + renameId + '|';
+        Object.keys(s.fileRenames).forEach(function (k) {
+          if (k.indexOf(renamePrefix) === 0 && s.fileRenames[k] === info.oldName) s.fileRenames[k] = info.newName;
+        });
+        s.fileRenames[renamePrefix + info.oldName] = info.newName;
+      }
       (s.records || []).forEach(function (r) {
         if ((r.study || STUDY) !== (info.study || STUDY)) return;
         var hit = (info.shellId && r.shellId === info.shellId) ||
@@ -758,7 +882,23 @@
     programForNumber: function (study, number) {
       return read().programByNumber[(study || STUDY) + '|' + number] || '';
     },
-    fileRenames: function () { return Object.assign({}, read().fileRenames); },
+    fileRenames: function (scope) {
+      var map = read().fileRenames || {};
+      var want = String(scope || '');
+      var out = {};
+      if (!want) return out;
+      var prefix = want + '|';
+      Object.keys(map).forEach(function (k) {
+        if (k.indexOf(prefix) !== 0) return;
+        var rest = k.slice(prefix.length);
+        var bar = rest.indexOf('|');
+        var oldName = bar < 0 ? rest : rest.slice(bar + 1);
+        if (!oldName || oldName === map[k]) return;
+        out[oldName] = map[k];
+      });
+      return out;
+    },
+    outputFilePath: outputFilePath,
     lastRun: function (prog, study) {
       var name = String(prog || '').split('/').pop();
       var s = read();
@@ -901,7 +1041,21 @@
       var fileKey = home + '|' + name;
       var sourceKey = fileKey + ':' + side;
       if (!s.files[fileKey]) { s.files[fileKey] = 1; changed = true; }
-      if (!s.sources[sourceKey]) { s.sources[sourceKey] = programHeader(rec, side); changed = true; }
+      var current = s.sources[sourceKey];
+      if (current && !sourceTextGenerated(current)) return;
+      var saved = '';
+      var legacy = [home + '|' + rec.id + ':' + side];
+      if (rec.program) legacy.push(home + '|' + String(rec.program).split('/').pop() + ':' + side);
+      var i;
+      for (i = 0; i < legacy.length; i++) {
+        var text = s.sources[legacy[i]];
+        if (text && !sourceTextGenerated(text)) { saved = text; break; }
+      }
+      if (saved) {
+        if (current !== saved) { s.sources[sourceKey] = saved; changed = true; }
+        return;
+      }
+      if (!current) { s.sources[sourceKey] = programHeader(rec, side); changed = true; }
     }
     ensureSide(rec.program, 'prod');
     ensureSide(qcName(rec.program), 'qc');

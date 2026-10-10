@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4merge1"></script>
+<script src="demo-flow.js?v=flow4round4"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -3771,7 +3771,7 @@
     var qc = program && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(program) : '';
     var bits = copyScopeBits(sourceId);
     var shellNo = src.number || draft.number || '';
-    var sentence = 'Copied as Draft from ' + bits.study + ' / ' + bits.deliverable + ' / ' + shellNo + ' (' + program + ')';
+    var sentence = 'Copied as Draft from ' + bits.study + ' / ' + bits.deliverable + ' / ' + shellNo + ' (' + (origProgram || program) + ')';
     rec.history = [{
       at: SPHERE_DEMO.stamp(),
       action: sentence,
@@ -3791,18 +3791,34 @@
         return next;
       }).join('\n');
     }
-    function textFor(sourceName, side, destName) {
-      if (!copySideExists(sourceId, sourceName, side, legacyId, existing)) return '';
-      var stored = readCopiedSource(sourceId, sourceName, side, legacyId);
-      if (stored) {
-        var moved = SPHERE_DEMO.retargetProgramText ? SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope) : stored;
-        return rewriteProgramName(moved, sourceName, destName);
-      }
-      if (!SPHERE_DEMO.programHeader) return '';
+    function stampOutputLine(text, side) {
+      if (!text || !SPHERE_DEMO.outputFilePath) return text || '';
       var headerRec = JSON.parse(JSON.stringify(rec));
       headerRec.study = destScope;
       headerRec.program = program;
-      return SPHERE_DEMO.programHeader(headerRec, side);
+      var path = SPHERE_DEMO.outputFilePath(headerRec, side === 'qc');
+      if (!path) return text;
+      return String(text).split('\n').map(function (row) {
+        if (!/Output file/.test(row)) return row;
+        var idx = row.indexOf(':');
+        if (idx < 0) return row;
+        return row.slice(0, idx + 1) + ' ' + path;
+      }).join('\n');
+    }
+    function textFor(sourceName, side, destName) {
+      if (!copySideExists(sourceId, sourceName, side, legacyId, existing)) return '';
+      var stored = readCopiedSource(sourceId, sourceName, side, legacyId);
+      var text = '';
+      if (stored) {
+        var moved = SPHERE_DEMO.retargetProgramText ? SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope) : stored;
+        text = rewriteProgramName(moved, sourceName, destName);
+      } else if (SPHERE_DEMO.programHeader) {
+        var headerRec = JSON.parse(JSON.stringify(rec));
+        headerRec.study = destScope;
+        headerRec.program = program;
+        text = SPHERE_DEMO.programHeader(headerRec, side);
+      }
+      return stampOutputLine(text, side);
     }
     var prodText = origProgram ? textFor(origProgram, 'prod', program) : '';
     var qcText = origQc ? textFor(origQc, 'qc', qc) : '';
