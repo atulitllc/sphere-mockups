@@ -181,14 +181,15 @@
     if (/mock-shells/i.test(path)) { page = 'mock-shells'; screenLabel = 'Mock Shells'; }
     else if (/tracker/i.test(path)) { page = 'tracker'; screenLabel = 'Tracker'; }
     else if (/publisher/i.test(path)) { page = 'publisher'; screenLabel = 'Generate PDF Package'; }
-    else if (/data-hub|files/i.test(path)) { page = 'files'; screenLabel = 'File Explorer'; }
+    else if (/data-hub/i.test(path)) { page = 'files'; screenLabel = 'Extract data'; }
+    else if (/files/i.test(path)) { page = 'files'; screenLabel = 'File Explorer'; }
     else if (/define/i.test(path)) { page = 'define'; screenLabel = 'Define'; }
     else if (/study-home/i.test(path)) { page = 'study-home'; screenLabel = 'Study home'; }
     else if (/studies/i.test(path)) { page = 'studies'; screenLabel = 'Studies'; }
     else if (/admin/i.test(path)) { page = 'admin'; screenLabel = 'Admin'; }
     else if (/audit/i.test(path)) { page = 'audit'; screenLabel = 'Audit'; }
     else if (/compute/i.test(path)) { page = 'compute'; screenLabel = 'Compute'; }
-    else if (/copilot/i.test(path)) { page = 'copilot'; screenLabel = 'Suggestions inbox'; }
+    else if (/copilot/i.test(path)) { page = 'copilot'; screenLabel = 'Copilot'; }
     else if (/index/i.test(path)) { return; }
 
     var topRight = document.querySelector('header.top .top-right');
@@ -602,6 +603,7 @@
     document.documentElement.style.zoom = String(z / 100);
     try { localStorage.setItem('sphere-ui-zoom', String(z)); } catch (e) {}
     syncMenuState();
+    try { window.dispatchEvent(new Event('resize')); } catch (eResize) {}
   }
 
   function applyContrast(c) {
@@ -850,6 +852,21 @@
     crumb.appendChild(current);
   }
 
+  function pageNameFits(crumb) {
+    var current = crumb.querySelector('.crumb-current') || crumb;
+    var text = String(current.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!text) return true;
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:nowrap;font:' + getComputedStyle(current).font;
+    probe.textContent = text;
+    document.body.appendChild(probe);
+    var full = probe.getBoundingClientRect().width;
+    probe.remove();
+    var cr = crumb.getBoundingClientRect();
+    var r = current.getBoundingClientRect();
+    return full <= cr.width + 1.5 && r.left >= cr.left - 1.5 && r.right <= cr.right + 1.5 && r.width + 1.5 >= full;
+  }
+
   function fitCrumbs() {
     document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
       var parents = crumb.querySelector('.crumb-parents');
@@ -861,13 +878,36 @@
       if (sep) sep.hidden = false;
       if (!parents) return;
       var sepW = sep ? sep.offsetWidth : 0;
-      var need = current.scrollWidth + sepW + 14;
-      if (need > crumb.clientWidth + 1) {
+      if (current.scrollWidth + sepW + 14 > crumb.clientWidth + 1) {
         parents.hidden = true;
         if (sep) sep.hidden = true;
-        if (current.scrollWidth > crumb.clientWidth + 1) crumb.classList.add('is-tight');
       }
     });
+  }
+
+  /* Parents ellipsize first. Then control labels, the user name, and the client pill, in that order.
+     The current page name ellipsizes only after those have given way. At 100% desktop nothing gives way. */
+  function fitBar() {
+    var top = document.querySelector('header.top');
+    if (!top) return;
+    top.classList.remove('is-bar-icons', 'is-bar-noname', 'is-bar-nopill');
+    document.body.classList.remove('is-bar-nopill');
+    fitCrumbs();
+    var crumb = top.querySelector('.crumb');
+    if (!crumb || crumb.clientWidth < 8 || pageNameFits(crumb)) return;
+    top.classList.add('is-bar-icons');
+    fitCrumbs();
+    if (pageNameFits(crumb)) return;
+    top.classList.add('is-bar-noname');
+    fitCrumbs();
+    if (pageNameFits(crumb)) return;
+    top.classList.add('is-bar-nopill');
+    document.body.classList.add('is-bar-nopill');
+    fitCrumbs();
+    if (!pageNameFits(crumb)) {
+      var current = crumb.querySelector('.crumb-current');
+      if (current && current.scrollWidth > crumb.clientWidth + 1) crumb.classList.add('is-tight');
+    }
   }
 
   function watchCrumbs() {
@@ -876,7 +916,7 @@
       var obs = new MutationObserver(function () {
         if (crumb.querySelector(':scope > .crumb-current')) return;
         splitCrumb(crumb);
-        fitCrumbs();
+        fitBar();
       });
       obs.observe(crumb, { childList: true });
       crumb._crumbObs = obs;
@@ -886,9 +926,9 @@
   function initNarrowChrome() {
     document.querySelectorAll('header.top .crumb').forEach(splitCrumb);
     watchCrumbs();
-    fitCrumbs();
-    window.addEventListener('resize', fitCrumbs);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCrumbs);
+    fitBar();
+    window.addEventListener('resize', fitBar);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBar);
 
     var nav = document.querySelector('aside.nav');
     if (!nav || document.getElementById('navMobileTools')) return;
