@@ -667,7 +667,34 @@ body.nav-collapsed {
 
 .hamburger svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; }
 
-.crumb { color: var(--muted); font-size: 13.5px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crumb {
+  color: var(--muted);
+  font-size: 13.5px;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.crumb-parents {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.crumb-sep { flex: 0 0 auto; white-space: pre; }
+.crumb-current {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.crumb.is-tight .crumb-current {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .crumb strong { color: var(--text); font-weight: 600; }
 
 .tenant-pill, .company-pill {
@@ -7224,7 +7251,37 @@ html[data-theme="dark"] .export-menu {
 }
 
 /* Phone and tablet top bar. Desktop (1280px and up) keeps the base rules. */
-.nav-mobile-tools { display: none; }
+.nav-mobile-tools {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding: 8px 4px 0;
+  border-top: 1px solid var(--nav-border);
+}
+.nav-mobile-client {
+  padding: 8px 12px 2px;
+  color: var(--nav-fg, #e8eefc);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+.nav-mobile-signout {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--nav-muted, #a8b8e0);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+}
+.nav-mobile-signout:hover {
+  color: var(--nav-fg, #e8eefc);
+  background: var(--nav-hover);
+}
 
 @media (max-width: 1279px) {
   .app, .main { min-width: 0; max-width: 100%; }
@@ -7250,14 +7307,35 @@ html[data-theme="dark"] .export-menu {
     flex: 0 0 auto;
   }
   header.top .crumb {
-    direction: rtl;
-    text-align: left;
+    display: flex;
+    align-items: baseline;
+    direction: ltr;
+    text-align: start;
     min-width: 0;
     flex: 1 1 auto;
+    overflow: hidden;
   }
-  header.top .crumb .crumb-fit {
-    direction: ltr;
-    unicode-bidi: isolate;
+  header.top .crumb-parents {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  header.top .crumb-sep {
+    flex: 0 0 auto;
+    white-space: pre;
+  }
+  header.top .crumb-current {
+    flex: 0 0 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  header.top .crumb.is-tight .crumb-current {
+    flex: 1 1 auto;
+    max-width: 100%;
   }
   .copilot-launch {
     position: relative;
@@ -7318,37 +7396,56 @@ html[data-theme="dark"] .export-menu {
     width: 32px;
     height: 32px;
   }
-  .nav-mobile-tools {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-top: auto;
-    padding: 8px 4px 0;
-    border-top: 1px solid var(--nav-border);
-  }
+  .nav-mobile-tools { display: flex; }
   .nav .nav-footer { margin-top: 8px; }
-  .nav-mobile-client {
-    padding: 8px 12px 2px;
-    color: var(--nav-fg, #e8eefc);
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .nav-mobile-signout {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    text-align: left;
-    padding: 9px 12px;
-    border-radius: var(--radius-sm);
-    color: var(--nav-muted, #a8b8e0);
-    background: transparent;
-    font-size: 14px;
-    font-weight: 500;
-  }
-  .nav-mobile-signout:hover {
-    color: var(--nav-fg, #e8eefc);
-    background: var(--nav-hover);
-  }
+}
+
+/* 768 to 860 still has room for the client pill and the user name, so they stay in the bar. */
+@media (min-width: 768px) and (max-width: 860px) {
+  header.top .tenant-pill,
+  header.top .company-pill { display: block; }
+  .user-chrome-name { display: inline; }
+  .nav-mobile-tools { display: none; }
+}
+
+/* When the current page name still does not fit, shed control labels, then the user name, then the pill. */
+header.top.is-bar-icons .copilot-launch {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+header.top.is-bar-icons .copilot-launch span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+header.top.is-bar-icons .a11y-trigger-label,
+header.top.is-bar-icons .a11y-picker-chevron,
+header.top.is-bar-icons .accent-picker-chevron { display: none; }
+header.top.is-bar-icons .a11y-picker-trigger,
+header.top.is-bar-icons .accent-picker-trigger {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+header.top.is-bar-noname .user-chrome-name { display: none; }
+header.top.is-bar-nopill .tenant-pill,
+header.top.is-bar-nopill .company-pill { display: none; }
+body.is-bar-nopill .nav-mobile-tools { display: flex; }
+body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
+@media (min-width: 861px) {
+  html.nav-collapsed .nav-mobile-tools,
+  body.nav-collapsed .nav-mobile-tools { display: none; }
 }
 
 /* Phone: sign-out leaves the bar so the crumb and icon buttons stay on screen. */
@@ -7365,6 +7462,23 @@ html[data-theme="dark"] .export-menu {
   .user-chrome-avatar svg {
     width: 20px;
     height: 20px;
+  }
+}
+
+/* On a phone the current page name needs its own row, or the icon buttons crowd it out. */
+@media (max-width: 480px) {
+  header.top {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 4px;
+  }
+  header.top .top-left {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  header.top .top-right {
+    flex: 1 1 auto;
+    margin-left: auto;
   }
 }
 

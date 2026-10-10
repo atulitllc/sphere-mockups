@@ -6,20 +6,60 @@
   var STUDY = 'ONC-204-301';
   var CURRENT_USER = 'Jordan Patel';
 
+  /* PR #19 replaced this across the whole JSON blob, including lookup values.
+     Restored keys (one-time, _keyRestore 1):
+       templateKey, layout.templateKey, templates[] entries, and any object key
+       "Primary endpoint: ORR" -> "Primary endpoint - ORR"
+     Left as display text (render-time only, not rewritten here):
+       shell/layout title, subtitle, footnotes, notes, subgroup, labelHeader, row labels,
+       shellSync title/footnotes, record titles.
+     No other stored key matched the old "Primary endpoint" replace. */
+  var KEY_RESTORE_VERSION = 1;
+  var TEMPLATE_KEY_RESTORE = { 'Primary endpoint: ORR': 'Primary endpoint - ORR' };
+
+  function restoreLookupString(value) {
+    return Object.prototype.hasOwnProperty.call(TEMPLATE_KEY_RESTORE, value) ? TEMPLATE_KEY_RESTORE[value] : value;
+  }
+  function restoreLookupKeys(node) {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      node.forEach(restoreLookupKeys);
+      return;
+    }
+    Object.keys(node).forEach(function (key) {
+      var nextKey = restoreLookupString(key);
+      if (nextKey !== key) {
+        if (!Object.prototype.hasOwnProperty.call(node, nextKey)) node[nextKey] = node[key];
+        delete node[key];
+        key = nextKey;
+      }
+      var value = node[key];
+      if (key === 'templateKey' && typeof value === 'string') {
+        node[key] = restoreLookupString(value);
+        return;
+      }
+      if (key === 'templates' && Array.isArray(value)) {
+        for (var i = 0; i < value.length; i++) {
+          if (typeof value[i] === 'string') value[i] = restoreLookupString(value[i]);
+          else restoreLookupKeys(value[i]);
+        }
+        return;
+      }
+      restoreLookupKeys(value);
+    });
+  }
+
   function read() {
     var s = null;
+    var had = false;
+    var parsed = false;
     try {
-      var raw = localStorage.getItem(KEY) || 'null';
+      var raw = localStorage.getItem(KEY);
+      had = raw != null && raw !== '';
+      raw = raw || 'null';
       if (raw.indexOf('\u00a7') >= 0) raw = raw.replace(/SAP \u00a7/g, 'SAP ').replace(/\u00a7\s*/g, '');
-      var tidied = raw
-        .replace(/Primary endpoint\s*[\u2014\u2013-]\s*/g, 'Primary endpoint: ')
-        .replace(/\u2014/g, ' · ')
-        .replace(/\u2013/g, '-');
-      if (tidied !== raw) {
-        raw = tidied;
-        try { localStorage.setItem(KEY, raw); } catch (eWrite) {}
-      }
       s = JSON.parse(raw);
+      parsed = true;
     } catch (e) { s = null; }
     s = s || {};
     s.shells = s.shells || {};      /* studyId -> shells[] */
@@ -35,6 +75,8 @@
     s.fileRenames = s.fileRenames || {}; /* old file name -> new file name */
     s.files = s.files || {}; /* scope|filename -> 1 when that program file exists */
     s.rowState = s.rowState || {}; /* record id -> persisted program name and run flags */
+    var upgraded = false;
+    /* Scope saved sources before key repair so a later walk sees the stored shape. */
     if (!s.sourcesScoped) {
       var migrated = {};
       var home = 'ONC-204-301';
@@ -44,8 +86,15 @@
       });
       s.sources = migrated;
       s.sourcesScoped = 1;
-      try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (eMig) {}
+      upgraded = true;
     }
+    /* Template lookup keys only. Display dashes stay in storage and are tidied at render. */
+    if (parsed && had && s._keyRestore !== KEY_RESTORE_VERSION) {
+      restoreLookupKeys(s);
+      s._keyRestore = KEY_RESTORE_VERSION;
+      upgraded = true;
+    }
+    if (upgraded) write(s);
     return s;
   }
   function write(s) {
