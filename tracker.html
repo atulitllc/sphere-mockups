@@ -3397,6 +3397,7 @@
         shell: field('nrShell').value
       });
       moveRowToSap(row, field('nrSap').value);
+      refreshRowWorkflowUI(row);
       applyFilters();
       close();
       if (allRows().length === before) return;
@@ -4906,8 +4907,9 @@
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
     if (!prog) return;
     var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
-    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="' + escapeHtml(prog) + '">' + escapeHtml(prog) + '</a>' +
-      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
+    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
+      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
     decorateRerunDot(row);
   }
   function rerunWhyForRow(row) {

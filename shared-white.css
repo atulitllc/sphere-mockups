@@ -4418,6 +4418,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 /* Tracker: kill header whitespace */
 .stack.tracker-stack {
   gap: 6px;
+  container-type: inline-size;
+  container-name: tracker;
 }
 .stack.tracker-stack > .note-banner.note-collapsible.is-collapsed {
   display: none;
@@ -6556,11 +6558,24 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
   /* Title and meta both flex. Meta's 2fr share stays under its 170px Programs
      floor at 1280, so that floor wins and the title keeps the leftover.
      On a wide row the 2fr share exceeds the floor and Programs grows. */
-  grid-template-columns: minmax(160px, 1fr) minmax(var(--tracker-meta-min), 2fr);
+  grid-template-columns: minmax(0, 1fr) minmax(var(--tracker-meta-min), 2fr);
   column-gap: 8px;
   align-items: center;
   width: 100%;
   min-width: 0;
+}
+/* 125% of a 1280 screen is about a 744px section. The same template stays
+   shared, with a lower Programs floor, so the row fits and columns do not drift.
+   At 1280 and 100% the section is 1000px, so this block does not apply. */
+@container tracker (max-width: 900px) {
+  .tracker-section {
+    --tracker-gap: 4px;
+    --tracker-type: 54px;
+    --tracker-shell: 48px;
+    --tracker-job: 136px;
+    --tracker-actions: 120px;
+    --tracker-programs-min: 84px;
+  }
 }
 .artifact-row .artifact-title-band {
   grid-column: 1;
