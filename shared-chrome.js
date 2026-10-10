@@ -181,14 +181,15 @@
     if (/mock-shells/i.test(path)) { page = 'mock-shells'; screenLabel = 'Mock Shells'; }
     else if (/tracker/i.test(path)) { page = 'tracker'; screenLabel = 'Tracker'; }
     else if (/publisher/i.test(path)) { page = 'publisher'; screenLabel = 'Generate PDF Package'; }
-    else if (/data-hub|files/i.test(path)) { page = 'files'; screenLabel = 'File Explorer'; }
+    else if (/data-hub/i.test(path)) { page = 'files'; screenLabel = 'Extract data'; }
+    else if (/files/i.test(path)) { page = 'files'; screenLabel = 'File Explorer'; }
     else if (/define/i.test(path)) { page = 'define'; screenLabel = 'Define'; }
     else if (/study-home/i.test(path)) { page = 'study-home'; screenLabel = 'Study home'; }
     else if (/studies/i.test(path)) { page = 'studies'; screenLabel = 'Studies'; }
     else if (/admin/i.test(path)) { page = 'admin'; screenLabel = 'Admin'; }
     else if (/audit/i.test(path)) { page = 'audit'; screenLabel = 'Audit'; }
     else if (/compute/i.test(path)) { page = 'compute'; screenLabel = 'Compute'; }
-    else if (/copilot/i.test(path)) { page = 'copilot'; screenLabel = 'Suggestions inbox'; }
+    else if (/copilot/i.test(path)) { page = 'copilot'; screenLabel = 'Copilot'; }
     else if (/index/i.test(path)) { return; }
 
     var topRight = document.querySelector('header.top .top-right');
@@ -198,8 +199,9 @@
     launch.type = 'button';
     launch.id = 'copilotLaunch';
     launch.className = 'copilot-launch';
-    launch.title = 'Ask Copilot';
-    launch.setAttribute('aria-label', 'Ask Copilot');
+    var copilotTip = 'Ask Copilot - help for ' + screenLabel;
+    launch.title = copilotTip;
+    launch.setAttribute('aria-label', copilotTip);
     launch.setAttribute('aria-haspopup', 'dialog');
     launch.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg><span>Ask Copilot</span>';
     topRight.insertBefore(launch, topRight.firstChild);
@@ -601,6 +603,7 @@
     document.documentElement.style.zoom = String(z / 100);
     try { localStorage.setItem('sphere-ui-zoom', String(z)); } catch (e) {}
     syncMenuState();
+    try { window.dispatchEvent(new Event('resize')); } catch (eResize) {}
   }
 
   function applyContrast(c) {
@@ -807,14 +810,125 @@
 
 /* Narrow top bar: keep the current page in the crumb, and park client + sign-out in the nav. */
 (function () {
-  function initNarrowChrome() {
-    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
-      if (crumb.querySelector('.crumb-fit')) return;
-      var span = document.createElement('span');
-      span.className = 'crumb-fit';
-      while (crumb.firstChild) span.appendChild(crumb.firstChild);
-      crumb.appendChild(span);
+  function splitCrumb(crumb) {
+    if (crumb.querySelector('.crumb-current')) return;
+    var nodes = [];
+    while (crumb.firstChild) nodes.push(crumb.removeChild(crumb.firstChild));
+    var segments = [[]];
+    nodes.forEach(function (node) {
+      if (node.nodeType === 3) {
+        var parts = String(node.textContent || '').split(/\s*\/\s*/);
+        parts.forEach(function (part, i) {
+          if (i > 0) segments.push([]);
+          if (part) segments[segments.length - 1].push(document.createTextNode(part));
+        });
+      } else {
+        segments[segments.length - 1].push(node);
+      }
     });
+    segments = segments.filter(function (seg) {
+      return seg.some(function (n) {
+        return n.nodeType !== 3 || String(n.textContent || '').trim();
+      });
+    });
+    if (!segments.length) return;
+    var currentNodes = segments.pop();
+    if (segments.length) {
+      var parents = document.createElement('span');
+      parents.className = 'crumb-parents';
+      segments.forEach(function (seg, idx) {
+        if (idx) parents.appendChild(document.createTextNode(' / '));
+        seg.forEach(function (n) { parents.appendChild(n); });
+      });
+      var sep = document.createElement('span');
+      sep.className = 'crumb-sep';
+      sep.textContent = ' / ';
+      crumb.appendChild(parents);
+      crumb.appendChild(sep);
+    }
+    var current = document.createElement('span');
+    current.className = 'crumb-current';
+    currentNodes.forEach(function (n) { current.appendChild(n); });
+    crumb.appendChild(current);
+  }
+
+  function pageNameFits(crumb) {
+    var current = crumb.querySelector('.crumb-current') || crumb;
+    var text = String(current.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!text) return true;
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:nowrap;font:' + getComputedStyle(current).font;
+    probe.textContent = text;
+    document.body.appendChild(probe);
+    var full = probe.getBoundingClientRect().width;
+    probe.remove();
+    var cr = crumb.getBoundingClientRect();
+    var r = current.getBoundingClientRect();
+    return full <= cr.width + 1.5 && r.left >= cr.left - 1.5 && r.right <= cr.right + 1.5 && r.width + 1.5 >= full;
+  }
+
+  function fitCrumbs() {
+    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
+      var parents = crumb.querySelector('.crumb-parents');
+      var sep = crumb.querySelector('.crumb-sep');
+      var current = crumb.querySelector('.crumb-current');
+      if (!current) return;
+      crumb.classList.remove('is-tight');
+      if (parents) parents.hidden = false;
+      if (sep) sep.hidden = false;
+      if (!parents) return;
+      var sepW = sep ? sep.offsetWidth : 0;
+      if (current.scrollWidth + sepW + 14 > crumb.clientWidth + 1) {
+        parents.hidden = true;
+        if (sep) sep.hidden = true;
+      }
+    });
+  }
+
+  /* Parents ellipsize first. Then control labels, the user name, and the client pill, in that order.
+     The current page name ellipsizes only after those have given way. At 100% desktop nothing gives way. */
+  function fitBar() {
+    var top = document.querySelector('header.top');
+    if (!top) return;
+    top.classList.remove('is-bar-icons', 'is-bar-noname', 'is-bar-nopill');
+    document.body.classList.remove('is-bar-nopill');
+    fitCrumbs();
+    var crumb = top.querySelector('.crumb');
+    if (!crumb || crumb.clientWidth < 8 || pageNameFits(crumb)) return;
+    top.classList.add('is-bar-icons');
+    fitCrumbs();
+    if (pageNameFits(crumb)) return;
+    top.classList.add('is-bar-noname');
+    fitCrumbs();
+    if (pageNameFits(crumb)) return;
+    top.classList.add('is-bar-nopill');
+    document.body.classList.add('is-bar-nopill');
+    fitCrumbs();
+    if (!pageNameFits(crumb)) {
+      var current = crumb.querySelector('.crumb-current');
+      if (current && current.scrollWidth > crumb.clientWidth + 1) crumb.classList.add('is-tight');
+    }
+  }
+
+  function watchCrumbs() {
+    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
+      if (crumb._crumbObs) return;
+      var obs = new MutationObserver(function () {
+        if (crumb.querySelector(':scope > .crumb-current')) return;
+        splitCrumb(crumb);
+        fitBar();
+      });
+      obs.observe(crumb, { childList: true });
+      crumb._crumbObs = obs;
+    });
+  }
+
+  function initNarrowChrome() {
+    document.querySelectorAll('header.top .crumb').forEach(splitCrumb);
+    watchCrumbs();
+    fitBar();
+    window.addEventListener('resize', fitBar);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBar);
 
     var nav = document.querySelector('aside.nav');
     if (!nav || document.getElementById('navMobileTools')) return;

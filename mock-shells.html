@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4phone" />
+<link rel="stylesheet" href="shared-white.css?v=flow4bar" />
 <script>
 (function () {
   try {
@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4job"></script>
+<script src="demo-flow.js?v=flow4keys"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -1173,12 +1173,9 @@
       var saved = SPHERE_DEMO.getShells(sid);
       if (saved && saved.length) studyStore[sid].shells = saved;
       /* shared SAP sections: map seed section ids to current (possibly renamed) names */
-      var dashDirty = false;
       (studyStore[sid].shells || []).forEach(function (sh) {
         if (sh.sap) sh.sap = SPHERE_DEMO.sectionName(sh.sap);
-        if (tidyShell(sh)) dashDirty = true;
       });
-      if (dashDirty && saved && saved.length && SPHERE_DEMO.setShells) SPHERE_DEMO.setShells(sid, studyStore[sid].shells);
     });
   }
   /* Pre-linked shells are real Tracker rows: syncedAt + recordId, not a separate icon state. */
@@ -1456,30 +1453,11 @@
       .replace(/\u2014/g, ' · ')
       .replace(/\u2013/g, '-');
   }
-  function tidyShell(sh) {
-    if (!sh) return false;
-    var changed = false;
-    function apply(obj, key) {
-      if (!obj || typeof obj[key] !== 'string') return;
-      var next = tidyVisible(obj[key]);
-      if (next !== obj[key]) { obj[key] = next; changed = true; }
-    }
-    apply(sh, 'title');
-    if (sh.layout) {
-      ['title', 'subtitle', 'footnotes', 'notes', 'subgroup', 'labelHeader'].forEach(function (key) {
-        apply(sh.layout, key);
-      });
-      (sh.layout.rows || []).forEach(function (row) { apply(row, 'label'); });
-    }
-    return changed;
-  }
   function loadShellIntoEditor(sh) {
     if (!sh) return;
     shellMissingId = '';
     var lay = sh.layout || blankLayout(sh.title);
     state.title = tidyVisible(lay.title || sh.title);
-    if (lay.title) lay.title = state.title;
-    if (sh.title) sh.title = tidyVisible(sh.title);
     state.subgroup = lay.subgroup || sh.subgroup || '';
     state.subtitle = lay.subtitle || '';
     state.columns = cloneData(lay.columns || ['Treatment A', 'Treatment B', 'Total']);
@@ -1909,13 +1887,13 @@
       return '<th class="col-group level-' + g.level + sel + '" data-group="' + g.id +
         '" data-level="' + g.level + '" colspan="' + (g.end - g.start + 1) +
         '"><span class="th-text th-group-text" data-group="' + g.id + '">' +
-        escapeHtml(g.label) + '</span></th>';
+        escapeHtml(tidyVisible(g.label)) + '</span></th>';
     }
     function addCornerAndAdd(rowspan, include) {
       var s = '';
       if (include) {
         s += '<th class="col-idx"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '>#</th>';
-        s += '<th class="col-label"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '>' + escapeHtml(state.labelHeader || '') + '</th>';
+        s += '<th class="col-label"' + (rowspan > 1 ? ' rowspan="' + rowspan + '"' : '') + '>' + escapeHtml(tidyVisible(state.labelHeader || '')) + '</th>';
       }
       return s;
     }
@@ -1988,7 +1966,7 @@
       html += '<tr class="sheet-row' + sel + '" data-row="' + ri + '">';
       html += '<td class="col-idx">' + (ri + 1) + '</td>';
       html += '<td class="col-label indent-' + Math.min(row.indent, 6) + '" data-row="' + ri + '" data-col="-1">';
-      html += '<span class="cell-text">' + escapeHtml(row.label) + '</span>';
+      html += '<span class="cell-text">' + escapeHtml(tidyVisible(row.label)) + '</span>';
       if (row.badges) {
         html += '<span class="cell-badges"><span class="cell-badge comment">1</span><span class="cell-badge note">2</span></span>';
       }
@@ -2003,12 +1981,12 @@
 
     document.getElementById('shellTitle').textContent = state.title || document.getElementById('shellTitle').dataset.placeholder;
     document.getElementById('shellTitle').classList.toggle('empty', !state.title);
-    paintInlineLine(document.getElementById('shellSubgroup'), state.subgroup);
-    paintInlineLine(document.getElementById('shellSubtitle'), state.subtitle);
+    paintInlineLine(document.getElementById('shellSubgroup'), tidyVisible(state.subgroup));
+    paintInlineLine(document.getElementById('shellSubtitle'), tidyVisible(state.subtitle));
 
     paintOutIdAndFigure();
-    setBlock('footnotes', state.footnotes);
-    setBlock('notes', state.notes);
+    setBlock('footnotes', tidyVisible(state.footnotes));
+    setBlock('notes', tidyVisible(state.notes));
     setBlock('program', state.program);
     setBlock('sapRef', state.sapRef);
 
@@ -4352,6 +4330,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow4phone"></script>
+<script src="shared-chrome.js?v=flow4bar"></script>
 </body>
 </html>
