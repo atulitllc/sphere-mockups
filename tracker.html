@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010e" />
+<link rel="stylesheet" href="shared-white.css?v=20261010f" />
 <script src="tenant-brand.js?v=20261010e"></script>
 <script>
 (function () {
@@ -172,7 +172,7 @@
       <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
         <div class="note-banner-inner"><div>
           <p style="margin:0 0 8px">Inventory, tags, SAP sections, tenant review flow, and <strong>Run selected</strong> (R/SAS). Open <strong>Generate PDF Package</strong> from here to assemble packages.</p>
-          <p style="margin:0"><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional <code>programs/dev</code> + <code>programs/qc</code> + <code>programs/prod</code> layout. Configure in <a href="admin.html?panel=workflow">Admin → Tracker workflow</a>.</p>
+          <p style="margin:0"><strong>No check-in / check-out.</strong> Editable only in <strong>In&nbsp;dev</strong> and <strong>Revise</strong>; other stages are read-only. Optional dev and prod layout per deliverable (<code>CSR/dev</code> editable, <code>CSR/prod</code> approved and read-only). Configure in <a href="admin.html?panel=defaults">Admin, Study layout</a>.</p>
         </div></div>
       </div>
 
@@ -1270,7 +1270,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script src="study-layout.js?v=flow4e"></script>
+<script src="study-layout.js?v=20261010f"></script>
 <script src="sphere-access.js?v=20261010d"></script>
 <script src="demo-flow.js?v=20261010c"></script>
 <script src="rtf-html.js?v=flow3k"></script>
@@ -4363,7 +4363,7 @@
     var wf = SPHERE.getTrackerWorkflow();
     var mode = (SPHERE.getProgramsFolderMode && SPHERE.getProgramsFolderMode()) || 'single';
     var folderHint = (mode === 'dev-qc-prod' || mode === 'dev-prod')
-      ? '<span class="muted" style="font-size:11px;margin-left:8px">Folders: programs/dev + programs/qc + programs/prod</span>'
+      ? '<span class="muted" style="font-size:11px;margin-left:8px">Folders: dev (editable) and prod (approved) per deliverable</span>'
       : '<span class="muted" style="font-size:11px;margin-left:8px">Folders: single programs/</span>';
     el.innerHTML = '<span class="muted" style="font-size:11px;margin-right:4px">Flow</span>' +
       wf.stages.map(function (s, i) {
@@ -4371,7 +4371,7 @@
           (s.role && s.role !== '-' ? '<span class="wf-role">' + s.role + '</span>' : '') +
           '</span>' + (i < wf.stages.length - 1 ? '<span class="wf-arrow" aria-hidden="true">→</span>' : '');
       }).join('') + folderHint +
-      '<a class="muted" style="font-size:11px;margin-left:8px" href="admin.html?panel=workflow">Configure</a>';
+      '<a class="muted" style="font-size:11px;margin-left:8px" href="' + ((mode === 'dev-qc-prod' || mode === 'dev-prod') ? 'admin.html?panel=defaults' : 'admin.html?panel=workflow') + '">Configure</a>';
   }
   function refreshRowWorkflowUI(row) {
     var status = row.getAttribute('data-status') || '';
@@ -4838,6 +4838,13 @@
     var bits = scopePathParts(row ? rowStudyScope(row) : trackerStoreId());
     return rel ? bits.root + String(rel).replace(/^\//, '') : bits.root;
   }
+  /* Dev and prod layout (Admin > Study layout): files live under <deliverable>/dev until
+     the output is approved (final), then under <deliverable>/prod. '' in single mode. */
+  function areaPrefix(row) {
+    if (!window.SPHERE || !SPHERE.isSplitProgramsFolderMode || !SPHERE.isSplitProgramsFolderMode()) return '';
+    var st = row ? (row.getAttribute('data-status') || '') : '';
+    return (SPHERE.isFinalStatus && SPHERE.isFinalStatus(st)) ? 'prod/' : 'dev/';
+  }
   function artifactMeta(row) {
     var prog = runProgName(row);
     var type = row.getAttribute('data-type') || '';
@@ -4849,6 +4856,7 @@
     var sample = rtfSampleFor(row);
     var outRel = '';
     var qcOutRel = '';
+    var area = areaPrefix(row);
     if (type === 'Dataset') {
       var base = (dom || stem || '').toLowerCase().replace(/^qc[-_]/, '');
       if (base) {
@@ -4862,12 +4870,12 @@
     }
     return {
       prog: prog, qc: qc, lang: lang, type: type, dom: dom, sample: sample,
-      progPath: prog ? studyPath('programs/' + folder + '/' + prog, row) : '',
-      logPath: prog ? studyPath('logs/' + stem + '.log', row) : '',
-      outPath: studyPath(outRel, row),
-      qcOutPath: studyPath(qcOutRel || outRel, row),
-      qcProgPath: qc ? studyPath('programs/' + folder + '/qc/' + qc, row) : '',
-      qcLogPath: qc ? studyPath('logs/' + qc.replace(/\.[^.]+$/, '') + '.log', row) : ''
+      progPath: prog ? studyPath(area + 'programs/' + folder + '/' + prog, row) : '',
+      logPath: prog ? studyPath(area + 'logs/' + stem + '.log', row) : '',
+      outPath: outRel ? studyPath(area + outRel, row) : studyPath('', row),
+      qcOutPath: (qcOutRel || outRel) ? studyPath(area + (qcOutRel || outRel), row) : studyPath('', row),
+      qcProgPath: qc ? studyPath(area + 'programs/' + folder + '/qc/' + qc, row) : '',
+      qcLogPath: qc ? studyPath(area + 'logs/' + qc.replace(/\.[^.]+$/, '') + '.log', row) : ''
     };
   }
   function artifactSideLabel(scope) {
@@ -6176,6 +6184,20 @@
       comment: comment,
       justification: justification
     };
+    /* Dev and prod layout: reaching a final status copies the dev files into prod. */
+    var isFinal = window.SPHERE && SPHERE.isFinalStatus;
+    if (isFinal && SPHERE.isSplitProgramsFolderMode && SPHERE.isSplitProgramsFolderMode() && isFinal(to) && !isFinal(from) && window.SPHERE_LAYOUT && SPHERE_LAYOUT.promote) {
+      var pProg = runProgName(row);
+      var pQc = pProg && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(pProg) : '';
+      var pItems = [];
+      if (pProg) pItems.push({ folder: 'programs', name: pProg, at: ev.at });
+      if (pQc) pItems.push({ folder: 'programs', name: pQc, at: ev.at });
+      if (pProg) pItems.push({ folder: 'logs', name: pProg.replace(/\.[^.]+$/, '') + '.log', at: ev.at });
+      if (pItems.length) {
+        SPHERE_LAYOUT.promote(rowStudyScope(row), pItems);
+        ev.note = (ev.note ? ev.note + ' ' : '') + 'Promoted dev to prod: ' + pItems.map(function (x) { return 'prod/' + x.folder + '/' + x.name; }).join(', ') + '.';
+      }
+    }
     var rec = flowRecord(row);
     if (rec) {
       if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
@@ -6965,6 +6987,6 @@
   if (trackerSort.key) applyTrackerSort();
 })();
 </script>
-<script src="shared-chrome.js?v=20261010e"></script>
+<script src="shared-chrome.js?v=20261010f"></script>
 </body>
 </html>

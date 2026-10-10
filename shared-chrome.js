@@ -386,12 +386,13 @@
   var WF_KEY = 'sphere-tracker-workflow';
   var WF_DEFAULT = { stats: true, mw: true, programsFolders: 'single', versionControl: 'local' };
   /* programsFolders: 'single' = one programs/ tree with editable+locked files
-     'dev-qc-prod' = programs/dev (editable) + programs/qc (QC copies) + programs/prod (approved)
-     legacy 'dev-prod' is treated as 'dev-qc-prod'
+     'dev-prod' = dev and prod at deliverable level: <deliverable>/dev (editable in In dev and
+     Revise) + <deliverable>/prod (approved, read-only), each with the standard study folders.
+     The older 'dev-qc-prod' value is read as 'dev-prod'. Set in Admin > Study layout.
      versionControl: 'local' (default) | 'github' (Enterprise GitHub backend, not connected) */
 
   function normalizeProgramsFolderMode(mode) {
-    if (mode === 'dev-qc-prod' || mode === 'dev-prod') return 'dev-qc-prod';
+    if (mode === 'dev-qc-prod' || mode === 'dev-prod') return 'dev-prod';
     return 'single';
   }
 
@@ -451,25 +452,23 @@
   }
 
   function isSplitProgramsFolderMode() {
-    return getProgramsFolderMode() === 'dev-qc-prod';
+    return getProgramsFolderMode() === 'dev-prod';
   }
 
   function isQcProgramStatus(status) {
     return status === 'In QC';
   }
 
-  /** Subfolder under programs/ in split mode: dev | qc | prod. */
+  /** Deliverable-level area in dev/prod mode: prod once approved (final), dev before. */
   function programFolderForStatus(status) {
-    if (isProgramEditable(status)) return 'dev';
-    if (isQcProgramStatus(status)) return 'qc';
-    return 'prod';
+    return isFinalStatus(status) ? 'prod' : 'dev';
   }
 
   /** Path hint for a program given status + tenant folder mode. */
   function programPathHint(filename, status) {
     var mode = getProgramsFolderMode();
-    if (mode === 'dev-qc-prod') {
-      return 'programs/' + programFolderForStatus(status) + '/' + filename;
+    if (mode === 'dev-prod') {
+      return programFolderForStatus(status) + '/programs/' + filename;
     }
     return 'programs/' + filename;
   }

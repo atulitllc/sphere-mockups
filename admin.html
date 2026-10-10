@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010e" />
+<link rel="stylesheet" href="shared-white.css?v=20261010f" />
 <script src="tenant-brand.js?v=20261010e"></script>
 <script>
 (function () {
@@ -34,7 +34,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow3j"></script>
+<script src="study-layout.js?v=20261010f"></script>
 <script src="sphere-access.js?v=20261010d"></script>
 </head>
 <body>
@@ -509,29 +509,6 @@
                 </div>
 
                 
-                <hr style="border:0;border-top:1px solid var(--border);margin:16px 0" />
-                <div class="section-head" style="margin-bottom:8px">
-                  <h2 class="section-heading" style="font-size:14px">Programs folder layout</h2>
-                </div>
-                <p class="muted" style="font-size:12.5px;margin:0 0 10px">How editable vs read-only program files are stored for this tenant.</p>
-                <div class="radio-cards" id="wfFolderMode" role="radiogroup" aria-label="Programs folder layout">
-                  <label class="radio-card">
-                    <input type="radio" name="programsFolders" value="single" />
-                    <div>
-                      <strong>Single <code>programs/</code> folder</strong>
-                      <div class="hint">One tree. Files stay put; stage locks them (editable only in In&nbsp;dev / Revise).</div>
-                    </div>
-                  </label>
-                  <label class="radio-card">
-                    <input type="radio" name="programsFolders" value="dev-qc-prod" />
-                    <div>
-                      <strong>Subfolders <code>programs/dev</code> + <code>programs/qc</code> + <code>programs/prod</code></strong>
-                      <div class="hint"><code>programs/dev</code> (editable) + <code>programs/qc</code> (QC copies) + <code>programs/prod</code> (approved / production, read-only). Author in dev → Send to QC copies into qc → Approve / promote copies into prod.</div>
-                    </div>
-                  </label>
-                </div>
-
-                <p class="muted" style="font-size:12px;margin:12px 0 0">No check-in / check-out. Editability follows stage: Dev &amp; Revise only. History + restore backend is under <a href="admin.html?panel=version-control">Version control</a>.</p>
               </div>
             </div>
           </div>
@@ -568,7 +545,7 @@
                 <div id="vcsGithubStub" hidden style="margin-top:14px">
                   <div class="note-banner" role="note" style="margin-bottom:12px">
                     <span class="note-label">Demo</span>
-                    <div>Connect fields are disabled. No real GitHub OAuth. Folder layout is still <a href="admin.html?panel=workflow">Tracker workflow</a> (<code>programs/</code> or <code>dev</code> / <code>qc</code> / <code>prod</code>).</div>
+                    <div>Connect fields are disabled. No real GitHub OAuth. Folder layout is set under <a href="admin.html?panel=defaults">Study layout</a> (single <code>programs/</code>, or <code>dev</code> and <code>prod</code> per deliverable).</div>
                   </div>
                   <div class="form" style="padding:0">
                     <div class="grid2">
@@ -684,7 +661,7 @@
                   </div>
                   <div class="note-banner" role="note" style="margin-top:8px">
                     <span class="note-label">Programs</span>
-                    <div>Editable vs read-only program files: choose <strong>single <code>programs/</code></strong> or <strong>dev / qc / prod subfolders</strong> under <a href="admin.html?panel=workflow">Tracker workflow</a>. Split mode: <code>programs/dev</code> (editable) + <code>programs/qc</code> (QC copies) + <code>programs/prod</code> (approved, read-only).</div>
+                    <div>Editable vs read-only program files: choose <strong>single <code>programs/</code></strong> or <strong>dev and prod at deliverable level</strong> under <a href="#programsFolderLayout">Programs folder layout</a> below. Dev and prod: <code>CSR/dev</code> (editable) and <code>CSR/prod</code> (approved, read-only), each with the standard folders.</div>
                   </div>
 
                   <div class="layout-level" id="layoutLevel" role="radiogroup" aria-label="Study folder hierarchy">
@@ -769,6 +746,30 @@
                     <span>Preview · new studies will get</span>
                     <div class="layout-preview" id="layoutPreview" aria-live="polite"></div>
                   </label>
+
+                  <div class="prog-folder-layout" id="programsFolderLayout">
+                    <div class="prog-folder-head">
+                      <span class="prog-folder-title">Programs folder layout</span>
+                      <span class="layout-card-hint">· how editable and read-only files are stored, saved when you pick</span>
+                    </div>
+                    <div class="radio-cards" id="wfFolderMode" role="radiogroup" aria-label="Programs folder layout">
+                      <label class="radio-card">
+                        <input type="radio" name="programsFolders" value="single" />
+                        <div>
+                          <strong>Single <code>programs/</code> folder</strong>
+                          <div class="hint">One tree per deliverable. Files stay put; the stage locks them (editable only in In&nbsp;dev and Revise).</div>
+                        </div>
+                      </label>
+                      <label class="radio-card">
+                        <input type="radio" name="programsFolders" value="dev-prod" />
+                        <div>
+                          <strong>Dev and prod at deliverable level: <code>CSR/dev</code> + <code>CSR/prod</code></strong>
+                          <div class="hint"><code>CSR/dev</code> (editable in In&nbsp;dev and Revise) and <code>CSR/prod</code> (approved, read-only), each with the standard study folders. Same for DMC, DSUR and every other deliverable. Approve or promote copies dev into prod. No separate qc folder.</div>
+                        </div>
+                      </label>
+                    </div>
+                    <p class="hint prog-folder-foot">No check-in or check-out. Editability follows the stage: In dev and Revise only. History and restore are under <a href="admin.html?panel=version-control">Version control</a>.</p>
+                  </div>
 
                   <div class="grid2">
                     <label>
@@ -1154,13 +1155,11 @@
     var pre = studyPrefix();
     var split = window.SPHERE && SPHERE.isSplitProgramsFolderMode && SPHERE.isSplitProgramsFolderMode();
     layoutPreview.innerHTML = folderNames().map(function (n) {
-      if (n === 'programs' && split) {
-        return '<span class="path-chip">' + pre + '/programs/dev</span>' +
-          '<span class="path-chip">' + pre + '/programs/qc</span>' +
-          '<span class="path-chip">' + pre + '/programs/prod</span>';
-      }
+      if (split) return '<span class="path-chip">' + pre + '/dev/' + n + '</span>';
       return '<span class="path-chip">' + pre + '/' + n + '</span>';
-    }).join('');
+    }).join('') + (split ? folderNames().map(function (n) {
+      return '<span class="path-chip is-prod">' + pre + '/prod/' + n + '</span>';
+    }).join('') : '');
   }
   window.SPHERE_refreshLayoutPreview = refreshPreview;
 
@@ -1559,7 +1558,7 @@
   paint();
 })();
 </script>
-<script src="shared-chrome.js?v=20261010e"></script>
+<script src="shared-chrome.js?v=20261010f"></script>
 <script>
 /* Admin > Branding: Save persists name, accent and logo (tenant-brand.js applies them on every page). */
 (function () {
@@ -1663,8 +1662,8 @@
       var mw = document.getElementById('wfMw');
       if (st) st.checked = !!f.stats;
       if (mw) mw.checked = !!f.mw;
-      var mode = (window.SPHERE && SPHERE.getProgramsFolderMode) ? SPHERE.getProgramsFolderMode() : (f.programsFolders === 'dev-prod' ? 'dev-qc-prod' : (f.programsFolders || 'single'));
-      if (mode === 'dev-prod') mode = 'dev-qc-prod';
+      var mode = (window.SPHERE && SPHERE.getProgramsFolderMode) ? SPHERE.getProgramsFolderMode() : (f.programsFolders || 'single');
+      if (mode === 'dev-qc-prod') mode = 'dev-prod';
       document.querySelectorAll('input[name="programsFolders"]').forEach(function (r) {
         r.checked = r.value === mode;
       });
@@ -1686,7 +1685,7 @@
       });
       paintPreview();
       if (typeof window.SPHERE_refreshLayoutPreview === 'function') window.SPHERE_refreshLayoutPreview();
-      if (typeof showToast === 'function') showToast('Tracker workflow saved for this tenant (demo)');
+      if (typeof showToast === 'function') showToast('Saved for this tenant (demo)');
     }
     function saveVcs() {
       if (!window.SPHERE || !SPHERE.setTrackerWorkflowFlags) return;

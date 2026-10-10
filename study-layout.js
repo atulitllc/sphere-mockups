@@ -338,7 +338,30 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintOpenedStudy);
   else paintOpenedStudy();
 
+  /* Programs folder layout (Admin > Study layout), stored with the Tracker workflow flags.
+     true = dev and prod at deliverable level: <deliverable>/dev + <deliverable>/prod. */
+  function programsSplit() {
+    var wf = readJson('sphere-tracker-workflow') || {};
+    return wf.programsFolders === 'dev-prod' || wf.programsFolders === 'dev-qc-prod';
+  }
+  /* Approve / promote copies dev into prod: remembered per study store. */
+  var PROMO_KEY = 'sphere-prod-promotions';
+  function promoted(store) { var all = readJson(PROMO_KEY) || {}; return (all[store] || []).slice(); }
+  function promote(store, items) {
+    var all = readJson(PROMO_KEY) || {};
+    var list = all[store] || [];
+    (items || []).forEach(function (it) {
+      if (!it || !it.name) return;
+      if (!list.some(function (x) { return x.folder === it.folder && x.name === it.name; })) list.push(it);
+    });
+    all[store] = list;
+    writeJson(PROMO_KEY, all);
+    return list;
+  }
   window.SPHERE_LAYOUT = {
+    programsSplit: programsSplit,
+    promoted: promoted,
+    promote: promote,
     openedStudy: openedStudy,
     setCurrent: setCurrent,
     removeStudy: removeStudy,

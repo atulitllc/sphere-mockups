@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010e" />
+<link rel="stylesheet" href="shared-white.css?v=20261010f" />
 <script src="tenant-brand.js?v=20261010e"></script>
 <script>
 (function () {
@@ -34,7 +34,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=flow4a"></script>
+<script src="study-layout.js?v=20261010f"></script>
 <script src="ingest-store.js?v=flow4a"></script>
 <script src="sphere-access.js?v=20261010d"></script>
 <script src="demo-flow.js?v=20261010c"></script>
@@ -535,11 +535,12 @@
   }
   /* Study subfolders in the studies tree are the folder browser: click to open,
      subtle count, folder actions on hover. */
-  function buildStudyTreeFolders(subsUl) {
-    FOLDERS.forEach(function (f) {
+  function buildStudyTreeFolders(subsUl, list) {
+    (list || FOLDERS).forEach(function (f) {
+      var label = f.label || f.id;
       var li = Array.prototype.filter.call(subsUl.querySelectorAll(':scope > .lt-sub'), function (n) {
         var d = n.querySelector('.lt-dir');
-        return d && d.textContent.replace(/\/$/, '') === f.id;
+        return d && d.textContent.replace(/\/$/, '') === label;
       })[0];
       if (!li) {
         li = document.createElement('li');
@@ -555,7 +556,7 @@
       b.setAttribute('data-folder', f.id);
       if (BROWSE) b.setAttribute('data-key', BROWSE.activeKey + '/' + f.id);
       b.title = f.title || ('Open ' + f.id + '/');
-      b.innerHTML = '<span class="lt-folder-name">' + f.id + '/</span>' +
+      b.innerHTML = '<span class="lt-folder-name">' + label + '/</span>' +
         (/^\d+$/.test(String(f.count)) ? '<span class="lt-count" aria-label="' + f.count + ' items">' + f.count + '</span>' : '');
       var more = document.createElement('button');
       more.type = 'button';
@@ -574,6 +575,14 @@
   }
 
   function buildTree() {
+    var areaUls = treeRoot.querySelectorAll('#filesStudies li.is-active .lt-subs[data-area]');
+    if (areaUls.length) {
+      Array.prototype.forEach.call(areaUls, function (ul) {
+        var g = ul.getAttribute('data-area');
+        buildStudyTreeFolders(ul, FOLDERS.filter(function (f) { return f.area === g; }));
+      });
+      return;
+    }
     var subsUl = treeRoot.querySelector('#filesStudies li.is-active > .lt-subs') || treeRoot.querySelector('#filesStudies .lt-subs');
     if (subsUl) { buildStudyTreeFolders(subsUl); return; }
     /* Fallback without a study layout: flat folder list. */
@@ -777,10 +786,14 @@
     var who = currentUser();
     if (who.deactivated) return { ok: false, reason: 'This account is deactivated' };
     var loc = locateFolder(folder);
+    if (loc.area === 'prod' && !loc.sub) return { ok: false, reason: 'Production folders are read-only. Approve in the Tracker to copy dev into prod.' };
     if (!loc.sub) return { ok: false, reason: 'Open a study folder such as programs/ to add items here. Levels above it follow the Admin study layout.' };
     if (/closed|locked|approved|archived|frozen/i.test(loc.status || '')) {
       return { ok: false, reason: 'This study is ' + String(loc.status).toLowerCase() + ', so its folders are read-only' };
     }
+    var area = loc.area || (/^(dev|prod)\//.test(loc.sub) ? loc.sub.split('/')[0] : '');
+    if (area === 'prod') return { ok: false, reason: 'Production folders are read-only. Approve in the Tracker to copy dev into prod.' };
+    if (area) loc.sub = loc.sub.slice(area.length + 1);
     if (window.SPHERE_ACCESS && SPHERE_ACCESS.canEdit && !SPHERE_ACCESS.canEdit(loc.path || ((window.SPHERE_filesPath || '') + folder))) {
       return { ok: false, reason: RO };
     }
@@ -1570,6 +1583,15 @@
       ? active.protocol
       : (active.protocol + '::' + active.deliverable);
     var subsList = L.get().subfolders.slice();
+    /* Programs folder layout 'dev-prod' (Admin > Study layout): every deliverable holds
+       dev/ (editable in In dev and Revise) and prod/ (approved, read-only), each with the
+       standard study folders. Area subfolder ids then read 'dev/sdtm', 'prod/programs'. */
+    var SPLIT = !!(L.programsSplit && L.programsSplit());
+    var AREAS = SPLIT ? ['dev', 'prod'] : [];
+    var areaSubs = SPLIT ? AREAS.reduce(function (acc, g) { return acc.concat(subsList.map(function (sub) { return g + '/' + sub; })); }, []) : subsList.slice();
+    window.SPHERE_filesSplit = SPLIT;
+    function areaOf(sub) { var g = String(sub || '').split('/')[0]; return AREAS.indexOf(g) >= 0 ? g : ''; }
+    function baseSub(sub) { var g = areaOf(sub); return g ? String(sub).slice(g.length + 1) : sub; }
     var activeKey = '@' + activePath.replace(/\/$/, '');
     /* Nest every registry folder path: compound / protocol / deliverable, per layout. */
     var nest = { kids: {}, entries: [] };
@@ -1613,10 +1635,15 @@
     };
     var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     function seedFiles(key, sub, status) {
+      var area = areaOf(sub);
+      sub = baseSub(sub);
       var names = SEED_NAMES[sub] || ['README.txt'];
       var h = seedHash(key);
       var n = /startup/i.test(status) ? Math.min(names.length, 1 + h % 3) : Math.max(2, names.length - h % 3);
-      return names.slice(0, n).map(function (name, i) {
+      var picked = names.slice(0, n);
+      /* prod/ holds approved copies only: none yet for studies in startup, most for others. */
+      if (area === 'prod') picked = /startup/i.test(status) ? [] : picked.filter(function (nm) { return seedHash(key + '|' + nm) % 10 < 7; });
+      return picked.map(function (name, i) {
         var hh = seedHash(key + '/' + name);
         var ext = String(name.split('.').pop()).toLowerCase();
         var kb = ext === 'sas7bdat' ? 120 + hh % 3800 : (ext === 'csv' ? 60 + hh % 2400 : 4 + hh % 40);
@@ -1636,12 +1663,16 @@
       if (key === activeKey) { var f = FOLDERS.filter(function (x) { return x.id === sub; })[0]; return f ? f.count : (TREE[sub] || []).length; }
       return seedFiles(key + '/' + sub, sub, nodeStatus(n)).length;
     }
+    function areaListing(key, area, n) {
+      return subsList.map(function (sub) { return dirEntry(sub, Number(subCount(key, area + '/' + sub, n)) || null); });
+    }
     /* Fill TREE for a tree key on first view. */
     function ensure(key) {
       if (TREE[key]) return true;
       var n = NODES[key];
       if (n) {
-        if (isLeaf(n)) TREE[key] = subsList.map(function (sub) { return dirEntry(sub, Number(subCount(key, sub, n)) || null); });
+        if (isLeaf(n) && SPLIT) TREE[key] = AREAS.map(function (g) { return dirEntry(g, null); });
+        else if (isLeaf(n)) TREE[key] = subsList.map(function (sub) { return dirEntry(sub, Number(subCount(key, sub, n)) || null); });
         else TREE[key] = Object.keys(n.kids).sort().map(function (k) { return dirEntry(k, null); });
         return true;
       }
@@ -1650,7 +1681,8 @@
       if (cut < 0) return false;
       var base = key.slice(0, cut);
       var sub = key.slice(cut + 1);
-      if (subsList.indexOf(sub) < 0) return false;
+      if (SPLIT && AREAS.indexOf(sub) >= 0) { TREE[key] = areaListing(base, sub, NODES[base]); return true; }
+      if (areaSubs.indexOf(sub) < 0) return false;
       TREE[key] = seedFiles(key, sub, nodeStatus(NODES[base]));
       return true;
     }
@@ -1663,7 +1695,24 @@
       var cur = n.entries.some(function (e) { return e.current; });
       var open = isActive || onPath;
       var kids = '';
-      if (leaf) {
+      if (leaf && SPLIT) {
+        kids = '<ul class="lt-tree lt-areas"' + (open ? '' : ' hidden') + '>' + AREAS.map(function (g) {
+          var gk = key + '/' + g;
+          var subsHtml = subsList.map(function (sub) {
+            if (isActive) return '<li class="lt-node lt-sub"><span class="lt-dir">' + escA(sub) + '/</span></li>';
+            var c = subCount(key, g + '/' + sub, n);
+            return '<li class="lt-node lt-sub lt-folder-node" data-folder="' + escA(gk + '/' + sub) + '">' +
+              '<button type="button" class="lt-dir lt-folder" data-key="' + escA(gk + '/' + sub) + '" title="Open ' + escA(gk.slice(1) + '/' + sub) + '/">' +
+              '<span class="lt-folder-name">' + escA(sub) + '/</span><span class="lt-count">' + c + '</span></button></li>';
+          }).join('');
+          return '<li class="lt-node lt-browse-node lt-area lt-area-' + g + '" data-node="' + escA(gk) + '" data-area="' + g + '">' +
+            '<span class="lt-row">' +
+            '<button type="button" class="lt-chev" aria-expanded="' + (isActive ? 'true' : 'false') + '" aria-label="' + (isActive ? 'Collapse ' : 'Expand ') + g + '">' + chev + '</button>' +
+            '<button type="button" class="lt-dir lt-browse" data-key="' + escA(gk) + '" title="' + escA(gk.slice(1)) + '/: ' + (g === 'prod' ? 'approved, read-only' : 'editable in In dev and Revise') + '">' + g + '/</button>' +
+            '<span class="lt-badge lt-area-badge">' + (g === 'prod' ? 'read-only' : 'editable') + '</span>' +
+            '</span><ul class="lt-tree lt-subs" data-area="' + g + '"' + (isActive ? '' : ' hidden') + '>' + subsHtml + '</ul></li>';
+        }).join('') + '</ul>';
+      } else if (leaf) {
         kids = '<ul class="lt-tree lt-subs"' + (open ? '' : ' hidden') + '>' + subsList.map(function (sub) {
           if (isActive) return '<li class="lt-node lt-sub"><span class="lt-dir">' + escA(sub) + '/</span></li>';
           var c = subCount(key, sub, n);
@@ -1695,7 +1744,7 @@
       if (ul) ul.hidden = !open;
       if (btn) {
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        btn.setAttribute('aria-label', (open ? 'Collapse ' : 'Expand ') + (NODES[li.getAttribute('data-node')] || {}).name);
+        btn.setAttribute('aria-label', (open ? 'Collapse ' : 'Expand ') + ((NODES[li.getAttribute('data-node')] || {}).name || String(li.getAttribute('data-node') || '').split('/').pop()));
       }
     }
     box.addEventListener('click', function (ev) {
@@ -1746,9 +1795,12 @@
         var rest = full.slice(base.length + 1);
         if (rest) {
           var sub = '';
-          subsList.concat(FOLDERS.map(function (f) { return f.id; })).forEach(function (id) { if ((rest === id || rest.indexOf(id + '/') === 0) && id.length > sub.length) sub = id; });
+          areaSubs.concat(FOLDERS.map(function (f) { return f.id; })).forEach(function (id) { if ((rest === id || rest.indexOf(id + '/') === 0) && id.length > sub.length) sub = id; });
           if (!sub) sub = rest.split('/')[0];
-          segs.push({ label: sub, key: base + '/' + sub });
+          if (areaOf(sub) && sub !== areaOf(sub)) {
+            segs.push({ label: areaOf(sub), key: base + '/' + areaOf(sub) });
+            segs.push({ label: baseSub(sub), key: base + '/' + sub });
+          } else segs.push({ label: sub, key: base + '/' + sub });
           rest.slice(sub.length + 1).split('/').filter(Boolean).forEach(function (seg) {
             segs.push({ label: seg, key: segs[segs.length - 1].key + '/' + seg });
           });
@@ -1761,9 +1813,10 @@
         Object.keys(NODES).forEach(function (k) { if (isLeaf(NODES[k]) && full.indexOf(k + '/') === 0 && k.length > base.length) base = k; });
         if (!base) return { sub: '', status: '', path: full.slice(1) };
         var rest = full.slice(base.length + 1);
+        if (SPLIT && AREAS.indexOf(rest) >= 0) return { sub: '', area: rest, status: nodeStatus(NODES[base]), path: full.slice(1) };
         var sub = '';
-        subsList.concat(FOLDERS.map(function (f) { return f.id; })).forEach(function (id) { if ((rest === id || rest.indexOf(id + '/') === 0) && id.length > sub.length) sub = id; });
-        return { sub: sub, status: nodeStatus(NODES[base]), path: full.slice(1) };
+        areaSubs.concat(FOLDERS.map(function (f) { return f.id; })).forEach(function (id) { if ((rest === id || rest.indexOf(id + '/') === 0) && id.length > sub.length) sub = id; });
+        return { sub: sub, area: areaOf(sub), status: nodeStatus(NODES[base]), path: full.slice(1) };
       },
       childKey: function (cur, name) {
         var full = cur.charAt(0) === '@' ? cur : activeKey + '/' + cur;
@@ -1819,13 +1872,43 @@
         FOLDERS.push({ id: sf, count: String((TREE[sf] || []).length), frozen: false, title: 'Admin layout' });
       }
     });
+    if (SPLIT) {
+      /* dev/ keeps the working files; prod/ holds the approved copies (a stable share of
+         the seeded files plus everything promoted from the Tracker). */
+      var promos = L.promoted ? L.promoted(window.SPHERE_filesScope || '') : [];
+      var baseFolders = FOLDERS.slice();
+      FOLDERS.length = 0;
+      AREAS.forEach(function (g) {
+        baseFolders.forEach(function (f) {
+          var id = g + '/' + f.id;
+          if (g === 'dev') {
+            Object.keys(TREE).forEach(function (k) {
+              if (k === f.id || k.indexOf(f.id + '/') === 0) TREE['dev/' + k] = TREE[k];
+            });
+          } else {
+            var list = (TREE[f.id] || []).filter(function (x) { return x.type !== 'dir' && seedHash(activeKey + '|' + f.id + '|' + x.name) % 10 < 6; })
+              .map(function (x) { var c = JSON.parse(JSON.stringify(x)); c.approved = true; return c; });
+            promos.forEach(function (pr) {
+              if (pr.folder !== f.id || list.some(function (x) { return x.name === pr.name; })) return;
+              list.push({ name: pr.name, type: String(pr.name).split('.').pop(), size: pr.size || '4 KB', modified: pr.at || '-', approved: true, promotedFrom: 'dev/' + f.id });
+            });
+            TREE[id] = list;
+          }
+          FOLDERS.push({ id: id, label: f.id, area: g, count: String((TREE[id] || []).length), frozen: false, title: g === 'prod' ? 'prod/' + f.id + '/: approved, read-only' : 'dev/' + f.id + '/: editable in In dev and Revise' });
+        });
+        TREE[g] = baseFolders.map(function (f) { return dirEntry(f.id, (TREE[g + '/' + f.id] || []).length || null); });
+      });
+      filesInfoLine('programsFolderHint', 2).innerHTML = '<span class="files-infobar-k">Programs</span><span><code>dev/</code> is editable in In&nbsp;dev and Revise. <code>prod/</code> holds approved copies and is read-only; Approve in the Tracker copies dev into prod. <a href="admin.html?panel=defaults">Change in Admin, Study layout</a></span>';
+    }
     current = FOLDERS[0] ? FOLDERS[0].id : current;
     window.SPHERE_filesStartFolder = current;
     if (window.SPHERE_INGEST) {
       SPHERE_INGEST.forStudy(activePath).forEach(function (it) {
         var fid = SPHERE_INGEST.folderId(it.dest);
         if (!fid) return;
-        if (fid === 'raw' && !FOLDERS.some(function (f) { return f.id === 'raw'; }) && FOLDERS.some(function (f) { return f.id === 'data/raw'; })) fid = 'data/raw';
+        if (SPLIT && !areaOf(fid)) fid = 'dev/' + fid;
+        var rawPre = SPLIT ? 'dev/' : '';
+        if (fid === rawPre + 'raw' && !FOLDERS.some(function (f) { return f.id === rawPre + 'raw'; }) && FOLDERS.some(function (f) { return f.id === rawPre + 'data/raw'; })) fid = rawPre + 'data/raw';
         if (!FOLDERS.some(function (f) { return f.id === fid; })) {
           FOLDERS.push({ id: fid, count: '0', frozen: false, title: it.dest });
           TREE[fid] = [];
@@ -1863,6 +1946,9 @@
   /* Deep link: files.html?...&folder=adam opens that folder (raw maps to data/raw when needed). */
   var askFolder = (new URLSearchParams(location.search).get('folder') || '').replace(/^\/+|\/+$/g, '');
   function hasFolder(id) { return FOLDERS.some(function (f) { return f.id === id; }); }
+  /* Dev and prod layout: plain folder links (adam, programs, raw) open the dev/ copy. */
+  if (askFolder && !hasFolder(askFolder) && window.SPHERE_filesSplit && !/^(dev|prod)(\/|$)/.test(askFolder)) askFolder = 'dev/' + askFolder;
+  if (askFolder === 'dev/raw' && !hasFolder('dev/raw') && hasFolder('dev/data/raw')) askFolder = 'dev/data/raw';
   if (askFolder === 'raw' && !hasFolder('raw') && hasFolder('data/raw')) askFolder = 'data/raw';
   if (askFolder === 'data/raw' && !hasFolder('data/raw') && hasFolder('raw')) askFolder = 'raw';
   refreshTreeCounts();
@@ -1873,51 +1959,8 @@
   };
 })();
 </script>
-<script src="shared-chrome.js?v=20261010e"></script>
+<script src="shared-chrome.js?v=20261010f"></script>
 
-<script>
-(function () {
-  function isSplitMode(mode) {
-    return mode === 'dev-qc-prod' || mode === 'dev-prod';
-  }
-  function applyProgramsFolderMode() {
-    return;
-    var mode = SPHERE.getProgramsFolderMode();
-    var hint = window.SPHERE_filesInfoLine ? SPHERE_filesInfoLine('programsFolderHint', 2) : null;
-    if (!hint) return;
-    if (isSplitMode(mode)) {
-      hint.innerHTML = '<span class="files-infobar-k">Programs</span><span><code>programs/dev</code> (editable · In&nbsp;dev / Revise) · <code>programs/qc</code> (QC copies) · <code>programs/prod</code> (approved, read-only) · <a href="admin.html?panel=workflow">Change in Admin → Tracker workflow</a></span>';
-    } else {
-      hint.innerHTML = '<span class="files-infobar-k">Programs</span><span>single <code>programs/</code> folder - stage lock makes files read-only outside In&nbsp;dev / Revise · <a href="admin.html?panel=workflow">Configure in Admin → Tracker workflow</a></span>';
-    }
-    // Demo: if tree has programs node, ensure child folders exist in UI list when split
-    try {
-      var TREE = window.SPHERE_filesTree;
-      if (TREE && TREE.programs && isSplitMode(mode)) {
-        var names = TREE.programs.map(function (x) { return x.name; });
-        function ensureDir(name, index) {
-          if (names.indexOf(name) >= 0) return;
-          TREE.programs.splice(index, 0, { name: name, type: 'dir', size: '-', modified: 'Tenant layout', frozen: false });
-          names = TREE.programs.map(function (x) { return x.name; });
-        }
-        ensureDir('dev', 0);
-        ensureDir('qc', 1);
-        ensureDir('prod', 2);
-        var samples = (TREE.programs || []).filter(function (x) { return x.type !== 'dir'; }).slice(0, 3).map(function (x) {
-          return Object.assign({}, x, { name: x.name });
-        });
-        if (!TREE['programs/dev']) TREE['programs/dev'] = samples;
-        if (!TREE['programs/qc']) TREE['programs/qc'] = samples.slice(0, 2);
-        if (!TREE['programs/prod']) TREE['programs/prod'] = samples;
-        if (typeof window.SPHERE_filesRerender === 'function') window.SPHERE_filesRerender();
-      }
-    } catch (e) {}
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyProgramsFolderMode);
-  else applyProgramsFolderMode();
-  window.addEventListener('sphere-workflow-change', applyProgramsFolderMode);
-})();
-</script>
 
 </body>
 </html>
