@@ -6671,6 +6671,35 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .files-studies a.lt-dir:hover { text-decoration: underline; color: var(--accent); }
 .files-studies .lt-node.is-active > .lt-dir { color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 4px; }
 /* File Explorer: study subfolders in the tree are the folder browser */
+/* Every studies tree node is browsable: chevron expands, label selects */
+.files-studies-tree { padding: 0 4px 4px; }
+.files-studies .lt-browse-node > .lt-row { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.files-studies .lt-chev {
+  flex: none; width: 16px; height: 18px; padding: 0; margin-left: -2px; border: 0; border-radius: 4px;
+  background: transparent; color: var(--muted); cursor: pointer; display: inline-grid; place-items: center;
+}
+.files-studies .lt-chev .sap-chevron { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; transition: transform .15s ease; }
+.files-studies .lt-chev[aria-expanded="false"] .sap-chevron { transform: rotate(-90deg); }
+.files-studies .lt-chev:hover { background: var(--row-hover); color: var(--text); }
+.files-studies .lt-chev:focus-visible,
+.files-studies button.lt-browse:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus-ring); }
+.files-studies button.lt-browse {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  border: 0; background: transparent; padding: 1px 4px; margin: 0; border-radius: 4px;
+  font: inherit; font-weight: 600; line-height: inherit; text-align: left; color: var(--text); cursor: pointer;
+}
+.files-studies button.lt-browse:hover { background: var(--row-hover); }
+.files-studies .lt-node.is-path > .lt-row > .lt-browse,
+.files-studies .lt-node.is-active > .lt-row > .lt-browse { color: var(--accent); }
+.files-studies button.lt-browse.active { color: var(--accent); background: var(--accent-soft); }
+.files-studies .lt-browse-node > .lt-row .lt-badge { flex: none; margin-left: 4px; }
+.files-studies .lt-browse-node::after { top: .85em; }
+.files-studies .lt-browse-node:last-child::before { height: .85em; }
+@media (max-width: 900px) {
+  .files-studies .lt-chev { width: 24px; height: 26px; }
+  .files-studies button.lt-browse,
+  .files-studies button.lt-folder { padding-top: 4px; padding-bottom: 4px; }
+}
 .files-studies:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
 .files-studies .lt-node.is-active:has(.lt-folder.active) > .lt-dir { background: transparent; }
 .files-studies .lt-folder-node { display: flex; align-items: center; gap: 2px; min-width: 0; }
