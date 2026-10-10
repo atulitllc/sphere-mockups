@@ -233,6 +233,19 @@
       return ok;
     },
     audit: function () { return read().audit.slice(); },
+    /* Append-only audit entry (Part 11 minded): actor and time are stamped here. */
+    logEvent: function (evt) {
+      var s = read();
+      var actor = user(s.currentId, s);
+      var entry = {};
+      Object.keys(evt || {}).forEach(function (k) { entry[k] = evt[k]; });
+      entry.actor = actor ? actor.name : '';
+      entry.actorId = s.currentId;
+      entry.at = new Date().toISOString();
+      s.audit.push(entry);
+      write(s);
+      return entry;
+    },
     soleLeadOf: function (userId) {
       var s = read();
       var out = [];

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010c" />
+<link rel="stylesheet" href="shared-white.css?v=20261010d" />
 <script>
 (function () {
   try {
@@ -35,7 +35,7 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
-<script src="sphere-access.js?v=acct1"></script>
+<script src="sphere-access.js?v=20261010d"></script>
 <script src="demo-flow.js?v=20261010c"></script>
 </head>
 <body>
@@ -150,6 +150,23 @@
               </div>
               <div class="files-actions folder-share-status">
                 <input type="search" id="filesSearch" placeholder="Search this folder and subfolders" aria-label="Search files" />
+                <div class="fe-new-wrap" id="feNewWrap">
+                  <button class="btn primary fe-new-btn" type="button" id="btnNewItem" aria-haspopup="menu" aria-expanded="false" aria-controls="feNewMenu">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>New</span>
+                    <svg class="fe-new-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <div class="fe-new-menu" id="feNewMenu" role="menu" hidden>
+                    <button type="button" role="menuitem" data-new="folder">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M12 10v6M9 13h6"/></svg>
+                      <span>New folder</span>
+                    </button>
+                    <button type="button" role="menuitem" data-new="file">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+                      <span>New file</span>
+                    </button>
+                  </div>
+                </div>
                 <a class="btn" id="btnExtractData" href="data-hub.html" title="Extract data" aria-label="Extract data">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
                   <span>Extract data</span>
@@ -188,6 +205,32 @@
   <button type="button" data-action="open" role="menuitem">Open</button>
   <button type="button" data-action="copy" role="menuitem">Copy</button>
   <button type="button" data-action="paste" role="menuitem">Paste</button>
+  <div class="ctx-sep ctx-new" aria-hidden="true"></div>
+  <button type="button" class="ctx-new" data-action="new-folder" role="menuitem">New folder…</button>
+  <button type="button" class="ctx-new" data-action="new-file" role="menuitem">New file…</button>
+  <p class="ctx-note ctx-new" id="ctxNewNote" hidden></p>
+</div>
+
+<div class="modal-backdrop" id="newItemModal" hidden role="dialog" aria-modal="true" aria-labelledby="newItemTitle">
+  <div class="modal fe-new-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="newItemTitle">New folder</h2>
+        <div class="access-path" id="newItemPath"></div>
+      </div>
+      <button class="btn sm" type="button" id="newItemClose" aria-label="Close">Close</button>
+    </div>
+    <form class="modal-body" id="newItemForm" novalidate autocomplete="off">
+      <label class="field-label" for="newItemName" id="newItemLabel">Folder name</label>
+      <input type="text" id="newItemName" class="fe-new-input" spellcheck="false" maxlength="80" aria-describedby="newItemHint newItemError" />
+      <p class="fe-new-hint" id="newItemHint"></p>
+      <p class="fe-new-error" id="newItemError" role="alert" hidden></p>
+    </form>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="newItemCancel">Cancel</button>
+      <button class="btn primary" type="button" id="newItemSave">Create</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="accessModal" hidden role="dialog" aria-modal="true" aria-labelledby="accessTitle">
@@ -650,6 +693,12 @@
       if (!s || s === '-') return '<span class="cell-empty">-</span>';
       return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
     }
+    if (withTime && p.hh != null) {
+      var now = new Date();
+      if (p.y === now.getFullYear() && p.m === now.getMonth() + 1 && p.d === now.getDate()) {
+        return 'Today ' + (p.hh % 12 || 12) + ':' + String(p.mm || 0).padStart(2, '0') + ' ' + (p.hh < 12 ? 'AM' : 'PM');
+      }
+    }
     return withTime ? formatDateTime(p) : formatDate(p);
   }
   function sizeCell(size) {
@@ -657,11 +706,209 @@
     if (!s || s === '-') return '<span class="cell-empty">-</span>';
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
+  /* New folder / New file. Created items persist in localStorage per study and
+     folder path (key: full tree path such as '@CMP-101/PRO-001/CSR/programs').
+     Permission to create (see folderPermission):
+       1. The account must be active, and SPHERE_ACCESS.canEdit (company and
+          compound grants from Manage access) must allow edits on the path.
+       2. A closed, locked or approved study is read-only.
+       3. Only study subfolders (data/raw, sdtm, adam, programs, tlf, logs, docs
+          and folders inside them) take new items; compound, protocol and
+          deliverable levels follow the Admin study layout.
+       4. The folder ACL (Manage access) decides: a user entry wins, otherwise the
+          best role of the user's teams (QC reviewers for Reviewer accounts,
+          Stats programmers for everyone else, plus Study leads for compound leads).
+          No ACL row means Edit for programmers and View for reviewers.
+       5. data/raw is read-only for teams: only a named user with Edit (the data
+          manager) can add to it, because raw data arrives from the EDC connector. */
+  var CREATED_KEY = 'sphere-fe-created-v1';
+  function escAttr(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  var TEXT_EXT = ['sas', 'r', 'txt', 'md', 'csv', 'log', 'json', 'xml', 'yml', 'yaml', 'py', 'sql'];
+  function readCreated() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(CREATED_KEY) || 'null');
+      return raw && typeof raw === 'object' ? raw : {};
+    } catch (e) { return {}; }
+  }
+  function writeCreated(all) {
+    try { localStorage.setItem(CREATED_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+  function fullKeyOf(folder) {
+    if (BROWSE) return BROWSE.prepare(folder).full;
+    return folder;
+  }
+  /* Merge saved items for one folder into TREE (and give saved subfolders a TREE entry). */
+  function mergeCreated(full, treeKey) {
+    var items = readCreated()[full] || [];
+    if (!items.length) return;
+    TREE[treeKey] = TREE[treeKey] || [];
+    items.forEach(function (it) {
+      var have = TREE[treeKey].some(function (f) { return f.name === it.name; });
+      if (!have) TREE[treeKey].push(JSON.parse(JSON.stringify(it)));
+      if (it.type === 'dir' && !TREE[treeKey + '/' + it.name]) TREE[treeKey + '/' + it.name] = [];
+    });
+  }
+  function shortName(name) {
+    var parts = String(name || '').trim().split(/\s+/);
+    if (parts.length < 2) return parts[0] || '';
+    return parts[0].charAt(0) + '. ' + parts[parts.length - 1];
+  }
+  function currentUser() {
+    var who = window.SPHERE_ACCESS && SPHERE_ACCESS.current ? SPHERE_ACCESS.current() : null;
+    if (who) return who;
+    var name = '';
+    try { name = localStorage.getItem('sphere-user-name') || ''; } catch (e) {}
+    return { id: '', name: name || 'Jordan Patel', username: '', role: '', admin: false };
+  }
+  /* Where a folder sits: study subfolder id (sdtm, data/raw...), study status. */
+  function locateFolder(folder) {
+    if (BROWSE && BROWSE.locate) return BROWSE.locate(fullKeyOf(folder));
+    var sub = '';
+    FOLDERS.forEach(function (f) { if ((folder === f.id || folder.indexOf(f.id + '/') === 0) && f.id.length > sub.length) sub = f.id; });
+    return { sub: sub || String(folder).split('/')[0], status: '', label: folder };
+  }
+  function aclRows(sub) {
+    return FOLDER_ACL[sub] || (sub === 'data/raw' ? FOLDER_ACL.raw : null) || (sub === 'raw' ? FOLDER_ACL['data/raw'] : null) || null;
+  }
+  var ROLE_RANK = { None: 0, View: 1, Edit: 2 };
+  function folderPermission(folder) {
+    var RO = 'You have read-only access to this folder';
+    var who = currentUser();
+    if (who.deactivated) return { ok: false, reason: 'This account is deactivated' };
+    var loc = locateFolder(folder);
+    if (!loc.sub) return { ok: false, reason: 'Open a study folder such as programs/ to add items here. Levels above it follow the Admin study layout.' };
+    if (/closed|locked|approved|archived|frozen/i.test(loc.status || '')) {
+      return { ok: false, reason: 'This study is ' + String(loc.status).toLowerCase() + ', so its folders are read-only' };
+    }
+    if (window.SPHERE_ACCESS && SPHERE_ACCESS.canEdit && !SPHERE_ACCESS.canEdit(loc.path || ((window.SPHERE_filesPath || '') + folder))) {
+      return { ok: false, reason: RO };
+    }
+    var isRaw = loc.sub === 'raw' || loc.sub === 'data/raw';
+    var reviewer = /reviewer/i.test(who.role || '');
+    var teams = [reviewer ? 'QC reviewers' : 'Stats programmers'];
+    if (window.SPHERE_ACCESS && SPHERE_ACCESS.isLead && SPHERE_ACCESS.isLead(window.SPHERE_filesCompound || '', who.id)) teams.push('Study leads');
+    var rows = aclRows(loc.sub);
+    var userRole = '';
+    var teamRole = 'None';
+    if (rows) {
+      var names = [who.name, shortName(who.name), who.username, who.id].filter(Boolean);
+      rows.forEach(function (r) {
+        if (r.kind === 'user' && names.indexOf(r.name) >= 0) userRole = r.role;
+        if (r.kind === 'team' && teams.indexOf(r.name) >= 0 && ROLE_RANK[r.role] > ROLE_RANK[teamRole]) teamRole = r.role;
+      });
+    } else {
+      teamRole = reviewer ? 'View' : 'Edit';
+    }
+    if (isRaw && teamRole === 'Edit') teamRole = 'View';
+    var role = userRole || teamRole;
+    if (role === 'Edit') return { ok: true, reason: '' };
+    if (role === 'View') {
+      return { ok: false, reason: isRaw ? RO + '. Raw data arrives from the EDC connector.' : RO };
+    }
+    return { ok: false, reason: 'You do not have access to this folder' };
+  }
+  function folderLabel(folder) {
+    var full = fullKeyOf(folder);
+    return String(full).replace(/^@/, '') + '/';
+  }
+  function nowStamp() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
+      ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  function fileTemplate(name, ext, who, folder) {
+    var day = nowStamp().slice(0, 10);
+    var path = folderLabel(folder) + name;
+    if (ext === 'sas') {
+      return '/*****************************************************************\n' +
+        '  Program : ' + name + '\n  Path    : ' + path + '\n  Author  : ' + who.name + '\n  Created : ' + day + '\n  Purpose : \n' +
+        '*****************************************************************/\n\n';
+    }
+    if (ext === 'r') {
+      return '# Program : ' + name + '\n# Path    : ' + path + '\n# Author  : ' + who.name + '\n# Created : ' + day + '\n# Purpose : \n\n';
+    }
+    if (ext === 'py' || ext === 'yml' || ext === 'yaml') return '# ' + name + '\n# Author: ' + who.name + ', ' + day + '\n\n';
+    if (ext === 'sql') return '-- ' + name + '\n-- Author: ' + who.name + ', ' + day + '\n\n';
+    if (ext === 'md') return '# ' + name.replace(/\.md$/i, '') + '\n\n';
+    return '';
+  }
+  function validateName(kind, raw, folder) {
+    var name = String(raw || '').trim();
+    var noun = kind === 'folder' ? 'Folder' : 'File';
+    if (!name) return { error: noun + ' name is required.' };
+    if (name.length > 80) return { error: 'Keep the name to 80 characters or fewer.' };
+    if (/[\/\\]/.test(name)) return { error: 'Slashes are not allowed. Create one level at a time.' };
+    if (/[:*?"<>|#%&{}$!'@`=+]/.test(name) || /[\u0000-\u001f]/.test(name)) return { error: 'Use letters, numbers, spaces, dots, dashes or underscores only.' };
+    if (name === '.' || name === '..' || name.charAt(0) === '.') return { error: 'Names cannot start with a dot.' };
+    if (/\.$/.test(name)) return { error: 'Names cannot end with a dot.' };
+    var clash = (TREE[folder] || []).some(function (f) { return String(f.name).toLowerCase() === name.toLowerCase(); });
+    if (clash) return { error: 'An item named ' + name + ' already exists in this folder.' };
+    var ext = '';
+    if (kind === 'file') {
+      var dot = name.lastIndexOf('.');
+      if (dot > 0) {
+        ext = name.slice(dot + 1).toLowerCase();
+        if (TEXT_EXT.indexOf(ext) < 0) return { error: 'Use a text file type: .sas, .R, .txt, .md, .csv, .log, .json, .xml, .yml, .py or .sql (or no extension).' };
+      }
+    }
+    return { name: name, ext: ext };
+  }
+  function auditCreate(kind, name, folder) {
+    if (!window.SPHERE_ACCESS || !SPHERE_ACCESS.logEvent) return;
+    try {
+      SPHERE_ACCESS.logEvent({
+        type: kind === 'folder' ? 'folder-create' : 'file-create',
+        entity: folderLabel(folder) + name + (kind === 'folder' ? '/' : ''),
+        study: window.SPHERE_filesPath || '',
+        detail: (kind === 'folder' ? 'Folder' : 'File') + ' created in File Explorer'
+      });
+    } catch (e) {}
+  }
+  function createItem(kind, rawName, folder) {
+    var perm = folderPermission(folder);
+    if (!perm.ok) return { error: perm.reason };
+    var v = validateName(kind, rawName, folder);
+    if (v.error) return v;
+    var who = currentUser();
+    var item;
+    if (kind === 'folder') {
+      item = { name: v.name, type: 'dir', size: '0 items', modified: nowStamp(), owner: who.name, created: true };
+    } else {
+      var ext = v.ext;
+      item = { name: v.name, type: ext === 'r' ? 'R' : (ext || 'txt'), size: '0 KB', modified: nowStamp(), owner: who.name, created: true, text: fileTemplate(v.name, ext, who, folder) };
+      if (!ext) item.type = 'file';
+    }
+    var full = fullKeyOf(folder);
+    var all = readCreated();
+    all[full] = (all[full] || []).concat([item]);
+    writeCreated(all);
+    TREE[folder] = TREE[folder] || [];
+    TREE[folder].push(JSON.parse(JSON.stringify(item)));
+    if (kind === 'folder') TREE[folder + '/' + v.name] = TREE[folder + '/' + v.name] || [];
+    auditCreate(kind, v.name, folder);
+    return { item: item };
+  }
+  /* Tree counts: base count from the seeded tree plus saved items in that folder. */
+  function refreshTreeCounts() {
+    var all = readCreated();
+    document.querySelectorAll('.lt-folder').forEach(function (b) {
+      var c = b.querySelector('.lt-count');
+      if (!c) return;
+      if (!c.hasAttribute('data-base')) c.setAttribute('data-base', c.textContent);
+      var base = Number(c.getAttribute('data-base')) || 0;
+      var key = b.getAttribute('data-key') || (BROWSE ? BROWSE.activeKey + '/' + b.getAttribute('data-folder') : b.getAttribute('data-folder'));
+      var n = base + (all[key] || []).length;
+      c.textContent = n;
+      c.setAttribute('aria-label', n + ' items');
+    });
+  }
+  window.SPHERE_filesNew = { permission: folderPermission, create: function (kind, name, folder) { var r = createItem(kind, name, folder == null ? current : folder); if (r.item) { refreshTreeCounts(); render(current); } return r; } };
   function render(folder) {
     applyStoredFileRenames();
     var view = BROWSE ? BROWSE.prepare(folder) : null;
     if (view) folder = view.key;
     current = folder;
+    mergeCreated(view ? view.full : folder, folder);
     crumbHere.textContent = view ? view.here : folder;
     if (view) BROWSE.paint(view);
     /* Highlight the folder, or its closest listed parent for nested paths (programs/dev). */
@@ -728,13 +975,14 @@
       var inRaw = folder === 'raw' || folder === 'data/raw';
       var nameSpan = (f.snapshot && inRaw)
         ? '<span class="snapshot-name" title="' + String(f.source || 'Snapshot').replace(/"/g, '&quot;') + '">' + shown + '</span>'
-        : '<span>' + shown + '</span>';
+        : '<span' + (f.owner ? ' title="' + escAttr('Owner: ' + f.owner) + '"' : '') + '>' + shown + '</span>';
       return '<tr' + cls + ' data-name="' + f.name + '" data-type="' + f.type + '"' + (f.frozen ? ' data-frozen="1"' : '') + '>' +
         '<td><div class="fname-cell">' + icon + nameSpan + '</div></td>' +
         '<td>' + cellWhen(f.modified, false) + '</td><td>' + cellWhen(f.modified, true) + '</td><td>' + sizeCell(f.size) + '</td>' +
         '<td class="col-access">' + accessBadge(f) + '</td>' +
         '<td class="col-more">' + moreBtn + '</td></tr>';
     }).join('');
+    syncNewControl();
   }
 
   function closeCtx() {
@@ -748,6 +996,27 @@
 
   function openCtx(e, target) {
     ctxTarget = target;
+    /* New folder / New file: folders only, disabled with the reason when read-only. */
+    var createIn = null;
+    if (target.kind === 'folder') {
+      createIn = target.createIn || (target.name && target.name !== target.folder ? target.folder + '/' + target.name : target.folder);
+    }
+    target.createIn = createIn;
+    var perm = createIn ? folderPermission(createIn) : null;
+    ctxMenu.querySelectorAll('.ctx-new').forEach(function (el) { el.hidden = !createIn; });
+    ctxMenu.querySelectorAll('[data-action="new-folder"], [data-action="new-file"]').forEach(function (b) {
+      b.setAttribute('aria-disabled', perm && !perm.ok ? 'true' : 'false');
+      if (perm && !perm.ok) b.title = perm.reason; else b.removeAttribute('title');
+    });
+    var note = document.getElementById('ctxNewNote');
+    if (note) {
+      note.textContent = perm && !perm.ok ? perm.reason : '';
+      note.hidden = !(perm && !perm.ok);
+    }
+    /* Other studies' folders: only Open and New apply there. */
+    ctxMenu.querySelectorAll('[data-action="manage"], [data-action="copy"], [data-action="paste"]').forEach(function (b) { b.hidden = !!target.other; });
+    var firstSep = ctxMenu.querySelector('.ctx-sep:not(.ctx-new)');
+    if (firstSep) firstSep.hidden = !!target.other;
     ctxMenu.classList.add('open');
     ctxMenu.setAttribute('aria-hidden', 'false');
     var x = e.clientX;
@@ -762,8 +1031,8 @@
       x = rr.right - 8;
       y = rr.bottom + 4;
     }
-    ctxMenu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
-    ctxMenu.style.top = Math.min(y, window.innerHeight - 140) + 'px';
+    ctxMenu.style.left = Math.max(8, Math.min(x, window.innerWidth - ctxMenu.offsetWidth - 8)) + 'px';
+    ctxMenu.style.top = Math.max(8, Math.min(y, window.innerHeight - ctxMenu.offsetHeight - 8)) + 'px';
   }
 
   function cloneAcl(folder) {
@@ -914,8 +1183,8 @@
       var row = nameCell.closest('tr');
       var fname = row.getAttribute('data-name');
       var ftype = (row.getAttribute('data-type') || '').toLowerCase();
-      if (ftype === 'sas' || ftype === 'r' || ftype === 'log') {
-        var found = (TREE[current] || []).filter(function (f) { return f.name === fname; })[0];
+      var found = (TREE[current] || []).filter(function (f) { return f.name === fname; })[0];
+      if (ftype === 'sas' || ftype === 'r' || ftype === 'log' || (found && found.created && ftype !== 'dir')) {
         if (found) openViewer(found);
         return;
       }
@@ -943,12 +1212,12 @@
 
   function openViewer(file) {
     var ext = String(file.type || '').toLowerCase();
-    if (['sas', 'r', 'log'].indexOf(ext) < 0) return;
+    if (['sas', 'r', 'log'].indexOf(ext) < 0 && !file.created) return;
     var key = 'sphere-file-text:' + current + '/' + file.name;
     var stored = '';
     try { stored = localStorage.getItem(key) || ''; } catch (err) {}
-    var text = stored || file.text || ('* ' + file.name + '\n* prototype text\n');
-    var can = !window.SPHERE_ACCESS || SPHERE_ACCESS.canEdit((window.SPHERE_filesPath || '') + current);
+    var text = stored || (file.created ? (file.text || '') : (file.text || ('* ' + file.name + '\n* prototype text\n')));
+    var can = folderPermission(current).ok;
     var back = document.createElement('div');
     back.className = 'modal-backdrop';
     back.innerHTML = '<div class="modal" role="dialog"><div class="modal-head"><h2></h2></div><div class="modal-body"><textarea id="fileViewerBody" style="width:100%;min-height:220px;font-family:ui-monospace,monospace"></textarea></div><div class="modal-foot"></div></div>';
@@ -977,6 +1246,125 @@
       foot.appendChild(save);
     }
   }
+  /* New control (toolbar), New items in folder menus, and the name dialog. */
+  var newWrap = document.getElementById('feNewWrap');
+  var newBtn = document.getElementById('btnNewItem');
+  var newMenu = document.getElementById('feNewMenu');
+  var newModal = document.getElementById('newItemModal');
+  var newName = document.getElementById('newItemName');
+  var newErr = document.getElementById('newItemError');
+  var newTarget = null;
+  function closeNewMenu() {
+    if (!newMenu) return;
+    newMenu.hidden = true;
+    if (newBtn) newBtn.setAttribute('aria-expanded', 'false');
+  }
+  function syncNewControl() {
+    if (!newBtn || !newWrap) return;
+    var perm = folderPermission(current);
+    newBtn.setAttribute('aria-disabled', perm.ok ? 'false' : 'true');
+    newWrap.classList.toggle('is-disabled', !perm.ok);
+    if (perm.ok) {
+      newWrap.removeAttribute('data-tip');
+      newBtn.title = 'Create a folder or file in ' + folderLabel(current);
+    } else {
+      newWrap.setAttribute('data-tip', perm.reason);
+      newBtn.title = perm.reason;
+      closeNewMenu();
+    }
+  }
+  function openNewModal(kind, folder) {
+    if (BROWSE) {
+      var v0 = BROWSE.prepare(folder);
+      folder = v0.key;
+      mergeCreated(v0.full, folder);
+    }
+    var perm = folderPermission(folder);
+    if (!perm.ok) { showToast(perm.reason); return; }
+    newTarget = { kind: kind, folder: folder };
+    document.getElementById('newItemTitle').textContent = kind === 'folder' ? 'New folder' : 'New file';
+    document.getElementById('newItemPath').textContent = 'In ' + folderLabel(folder);
+    document.getElementById('newItemLabel').textContent = kind === 'folder' ? 'Folder name' : 'File name';
+    newName.placeholder = kind === 'folder' ? 'e.g. dev' : 'e.g. t_14_2_2_eff.sas';
+    document.getElementById('newItemHint').textContent = kind === 'folder'
+      ? 'Letters, numbers, spaces, dots, dashes or underscores. One level at a time.'
+      : 'Extension optional: .sas, .R, .txt, .md, .csv, .log, .json, .xml, .yml, .py or .sql. Owner: ' + currentUser().name + '.';
+    newName.value = '';
+    newName.removeAttribute('aria-invalid');
+    newErr.hidden = true;
+    newErr.textContent = '';
+    newModal.removeAttribute('hidden');
+    setTimeout(function () { newName.focus(); }, 0);
+  }
+  function closeNewModal() {
+    if (newModal) newModal.setAttribute('hidden', '');
+    newTarget = null;
+  }
+  function submitNew() {
+    if (!newTarget) return;
+    var t = newTarget;
+    var r = createItem(t.kind, newName.value, t.folder);
+    if (r.error) {
+      newErr.textContent = r.error;
+      newErr.hidden = false;
+      newName.setAttribute('aria-invalid', 'true');
+      newName.focus();
+      return;
+    }
+    closeNewModal();
+    refreshTreeCounts();
+    render(t.folder);
+    showToast((t.kind === 'folder' ? 'Folder ' : 'File ') + r.item.name + ' created');
+  }
+  if (newBtn) {
+    newBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var perm = folderPermission(current);
+      if (!perm.ok) { showToast(perm.reason); return; }
+      var open = newMenu.hidden;
+      newMenu.hidden = !open;
+      newBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) { var first = newMenu.querySelector('button'); if (first) first.focus(); }
+    });
+    newMenu.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-new]');
+      if (!b) return;
+      closeNewMenu();
+      openNewModal(b.getAttribute('data-new'), current);
+    });
+    document.addEventListener('click', function (e) {
+      if (!newWrap.contains(e.target)) closeNewMenu();
+    });
+  }
+  if (newModal) {
+    document.getElementById('newItemForm').addEventListener('submit', function (e) { e.preventDefault(); submitNew(); });
+    document.getElementById('newItemSave').addEventListener('click', submitNew);
+    document.getElementById('newItemCancel').addEventListener('click', closeNewModal);
+    document.getElementById('newItemClose').addEventListener('click', closeNewModal);
+    newModal.addEventListener('click', function (e) { if (e.target === newModal) closeNewModal(); });
+    newName.addEventListener('input', function () {
+      if (newErr.hidden) return;
+      var v = validateName(newTarget.kind, newName.value, newTarget.folder);
+      newErr.textContent = v.error || '';
+      newErr.hidden = !v.error;
+      if (v.error) newName.setAttribute('aria-invalid', 'true'); else newName.removeAttribute('aria-invalid');
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    closeNewMenu();
+    closeNewModal();
+  });
+  /* Right-click on any studies tree node (other studies too) opens the folder menu. */
+  (function () {
+    document.addEventListener('contextmenu', function (e) {
+      var b = e.target.closest && e.target.closest('#filesStudies .lt-folder[data-key], #filesStudies .lt-browse[data-key]');
+      if (!b || b.hasAttribute('data-folder')) return;
+      e.preventDefault();
+      var key = b.getAttribute('data-key');
+      openCtx(e, { kind: 'folder', folder: key, name: key, createIn: key, other: true });
+    });
+  })();
   var clip = null;
   function fileChangeRefusal(action) {
     if (!window.SPHERE_ACCESS) return '';
@@ -1006,6 +1394,13 @@
     var btn = e.target.closest('button[data-action]');
     if (!btn || !ctxTarget) return;
     var action = btn.getAttribute('data-action');
+    if (action === 'new-folder' || action === 'new-file') {
+      if (btn.getAttribute('aria-disabled') === 'true') return;
+      var into = ctxTarget.createIn;
+      closeCtx();
+      if (into) openNewModal(action === 'new-folder' ? 'folder' : 'file', into);
+      return;
+    }
     if (action === 'manage') {
       openAccess(ctxTarget);
     } else if (action === 'copy') {
@@ -1359,6 +1754,16 @@
         }
         return { key: key, full: full, here: segs.length ? segs[segs.length - 1].label : key, segs: segs };
       },
+      /* Full tree key -> study subfolder (data/raw, programs...), study status, path. */
+      locate: function (full) {
+        var base = '';
+        Object.keys(NODES).forEach(function (k) { if (isLeaf(NODES[k]) && full.indexOf(k + '/') === 0 && k.length > base.length) base = k; });
+        if (!base) return { sub: '', status: '', path: full.slice(1) };
+        var rest = full.slice(base.length + 1);
+        var sub = '';
+        subsList.concat(FOLDERS.map(function (f) { return f.id; })).forEach(function (id) { if ((rest === id || rest.indexOf(id + '/') === 0) && id.length > sub.length) sub = id; });
+        return { sub: sub, status: nodeStatus(NODES[base]), path: full.slice(1) };
+      },
       childKey: function (cur, name) {
         var full = cur.charAt(0) === '@' ? cur : activeKey + '/' + cur;
         var next = full + '/' + name;
@@ -1459,6 +1864,7 @@
   function hasFolder(id) { return FOLDERS.some(function (f) { return f.id === id; }); }
   if (askFolder === 'raw' && !hasFolder('raw') && hasFolder('data/raw')) askFolder = 'data/raw';
   if (askFolder === 'data/raw' && !hasFolder('data/raw') && hasFolder('raw')) askFolder = 'raw';
+  refreshTreeCounts();
   render(askFolder && TREE[askFolder] ? askFolder : (window.SPHERE_filesStartFolder || 'programs'));
   window.SPHERE_filesTree = TREE;
   window.SPHERE_filesRerender = function (folder) {

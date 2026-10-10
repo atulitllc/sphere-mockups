@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010c" />
+<link rel="stylesheet" href="shared-white.css?v=20261010d" />
 <script>
 (function () {
   try {
@@ -166,7 +166,7 @@
           <span class="badge ok">Immutable log</span>
         </div>
         <div style="padding-top:16px">
-          <ul class="timeline">
+          <ul class="timeline" id="auditTimeline">
             <li>
               <div class="when">Today<br>4:48:02 PM ET</div>
               <div><div class="dot"></div><div class="line"></div></div>
@@ -356,5 +356,44 @@
 })();
 </script>
 <script src="shared-chrome.js?v=flow4bar"></script>
+<script src="sphere-access.js?v=20261010d"></script>
+<script>
+/* Live entries recorded in this browser (File Explorer creates, account changes)
+   go on top of the seeded timeline, newest first. */
+(function () {
+  var list = document.getElementById('auditTimeline');
+  if (!list || !window.SPHERE_ACCESS || !SPHERE_ACCESS.audit) return;
+  var LABEL = {
+    'folder-create': ['Folder created', 'Create'],
+    'file-create': ['File created', 'Create'],
+    deactivate: ['Account deactivated', 'Access'],
+    reactivate: ['Account reactivated', 'Access']
+  };
+  function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    var now = new Date();
+    var y = new Date(now); y.setDate(now.getDate() - 1);
+    var day = d.toDateString() === now.toDateString() ? 'Today'
+      : (d.toDateString() === y.toDateString() ? 'Yesterday'
+      : d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/New_York' }));
+    return day + '<br>' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', timeZone: 'America/New_York' }) + ' ET';
+  }
+  var items = SPHERE_ACCESS.audit().filter(function (e) { return e && LABEL[e.type]; }).reverse();
+  var html = items.map(function (e) {
+    var lab = LABEL[e.type];
+    var subject = e.entity || e.user || '';
+    var detail = e.detail || (lab[0] + ' by ' + (e.actor || 'unknown') + '.');
+    if (e.study) detail += ' Study path ' + e.study + '.';
+    return '<li><div class="when">' + when(e.at) + '</div>' +
+      '<div><div class="dot"></div><div class="line"></div></div>' +
+      '<div><div class="evt">' + esc(lab[0]) + (subject ? ' · ' + esc(subject) : '') + '</div>' +
+      '<div class="detail">' + esc(detail) + '</div>' +
+      '<div class="stat-pills audit-pills"><span class="badge">' + esc(lab[1]) + '</span><span class="badge">Actor · ' + esc(e.actor || 'unknown') + '</span></div></div></li>';
+  }).join('');
+  if (html) list.insertAdjacentHTML('afterbegin', html);
+})();
+</script>
 </body>
 </html>
