@@ -422,23 +422,24 @@
     <div class="modal-head">
       <div>
         <h2 id="copyTitle">Copy shell</h2>
-        <div class="hint" id="copyHint">Choose one or more destinations. Copies are created as Draft.</div>
+        <div class="hint" id="copyHint">Choose a deliverable. Copies are created as Draft.</div>
       </div>
       <button class="btn ghost sm" type="button" id="copyClose" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
-      <div class="copy-field">
-        <span>Destinations <span class="muted">(compound / protocol / folder from Admin)</span></span>
-        <ul class="study-pick-list" id="copyStudyList" role="group" aria-label="Copy destinations"></ul>
-      </div>
-      <label class="check-inline" style="display:flex;align-items:center;gap:8px;font-size:13px">
-        <input type="checkbox" id="copyTrackerToo" />
-        Also copy linked Tracker records as Draft
+      <label>Deliverable
+        <select id="copyDeliverable" aria-label="Deliverable">
+          <option value="">Choose a deliverable</option>
+        </select>
       </label>
+      <div class="check-row">
+        <input type="checkbox" id="copyTrackerToo" />
+        <span>Also copy linked Tracker records as Draft</span>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn" type="button" id="copyCancel">Cancel</button>
-      <button class="btn primary" type="button" id="copyConfirm">Copy as draft</button>
+      <button class="btn primary" type="button" id="copyConfirm" disabled>Copy as draft</button>
     </div>
   </div>
 </div>
@@ -1173,6 +1174,19 @@
       (studyStore[sid].shells || []).forEach(function (sh) { if (sh.sap) sh.sap = SPHERE_DEMO.sectionName(sh.sap); });
     });
   }
+  /* Pre-linked shells are real Tracker rows: syncedAt + recordId, not a separate icon state. */
+  var SEED_TRACKER_NUMBERS = ['14.1.1', '14.1.2', '14.1.3', '14.2.1', '14.2.3', '14.3.1', '14.3.1.1', '14.3.1.2', '14.3.1.3', '14.3.1.4', '14.3.1.5', '14.3.1.6', '14.3.2', '14.3.2.1', '14.3.2.2', '14.3.3', '14.3.4', '14.3.5', '14.3.5.1', '14.3.5.2', '14.3.8'];
+  var SEED_TRACKER_AT = '2026-08-12 09:14';
+  function applySeedTrackerLinks(shells) {
+    (shells || []).forEach(function (sh) {
+      if (!sh || sh.syncedAt || sh.recordId || sh.copiedFrom || sh.autoNumber) return;
+      if (String(sh.id) !== String(sh.number)) return;
+      if (SEED_TRACKER_NUMBERS.indexOf(String(sh.number)) < 0) return;
+      sh.syncedAt = SEED_TRACKER_AT;
+      sh.recordId = sh.number === '14.1.3' ? 'rec-14-1-3' : ('num:' + sh.number);
+    });
+  }
+  if (studyStore['ONC-204-301']) applySeedTrackerLinks(studyStore['ONC-204-301'].shells);
 
   var state = {
     title: 'Demographics',
@@ -1240,10 +1254,41 @@
     return studyStore[CURRENT_STUDY].shells;
   }
 
-  function findShell(id) {
-    var shells = currentShells();
-    for (var i = 0; i < shells.length; i++) if (shells[i].id === id) return shells[i];
+  function shellStoreOrder() {
+    var order = [];
+    if (studyStore[CURRENT_STUDY]) order.push(CURRENT_STUDY);
+    Object.keys(studyStore).forEach(function (sid) {
+      if (sid !== CURRENT_STUDY) order.push(sid);
+    });
+    return order;
+  }
+  function matchShellIn(shells, key, byNumber) {
+    var i;
+    for (i = 0; i < shells.length; i++) {
+      if (!byNumber && shells[i].id === key) return shells[i];
+      if (byNumber && String(shells[i].number) === key) return shells[i];
+    }
     return null;
+  }
+  /* Exact catalog id wins over an output-number match, including copies such as 14.1.1a. */
+  function locateShell(id) {
+    var key = id == null ? '' : String(id);
+    if (!key) return null;
+    var lists = shellStoreOrder();
+    var pass, i, store, hit;
+    for (pass = 0; pass < 2; pass++) {
+      for (i = 0; i < lists.length; i++) {
+        store = studyStore[lists[i]];
+        if (!store) continue;
+        hit = matchShellIn(store.shells || [], key, pass === 1);
+        if (hit) return { studyId: lists[i], shell: hit };
+      }
+    }
+    return null;
+  }
+  function findShell(id) {
+    var loc = locateShell(id);
+    return loc ? loc.shell : null;
   }
 
   function selectedShell() {
@@ -1553,7 +1598,14 @@
 
   function selectShell(id, skipPersist, keepMulti) {
     if (!skipPersist) persistEditorToSelected();
-    if (!findShell(id) && currentShells().length) id = currentShells()[0].id;
+    var loc = locateShell(id);
+    if (!loc && currentShells().length) loc = { studyId: CURRENT_STUDY, shell: currentShells()[0] };
+    if (loc && loc.studyId !== CURRENT_STUDY) {
+      CURRENT_STUDY = loc.studyId;
+      updateStudyChrome();
+    }
+    id = loc ? loc.shell.id : id;
+    if (!studyStore[CURRENT_STUDY]) return;
     studyStore[CURRENT_STUDY].selectedId = id;
     if (!keepMulti) {
       catalogSelectedIds = id ? [id] : [];
@@ -2705,15 +2757,14 @@
   });
 
   /* -- Demo flow: clean new-shell template, autosave, Send to Tracker (+ in TOC) -- */
-  var TRACKER_LINKED = ['14.1.1', '14.1.2', '14.2.1', '14.2.3', '14.3.1', '14.3.1.1', '14.3.1.2', '14.3.1.3', '14.3.1.4', '14.3.1.5', '14.3.1.6', '14.3.2', '14.3.2.1', '14.3.2.2', '14.3.3', '14.3.4', '14.3.5', '14.3.5.1', '14.3.5.2', '14.3.8'];
   var SAP_PREFIX = { 'Demographics': '14.1', 'Efficacy': '14.2', 'Safety TLFs': '14.3', 'Labs': '14.3', 'Unassigned': '14.9' };
 
   function nextShellNumber(sap, selfId) {
     var prefix = SAP_PREFIX[normalizeSap(sap)] || (window.SPHERE_DEMO && SPHERE_DEMO.sectionPrefix(normalizeSap(sap))) || '14.9';
     var max = 0;
-    var nums = TRACKER_LINKED.slice();
-    currentShells().forEach(function (sh) { if (sh.id !== selfId) nums.push(String(sh.number || '')); });
-    nums.forEach(function (n) {
+    currentShells().forEach(function (sh) {
+      if (sh.id === selfId) return;
+      var n = String(sh.number || '');
       if (n.indexOf(prefix + '.') !== 0) return;
       var k = parseInt(n.slice(prefix.length + 1).split('.')[0], 10);
       if (!isNaN(k) && k > max) max = k;
@@ -2915,32 +2966,24 @@
       });
     }
   }
-  function isLinkedExisting(sh) {
-    return CURRENT_STUDY === 'ONC-204-301' && !sh.syncedAt && !sh.autoNumber && TRACKER_LINKED.indexOf(String(sh.number)) >= 0;
-  }
   function isTrackerLinked(sh) {
-    if (!sh) return false;
-    if (sh.syncedAt || sh.recordId) return true;
-    try { return isLinkedExisting(sh); } catch (err) { return false; }
+    return !!(sh && (sh.syncedAt || sh.recordId));
   }
-  function isSendable(sh) { return !!sh && !sh.syncedAt && (sh.status === 'Final' || sh.status === 'Locked'); }
+  function isSendable(sh) { return !!sh && !isTrackerLinked(sh) && (sh.status === 'Final' || sh.status === 'Locked'); }
 
   var SYNC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/><path d="M9 12.2l2 2 4-4"/></svg>';
   var PLUS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
 
   function syncButtonHtml(sh) {
-    if (sh.syncedAt) {
-      return '<button type="button" class="toc-sync is-synced" data-sync-id="' + escapeHtml(sh.id) + '" title="Synced to Tracker · ' + escapeHtml(sh.syncedAt) + ' (click to view)" aria-label="Synced to Tracker ' + escapeHtml(sh.syncedAt) + '">' + SYNC_ICON + '</button>';
-    }
-    if (isLinkedExisting(sh)) {
-      return '<button type="button" class="toc-sync is-synced is-linked" data-sync-id="' + escapeHtml(sh.id) + '" title="Synced to Tracker · existing program (click to view)" aria-label="Synced to Tracker, existing program">' + SYNC_ICON + '</button>';
+    if (isTrackerLinked(sh)) {
+      return '<button type="button" class="toc-sync is-synced" data-sync-id="' + escapeHtml(sh.id) + '" title="In Tracker – click to open" aria-label="In Tracker – click to open">' + SYNC_ICON + '</button>';
     }
     if (!isSendable(sh)) {
       return '<button type="button" class="toc-sync is-disabled" aria-disabled="true" data-sync-id="' + escapeHtml(sh.id) + '"' +
-        ' title="Set status to Final to send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker - set status to Final first">' + PLUS_ICON + '</button>';
+        ' title="Set to Final to send" aria-label="Set to Final to send">' + PLUS_ICON + '</button>';
     }
     return '<button type="button" class="toc-sync is-ready" data-sync-id="' + escapeHtml(sh.id) + '"' +
-      ' title="Send to Tracker" aria-label="Send shell ' + escapeHtml(sh.number) + ' to Tracker">' + PLUS_ICON + '</button>';
+      ' title="Ready – send to Tracker" aria-label="Ready – send to Tracker">' + PLUS_ICON + '</button>';
   }
 
   var CAN_UNLOCK = true; /* demo: signed-in lead programmer may unlock */
@@ -3009,9 +3052,9 @@
     if (badge) {
       var v = 'v' + ((sh && sh.version) || '0.1');
       var locked = sh && sh.status === 'Locked';
-      badge.textContent = v + (locked ? ' · Locked' : '') + (sh && sh.syncedAt ? ' · In Tracker' : '');
+      badge.textContent = v + (locked ? ' · Locked' : '') + (sh && isTrackerLinked(sh) ? ' · In Tracker' : '');
       badge.title = 'Shell version' + (sh && sh.modifiedAt ? ' · autosaved ' + sh.modifiedAt : ' · edits autosave');
-      badge.className = 'shell-status-badge is-version' + (locked ? ' is-locked' : '') + (sh && sh.syncedAt ? ' is-synced' : '');
+      badge.className = 'shell-status-badge is-version' + (locked ? ' is-locked' : '') + (sh && isTrackerLinked(sh) ? ' is-synced' : '');
     }
   }
 
@@ -3057,7 +3100,7 @@
     renderCatalog();
     paintShellStatus(sh);
     persistCatalog();
-    if (sh && !sh.syncedAt && !isLinkedExisting(sh)) {
+    if (sh && !isTrackerLinked(sh)) {
       showToast(sh.status === 'Final'
         ? 'Shell ' + sh.number + ' is Final · click + in the list to send it to the Tracker'
         : 'Shell ' + sh.number + ' set to ' + sh.status);
@@ -3167,8 +3210,8 @@
     e.preventDefault();
     var sh = findShell(btn.getAttribute('data-sync-id'));
     if (!sh) return;
-    if (btn.classList.contains('is-synced')) {
-      var target = sh.syncedAt && sh.recordId ? sh.recordId : 'num:' + sh.number;
+    if (isTrackerLinked(sh)) {
+      var target = sh.recordId || ('num:' + sh.number);
       location.href = 'tracker.html?focus=' + encodeURIComponent(target);
       return;
     }
@@ -3377,8 +3420,9 @@
 
   /* -- Copy to study -- */
   var copyModal = document.getElementById('copyModal');
-  var copyStudyList = document.getElementById('copyStudyList');
+  var copyDeliverable = document.getElementById('copyDeliverable');
   var copyTemplateWarn = document.getElementById('copyTemplateWarn');
+  var INFRA_FOLDERS = { 'data/raw': 1, sdtm: 1, adam: 1, programs: 1, tlf: 1, logs: 1, docs: 1 };
 
   function storeIdForEntry(e) {
     var proto = e.protocol || e.compound;
@@ -3418,33 +3462,65 @@
   }
 
   var pendingCopyIds = null;
+  function isDeliverableName(name) {
+    var n = String(name || '').trim().toLowerCase();
+    return !!n && !INFRA_FOLDERS[n];
+  }
+  /* One option per Study Admin registry deliverable, across every compound and protocol. */
   function copyDestinations() {
     var L = window.SPHERE_LAYOUT;
-    var folders = L && L.get ? (L.get().subfolders || []).slice() : [];
+    if (!L || !L.registry) return [];
     var out = [];
     var seen = {};
-    adminStudies().forEach(function (s) {
-      var names = [];
-      if (s.deliverable) names.push(s.deliverable);
-      folders.forEach(function (f) {
-        if (names.indexOf(f) < 0) names.push(f);
-      });
-      if (!names.length) names.push('CSR');
-      names.forEach(function (folder) {
-        var id = s.id + '|' + folder;
-        if (seen[id]) return;
-        seen[id] = 1;
-        out.push({
-          id: id,
-          studyId: s.id,
-          folder: folder,
-          compound: s.compound || '',
-          protocol: s.protocol || s.id,
-          label: [s.compound, s.protocol || s.id, folder].filter(Boolean).join(' / ')
-        });
+    L.registry().forEach(function (e) {
+      var deliverable = String(e.deliverable || '').trim();
+      if (!isDeliverableName(deliverable)) return;
+      var compound = e.compound || '';
+      var protocol = e.protocol || '';
+      var id = [compound, protocol, deliverable].join('|');
+      if (seen[id]) return;
+      seen[id] = 1;
+      out.push({
+        id: id,
+        studyId: storeIdForEntry(e),
+        folder: deliverable,
+        deliverable: deliverable,
+        compound: compound,
+        protocol: protocol,
+        label: [compound, protocol, deliverable].filter(Boolean).join(' / ')
       });
     });
+    out.sort(function (a, b) {
+      return a.compound.localeCompare(b.compound) || a.protocol.localeCompare(b.protocol) || a.deliverable.localeCompare(b.deliverable);
+    });
     return out;
+  }
+  function syncCopyConfirm() {
+    var btn = document.getElementById('copyConfirm');
+    if (!btn) return;
+    btn.disabled = !(copyDeliverable && copyDeliverable.value);
+  }
+  function fillCopyDeliverable() {
+    if (!copyDeliverable) return;
+    var targets = copyDestinations();
+    var groups = [];
+    var by = {};
+    targets.forEach(function (t) {
+      var key = t.compound || 'Other';
+      if (!by[key]) { by[key] = []; groups.push(key); }
+      by[key].push(t);
+    });
+    var html = '<option value="">Choose a deliverable</option>';
+    groups.forEach(function (c) {
+      html += '<optgroup label="' + escapeHtml(c) + '">';
+      by[c].forEach(function (t) {
+        html += '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.label) + '</option>';
+      });
+      html += '</optgroup>';
+    });
+    copyDeliverable.innerHTML = html;
+    copyDeliverable.value = '';
+    syncCopyConfirm();
   }
 
   function openCopyModal(ids) {
@@ -3458,21 +3534,18 @@
     pendingCopyIds = list;
     var targets = copyDestinations();
     if (!targets.length) {
-      showToast('No destinations in the Admin compound, protocol, and folder layout');
+      showToast('No deliverables in the Study Admin registry');
       return;
     }
-    copyStudyList.innerHTML = targets.map(function (s) {
-      return '<li><label><input type="checkbox" name="copyDest" value="' + escapeHtml(s.id) + '" data-study="' + escapeHtml(s.studyId) + '" data-folder="' + escapeHtml(s.folder) + '" />' +
-        '<span class="study-pick-meta"><span class="study-pick-id">' + escapeHtml(s.label) + '</span>' +
-        '<span class="study-pick-title">' + escapeHtml(s.compound) + ' · ' + escapeHtml(s.protocol) + ' · ' + escapeHtml(s.folder) + '</span></span></label></li>';
-    }).join('');
+    fillCopyDeliverable();
     var tracker = document.getElementById('copyTrackerToo');
     if (tracker) tracker.checked = false;
     var hint = document.getElementById('copyHint');
     if (hint) hint.textContent = list.length > 1
-      ? ('Copy ' + list.length + ' shells. Choose one or more destinations. Copies are Draft.')
-      : 'Choose one or more destinations. Copies are created as Draft.';
+      ? ('Copy ' + list.length + ' shells. Choose a deliverable. Copies are Draft.')
+      : 'Choose a deliverable. Copies are created as Draft.';
     copyModal.removeAttribute('hidden');
+    if (copyDeliverable) copyDeliverable.focus();
   }
 
   function closeCopyModal() {
@@ -3525,8 +3598,11 @@
       title: draft.title,
       number: draft.number,
       program: (draft.layout && draft.layout.program) || '',
-      type: draft.type || 'Table'
+      type: draft.type || 'Table',
+      sap: src.sap || DEFAULT_SAP,
+      roles: { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' }
     };
+    if (!rec.roles) rec.roles = { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' };
     rec.id = 'rec-copy-' + draft.id;
     rec.shellId = draft.id;
     rec.number = draft.number;
@@ -3536,11 +3612,8 @@
     SPHERE_DEMO.addRecord(rec);
   }
   function performCopy() {
-    var boxes = copyStudyList.querySelectorAll('input[name="copyDest"]:checked');
-    if (!boxes.length) {
-      showToast('Choose at least one destination');
-      return;
-    }
+    var dest = copyDestinations().filter(function (d) { return copyDeliverable && d.id === copyDeliverable.value; })[0];
+    if (!dest) return;
     persistEditorToSelected();
     var sources = (pendingCopyIds || []).map(findShell).filter(Boolean);
     if (!sources.length) {
@@ -3548,62 +3621,70 @@
       return;
     }
     var alsoTracker = !!(document.getElementById('copyTrackerToo') && document.getElementById('copyTrackerToo').checked);
+    var sourceId = CURRENT_STUDY;
+    var targetId = dest.studyId;
+    var folder = dest.deliverable;
+    var target = studyMeta(targetId);
+    if (!target || target.tenant !== CURRENT_TENANT || target.canOpen === false || target.canCreate === false) {
+      showToast('No copies were created');
+      return;
+    }
+    if (!studyStore[targetId]) studyStore[targetId] = { shells: seedCatalog(targetId), selectedId: null };
     var made = 0;
-    var firstStudy = '';
-    Array.prototype.forEach.call(boxes, function (box) {
-      var targetId = box.getAttribute('data-study');
-      var folder = box.getAttribute('data-folder') || '';
-      var target = studyMeta(targetId);
-      if (!target || target.tenant !== CURRENT_TENANT || target.canOpen === false || target.canCreate === false) return;
-      if (!studyStore[targetId]) studyStore[targetId] = { shells: seedCatalog(targetId), selectedId: null };
-      sources.forEach(function (src) {
-        var ids = nextDraftId(targetId, src.number);
-        var templateKey = src.templateKey || '';
-        var missing = !src.custom && !!templateKey && !targetHasTemplate(targetId, templateKey);
-        var layout = shellSnapshot(src);
-        layout.templateKey = missing ? '' : (layout.templateKey || templateKey);
-        layout.custom = missing ? true : !!layout.custom;
-        var draft = makeShell({
-          id: ids.id,
-          number: ids.number,
-          type: src.type || 'Table',
-          title: layout.title || src.title,
-          status: 'Draft',
-          analysisSet: src.analysisSet || 'Safety',
-          sap: src.sap || DEFAULT_SAP,
-          locked: false,
-          qc: null,
-          approved: false,
-          custom: layout.custom,
-          templateKey: layout.templateKey,
-          templateMissing: missing,
-          automate: !!src.automate,
-          metadata: cloneData(src.metadata || []),
-          layout: layout,
-          destFolder: folder,
-          copiedFrom: { study: CURRENT_STUDY, shellId: src.id, shellNumber: src.number, folder: folder }
-        });
-        draft.generatedOutputs = [];
-        studyStore[targetId].shells.push(draft);
-        studyStore[targetId].selectedId = draft.id;
-        if (alsoTracker) copyTrackerDraft(src, draft);
-        made++;
-        if (!firstStudy) firstStudy = targetId;
+    sources.forEach(function (src) {
+      var ids = nextDraftId(targetId, src.number);
+      var templateKey = src.templateKey || '';
+      var missing = !src.custom && !!templateKey && !targetHasTemplate(targetId, templateKey);
+      var layout = shellSnapshot(src);
+      layout.templateKey = missing ? '' : (layout.templateKey || templateKey);
+      layout.custom = missing ? true : !!layout.custom;
+      var draft = makeShell({
+        id: ids.id,
+        number: ids.number,
+        type: src.type || 'Table',
+        title: layout.title || src.title,
+        status: 'Draft',
+        analysisSet: src.analysisSet || 'Safety',
+        sap: src.sap || DEFAULT_SAP,
+        locked: false,
+        qc: null,
+        approved: false,
+        custom: layout.custom,
+        templateKey: layout.templateKey,
+        templateMissing: missing,
+        automate: !!src.automate,
+        metadata: cloneData(src.metadata || []),
+        layout: layout,
+        destFolder: folder,
+        copiedFrom: { study: sourceId, shellId: src.id, shellNumber: src.number, folder: folder }
       });
+      draft.generatedOutputs = [];
+      studyStore[targetId].shells.push(draft);
+      studyStore[targetId].selectedId = draft.id;
+      if (alsoTracker) copyTrackerDraft(src, draft);
+      made++;
     });
+    if (window.SPHERE_DEMO && SPHERE_DEMO.setShells) {
+      SPHERE_DEMO.setShells(targetId, studyStore[targetId].shells);
+      if (sourceId !== targetId && studyStore[sourceId]) SPHERE_DEMO.setShells(sourceId, studyStore[sourceId].shells);
+    }
     closeCopyModal();
     if (!made) {
       showToast('No copies were created');
       return;
     }
-    var msg = 'Copied ' + sources.length + ' shell' + (sources.length === 1 ? '' : 's') + ' to ' + boxes.length + ' destination' + (boxes.length === 1 ? '' : 's') + ' as Draft';
+    var msg = 'Copied ' + sources.length + ' shell' + (sources.length === 1 ? '' : 's') + ' to ' + dest.label + ' as Draft';
     showToast(msg);
     var banner = document.getElementById('copySuccessBanner');
     var text = document.getElementById('copySuccessText');
     if (text) text.textContent = msg;
     if (banner) banner.classList.add('show');
-    if (firstStudy && firstStudy !== CURRENT_STUDY) switchStudy(firstStudy);
-    else renderCatalog();
+    if (targetId && targetId !== CURRENT_STUDY) switchStudy(targetId);
+    else {
+      renderCatalog();
+      var shown = studyStore[CURRENT_STUDY] && studyStore[CURRENT_STUDY].selectedId;
+      if (shown) loadShellIntoEditor(findShell(shown));
+    }
   }
 
   function pdfEscape(s) {
@@ -3759,6 +3840,7 @@
   document.getElementById('copyClose').addEventListener('click', closeCopyModal);
   document.getElementById('copyCancel').addEventListener('click', closeCopyModal);
   document.getElementById('copyConfirm').addEventListener('click', performCopy);
+  if (copyDeliverable) copyDeliverable.addEventListener('change', syncCopyConfirm);
   copyModal.addEventListener('click', function (e) {
     if (e.target === copyModal) closeCopyModal();
   });
@@ -3868,7 +3950,9 @@
     var host = document.getElementById('shellMetaForm');
     if (!host || !sh) return;
     var lay = sh.layout || {};
-    var tracker = sh.syncedAt ? 'Synced ' + sh.syncedAt + ' · ' + (sh.program || '') : (isLinkedExisting(sh) ? 'Linked to existing Tracker row' : 'Not in Tracker yet');
+    var tracker = isTrackerLinked(sh)
+      ? ('In Tracker' + (sh.syncedAt ? ' · ' + sh.syncedAt : '') + (sh.program ? ' · ' + sh.program : ''))
+      : 'Not in Tracker yet';
     host.innerHTML =
       metaField('smfNumber', 'Output ID', metaInput('smfNumber', sh.number)) +
       metaField('smfType', 'Type', metaSelect('smfType', ['Table', 'Figure', 'Listing'], sh.type)) +
@@ -3975,13 +4059,14 @@
   (function bootFromShellQuery() {
     var requested = '';
     try { requested = new URLSearchParams(location.search).get('shell') || ''; } catch (e) {}
-    var id = (requested && findShell(requested)) ? requested : '14.1.1';
+    var found = requested ? locateShell(requested) : null;
+    var id = found ? found.shell.id : '14.1.1';
     selectShell(id, true);
-    if (!requested || id !== requested || !catalogBody) return;
+    if (!requested || !found || !catalogBody) return;
     var tr = null;
     var rows = catalogBody.querySelectorAll('tr[data-id]');
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i].getAttribute('data-id') === requested) { tr = rows[i]; break; }
+      if (rows[i].getAttribute('data-id') === id) { tr = rows[i]; break; }
     }
     if (!tr) return;
     var sec = tr.closest('.sap-section');

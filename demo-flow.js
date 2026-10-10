@@ -492,5 +492,33 @@
       return shells;
     }
   };
+  /* 14.1.3 is a catalog shell with a Tracker record that the static board omitted. */
+  (function ensureDispositionRecord() {
+    var s = read();
+    var id = 'rec-14-1-3';
+    var exists = (s.records || []).some(function (r) { return r.id === id || r.shellId === '14.1.3'; });
+    if (exists) return;
+    s.records.push({
+      id: id,
+      shellId: '14.1.3',
+      number: '14.1.3',
+      title: 'Subject disposition',
+      type: 'Table',
+      sap: 'Demographics',
+      analysisSet: 'ITT',
+      population: 'Intent-to-treat set (ITTFL = "Y")',
+      sources: ['ADAM.ADSL', 'ADAM.ADDS'],
+      keyVars: 'USUBJID, TRT01P, RANDFL, SAFFL, EOTSTT, DCTREAS, EOSSTT, DCSREAS',
+      sortOrder: 'Status then reason (descending frequency)',
+      shellVersion: '1.0',
+      program: 't_14_1_3_subj_disp.sas',
+      status: 'In dev',
+      roles: { prod: CURRENT_USER, qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' },
+      syncedAt: '2026-09-02 11:05',
+      isNew: false,
+      history: [{ at: '2026-09-02 11:05', action: 'Synced from Mock Shells', status: 'In dev', person: CURRENT_USER, note: 'Shell 14.1.3' }]
+    });
+    write(s);
+  })();
   window.SPHERE_DEMO = api;
 })();

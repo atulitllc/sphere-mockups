@@ -2698,7 +2698,18 @@
     }
     if (!raw.trim()) raw = titleEl.textContent || '';
     var id = raw.split('·')[0].replace(/\s+/g, ' ').trim();
-    return /^\d+(?:\.\d+)+$/.test(id) ? id : '';
+    return /^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(id) ? id : '';
+  }
+
+  function shellIdForRow(row) {
+    var flowId = row && row.getAttribute('data-flow-id');
+    if (flowId && window.SPHERE_DEMO && SPHERE_DEMO.record) {
+      var rec = SPHERE_DEMO.record(flowId);
+      if (rec && rec.shellId) return rec.shellId;
+    }
+    var stored = row && row.getAttribute('data-shell-id');
+    if (stored) return stored;
+    return rowOutputId(row);
   }
 
   function shellStatusLinks(label) {
@@ -2725,7 +2736,7 @@
       var cells = metaCells(row);
       if (!cells[4]) return;
       var label = (cells[4].textContent || '').trim();
-      cells[4].innerHTML = shellCellHtml(label, rowOutputId(row));
+      cells[4].innerHTML = shellCellHtml(label, shellIdForRow(row));
     });
   }
 
@@ -2820,7 +2831,7 @@
       }
     }
     // Shell
-    if (cells[4]) cells[4].innerHTML = shellCellHtml(shell, rowOutputId(row));
+    if (cells[4]) cells[4].innerHTML = shellCellHtml(shell, shellIdForRow(row));
 
     var check = row.querySelector('.row-check');
     if (check) check.setAttribute('aria-label', 'Select ' + (title || 'row'));
@@ -5229,9 +5240,10 @@
     var row = buildArtifactRow({ type: rec.type, status: rec.status, tags: '', sap: rec.sap, job: '', program: rec.program, title: escapeHtml(rec.number + ' · ' + rec.title) });
     row.setAttribute('data-flow-id', rec.id);
     row.setAttribute('data-orig-status', rec.status);
+    if (rec.shellId) row.setAttribute('data-shell-id', rec.shellId);
     var cells = metaCells(row);
-    if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml(rec.roles.prod) + '</span>';
-    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rowOutputId(row));
+    if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml((rec.roles && rec.roles.prod) || '') + '</span>';
+    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row));
     if (rec.isNew) {
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
