@@ -5481,6 +5481,7 @@
   }
   var stagePending = null;
   var stageOpener = null;
+  var stageFocusTimer = null;
   function modalFocusable(root) {
     var list = root.querySelectorAll('a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled])');
     var out = [];
@@ -5545,6 +5546,7 @@
     var opener = stageOpener;
     stagePending = null;
     stageOpener = null;
+    if (stageFocusTimer) { clearTimeout(stageFocusTimer); stageFocusTimer = null; }
     if (modal) modal.hidden = true;
     if (!pending) { focusIfVisible(opener); return; }
     if (commit && pending.onOk) pending.onOk(pending.info());
@@ -5605,7 +5607,11 @@
     modal.hidden = false;
     syncStageConfirm();
     var focusEl = to === 'Revise' ? justify : commentEl;
-    if (focusEl) setTimeout(function () { focusEl.focus(); }, 30);
+    if (stageFocusTimer) clearTimeout(stageFocusTimer);
+    stageFocusTimer = setTimeout(function () {
+      stageFocusTimer = null;
+      if (focusEl && modal && !modal.hidden) focusEl.focus();
+    }, 30);
   }
   (function bindStageModal() {
     var modal = document.getElementById('stageModal');
