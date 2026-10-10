@@ -4946,7 +4946,7 @@
     }
     renderArtifactRtf(pane, row, meta, gen, scope);
   }
-  function openArtifactViewer(row, scope) {
+  function openArtifactViewer(row, scope, openerEl) {
     var modal = document.getElementById('rtfModal');
     var titleEl = document.getElementById('rtfModalTitle');
     var host = document.getElementById('artifactTabs');
@@ -4962,7 +4962,8 @@
       showToast('No program, log or output yet');
       return;
     }
-    artifactOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+    artifactOpener = (openerEl && openerEl.nodeType === 1) ? openerEl
+      : (document.activeElement && document.activeElement !== document.body ? document.activeElement : null);
     modal._row = row;
     modal._scope = scope;
     var meta = artifactMeta(row);
@@ -5005,12 +5006,19 @@
     var modal = document.getElementById('rtfModal');
     var back = artifactOpener;
     artifactOpener = null;
+    if (modal && document.activeElement && modal.contains(document.activeElement)) {
+      try { document.activeElement.blur(); } catch (eBlur) {}
+    }
     if (modal) {
       modal.setAttribute('hidden', '');
       modal._row = null;
       modal._scope = null;
       modal._tab = null;
     }
+    var host = document.getElementById('artifactTabs');
+    if (host) host.innerHTML = '';
+    var pane = document.getElementById('artifactPane');
+    if (pane) pane.innerHTML = '';
     setArtifactFoot(false, false);
     artifactGen++;
     if (back) focusIfVisible(back);
@@ -5508,6 +5516,9 @@
   function rowStudyScope(row) {
     var stamped = row && row.getAttribute ? (row.getAttribute('data-shell-study') || row.getAttribute('data-runtime-scope') || '') : '';
     if (stamped) return stamped;
+    /* Static seed rows belong to the home study even when this page is another scope. */
+    var id = row && row.getAttribute ? (row.getAttribute('data-record-id') || '') : '';
+    if (id.indexOf('seed-') === 0) return TRACKER_HOME;
     return trackerStoreId();
   }
   function shellInScope(row) {
@@ -6133,7 +6144,7 @@
     var link = e.target.closest('.program-open-link');
     if (link) {
       e.preventDefault();
-      openArtifactViewer(link.closest('.artifact-row'), link.getAttribute('data-which'));
+      openArtifactViewer(link.closest('.artifact-row'), link.getAttribute('data-which'), link);
     }
   });
 
