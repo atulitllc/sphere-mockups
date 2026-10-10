@@ -198,8 +198,9 @@
     launch.type = 'button';
     launch.id = 'copilotLaunch';
     launch.className = 'copilot-launch';
-    launch.title = 'Ask Copilot';
-    launch.setAttribute('aria-label', 'Ask Copilot');
+    var copilotTip = 'Ask Copilot - help for ' + screenLabel;
+    launch.title = copilotTip;
+    launch.setAttribute('aria-label', copilotTip);
     launch.setAttribute('aria-haspopup', 'dialog');
     launch.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg><span>Ask Copilot</span>';
     topRight.insertBefore(launch, topRight.firstChild);
@@ -807,14 +808,87 @@
 
 /* Narrow top bar: keep the current page in the crumb, and park client + sign-out in the nav. */
 (function () {
-  function initNarrowChrome() {
-    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
-      if (crumb.querySelector('.crumb-fit')) return;
-      var span = document.createElement('span');
-      span.className = 'crumb-fit';
-      while (crumb.firstChild) span.appendChild(crumb.firstChild);
-      crumb.appendChild(span);
+  function splitCrumb(crumb) {
+    if (crumb.querySelector('.crumb-current')) return;
+    var nodes = [];
+    while (crumb.firstChild) nodes.push(crumb.removeChild(crumb.firstChild));
+    var segments = [[]];
+    nodes.forEach(function (node) {
+      if (node.nodeType === 3) {
+        var parts = String(node.textContent || '').split(/\s*\/\s*/);
+        parts.forEach(function (part, i) {
+          if (i > 0) segments.push([]);
+          if (part) segments[segments.length - 1].push(document.createTextNode(part));
+        });
+      } else {
+        segments[segments.length - 1].push(node);
+      }
     });
+    segments = segments.filter(function (seg) {
+      return seg.some(function (n) {
+        return n.nodeType !== 3 || String(n.textContent || '').trim();
+      });
+    });
+    if (!segments.length) return;
+    var currentNodes = segments.pop();
+    if (segments.length) {
+      var parents = document.createElement('span');
+      parents.className = 'crumb-parents';
+      segments.forEach(function (seg, idx) {
+        if (idx) parents.appendChild(document.createTextNode(' / '));
+        seg.forEach(function (n) { parents.appendChild(n); });
+      });
+      var sep = document.createElement('span');
+      sep.className = 'crumb-sep';
+      sep.textContent = ' / ';
+      crumb.appendChild(parents);
+      crumb.appendChild(sep);
+    }
+    var current = document.createElement('span');
+    current.className = 'crumb-current';
+    currentNodes.forEach(function (n) { current.appendChild(n); });
+    crumb.appendChild(current);
+  }
+
+  function fitCrumbs() {
+    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
+      var parents = crumb.querySelector('.crumb-parents');
+      var sep = crumb.querySelector('.crumb-sep');
+      var current = crumb.querySelector('.crumb-current');
+      if (!current) return;
+      crumb.classList.remove('is-tight');
+      if (parents) parents.hidden = false;
+      if (sep) sep.hidden = false;
+      if (!parents) return;
+      var sepW = sep ? sep.offsetWidth : 0;
+      var need = current.scrollWidth + sepW + 14;
+      if (need > crumb.clientWidth + 1) {
+        parents.hidden = true;
+        if (sep) sep.hidden = true;
+        if (current.scrollWidth > crumb.clientWidth + 1) crumb.classList.add('is-tight');
+      }
+    });
+  }
+
+  function watchCrumbs() {
+    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
+      if (crumb._crumbObs) return;
+      var obs = new MutationObserver(function () {
+        if (crumb.querySelector(':scope > .crumb-current')) return;
+        splitCrumb(crumb);
+        fitCrumbs();
+      });
+      obs.observe(crumb, { childList: true });
+      crumb._crumbObs = obs;
+    });
+  }
+
+  function initNarrowChrome() {
+    document.querySelectorAll('header.top .crumb').forEach(splitCrumb);
+    watchCrumbs();
+    fitCrumbs();
+    window.addEventListener('resize', fitCrumbs);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCrumbs);
 
     var nav = document.querySelector('aside.nav');
     if (!nav || document.getElementById('navMobileTools')) return;

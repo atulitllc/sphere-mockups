@@ -667,7 +667,34 @@ body.nav-collapsed {
 
 .hamburger svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; }
 
-.crumb { color: var(--muted); font-size: 13.5px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crumb {
+  color: var(--muted);
+  font-size: 13.5px;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.crumb-parents {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.crumb-sep { flex: 0 0 auto; white-space: pre; }
+.crumb-current {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.crumb.is-tight .crumb-current {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .crumb strong { color: var(--text); font-weight: 600; }
 
 .tenant-pill, .company-pill {
@@ -7228,14 +7255,35 @@ html[data-theme="dark"] .export-menu {
     flex: 0 0 auto;
   }
   header.top .crumb {
-    direction: rtl;
-    text-align: left;
+    display: flex;
+    align-items: baseline;
+    direction: ltr;
+    text-align: start;
     min-width: 0;
     flex: 1 1 auto;
+    overflow: hidden;
   }
-  header.top .crumb .crumb-fit {
-    direction: ltr;
-    unicode-bidi: isolate;
+  header.top .crumb-parents {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  header.top .crumb-sep {
+    flex: 0 0 auto;
+    white-space: pre;
+  }
+  header.top .crumb-current {
+    flex: 0 0 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  header.top .crumb.is-tight .crumb-current {
+    flex: 1 1 auto;
+    max-width: 100%;
   }
   .copilot-launch {
     position: relative;
@@ -7329,6 +7377,36 @@ html[data-theme="dark"] .export-menu {
   }
 }
 
+/* Room for the current page name once the client pill and name labels no longer fit. */
+@media (max-width: 1040px) {
+  header.top .tenant-pill,
+  header.top .company-pill { display: none; }
+  header.top .user-chrome-name { display: none; }
+  .a11y-trigger-label,
+  .a11y-picker-chevron,
+  .accent-picker-chevron { display: none; }
+  .a11y-picker-trigger,
+  .accent-picker-trigger {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .nav-mobile-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: auto;
+    padding: 8px 4px 0;
+    border-top: 1px solid var(--nav-border);
+  }
+}
+@media (min-width: 861px) {
+  html.nav-collapsed .nav-mobile-tools,
+  body.nav-collapsed .nav-mobile-tools { display: none; }
+}
+
 /* Phone: sign-out leaves the bar so the crumb and icon buttons stay on screen. */
 @media (max-width: 767px) {
   .user-chrome-logout { display: none; }
@@ -7343,6 +7421,23 @@ html[data-theme="dark"] .export-menu {
   .user-chrome-avatar svg {
     width: 20px;
     height: 20px;
+  }
+}
+
+/* On a phone the current page name needs its own row, or the icon buttons crowd it out. */
+@media (max-width: 480px) {
+  header.top {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 4px;
+  }
+  header.top .top-left {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  header.top .top-right {
+    flex: 1 1 auto;
+    margin-left: auto;
   }
 }
 
