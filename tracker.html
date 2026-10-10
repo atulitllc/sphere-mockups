@@ -2724,14 +2724,16 @@
     return true;
   }
 
-  function shellCellHtml(label, shellId) {
+  function shellCellHtml(label, shellId, studyId) {
     var text = String(label || '').replace(/\s+/g, ' ').trim();
     var show = text || '-';
     if (!shellStatusLinks(text) || !shellId) {
       var muted = !shellStatusLinks(text);
       return '<span class="meta-v' + (muted ? ' muted' : '') + '">' + escapeHtml(show) + '</span>';
     }
-    return '<a class="shell-open-link meta-v" href="mock-shells.html?shell=' + encodeURIComponent(shellId) + '" title="Open shell ' + escapeHtml(shellId) + ' in Mock Shells">' + escapeHtml(text) + '</a>';
+    var href = 'mock-shells.html?shell=' + encodeURIComponent(shellId);
+    if (studyId) href += '&study=' + encodeURIComponent(studyId);
+    return '<a class="shell-open-link meta-v" href="' + href + '" title="Open shell ' + escapeHtml(shellId) + ' in Mock Shells">' + escapeHtml(text) + '</a>';
   }
 
   function paintShellLinks(root) {
@@ -2740,7 +2742,7 @@
       var cells = metaCells(row);
       if (!cells[4]) return;
       var label = (cells[4].textContent || '').trim();
-      cells[4].innerHTML = shellCellHtml(label, shellIdForRow(row));
+      cells[4].innerHTML = shellCellHtml(label, shellIdForRow(row), row.getAttribute('data-shell-study') || '');
     });
   }
 
@@ -2835,7 +2837,7 @@
       }
     }
     // Shell
-    if (cells[4]) cells[4].innerHTML = shellCellHtml(shell, shellIdForRow(row));
+    if (cells[4]) cells[4].innerHTML = shellCellHtml(shell, shellIdForRow(row), row.getAttribute('data-shell-study') || '');
 
     var check = row.querySelector('.row-check');
     if (check) check.setAttribute('aria-label', 'Select ' + (title || 'row'));
@@ -3308,7 +3310,7 @@
     var tags = (opts.tags || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var tagsHtml = tags.length
       ? '<div class="chip-row">' + tags.map(function (t) { return '<span class="tag-chip">' + t + '</span>'; }).join('') + '</div>'
-      : '<span class="meta-v muted title-tags-empty">-</span>';
+      : '<span class="meta-v muted title-tags-empty"></span>';
     var prog = (opts.program || '').split('/').pop() || '-';
     var progHtml = prog === '-'
       ? '<span class="meta-v muted program-name">-</span>'
@@ -5249,11 +5251,8 @@
     if (rec.shellId) row.setAttribute('data-shell-id', rec.shellId);
     var cells = metaCells(row);
     if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml((rec.roles && rec.roles.prod) || '') + '</span>';
-    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row));
-    if (rec.shellId === '14.1.3' || rec.number === '14.1.3') {
-      var emptyTags = row.querySelector('.title-tags-empty');
-      if (emptyTags) emptyTags.textContent = '';
-    }
+    if (rec.study) row.setAttribute('data-shell-study', rec.study);
+    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row), rec.study || '');
     if (rec.isNew) {
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
@@ -5318,8 +5317,51 @@
     if (typeof syncSectionCounts === 'function') syncSectionCounts();
   }
 
+  var TRACKER_HOME = 'ONC-204-301';
+  function storeIdFromParts(protocol, deliverable) {
+    if (!protocol) return TRACKER_HOME;
+    if (!deliverable || deliverable === 'CSR') return protocol;
+    return protocol + '::' + deliverable;
+  }
+  function trackerStoreId() {
+    var qStudy = '';
+    var qDel = '';
+    try {
+      var q = new URLSearchParams(location.search);
+      qStudy = q.get('study') || '';
+      qDel = q.get('deliverable') || '';
+    } catch (e) {}
+    if (qStudy.indexOf('::') >= 0) return qStudy;
+    if (qStudy) return storeIdFromParts(qStudy, qDel || 'CSR');
+    try {
+      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
+      if (saved && saved.p) return storeIdFromParts(saved.p, saved.d || 'CSR');
+    } catch (e2) {}
+    return TRACKER_HOME;
+  }
+  function paintTrackerChrome(store) {
+    var raw = String(store || TRACKER_HOME);
+    var cut = raw.indexOf('::');
+    var label = cut < 0 ? raw : (raw.slice(0, cut) + ' / ' + raw.slice(cut + 2));
+    var crumb = document.querySelector('.crumb');
+    if (crumb) {
+      crumb.innerHTML = cut < 0
+        ? ('Studies / <strong>' + escapeHtml(raw) + '</strong> / Tracker')
+        : ('Studies / <strong>' + escapeHtml(raw.slice(0, cut)) + '</strong> / ' + escapeHtml(raw.slice(cut + 2)) + ' / Tracker');
+    }
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = label + ' · Phase 3';
+  }
+
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
+    var trackerStore = trackerStoreId();
+    paintTrackerChrome(trackerStore);
+    if (trackerStore !== TRACKER_HOME) {
+      allRows().forEach(function (row) {
+        if (!row.getAttribute('data-flow-id')) row.remove();
+      });
+    }
     allRows().forEach(function (row) {
       var st = SPHERE_DEMO.getStatus(flowKey(row));
       if (st) {
@@ -5328,7 +5370,8 @@
       }
     });
     applySharedSections();
-    SPHERE_DEMO.records().forEach(function (rec) {
+    var listRecords = SPHERE_DEMO.recordsFor ? SPHERE_DEMO.recordsFor(trackerStore) : SPHERE_DEMO.records();
+    listRecords.forEach(function (rec) {
       var row = buildFlowRow(rec);
       moveRowToSap(row, SPHERE_DEMO.sectionName(rec.sap));
     });

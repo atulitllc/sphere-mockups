@@ -3599,13 +3599,21 @@
     lay.sapRef = '';
     return lay;
   }
-  function copyTrackerDraft(src, draft) {
+  function copyTrackerDraft(src, draft, targetId) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.addRecord) return;
     var linked = src.syncedAt || src.recordId || isTrackerLinked(src);
     if (!linked) return;
-    var existing = (SPHERE_DEMO.records() || []).filter(function (r) {
-      return r.shellId === src.id || String(r.number) === String(src.number);
+    var sourceId = CURRENT_STUDY || 'ONC-204-301';
+    var all = SPHERE_DEMO.records() || [];
+    function inSource(r) { return (r.study || 'ONC-204-301') === sourceId; }
+    var existing = all.filter(function (r) {
+      return inSource(r) && (r.shellId === src.id || String(r.number) === String(src.number));
     })[0];
+    if (!existing) {
+      existing = all.filter(function (r) {
+        return r.shellId === src.id || String(r.number) === String(src.number);
+      })[0];
+    }
     var rec = existing ? JSON.parse(JSON.stringify(existing)) : {
       title: draft.title,
       number: draft.number,
@@ -3622,6 +3630,9 @@
     rec.status = 'Draft';
     rec.history = [{ at: SPHERE_DEMO.stamp(), action: 'Copied as Draft', status: 'Draft', person: SPHERE_DEMO.CURRENT_USER, note: 'Copied with shell ' + src.number }];
     rec.syncedAt = SPHERE_DEMO.stamp();
+    delete rec.study;
+    if (targetId && targetId !== sourceId) rec.study = targetId;
+    else if (sourceId !== 'ONC-204-301') rec.study = sourceId;
     SPHERE_DEMO.addRecord(rec);
     draft.recordId = rec.id;
     draft.syncedAt = rec.syncedAt;
@@ -3676,7 +3687,7 @@
       draft.generatedOutputs = [];
       studyStore[targetId].shells.push(draft);
       studyStore[targetId].selectedId = draft.id;
-      if (alsoTracker) copyTrackerDraft(src, draft);
+      if (alsoTracker) copyTrackerDraft(src, draft, targetId);
       made++;
     });
     if (window.SPHERE_DEMO && SPHERE_DEMO.setShells) {
@@ -4074,7 +4085,16 @@
   renderCatalog();
   (function bootFromShellQuery() {
     var requested = '';
-    try { requested = new URLSearchParams(location.search).get('shell') || ''; } catch (e) {}
+    var requestedStudy = '';
+    try {
+      var qs = new URLSearchParams(location.search);
+      requested = qs.get('shell') || '';
+      requestedStudy = qs.get('study') || '';
+    } catch (e) {}
+    if (requestedStudy && studyStore[requestedStudy]) {
+      CURRENT_STUDY = requestedStudy;
+      updateStudyChrome();
+    }
     var found = requested ? locateShell(requested) : null;
     var id = found ? found.shell.id : '14.1.1';
     selectShell(id, true);

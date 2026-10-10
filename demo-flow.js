@@ -265,6 +265,11 @@
     getShells: function (study) { var s = read(); return s.shells[study || STUDY] || null; },
     setShells: function (study, shells) { var s = read(); s.shells[study || STUDY] = shells; write(s); },
     records: function () { return read().records; },
+    /* Records with no study belong to the home CSR board. Other stores are explicit. */
+    recordsFor: function (study) {
+      var id = study || STUDY;
+      return read().records.filter(function (r) { return (r.study || STUDY) === id; });
+    },
     addRecord: function (rec) {
       var s = read();
       s.records = s.records || [];
@@ -354,6 +359,7 @@
       };
       s.shellSync[key] = rec;
       s.records.forEach(function (r) {
+        if ((r.study || STUDY) !== (study || STUDY)) return;
         var hit = (info.shellId && r.shellId === info.shellId) || String(r.number) === String(info.number);
         if (!hit) return;
         if (pending.indexOf('title') >= 0) r.title = title;
@@ -410,6 +416,7 @@
       if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
       if (info.oldName) s.fileRenames[info.oldName] = info.newName;
       (s.records || []).forEach(function (r) {
+        if ((r.study || STUDY) !== (info.study || STUDY)) return;
         var hit = (info.shellId && r.shellId === info.shellId) ||
           (info.oldName && r.program === info.oldName) ||
           (info.number && String(r.number) === String(info.number));
