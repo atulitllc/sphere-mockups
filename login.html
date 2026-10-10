@@ -447,7 +447,7 @@
 
           <div class="login-tenant" title="Active tenant">
             <span class="login-tenant-dot" aria-hidden="true"></span>
-            <span><strong>X Pharma</strong> ten_x_pharma</span>
+            <span><strong>Northwind Biopharma</strong> ten_northwind</span>
           </div>
 
           <div class="login-error" id="loginError" role="alert">Enter a work email and password to continue.</div>
@@ -455,7 +455,7 @@
           <form id="loginForm" action="studies.html" method="get" novalidate>
             <div class="login-field">
               <label for="loginEmail">Work email</label>
-              <input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="you@xpharma.com" value="jordan.patel@xpharma.com" required />
+              <input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="you@northwindbio.example" value="jordan.patel@northwindbio.example" required />
             </div>
             <div class="login-field">
               <label for="loginPassword">Password</label>
@@ -545,7 +545,7 @@
   }
   function goIn() {
     var emailEl = document.getElementById('loginEmail');
-    var email = ((emailEl && emailEl.value) || '').trim() || 'jordan.patel@xpharma.com';
+    var email = ((emailEl && emailEl.value) || '').trim() || 'jordan.patel@northwindbio.example';
     var account = knownUser(email);
     if (account && account.deactivated) {
       showError('This account is deactivated.');
@@ -590,7 +590,7 @@
   if (forgot) {
     forgot.addEventListener('click', function (e) {
       e.preventDefault();
-      alert('Password reset is stubbed in this mock. Use Sign in or SSO to continue.');
+      alert('Password reset is not available in this demo. Use Sign in or SSO to continue.');
     });
   }
 })();

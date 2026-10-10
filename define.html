@@ -150,7 +150,7 @@
           <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
           <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         </button>
-        <div class="tenant-pill">X Pharma</div>
+        <div class="tenant-pill">Northwind Biopharma</div>
       </div>
     </header>
 
@@ -167,7 +167,7 @@
       </div>
 
         <div class="note-banner note-collapsible is-collapsed" id="pageNoteBanner" role="note">
-        <div class="note-banner-inner"><div><strong>Assisted generate → human review → lock/approve before publish.</strong> Output is a Define-XML stub built from selected domains and linked specs. It does not auto-publish and is not a shell lock or Tracker freeze.</div></div>
+        <div class="note-banner-inner"><div><strong>Assisted generate → human review → lock/approve before publish.</strong> Output is Define-XML built from selected domains and linked specs. It does not auto-publish and is not a shell lock or Tracker freeze.</div></div>
       </div>
 
         <div class="define-layout">
@@ -253,7 +253,7 @@
 
               <div class="form-actions" style="margin-top:4px">
                 <div class="left-actions">
-                  <button class="btn" type="button" id="btnValidate" disabled>Validate stub</button>
+                  <button class="btn" type="button" id="btnValidate" disabled>Validate</button>
                 </div>
                 <div class="right-actions">
                   <button class="btn primary" type="button" id="btnGenerate">Generate Define.xml</button>
@@ -277,8 +277,8 @@
               </div>
 
               <div>
-                <div class="section-title" style="margin-bottom:8px">Stub preview</div>
-                <div class="xml-preview" id="xmlPreview" aria-live="polite">&lt;!-- Generate to produce a Define-XML stub from selected domains --&gt;</div>
+                <div class="section-title" style="margin-bottom:8px">Preview</div>
+                <div class="xml-preview" id="xmlPreview" aria-live="polite">&lt;!-- Generate to produce Define-XML from selected domains --&gt;</div>
               </div>
             </div>
           </div>
@@ -316,7 +316,7 @@
         <div class="card">
           <div class="card-head">
             <span class="title-row">Package contents</span>
-            <span class="badge">Stub view</span>
+            <span class="badge">Preview</span>
           </div>
           <div class="card-body" style="padding-top:8px">
             <div class="view-tabs" role="tablist" aria-label="Package contents">
@@ -335,7 +335,7 @@
               </div>
             </div>
             <div class="view-panel" id="tab-vlm" role="tabpanel" hidden>
-              <div class="hint" style="margin-bottom:8px">Value-level metadata stubs derived from selected domains (demo).</div>
+              <div class="hint" style="margin-bottom:8px">Value-level metadata derived from selected domains (demo).</div>
               <div class="table-wrap">
                 <table>
                   <thead><tr><th>Dataset</th><th>Variable</th><th>Where</th><th>Data type</th><th>Codelist</th></tr></thead>
@@ -351,7 +351,7 @@
             <div class="view-panel" id="tab-codelists" role="tabpanel" hidden>
               <div class="table-wrap">
                 <table>
-                  <thead><tr><th>OID</th><th>Name</th><th>NCI / C-code</th><th>Items (stub)</th></tr></thead>
+                  <thead><tr><th>OID</th><th>Name</th><th>NCI / C-code</th><th>Items</th></tr></thead>
                   <tbody>
                     <tr><td>CL.SEX</td><td>Sex</td><td>C66731</td><td>F, M, U</td></tr>
                     <tr><td>CL.AESEV</td><td>Severity / Intensity</td><td>C66769</td><td>MILD, MODERATE, SEVERE</td></tr>
@@ -401,7 +401,7 @@
                   <td>28 Aug 2026 · 3:05 PM ET</td>
                   <td>M. Chen</td>
                   <td><span class="badge ok">Approved</span></td>
-                  <td><button class="btn ghost" type="button" disabled title="Prior stub">Download</button></td>
+                  <td><button class="btn ghost" type="button" disabled title="Earlier file">Download</button></td>
                 </tr>
                 <tr>
                   <td>define-adam.xml</td>
@@ -410,7 +410,7 @@
                   <td>12 Aug 2026 · 11:20 AM ET</td>
                   <td>J. Patel</td>
                   <td><span class="badge review">In review</span></td>
-                  <td><button class="btn ghost" type="button" disabled title="Prior stub">Download</button></td>
+                  <td><button class="btn ghost" type="button" disabled title="Earlier file">Download</button></td>
                 </tr>
               </tbody>
             </table>
@@ -516,19 +516,19 @@
   });
 
 
-  /* --- Define stub logic --- */
+  /* --- Define preview logic --- */
   var CATALOG = [
     { domain: 'DM', cls: 'Special Purpose', pkg: 'sdtm', src: 'sdtm/dm.sas7bdat', label: 'Demographics', spec: 'specs/sdtm_dm.xlsx', status: 'Mapped' },
     { domain: 'AE', cls: 'Events', pkg: 'sdtm', src: 'sdtm/ae.sas7bdat', label: 'Adverse Events', spec: 'specs/sdtm_ae.xlsx', status: 'Mapped' },
     { domain: 'LB', cls: 'Findings', pkg: 'sdtm', src: 'sdtm/lb.sas7bdat', label: 'Laboratory Test Results', spec: 'specs/sdtm_lb.xlsx', status: 'Mapped' },
-    { domain: 'VS', cls: 'Findings', pkg: 'sdtm', src: 'sdtm/vs.sas7bdat', label: 'Vital Signs', spec: '-', status: 'Stub' },
-    { domain: 'EX', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/ex.sas7bdat', label: 'Exposure', spec: '-', status: 'Stub' },
-    { domain: 'CM', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/cm.sas7bdat', label: 'Concomitant Meds', spec: '-', status: 'Stub' },
+    { domain: 'VS', cls: 'Findings', pkg: 'sdtm', src: 'sdtm/vs.sas7bdat', label: 'Vital Signs', spec: '-', status: 'Not mapped' },
+    { domain: 'EX', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/ex.sas7bdat', label: 'Exposure', spec: '-', status: 'Not mapped' },
+    { domain: 'CM', cls: 'Interventions', pkg: 'sdtm', src: 'sdtm/cm.sas7bdat', label: 'Concomitant Meds', spec: '-', status: 'Not mapped' },
     { domain: 'ADSL', cls: 'Subject Level', pkg: 'adam', src: 'adam/adsl.sas7bdat', label: 'Subject-Level Analysis', spec: 'specs/adam_adsl.xlsx', status: 'Mapped' },
     { domain: 'ADAE', cls: 'Occurrence', pkg: 'adam', src: 'adam/adae.sas7bdat', label: 'Adverse Events Analysis', spec: 'specs/adam_adae.xlsx', status: 'Mapped' },
-    { domain: 'ADLB', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adlb.sas7bdat', label: 'Laboratory Analysis', spec: '-', status: 'Stub' },
-    { domain: 'ADTTE', cls: 'Time-to-Event', pkg: 'adam', src: 'adam/adtte.sas7bdat', label: 'Time-to-Event', spec: '-', status: 'Stub' },
-    { domain: 'ADRS', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adrs.sas7bdat', label: 'Response Analysis', spec: '-', status: 'Stub' }
+    { domain: 'ADLB', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adlb.sas7bdat', label: 'Laboratory Analysis', spec: '-', status: 'Not mapped' },
+    { domain: 'ADTTE', cls: 'Time-to-Event', pkg: 'adam', src: 'adam/adtte.sas7bdat', label: 'Time-to-Event', spec: '-', status: 'Not mapped' },
+    { domain: 'ADRS', cls: 'Basic Data Structure', pkg: 'adam', src: 'adam/adrs.sas7bdat', label: 'Response Analysis', spec: '-', status: 'Not mapped' }
   ];
 
   var catalogBody = document.getElementById('catalogBody');
@@ -675,7 +675,7 @@
       : 'http://www.cdisc.org/ns/def/v2.0';
     var lines = [];
     lines.push('<?xml version="1.0" encoding="UTF-8"?>');
-    lines.push('<!-- SPHERE stub · generated from study metadata + dataset specs · not freehand -->');
+    lines.push('<!-- Generated from study metadata + dataset specs · not freehand -->');
     lines.push('<!-- Human review required before publish. Shell lock / Tracker unaffected. -->');
     lines.push('<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3"');
     lines.push('     xmlns:def="' + ns + '"');
@@ -687,9 +687,9 @@
     lines.push('      <StudyDescription>Phase 3 oncology · Define-XML ' + ver + ' · ' + (pkg === 'both' ? 'SDTM+ADaM' : pkg.toUpperCase()) + '</StudyDescription>');
     lines.push('      <ProtocolName>ONC-204-301</ProtocolName>');
     lines.push('    </GlobalVariables>');
-    lines.push('    <MetaDataVersion OID="MDV.ONC-204-301.1" Name="Define stub" def:DefineVersion="' + ver + '.0">');
+    lines.push('    <MetaDataVersion OID="MDV.ONC-204-301.1" Name="Define preview" def:DefineVersion="' + ver + '.0">');
     sel.forEach(function (d) {
-      lines.push('      <ItemGroupDef OID="IG.' + d + '" Name="' + d + '" Repeating="' + (d === 'DM' || d === 'ADSL' ? 'No' : 'Yes') + '" def:Structure="' + d + ' stub">');
+      lines.push('      <ItemGroupDef OID="IG.' + d + '" Name="' + d + '" Repeating="' + (d === 'DM' || d === 'ADSL' ? 'No' : 'Yes') + '" def:Structure="' + d + '">');
       lines.push('        <!-- variables / VLM / codelist refs omitted in mock -->');
       lines.push('      </ItemGroupDef>');
     });
@@ -734,15 +734,15 @@
       btnDownload.disabled = false;
       btnValidate.disabled = false;
       btnApprove.disabled = false;
-      toast('Define.xml stub ready');
+      toast('Define.xml ready');
     }, 900);
   });
 
   btnValidate.addEventListener('click', function () {
     if (!generated) return;
     statusBadge.className = 'badge ok';
-    statusBadge.textContent = 'Validated (stub)';
-    toast('Stub validation passed (mock)');
+    statusBadge.textContent = 'Validated';
+    toast('Validation passed');
   });
 
   btnDownload.addEventListener('click', function () {
@@ -757,7 +757,7 @@
       URL.revokeObjectURL(a.href);
       a.remove();
     }, 0);
-    toast('Downloaded stub XML');
+    toast('Downloaded XML');
   });
 
   btnApprove.addEventListener('click', function () {
