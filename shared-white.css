@@ -4310,6 +4310,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
   flex-wrap: wrap;
   flex: 0 0 auto;
   margin: 0 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 #trackerListsBar .actions-sep {
   width: 1px;
@@ -4419,6 +4421,8 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 /* Tracker: kill header whitespace */
 .stack.tracker-stack {
   gap: 6px;
+  container-type: inline-size;
+  container-name: tracker;
 }
 .stack.tracker-stack > .note-banner.note-collapsible.is-collapsed {
   display: none;
@@ -5848,14 +5852,36 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* Keep Tracker Actions on-screen - parent .content uses overflow-x: clip */
+/* Keep Tracker Actions on-screen - parent .content uses overflow-x: clip.
+   Only the grid scrolls. Filters and the delete/export icons stay put. */
 .content:has(.tracker-board) {
   overflow-x: clip;
 }
 .tracker-section {
   min-width: 0;
   max-width: 100%;
+  overflow-x: visible;
+}
+.tracker-hscroll {
   overflow-x: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+/* As wide as the column template, and at least the visible card. Header,
+   rows, and group bars are 100% of this, so their backgrounds and borders
+   cover Actions when the card is scrolled. Title text does not widen it. */
+.tracker-hscroll-inner {
+  width: max(100%, var(--tracker-grid-min, 100%));
+}
+.tracker-hscroll-inner > .tracker-col-head,
+.tracker-hscroll-inner .tracker-board,
+.tracker-hscroll-inner .sap-section,
+.tracker-hscroll-inner .sap-section-bar,
+.tracker-hscroll-inner .artifact-row {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .tracker-col-head,
 .tracker-board .artifact-row {
@@ -6543,6 +6569,9 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
     var(--tracker-job) + var(--tracker-actions) + var(--tracker-programs-min) +
     (5 * var(--tracker-gap))
   );
+  /* Row chrome (4px + 8px padding) plus the checkbox, its gap, the 160px
+     title floor, the title/meta gap, and the meta floor. */
+  --tracker-grid-min: calc(4px + 36px + 8px + 160px + 8px + var(--tracker-meta-min) + 8px);
   --tracker-cols:
     var(--tracker-type)
     var(--tracker-status)
@@ -6554,14 +6583,29 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .artifact-row .artifact-main,
 .tracker-col-head .artifact-main {
   display: grid;
-  /* Title and meta both flex. Meta's 2fr share stays under its 170px Programs
-     floor at 1280, so that floor wins and the title keeps the leftover.
-     On a wide row the 2fr share exceeds the floor and Programs grows. */
+  /* Title and meta both flex. The title track cannot shrink below 160px, so
+     the output name stays readable. Meta's 2fr share stays under its 170px
+     Programs floor at 1280, so that floor wins and the title keeps the leftover
+     (already above 160px). On a wide row the 2fr share exceeds the floor and
+     Programs grows. At 1280 and 1920 the used widths match the previous floor. */
   grid-template-columns: minmax(160px, 1fr) minmax(var(--tracker-meta-min), 2fr);
   column-gap: 8px;
   align-items: center;
   width: 100%;
   min-width: 0;
+}
+/* 125% of a 1280 screen is about a 744px section. Keep a readable title and
+   Programs floor here. The row may scroll inside the tracker card. At 1280
+   and 100% the section is 1000px, so this block does not apply. */
+@container tracker (max-width: 900px) {
+  .tracker-section {
+    --tracker-gap: 4px;
+    --tracker-type: 54px;
+    --tracker-shell: 48px;
+    --tracker-job: 164px;
+    --tracker-actions: 122px;
+    --tracker-programs-min: 170px;
+  }
 }
 .artifact-row .artifact-title-band {
   grid-column: 1;
@@ -6695,6 +6739,54 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 html[data-ui-zoom="125"] .artifact-row .role-chip .role-nm,
 html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-block; max-width: 11ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 @media (max-width: 1280px) { .artifact-row .role-chip .role-nm { display: inline-block; } }
+/* Narrow tracker card (1024, or 1280 at 125% zoom). The section is under 900px,
+   so 1280 and 1920 at 100% are unchanged. Tags and role chips each take their
+   own line under a title that keeps the full 160px column. Program names wrap
+   inside the 170px Programs track instead of collapsing to an ellipsis. */
+@container tracker (max-width: 900px) {
+  .artifact-row .artifact-title-band {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+  .artifact-row .artifact-title-band .artifact-title {
+    grid-column: 1;
+    grid-row: 1;
+    max-width: 100%;
+  }
+  .artifact-row .artifact-title-band .artifact-tags {
+    grid-column: 1;
+    grid-row: 2;
+    overflow: visible;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .artifact-row .artifact-title-band .chip-row {
+    flex-wrap: wrap;
+    overflow: visible;
+    max-height: none;
+  }
+  .artifact-row .artifact-title-band .row-roles-inline {
+    grid-column: 1;
+    grid-row: 3;
+    flex-wrap: wrap;
+    overflow: visible;
+    justify-content: flex-start;
+    margin-left: 0;
+    max-width: 100%;
+  }
+  .tracker-col-head .col-head-output,
+  .tracker-col-head .col-head-output .col-head-label,
+  .tracker-col-head .col-head-output .col-head-sub {
+    white-space: nowrap;
+  }
+  .artifact-row .artifact-meta .program-name,
+  .artifact-row .artifact-meta .qc-program-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+}
 .artifact-row .role-chip b { padding-left: 4px; }
 /* File Explorer: one compact info bar (study + programs layout) (flow3) */
 .files-infobar { display: flex; flex-direction: column; gap: 3px; padding: 7px 12px; margin: 0; border: 1px solid var(--blue-border); border-radius: var(--radius-sm); background: var(--accent-soft); font-size: 12px; line-height: 1.45; color: var(--text); }
