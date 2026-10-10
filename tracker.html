@@ -2839,6 +2839,7 @@
     refreshAssignedFilter();
     syncSectionCounts();
     applyFilters();
+    persistRuntimeRowFromDom(row);
     closeRowEditor();
     showToast('Row updated');
   }
@@ -3299,6 +3300,7 @@
     row.setAttribute('data-job', opts.job || '');
     row.setAttribute('data-program', opts.program || '');
     if (opts.recordId) row.setAttribute('data-record-id', opts.recordId);
+    if (opts.scope) row.setAttribute('data-runtime-scope', opts.scope);
     /* checkout removed */
     var tags = (opts.tags || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var tagsHtml = tags.length
@@ -5133,6 +5135,7 @@
     if (chip) chip.remove();
     refreshRowWorkflowUI(row);
     flashRow(row, false);
+    persistRuntimeRowFromDom(row);
   }
 
   /* Workflow popover (status pill) */
@@ -5331,14 +5334,40 @@
   function readRuntimeRows() {
     try {
       var raw = JSON.parse(localStorage.getItem(RUNTIME_ROWS_KEY) || '[]');
-      return Array.isArray(raw) ? raw : [];
+      if (!Array.isArray(raw)) return [];
+      var changed = false;
+      raw.forEach(function (row) {
+        if (row && !row.scope) { row.scope = RUNTIME_HOME; changed = true; }
+      });
+      if (changed) writeRuntimeRows(raw);
+      return raw;
     } catch (eRead) { return []; }
   }
 
+  var RUNTIME_HOME = 'ONC-204-301';
+  function runtimeScopeId() {
+    if (typeof trackerStoreId === 'function') return trackerStoreId();
+    try {
+      var q = new URLSearchParams(location.search);
+      var qStudy = q.get('study') || '';
+      var qDel = q.get('deliverable') || '';
+      if (qStudy.indexOf('::') >= 0) return qStudy;
+      if (qStudy) return (!qDel || qDel === 'CSR') ? qStudy : (qStudy + '::' + qDel);
+      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
+      if (saved && saved.p) return (!saved.d || saved.d === 'CSR') ? saved.p : (saved.p + '::' + saved.d);
+    } catch (eScope) {}
+    return RUNTIME_HOME;
+  }
+  function writeRuntimeRows(list) {
+    try { localStorage.setItem(RUNTIME_ROWS_KEY, JSON.stringify(list)); } catch (eSaveRow) {}
+  }
   function rememberRuntimeRow(spec) {
     var list = readRuntimeRows();
-    list.push({
+    var scope = spec.scope || runtimeScopeId();
+    spec.scope = scope;
+    var row = {
       recordId: spec.recordId,
+      scope: scope,
       type: spec.type || 'Table',
       status: spec.status || 'Draft',
       tags: spec.tags || '',
@@ -5347,13 +5376,50 @@
       title: spec.title || '',
       shell: spec.shell || 'n/a',
       job: spec.job || ''
-    });
-    try { localStorage.setItem(RUNTIME_ROWS_KEY, JSON.stringify(list)); } catch (eSaveRow) {}
+    };
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].recordId === spec.recordId) idx = i;
+    if (idx >= 0) list[idx] = row;
+    else list.push(row);
+    writeRuntimeRows(list);
+  }
+  function persistRuntimeRowFromDom(row) {
+    if (!row) return;
+    var id = row.getAttribute('data-record-id') || '';
+    if (id.indexOf('rec-runtime-') !== 0) return;
+    var titleEl = row.querySelector('.artifact-title');
+    var cells = metaCells(row);
+    var shell = cells[4] ? String(cells[4].textContent || '').replace(/\s+/g, ' ').trim() : '';
+    var snap = {
+      recordId: id,
+      scope: row.getAttribute('data-runtime-scope') || runtimeScopeId(),
+      type: row.getAttribute('data-type') || 'Table',
+      status: row.getAttribute('data-status') || 'Draft',
+      tags: row.getAttribute('data-tags') || '',
+      sap: row.getAttribute('data-sap') || '',
+      program: row.getAttribute('data-program') || '',
+      title: titleEl ? String(titleEl.textContent || '').replace(/\s+/g, ' ').trim() : '',
+      shell: shell || 'n/a',
+      job: row.getAttribute('data-job') || ''
+    };
+    var list = readRuntimeRows();
+    var found = false;
+    for (var i = 0; i < list.length; i++) {
+      if (!list[i] || list[i].recordId !== id) continue;
+      snap.scope = list[i].scope || snap.scope;
+      list[i] = snap;
+      found = true;
+      break;
+    }
+    if (!found) list.push(snap);
+    writeRuntimeRows(list);
   }
 
   function hydrateRuntimeRows() {
+    var scope = runtimeScopeId();
     readRuntimeRows().forEach(function (spec) {
       if (!spec || !spec.recordId || !board) return;
+      if ((spec.scope || RUNTIME_HOME) !== scope) return;
       var id = String(spec.recordId).replace(/"/g, '');
       if (board.querySelector('.artifact-row[data-record-id="' + id + '"]')) return;
       moveRowToSap(buildArtifactRow(spec), spec.sap || 'Demographics');

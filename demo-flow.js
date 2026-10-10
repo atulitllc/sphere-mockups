@@ -41,6 +41,8 @@
       localStorage.removeItem(KEY);
       localStorage.removeItem('sphere-study-registry-v2');
       localStorage.removeItem('sphere-tenant-study-layout');
+      localStorage.removeItem('sphere-tracker-runtime-rows');
+      localStorage.removeItem('sphere-tracker-id-seq');
       justReset = true;
       qs.delete('reset');
       var q = qs.toString();
