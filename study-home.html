@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3j" />
+<link rel="stylesheet" href="shared-white.css?v=flow4style" />
 <script>
 (function () {
   try {
@@ -144,7 +144,7 @@
             <div class="meta-item"><div class="k">Lead biostat</div><div class="v">M. Chen</div></div>
             <div class="meta-item" data-meta="sap"><div class="k">SAP status</div><div class="v" id="metaSap">Locked</div></div>
             <div class="meta-item" data-meta="delivery"><div class="k">Delivery target</div><div class="v" id="metaDelivery">CSR package · Q4</div></div>
-            <div class="meta-item"><div class="k">Delivery type</div><div class="v" id="metaDeliveryType">-</div></div>
+            <div class="meta-item"><div class="k">Delivery type</div><div class="v" id="metaDeliveryType"><span class="cell-empty">-</span></div></div>
           </div>
         </div>
       </section>
@@ -436,7 +436,7 @@
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
   if (!defaultHero) {
     var t = document.querySelector('.study-hero-title');
-    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' - ' + (e.name || '');
+    if (t) t.textContent = L.studyId(e) + (e.deliverable ? ' · ' + e.deliverable : '') + ' · ' + (e.name || '');
     var sub = document.querySelector('.study-hero-sub');
     if (sub) sub.textContent = 'Phase ' + (e.phase || '-') + ' · ' + (e.studyType || '-') + ' · created ' + (e.created || '');
     var badge = document.querySelector('.study-hero-title-row .badge');
@@ -444,7 +444,10 @@
     var map = { 'Indication': e.indication, 'Lead programmer': e.lead, 'Lead biostat': e.statistician, 'Cutoff': e.dblock, 'Subjects': '', 'SAP status': 'Draft', 'Delivery target': '' };
     if (grid) grid.querySelectorAll('.meta-item').forEach(function (m) {
       var k = m.querySelector('.k'), v = m.querySelector('.v');
-      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) v.textContent = map[k.textContent] || '-';
+      if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) {
+        var shown = map[k.textContent];
+        v.innerHTML = shown ? esc(shown) : '<span class="cell-empty">-</span>';
+      }
     });
   }
   if (grid) {
@@ -452,7 +455,7 @@
     var shared = L.samePath(e);
     if (shared.length > 1) items.push(['Shares folder with', shared.filter(function (x) { return x !== e; }).map(function (x) { return x.protocol + ' · ' + x.deliverable; }).join(', ')]);
     var deliveryType = document.getElementById('metaDeliveryType');
-    if (deliveryType) deliveryType.textContent = e.studyType || '-';
+    if (deliveryType) deliveryType.innerHTML = e.studyType ? esc(e.studyType) : '<span class="cell-empty">-</span>';
     grid.insertAdjacentHTML('afterbegin', '<div class="meta-item meta-item-path" style="grid-column:1/-1"><div class="k">Folder path</div><div class="v"><a class="study-path-line" style="font-size:12.5px" href="files.html?path=' + encodeURIComponent(path) + '">' + esc(path) + '</a> <span class="muted" style="font-size:11.5px">· layout ' + esc(L.levelLabel()) + ' · ' + esc(L.get().subfolders.join(' · ')) + '</span></div></div>' +
       items.map(function (it) { return '<div class="meta-item"><div class="k">' + it[0] + '</div><div class="v">' + esc(it[1]) + '</div></div>'; }).join(''));
   }
@@ -474,17 +477,24 @@
   function readAll() {
     try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; }
   }
-  function show(v) {
+  function blank(v) {
     var s = String(v == null ? '' : v).trim();
-    return s ? s : '-';
+    return !s || s === '-' || s === 'Not set';
+  }
+  function show(v) {
+    return blank(v) ? '' : String(v).trim();
+  }
+  function paintValue(el, v) {
+    if (blank(v)) el.innerHTML = '<span class="cell-empty">-</span>';
+    else el.textContent = String(v).trim();
   }
   function paint() {
     var saved = readAll()[studyKey()] || {};
     fields.forEach(function (f) {
       var el = document.getElementById(f.id);
       if (!el) return;
-      if (Object.prototype.hasOwnProperty.call(saved, f.key)) el.textContent = show(saved[f.key]);
-      else if (!el.textContent.trim()) el.textContent = '-';
+      if (Object.prototype.hasOwnProperty.call(saved, f.key)) paintValue(el, saved[f.key]);
+      else if (blank(el.textContent)) paintValue(el, '');
     });
   }
   function open() {
@@ -494,7 +504,7 @@
       var input = document.getElementById(f.edit);
       if (!input || !view) return;
       var current = Object.prototype.hasOwnProperty.call(saved, f.key) ? saved[f.key] : view.textContent;
-      input.value = current === '-' ? '' : current;
+      input.value = blank(current) ? '' : current;
     });
     document.getElementById('studyMetaModal').hidden = false;
   }
@@ -512,7 +522,7 @@
     var rec = {};
     fields.forEach(function (f) {
       rec[f.key] = document.getElementById(f.edit).value.trim();
-      document.getElementById(f.id).textContent = show(rec[f.key]);
+      paintValue(document.getElementById(f.id), rec[f.key]);
     });
     all[studyKey()] = rec;
     localStorage.setItem(KEY, JSON.stringify(all));

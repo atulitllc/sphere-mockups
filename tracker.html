@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3n" />
+<link rel="stylesheet" href="shared-white.css?v=flow4style" />
 <script>
 (function () {
   try {
@@ -123,7 +123,6 @@
         <div class="page-intro page-intro-compact" style="margin-bottom:0">
         <div class="page-title-row">
           <h1 class="page-title">Tracker - programs, TLFs &amp; datasets</h1>
-          <button class="btn primary" type="button" id="btnNewRecord">New Record</button>
           <button type="button" class="btn icon-btn accent-icon page-note-toggle" aria-expanded="false" aria-controls="pageNoteBanner" title="Show note" aria-label="Show note">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.2 2.2 0 0 0 1.5-2.1c0-1.2-.9-2-2-2s-2 .7-2 1.8"/><path d="M12 17.2h.01"/></svg>
           </button>
@@ -160,6 +159,10 @@
               <button class="action-icon-btn" type="button" id="btnExportCsv" title="Export CSV" aria-label="Export CSV">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
                 <span class="label">Export CSV</span>
+              </button>
+              <button class="action-icon-btn" type="button" id="btnNewRecord" title="New Record" aria-label="New Record">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <span class="label">New Record</span>
               </button>
             </div>
         </div>
@@ -301,7 +304,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Demographics" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.1.1 · Demographics</div>
+                  <div class="artifact-title">14.1.1 · Demographics and baseline characteristics</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">First look</span><span class="tag-chip">DMC</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -363,7 +366,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Efficacy" aria-label="Select all in Efficacy">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-efficacy">
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="queued" data-program="tfl_14_2_1_orr.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="done" data-program="tfl_14_2_1_orr.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -448,7 +451,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Safety TLFs" aria-label="Select all in Safety TLFs">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-safety-tlfs">
-            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="adam_adae.sas">
+            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="adam_adae.sas">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADAE" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -538,7 +541,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Safety TLFs" data-job="queued" data-program="tfl_14_3_1_3_ae_disc.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_3_ae_disc.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events leading to permanent disc" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -664,7 +667,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="running" data-program="tfl_14_3_4_ae_common.R">
+            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_4_ae_common.R">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Common adverse events (≥5% in any treatm" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -713,7 +716,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Labs" data-job="queued" data-program="tfl_14_3_5_1_lb_chem.sas">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Labs" data-job="done" data-program="tfl_14_3_5_1_lb_chem.sas">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry shifts from baselin" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -895,7 +898,7 @@
             <option>Locked</option>
             <option>Available</option>
             <option selected>n/a</option>
-            <option>-</option>
+            <option value="-">None</option>
           </select>
         </label>
       </div>
@@ -1794,6 +1797,7 @@
     clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
     check: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="currentColor"/><path d="M7.4 12.4l3.1 3.1 6.1-6.6" fill="none" style="stroke:var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     warn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2L1.2 21.3h21.6L12 2.2z" fill="currentColor"/><path d="M12 9.2v5.2" style="stroke:var(--surface)" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.7" r="1.4" style="fill:var(--surface)"/></svg>',
+    error: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="currentColor"/><path d="M8.2 8.2l7.6 7.6M15.8 8.2l-7.6 7.6" fill="none" style="stroke:var(--surface)" stroke-width="2.4" stroke-linecap="round"/></svg>',
     spin: '<span class="run-spin"></span>'
   };
 
@@ -1804,6 +1808,48 @@
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function hhmm(d) { return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+  var RUN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function lastRunLabel(date) {
+    var d = date instanceof Date ? date : new Date(date);
+    if (!d || isNaN(d.getTime())) return '';
+    var h = d.getHours();
+    var clock = ((h % 12) || 12) + ':' + pad2(d.getMinutes()) + ' ' + (h < 12 ? 'AM' : 'PM');
+    var now = new Date();
+    var startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    var startThat = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var dayDiff = Math.round((startToday - startThat) / 86400000);
+    if (dayDiff <= 0) return 'Today ' + clock;
+    if (dayDiff === 1) return 'Yesterday ' + clock;
+    return d.getDate() + ' ' + RUN_MONTHS[d.getMonth()] + ' ' + clock;
+  }
+  /* Explicit finished outcomes. No program-name hash. 14.1.1 stays Completed.
+     days is how many calendar days before today. h/m is the clock time. */
+  var SEED_JOBS = {
+    'tfl_14_1_1_demog.R': { outcome: 'completed', days: 0, h: 15, m: 49, dur: 18 },
+    'adam_adsl.sas': { outcome: 'warning', days: 1, h: 8, m: 24, dur: 22 },
+    'tfl_14_1_2_base.R': { outcome: 'completed', days: 1, h: 13, m: 44, dur: 31 },
+    'tfl_14_2_1_orr.R': { outcome: 'completed', days: 0, h: 10, m: 20, dur: 14 },
+    'tfl_14_2_3_orr_dorr.sas': { outcome: 'warning', days: 2, h: 14, m: 10, dur: 27 },
+    'adam_adae.sas': { outcome: 'completed', days: 1, h: 9, m: 19, dur: 19 },
+    'tfl_14_3_1_ae.R': { outcome: 'completed', days: 3, h: 11, m: 5, dur: 16 },
+    'tfl_14_3_8_cm.sas': { outcome: 'error', days: 1, h: 16, m: 2, dur: 12 },
+    'tfl_14_3_1_1_ae_soc_pt.R': { outcome: 'completed', days: 0, h: 9, m: 10, dur: 24 },
+    'tfl_14_3_1_2_sae_rel.R': { outcome: 'completed', days: 6, h: 15, m: 40, dur: 21 },
+    'tfl_14_3_1_3_ae_disc.R': { outcome: 'completed', days: 1, h: 12, m: 34, dur: 17 },
+    'tfl_14_3_1_5_aesi.R': { outcome: 'completed', days: 10, h: 10, m: 8, dur: 29 },
+    'tfl_14_3_1_6_ae_ttf.R': { outcome: 'completed', days: 0, h: 13, m: 17, dur: 11 },
+    'tfl_14_3_2_2_death_list.R': { outcome: 'completed', days: 4, h: 14, m: 18, dur: 15 },
+    'tfl_14_3_3_ae_sev.R': { outcome: 'completed', days: 12, h: 9, m: 58, dur: 33 },
+    'tfl_14_3_4_ae_common.R': { outcome: 'completed', days: 1, h: 15, m: 34, dur: 20 },
+    'tfl_14_3_5_1_lb_chem.sas': { outcome: 'completed', days: 0, h: 11, m: 5, dur: 13 }
+  };
+  function seedStamp(spec) {
+    var now = new Date();
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), spec.h, spec.m, 0, 0);
+    d.setDate(d.getDate() - spec.days);
+    if (d.getTime() > now.getTime() - 60000) d = new Date(now.getTime() - 20 * 60000);
+    return d.getTime();
+  }
   function hhmmss(d) { return hhmm(d) + ':' + pad2(d.getSeconds()); }
   function fmt12(d) {
     var h = d.getHours(), m = d.getMinutes();
@@ -1879,57 +1925,62 @@
     var j = row._runJob;
     if (!cell || !j) return;
     var now = Date.now();
-    var key, html;
+    var face, when, key, title, button;
     if (j.state === 'queued') {
       var pos = queuePosition(j);
       key = 'q|' + pos;
-      html = '<span class="run-st is-queued" title="Queued · ' + runEsc(modeLabel(j.mode)) + ' · ' + j.lang + '">' +
-        '<span class="run-st-line"><span class="run-ic">' + RUN_ICONS.clock + '</span><span class="run-st-txt">Queued</span></span>' +
-        '<span class="run-st-sub">' + runEsc(modeLabel(j.mode)) + ' · #' + pos + '</span></span>';
+      face = { cls: 'is-queued', icon: RUN_ICONS.clock, word: 'Queued' };
+      when = j.prevEnd ? lastRunLabel(j.prevEnd) : '';
+      title = 'Queued · ' + modeLabel(j.mode) + ' · #' + pos + ' · ' + j.lang + (when ? '. Last run: ' + when : '');
+      button = false;
     } else if (j.state === 'running') {
-      key = 'r|' + j.phase;
-      if (cell._runKey === key) {
-        var sub = cell.querySelector('[data-run-sub]');
-        var bar = cell.querySelector('[data-run-bar]');
-        if (sub) sub.textContent = runningSub(j, now);
-        if (bar) bar.style.width = runningPct(j, now) + '%';
-        return;
-      }
-      var phKind = phaseDisplay(j.phases[j.phase].kind);
-      html = '<span class="run-st is-running" title="Running ' + j.lang + ' · ' + phKind + ' program' + (j.mode === 'both' ? ' (Prod then QC)' : '') + '">' +
-        '<span class="run-st-line"><span class="run-ic">' + RUN_ICONS.spin + '</span><span class="run-st-txt">Running ' + j.lang + '…</span></span>' +
-        '<span class="run-st-sub" data-run-sub>' + runEsc(runningSub(j, now)) + '</span>' +
-        '<span class="run-bar" aria-hidden="true"><i data-run-bar style="width:' + runningPct(j, now) + '%"></i></span></span>';
+      key = 'r|' + j.phase + '|' + Math.floor((now - (j.phaseAt || now)) / 1000);
+      face = { cls: 'is-running', icon: RUN_ICONS.spin, word: 'Running' };
+      when = j.prevEnd ? lastRunLabel(j.prevEnd) : '';
+      var phKind = j.phases && j.phases[j.phase] ? phaseDisplay(j.phases[j.phase].kind) : 'Prod';
+      title = 'Running ' + j.lang + ' · ' + phKind + (j.mode === 'both' ? ' (Prod then QC)' : '') + (j.phaseAt ? ' · ' + runningSub(j, now) : '') + (when ? '. Last run: ' + when : '');
+      button = false;
+    } else if (j.state === 'error') {
+      key = 'e|' + j.id;
+      face = { cls: 'is-error', icon: RUN_ICONS.error, word: 'Error' };
+      when = lastRunLabel(j.endDate);
+      title = 'Error. Last run: ' + when + ' · ' + fmtDur(j.endedAt - j.startedAt) + ' · ' + j.lang + ' · ' + modeLabel(j.mode) + '. View log';
+      button = true;
     } else {
-      key = 'd|' + j.id;
-      if (cell._runKey === key) return;
-      var dur = fmtDur(j.endedAt - j.startedAt);
-      var full = (j.warn ? 'Completed with warnings' : 'Completed') + ' ' + hhmm(j.endDate) + ' · ' + dur;
-      html = '<button type="button" class="run-st ' + (j.warn ? 'is-warn' : 'is-done') + '" data-run-log ' +
-        'title="' + full + ' · ' + j.lang + ' · ' + runEsc(modeLabel(j.mode)) + ' - view log" aria-label="' + full + '. View ' + j.lang + ' log">' +
-        '<span class="run-st-line"><span class="run-ic">' + (j.warn ? RUN_ICONS.warn : RUN_ICONS.check) + '</span><span class="run-st-txt">' + (j.warn ? 'With warnings' : 'Completed') + '</span></span>' +
-        '<span class="run-st-sub">' + hhmm(j.endDate) + ' · ' + dur + '</span></button>';
+      key = 'd|' + j.id + '|' + (j.warn ? 'w' : 'c');
+      face = j.warn
+        ? { cls: 'is-warn', icon: RUN_ICONS.warn, word: 'Warning' }
+        : { cls: 'is-done', icon: RUN_ICONS.check, word: 'Completed' };
+      when = lastRunLabel(j.endDate);
+      title = face.word + '. Last run: ' + when + ' · ' + fmtDur(j.endedAt - j.startedAt) + ' · ' + j.lang + ' · ' + modeLabel(j.mode) + '. View log';
+      button = true;
     }
     if (cell._runKey === key) return;
     cell._runKey = key;
-    cell.innerHTML = html;
+    var sub = when ? '<span class="run-st-sub">' + runEsc(when) + '</span>' : '';
+    var inner = '<span class="run-st-line"><span class="run-ic">' + face.icon + '</span><span class="run-st-txt">' + face.word + '</span></span>' + sub;
+    cell.innerHTML = button
+      ? '<button type="button" class="run-st ' + face.cls + '" data-run-log title="' + runEsc(title) + '" aria-label="' + runEsc(title) + '">' + inner + '</button>'
+      : '<span class="run-st ' + face.cls + '" title="' + runEsc(title) + '">' + inner + '</span>';
   }
 
-  /* Rows loaded with a previous run: show as completed earlier today (clickable log) */
+  /* Seeded jobs are finished. Running and Queued exist only after the user clicks Run. */
   allRows().forEach(function (row) {
     var st = row.getAttribute('data-job');
     var prog = runProgName(row);
     if (!prog || !st) return;
-    var h = hashStr(prog);
-    var durMs = (6 + h % 30) * 1000 + (h % 1000);
-    var end = Date.now() - (25 + h % 150) * 60000;
+    var spec = SEED_JOBS[prog] || { outcome: 'completed', days: 1, h: 9, m: 0, dur: 15 };
+    var durMs = spec.dur * 1000;
+    var end = seedStamp(spec);
+    var outcome = spec.outcome === 'error' ? 'error' : 'completed';
     var j = {
       id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: 'prod',
-      phases: [{ kind: 'Prod', dur: durMs }], phase: 0, state: 'done', warn: h % 6 === 0, warnPhase: 0,
+      phases: [{ kind: 'Prod', dur: durMs }], phase: 0, state: outcome === 'error' ? 'error' : 'done',
+      warn: outcome !== 'error' && spec.outcome === 'warning', warnPhase: 0,
       batch: null, startedAt: end - durMs, endedAt: end, endDate: new Date(end), logs: {}
     };
     row._runJob = j;
-    row.setAttribute('data-job', 'done');
+    row.setAttribute('data-job', j.state);
     row.setAttribute('data-last-run', j.endDate.toISOString());
     renderJobCell(row);
   });
@@ -2113,7 +2164,7 @@
       var st;
       if (j.state === 'running') st = runningSub(j, now);
       else if (j.state === 'queued') st = 'Queued · ' + modeLabel(j.mode);
-      else st = (j.warn ? 'Warnings ' : 'Completed ') + hhmm(j.endDate) + ' · ' + fmtDur(j.endedAt - j.startedAt);
+      else st = (j.state === 'error' ? 'Error' : j.warn ? 'Warning' : 'Completed') + (j.endDate ? '. Last run: ' + lastRunLabel(j.endDate) : '') + ' · ' + fmtDur(j.endedAt - j.startedAt);
       var stEl = li.querySelector('.bgjobs-state');
       if (stEl.textContent !== st) stEl.textContent = st;
       li.setAttribute('aria-label', j.prog + ', ' + st + (j.state === 'done' ? ', view log' : ', show row'));
@@ -2518,12 +2569,12 @@
     Array.prototype.forEach.call(runLogTabs.children, function (b, i) { b.setAttribute('aria-selected', i === idx ? 'true' : 'false'); });
   }
   function openRunLog(j, returnEl) {
-    if (!j || j.state !== 'done' || !runLogModal) return;
+    if (!j || (j.state !== 'done' && j.state !== 'error') || !runLogModal) return;
     runLogReturn = returnEl || document.activeElement;
     document.getElementById('runLogTitle').textContent = 'Log · ' + j.prog;
     document.getElementById('runLogSub').textContent =
       (j.lang === 'SAS' ? 'SAS 9.4 M8' : 'R 4.5.1') + ' · ' + (j.mode === 'both' ? 'Prod then QC' : j.mode === 'qc' ? 'QC program' : 'Production program') +
-      ' · ' + (j.warn ? 'Completed with warnings' : 'Completed') + ' ' + hhmm(j.endDate) + ' · ' + fmtDur(j.endedAt - j.startedAt) +
+      ' · ' + (j.state === 'error' ? 'Error' : j.warn ? 'Warning' : 'Completed') + '. Last run: ' + lastRunLabel(j.endDate) + ' · ' + fmtDur(j.endedAt - j.startedAt) +
       (j.batch ? ' · ' + j.batch.id : '');
     runLogTabs.innerHTML = '';
     if (j.phases.length > 1) {
@@ -4855,9 +4906,8 @@
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
     if (!prog) return;
     var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
-    var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
-    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
-      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="' + escapeHtml(prog) + '">' + escapeHtml(prog) + '</a>' +
+      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
     decorateRerunDot(row);
   }
   function rerunWhyForRow(row) {
@@ -4884,6 +4934,24 @@
     dot.title = why;
     dot.setAttribute('aria-label', why);
   }
+  function tidyVisible(text) {
+    return String(text || '')
+      .replace(/characteristicsq1/gi, 'characteristics')
+      .replace(/\u2014/g, ' · ')
+      .replace(/\u2013/g, '-');
+  }
+  function shellNotesForRow(row) {
+    if (!window.SPHERE_DEMO) return null;
+    var num = rowOutputId(row);
+    if (!num) return null;
+    var sync = SPHERE_DEMO.shellContent ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
+    var shells = SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells('ONC-204-301') : null;
+    var sh = shells && shells.filter(function (s) { return String(s.number) === String(num); })[0];
+    var title = tidyVisible((sync && sync.title) || (sh && ((sh.layout && sh.layout.title) || sh.title)) || '');
+    var footnotes = (sync && sync.footnotes) || (sh && sh.layout && sh.layout.footnotes) || '';
+    if (!title && !footnotes) return null;
+    return { title: title, footnotes: footnotes };
+  }
   function applyShellChrome() {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.shellContent) return;
     allRows().forEach(function (row) {
@@ -4896,25 +4964,17 @@
           if (progCell && progCell.parentNode) paintProgramCell(row, progCell.parentNode, row.getAttribute('data-status') || '');
         }
       }
-      var rec = num ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
-      if (rec) {
-        var titleEl = row.querySelector('.artifact-title');
-        if (titleEl && rec.title) titleEl.textContent = num + ' · ' + rec.title;
-        var band = row.querySelector('.artifact-title-band');
-        if (band) {
-          var fn = band.querySelector('.artifact-footnotes');
-          if (rec.footnotes) {
-            if (!fn) {
-              fn = document.createElement('div');
-              fn.className = 'artifact-footnotes';
-              var t = band.querySelector('.artifact-title');
-              if (t) t.insertAdjacentElement('afterend', fn);
-              else band.appendChild(fn);
-            }
-            fn.textContent = rec.footnotes;
-            fn.title = rec.footnotes;
-          } else if (fn) fn.remove();
-        }
+      var rec = shellNotesForRow(row);
+      var titleEl = row.querySelector('.artifact-title');
+      if (rec && titleEl && rec.title) titleEl.textContent = num + ' · ' + rec.title;
+      if (rec && rec.footnotes) row.setAttribute('data-footnotes', rec.footnotes);
+      else row.removeAttribute('data-footnotes');
+      var band = row.querySelector('.artifact-title-band');
+      var fn = band && band.querySelector('.artifact-footnotes');
+      if (fn) fn.remove();
+      if (titleEl) {
+        var base = (titleEl.textContent || '').trim();
+        titleEl.title = rec && rec.footnotes ? (base + '\n' + rec.footnotes) : base;
       }
       decorateRerunDot(row);
     });
@@ -4941,7 +5001,12 @@
     var band = row.querySelector('.artifact-title-band');
     if (!band) return;
     var ttl = band.querySelector('.artifact-title');
-    if (ttl) ttl.title = (ttl.textContent || '').trim() + ((row.getAttribute('data-tags') || '') ? ' · ' + row.getAttribute('data-tags').split(',').join(', ') : '');
+    if (ttl) {
+      var tip = (ttl.textContent || '').trim() + ((row.getAttribute('data-tags') || '') ? ' · ' + row.getAttribute('data-tags').split(',').join(', ') : '');
+      var notes = row.getAttribute('data-footnotes') || '';
+      if (notes) tip += '\n' + notes;
+      ttl.title = tip;
+    }
     var host = band.querySelector('.row-roles-inline');
     if (!host) {
       host = document.createElement('div');

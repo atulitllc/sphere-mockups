@@ -1,4 +1,4 @@
-# SPHERE — Program version control & folders
+# SPHERE: Program version control & folders
 
 Product direction (Sanjiv). Mockups follow this; the real product should too.
 
@@ -6,8 +6,8 @@ Product direction (Sanjiv). Mockups follow this; the real product should too.
 
 Tenant Admin chooses the storage backend. The programmer UX stays the same either way.
 
-- **Local history** (default) — SPHERE keeps snapshots on the tenant.
-- **Enterprise GitHub** — same History + restore UI; GitHub is the backend (org/repo). MVP is Local plus an Admin stub for GitHub (no OAuth required in the demo).
+- **Local history** (default): SPHERE keeps snapshots on the tenant.
+- **Enterprise GitHub**: same History + restore UI; GitHub is the backend (org/repo). MVP is Local plus an Admin stub for GitHub (no OAuth required in the demo).
 
 History + restore live in **In dev** and **Revise** (the only editable stages). Snapshots are taken on save, handoff, restore, and promote.
 

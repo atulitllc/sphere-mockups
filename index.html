@@ -1,20 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" data-accent="blue">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SPHERE mockups</title>
+  <link rel="stylesheet" href="shared-white.css?v=flow4style" />
+  <script>
+  (function () {
+    try {
+      var t = localStorage.getItem('sphere-theme');
+      if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+  </script>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; max-width: 760px; margin: 48px auto; padding: 0 20px; color: #111827; line-height: 1.5; }
-    a { color: #2563eb; }
-    li { margin: 8px 0; }
-    .note { color: #6b7280; font-size: 14px; }
-    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-    h2 { margin-top: 2rem; font-size: 1.15rem; }
+    body.idx {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 20px 64px;
+      font-size: 15px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .idx-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .idx a { color: var(--accent); }
+    .idx li { margin: 8px 0; }
+    .idx .note { color: var(--muted); font-size: 14px; }
+    .idx code { background: var(--chip-bg); color: var(--text); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .idx h2 { margin-top: 2rem; font-size: 1.15rem; }
   </style>
 </head>
-<body>
-  <h1>SPHERE mockups</h1>
+<body class="idx">
+  <div class="idx-top">
+    <h1>SPHERE mockups</h1>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
   <p class="note">Public preview only. Product documentation is maintained separately.</p>
   <p class="note">Modules use a colored left-nav chrome (default <strong>blue</strong>) with light/dark mode and a compact accent dropdown (<code>sphere-theme</code> + <code>sphere-accent</code> in <code>localStorage</code>). Page layout prefers open sections over nested cards.</p>
 
@@ -27,14 +51,14 @@
   <h2>Interactive modules</h2>
   <ul>
     <li><a href="./studies.html">Studies</a> - study list / selection · create standard folder tree</li>
-    <li><a href="./study-home.html">Study home</a> - single-study workspace (in every screen’s nav)</li>
+    <li><a href="./study-home.html">Study home</a> - single-study workspace (in every screen's nav)</li>
     <li><a href="./mock-shells.html"><strong>Mock Shells</strong></a> - style lock</li>
     <li><a href="./data-hub.html">Data Hub</a></li>
     <li><a href="./files.html"><strong>Files</strong></a> - study directory browser (raw / sdtm / adam / programs / tlf / logs) · folder <strong>Manage access</strong> (View|Edit, teams) · QC <strong>Frozen / View only on share</strong></li>
     <li><a href="./tracker.html"><strong>Tracker</strong></a> - programs / TLFs / datasets + <strong>Run selected</strong> (Compute folded in); <strong>Both (Prod then QC)</strong> runs the production program first, then the QC program; Shell cells open the matching mock shell; clicking a production or QC program name opens Program · Log · RTF for that side (TLF RTF as HTML; datasets and QC note when there is no TLF RTF); there is no Files column; tags, SAP sections, import from <code>programs/</code>; <strong>Send to QC</strong> freezes share ACLs on Files</li>
     <li><a href="./define.html"><strong>Define</strong></a> - CDISC Define-XML 2.0/2.1 for SDTM/ADaM from study metadata + specs · human review before publish</li>
     <li><a href="./publisher.html">Generate PDF Package</a></li>
-        <li><a href="./admin.html"><strong>Admin</strong></a> · <a href="./audit.html">Audit</a> - per-tenant config · <a href="./admin.html?panel=defaults"><strong>Study layout</strong></a> · <a href="./admin.html?panel=users"><strong>Teams</strong></a> for folder ACL</li>
+    <li><a href="./admin.html"><strong>Admin</strong></a> · <a href="./audit.html">Audit</a> - per-tenant config · <a href="./admin.html?panel=defaults"><strong>Study layout</strong></a> · <a href="./admin.html?panel=users"><strong>Teams</strong></a> for folder ACL</li>
   </ul>
 
   <h2>Legacy aliases</h2>
@@ -49,5 +73,21 @@
     <li><a href="./shots/02-mock-shells-theme-light-mobile.png">Mock Shells - mobile</a></li>
     <li><a href="./shots/">All shots</a></li>
   </ul>
+  <script>
+  (function () {
+    var root = document.documentElement;
+    var themeBtn = document.getElementById('themeToggle');
+    function currentTheme() { return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      try { localStorage.setItem('sphere-theme', theme); } catch (e) {}
+      if (themeBtn) themeBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function () { applyTheme(currentTheme() === 'dark' ? 'light' : 'dark'); });
+      applyTheme(currentTheme());
+    }
+  })();
+  </script>
 </body>
 </html>

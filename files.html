@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3j" />
+<link rel="stylesheet" href="shared-white.css?v=flow4style" />
 <script>
 (function () {
   try {
@@ -154,11 +154,14 @@
               </div>
               <div class="files-actions folder-share-status">
                 <input type="search" id="filesSearch" placeholder="Search this folder and subfolders" aria-label="Search files" />
-                <a class="btn icon-text-btn accent-icon" id="btnExtractData" href="data-hub.html" title="Extract data" aria-label="Extract data">
+                <a class="btn" id="btnExtractData" href="data-hub.html" title="Extract data" aria-label="Extract data">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
                   <span>Extract data</span>
                 </a>
-                <button class="btn" type="button" id="btnManageFolder" title="Manage access for this folder">Manage access</button>
+                <button class="btn" type="button" id="btnManageFolder" title="Manage access for this folder">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span>Manage access</span>
+                </button>
               </div>
             </div>
             <div class="files-table-wrap">
@@ -550,6 +553,48 @@
     });
     NESTED.forEach(function (f) { if (map[f.name]) f.name = map[f.name]; });
   }
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function parseWhen(raw) {
+    var s = String(raw || '').trim();
+    if (!s || s === '-') return null;
+    var iso = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/);
+    if (iso) return { y: +iso[1], m: +iso[2], d: +iso[3], hh: iso[4] != null ? +iso[4] : null, mm: iso[5] != null ? +iso[5] : null };
+    var named = s.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})(?:\s*[·.]\s*(\d{1,2}):(\d{2})\s*(AM|PM))?/i);
+    if (named) {
+      var mon = named[2].charAt(0).toUpperCase() + named[2].slice(1, 3).toLowerCase();
+      var mi = MONTHS.indexOf(mon);
+      if (mi < 0) return null;
+      var hh = named[4] != null ? +named[4] : null;
+      if (hh != null && /pm/i.test(named[6] || '') && hh < 12) hh += 12;
+      if (hh != null && /am/i.test(named[6] || '') && hh === 12) hh = 0;
+      return { y: +named[3], m: mi + 1, d: +named[1], hh: hh, mm: named[5] != null ? +named[5] : null };
+    }
+    return null;
+  }
+  function formatDate(p) {
+    return String(p.d).padStart(2, '0') + ' ' + MONTHS[p.m - 1] + ' ' + p.y;
+  }
+  function formatDateTime(p) {
+    var date = formatDate(p);
+    if (p.hh == null) return date;
+    var h = p.hh % 12 || 12;
+    var ap = p.hh < 12 ? 'AM' : 'PM';
+    return date + ' · ' + h + ':' + String(p.mm || 0).padStart(2, '0') + ' ' + ap + ' ET';
+  }
+  function cellWhen(raw, withTime) {
+    var p = parseWhen(raw);
+    if (!p) {
+      var s = String(raw || '').trim();
+      if (!s || s === '-') return '<span class="cell-empty">-</span>';
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    }
+    return withTime ? formatDateTime(p) : formatDate(p);
+  }
+  function sizeCell(size) {
+    var s = String(size || '').trim();
+    if (!s || s === '-') return '<span class="cell-empty">-</span>';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
   function render(folder) {
     applyStoredFileRenames();
     current = folder;
@@ -574,14 +619,22 @@
       });
     }
     rows.sort(function (a, b) {
-      var av = sortKey === 'name' ? a.name : a.modified;
-      var bv = sortKey === 'name' ? b.name : b.modified;
-      return String(av).localeCompare(String(bv)) * sortDir;
+      if (sortKey === 'name') return String(a.name).localeCompare(String(b.name)) * sortDir;
+      function stamp(raw) {
+        var p = parseWhen(raw);
+        if (!p) return 0;
+        return p.y * 100000000 + p.m * 1000000 + p.d * 10000 + (p.hh || 0) * 100 + (p.mm || 0);
+      }
+      var diff = stamp(a.modified) - stamp(b.modified);
+      if (!diff) return String(a.name).localeCompare(String(b.name));
+      return diff * sortDir;
     });
     document.querySelectorAll('.sort-h').forEach(function (h) {
-      var label = h.getAttribute('data-sort');
-      label = label.charAt(0).toUpperCase() + label.slice(1);
-      h.textContent = label + (h.getAttribute('data-sort') === sortKey ? (sortDir > 0 ? ' ↑' : ' ↓') : '');
+      var key = h.getAttribute('data-sort');
+      var label = key.charAt(0).toUpperCase() + key.slice(1);
+      var arrow = key === sortKey ? (sortDir > 0 ? '↑' : '↓') : '';
+      h.innerHTML = '<span>' + label + '</span>' + (arrow ? '<span class="sort-arrow" aria-hidden="true">' + arrow + '</span>' : '');
+      h.setAttribute('aria-sort', key === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none');
     });
     bodyEl.innerHTML = rows.map(function (f) {
       var tc = typeClass(f.type);
@@ -602,10 +655,9 @@
       var nameSpan = (f.snapshot && inRaw)
         ? '<span class="snapshot-name" title="' + String(f.source || 'Snapshot').replace(/"/g, '&quot;') + '">' + shown + '</span>'
         : '<span>' + shown + '</span>';
-      var when = f.snapshot ? f.modified : String(f.modified || '').split('·')[0].trim();
       return '<tr' + cls + ' data-name="' + f.name + '" data-type="' + f.type + '"' + (f.frozen ? ' data-frozen="1"' : '') + '>' +
         '<td><div class="fname-cell">' + icon + nameSpan + '</div></td>' +
-        '<td>' + when + '</td><td>' + (f.snapshot ? f.modified : f.modified) + '</td><td>' + f.size + '</td>' +
+        '<td>' + cellWhen(f.modified, false) + '</td><td>' + cellWhen(f.modified, true) + '</td><td>' + sizeCell(f.size) + '</td>' +
         '<td class="col-access">' + accessBadge(f) + '</td>' +
         '<td class="col-more">' + moreBtn + '</td></tr>';
     }).join('');
@@ -721,7 +773,8 @@
       btn.className = 'btn';
       btn.type = 'button';
       btn.id = 'btnManageFolder';
-      btn.textContent = 'Manage access';
+      btn.title = 'Manage access for this folder';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Manage access</span>';
       host.appendChild(btn);
       btn.addEventListener('click', function () {
         openAccess({ kind: 'folder', folder: current, name: current, frozen: folderHasFrozen(current) });
@@ -1044,7 +1097,7 @@
     }
     filesInfoLine('filesStudyNote', 1).innerHTML = '<span class="files-infobar-k">Study</span><span><strong>' + esc(active.name || activePath) + '</strong> · <code>' + esc(activePath) + '</code>' +
       (active.current ? ' · <span class="lt-badge cur">current</span>' : '') +
-      (!demoFiles ? ' - folders created from the tenant study layout on ' + esc(active.created || 'today') : '') +
+      (!demoFiles ? ' · folders created from the tenant study layout on ' + esc(active.created || 'today') : '') +
       ' · <a href="study-home.html?study=' + encodeURIComponent(L.studyId(active)) + '&path=' + encodeURIComponent(activePath) + '">Study home</a></span>';
     if (typeof syncManage === 'function') syncManage();
   })();

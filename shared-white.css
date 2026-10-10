@@ -453,6 +453,20 @@ body {
 }
 
 button, input, select, textarea { font: inherit; color: inherit; }
+/* Root cause of native gray buttons: the line above only inherited font and color,
+   so any <button> without a component class kept the browser border, background, and padding.
+   Reset those here. Component classes (.btn, .action-icon-btn, menus, toggles) set their own box. */
+button {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 0;
+  text-align: center;
+}
 
 .app {
   display: grid;
@@ -827,6 +841,7 @@ body.nav-collapsed {
 
 .content {
   padding: 22px 24px 48px;
+  min-width: 0;
 }
 
 .content.cols-2,
@@ -983,6 +998,13 @@ body.nav-collapsed {
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+}
+.table-panel .table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .table-panel .card-head,
@@ -1126,12 +1148,14 @@ tbody tr:last-child td { border-bottom: none; }
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-weight: 500;
   font-size: 13.5px;
   transition: background .12s ease, border-color .12s ease;
 }
 
+a.btn { text-decoration: none; color: var(--text); }
 .btn svg {
   width: 15px; height: 15px;
   stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
@@ -1761,7 +1785,7 @@ label .req::after { content: " *"; color: var(--danger); }
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   gap: 0 8px;
-  padding: 9px 8px 9px 4px;
+  padding: 9px 7px 9px 3px;
   margin: 0 0 2px;
   min-height: 40px;
   align-items: center;
@@ -1790,6 +1814,13 @@ label .req::after { content: " *"; color: var(--danger); }
   align-items: center;
   min-height: 0;
   padding: 0;
+  overflow: hidden;
+}
+.tracker-col-head .artifact-meta .col-head-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .tracker-col-head .artifact-meta .row-actions,
 .tracker-col-head .meta-cell:last-child {
@@ -1959,11 +1990,11 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .artifact-meta {
   display: grid;
-  /* Fixed middle + actions tracks so columns align across rows */
-  grid-template-columns: minmax(160px, 1.6fr) 84px 110px 84px 150px minmax(188px, 1.1fr);
-  gap: 8px 12px;
+  grid-template-columns: var(--tracker-cols);
+  column-gap: var(--tracker-gap);
   align-items: center;
   width: 100%;
+  min-width: 0;
 }
 .artifact-meta .meta-cell { min-width: 0; }
 .artifact-meta > .meta-cell:nth-child(4) { display: none; }
@@ -1973,10 +2004,11 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 
 @media (max-width: 1200px) {
-  /* Keep Tracker columns; scroll horizontally instead of crushing Actions */
+  /* Same shared tracks. Do not give Programs a content minimum or a min-width
+     that differs per row. At 125% the board may scroll; the tracks stay put. */
   .artifact-meta {
-    grid-template-columns: minmax(140px, 1.4fr) 78px 96px 78px 140px minmax(188px, 1fr);
-    min-width: 820px;
+    grid-template-columns: var(--tracker-cols);
+    min-width: 0;
   }
   .artifact-meta .meta-cell.actions-cell .row-actions,
   .artifact-meta .meta-cell:has(.row-actions) .row-actions {
@@ -1985,8 +2017,8 @@ label .req::after { content: " *"; color: var(--danger); }
 }
 @media (max-width: 720px) {
   .artifact-meta {
-    grid-template-columns: minmax(120px, 1.2fr) 70px 88px 70px 128px minmax(188px, 1fr);
-    min-width: 768px;
+    grid-template-columns: var(--tracker-cols);
+    min-width: 0;
   }
 }
 
@@ -5555,8 +5587,8 @@ html[data-contrast="low"][data-theme="dark"] {
 .artifact-meta .meta-cell:has(.row-actions),
 .artifact-meta .meta-cell.actions-cell {
   display: flex;
-  width: 100%;
-  min-width: 152px;
+  width: auto;
+  min-width: 0;
   overflow: visible;
   justify-content: flex-end;
   align-items: center;
@@ -5566,7 +5598,7 @@ html[data-contrast="low"][data-theme="dark"] {
   display: inline-flex;
   flex-wrap: nowrap;
   flex-shrink: 0;
-  gap: 4px;
+  gap: 2px;
   align-items: center;
   justify-content: flex-end;
   margin-left: auto;
@@ -5817,16 +5849,27 @@ html[data-contrast="low"][data-theme="dark"] {
 
 /* Keep Tracker Actions on-screen - parent .content uses overflow-x: clip */
 .content:has(.tracker-board) {
+  overflow-x: clip;
+}
+.tracker-section {
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
 }
+.tracker-col-head,
+.tracker-board .artifact-row {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
 .tracker-board {
-  overflow-x: auto;
+  overflow-x: visible;
   padding-bottom: 4px;
   min-width: 0;
 }
 .tracker-col-head .artifact-meta,
 .artifact-row .artifact-meta {
-  min-width: 876px;
+  min-width: 0;
 }
 
 /* Bulk run split control */
@@ -6150,15 +6193,15 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 }
 
 
-/* Long program names: ellipsis instead of spilling into the Type column (visible at larger UI zoom) */
-.artifact-row .artifact-meta .program-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* Largest UI zoom: tighter Tracker tracks so Actions stay on screen */
-html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
-html[data-ui-zoom="125"] .artifact-row .artifact-meta {
-  grid-template-columns: minmax(96px, 1fr) 62px 78px 98px 56px 116px 76px 152px;
-  column-gap: 10px;
-  min-width: 800px;
+/* Program and QC names ellipsize inside the shared Programs track. Full name is the title. */
+.artifact-row .artifact-meta .program-name,
+.artifact-row .artifact-meta .qc-program-name {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Tracker bulk bar: pinned under the app header while rows are selected and the page is scrolled */
@@ -6481,21 +6524,53 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .layout-card-path { overflow-wrap: anywhere; white-space: normal; }
 .new-study-grid .new-study-preview { display: grid; grid-template-columns: minmax(0, 1fr); }
 
-/* Tracker row layout v2 (flow3): [title + tags / roles] | Programs Type Status Assigned Shell Job Actions */
+/* Tracker row layout: title column, then one shared meta template.
+   The meta column is a fraction of the row, never shrink-to-fit content,
+   so the header and every row resolve the same tracks. */
+.tracker-section {
+  --tracker-gap: 6px;
+  --tracker-type: 62px;
+  --tracker-status: 126px;
+  --tracker-shell: 56px;
+  --tracker-job: 146px;
+  --tracker-actions: 122px;
+  --tracker-programs-min: 170px;
+  /* Sum of the fixed tracks, the Programs floor, and the five gaps.
+     The meta column cannot shrink below this, or Programs overflows the board. */
+  --tracker-meta-min: calc(
+    var(--tracker-type) + var(--tracker-status) + var(--tracker-shell) +
+    var(--tracker-job) + var(--tracker-actions) + var(--tracker-programs-min) +
+    (5 * var(--tracker-gap))
+  );
+  --tracker-cols:
+    var(--tracker-type)
+    var(--tracker-status)
+    var(--tracker-shell)
+    var(--tracker-job)
+    minmax(var(--tracker-programs-min), 1fr)
+    var(--tracker-actions);
+}
 .artifact-row .artifact-main,
 .tracker-col-head .artifact-main {
   display: grid;
-  grid-template-columns: minmax(210px, 1fr) auto;
-  column-gap: 14px;
+  /* Title and meta both flex. Meta's 2fr share stays under its 170px Programs
+     floor at 1280, so that floor wins and the title keeps the leftover.
+     On a wide row the 2fr share exceeds the floor and Programs grows. */
+  grid-template-columns: minmax(160px, 1fr) minmax(var(--tracker-meta-min), 2fr);
+  column-gap: 8px;
   align-items: center;
+  width: 100%;
+  min-width: 0;
 }
 .artifact-row .artifact-title-band {
   grid-column: 1;
   display: grid;
-  grid-template-columns: minmax(0, max-content) minmax(60px, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
   column-gap: 8px;
   row-gap: 5px;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
   container-type: inline-size;
 }
 .artifact-row .artifact-title-band .artifact-title { grid-column: 1; }
@@ -6506,38 +6581,62 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .col-head-sub { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .col-head-sub::before { content: '· '; }
 
+/* Six visible columns on one row: Type, Status, Shell, Job, Programs, Actions.
+   Assigned To (nth-child 4) is display:none and does not take a track.
+   Tracks come from --tracker-cols once. Programs is minmax(170px, 1fr) and
+   every cell is min-width: 0, so content never sizes a track. The meta column
+   minimum matches that template so the 170px floor fits inside the board.
+   Do not set grid-column to a later column and then an earlier one. Sparse
+   auto-placement will not move backward, so the next cell wraps to row 2. */
 .tracker-col-head .artifact-meta,
 .artifact-row .artifact-meta {
-  grid-template-columns: 54px 112px 96px 54px 112px minmax(130px, 160px) 136px;
-  column-gap: 10px;
+  grid-template-columns: var(--tracker-cols);
+  column-gap: var(--tracker-gap);
+  align-items: center;
+  width: 100%;
   min-width: 0;
 }
-html[data-ui-zoom="125"] .tracker-col-head .artifact-meta,
-html[data-ui-zoom="125"] .artifact-row .artifact-meta,
-html[data-ui-zoom="150"] .tracker-col-head .artifact-meta,
-html[data-ui-zoom="150"] .artifact-row .artifact-meta {
-  grid-template-columns: 50px 108px 88px 50px 106px minmax(124px, 150px) 136px;
-  column-gap: 8px;
+.artifact-meta > .meta-cell {
+  grid-row: 1;
+  align-self: center;
   min-width: 0;
+  max-width: 100%;
 }
-html[data-ui-zoom="125"] .artifact-row .artifact-main, html[data-ui-zoom="125"] .tracker-col-head .artifact-main { grid-template-columns: minmax(180px, 1fr) auto; }
-.artifact-meta > .meta-cell:first-child { order: 1; }
-.artifact-meta > .meta-cell:nth-child(7) { order: 2; }
+.artifact-meta > .meta-cell:nth-child(2) { order: 1; } /* Type */
+.artifact-meta > .meta-cell:nth-child(3) { order: 2; } /* Status */
+.artifact-meta > .meta-cell:nth-child(5) { order: 3; } /* Shell */
+.artifact-meta > .meta-cell:nth-child(6) { order: 4; } /* Job */
+.artifact-meta > .meta-cell:nth-child(1) { order: 5; } /* Programs */
+.artifact-meta > .meta-cell:nth-child(7) { order: 6; } /* Actions */
 .artifact-row .artifact-meta .program-name { font-size: 11px; line-height: 1.35; }
 .artifact-row .artifact-meta .qc-program-name { margin-top: 2px; }
 .artifact-row { padding-top: 11px; padding-bottom: 11px; }
-.artifact-row .wf-pill .wf-pill-label { white-space: nowrap; }
+.artifact-row .artifact-meta > .meta-cell:nth-child(3),
+.artifact-row .artifact-meta > .meta-cell.job-cell { overflow: hidden; }
+.artifact-row .wf-pill { max-width: 100%; }
+.artifact-row .wf-pill .wf-pill-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Actions stay visible when the board scrolls horizontally (large zoom / narrow screens) */
+/* Actions sit in their own track. No negative margin and no sticky overlay,
+   or the buttons cover the end of the program name. */
 .artifact-row .artifact-meta > .actions-cell,
 .tracker-col-head .artifact-meta > .meta-cell:last-child {
-  position: sticky; right: 0;
+  position: relative;
+  margin-left: 0;
+  padding-left: 0;
+  background: transparent;
 }
 .artifact-row .artifact-meta > .actions-cell:has(.row-exec-menu:not([hidden])),
 .artifact-row .artifact-meta > .actions-cell:has(.row-people-wrap:hover),
 .artifact-row .artifact-meta > .actions-cell:focus-within { z-index: 30; }
-.tracker-col-head .artifact-meta > .meta-cell:last-child { background: linear-gradient(90deg, transparent, var(--accent-soft) 10px); padding-left: 10px; margin-left: -10px; align-self: stretch; }
-.artifact-row .artifact-meta > .actions-cell { background: linear-gradient(90deg, transparent, var(--surface) 10px); padding-left: 10px; margin-left: -10px; }
+.artifact-row .artifact-meta > .meta-cell:nth-child(1) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  overflow: hidden;
+}
+.artifact-row .artifact-meta > .meta-cell:nth-child(1) .rerun-dot { flex: 0 0 auto; }
+.artifact-row .artifact-meta > .meta-cell:nth-child(1) .program-name { flex: 1 1 auto; min-width: 0; }
+.artifact-row .artifact-meta > .meta-cell:nth-child(1) .qc-program-name { flex: 1 0 100%; min-width: 0; }
 
 /* Roles line: compact + muted */
 .artifact-row .role-chip { height: 18px; border-color: transparent; background: var(--row-hover); color: var(--muted); padding: 0 6px 0 1px; }
@@ -6784,4 +6883,179 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   max-width: 100%;
   height: auto;
   margin: 10px auto 6px;
+}
+
+/* ===== Shared controls (flow4style) =====
+   Reuse .btn / .btn.primary / .btn.ghost / .btn.sm / .btn.icon-btn,
+   .action-icon-btn, .badge / .tag-chip, .cell-empty, .sort-h, and .menu-pop.
+   Do not add unclassed buttons or one-off borders. See DESIGN.md. */
+
+.cell-empty {
+  color: var(--muted-2);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Sortable headers match plain <th> labels */
+.sort-h {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.sort-h:hover { color: var(--text); background: transparent; }
+.sort-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sort-h .sort-arrow { font-size: 10px; line-height: 1; opacity: 0.8; text-transform: none; }
+.files-table-wrap th { white-space: nowrap; }
+.files-actions .btn { height: 34px; }
+
+/* Studies expand control */
+.proto-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  vertical-align: middle;
+}
+.proto-toggle:hover { background: var(--row-hover); color: var(--text); border-color: var(--border-strong); }
+.proto-toggle .sap-chevron { width: 14px; height: 14px; transform: rotate(-90deg); }
+.proto-toggle[aria-expanded="true"] .sap-chevron { transform: rotate(0deg); }
+.proto-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+tr.protocol-folder { cursor: pointer; }
+tr.protocol-folder td { background: color-mix(in srgb, var(--accent) 4%, var(--surface)); }
+
+/* Tracker: New Record matches the toolbar, primary fill */
+#trackerListsBar #btnNewRecord.action-icon-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+#trackerListsBar #btnNewRecord.action-icon-btn:hover,
+#trackerListsBar #btnNewRecord.action-icon-btn:focus-visible {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+#trackerListsBar #btnNewRecord.action-icon-btn svg { stroke: currentColor; }
+
+/* Tracker rows: header and cells share one line, vertically centered */
+.tracker-board .artifact-row {
+  align-items: center;
+}
+.artifact-title-band .artifact-footnotes { display: none !important; }
+.job-cell .run-st {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  max-width: 100%;
+}
+.job-cell .run-st-line {
+  max-width: 100%;
+  white-space: nowrap;
+}
+.job-cell .run-st-txt {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+.job-cell .run-st-sub {
+  display: block;
+  padding-left: 21px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.job-cell .run-bar { display: none; }
+.run-st.is-error .run-st-line { color: var(--danger); }
+
+/* Mock Shells toolbar: one control height, export menu */
+.shell-props { align-items: center; }
+.shell-props .meta-field { align-items: center; }
+.shell-props .meta-field select,
+.status-field select,
+.shell-actions .btn,
+.shell-actions .btn.sm,
+.shell-actions .export-trigger {
+  height: 32px;
+  box-sizing: border-box;
+}
+.status-field { height: 32px; align-items: center; }
+.shell-actions .btn.icon-btn,
+.status-field .btn.icon-btn {
+  width: 32px;
+  height: 32px;
+}
+.export-wrap { position: relative; display: inline-flex; align-items: center; }
+.export-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 80;
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 2px;
+}
+html[data-theme="dark"] .export-menu {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.export-menu[hidden] { display: none !important; }
+.export-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.export-menu button:hover,
+.export-menu button:focus-visible { background: var(--accent-soft); color: var(--accent); outline: none; }
+.export-menu svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.export-wrap.is-open .export-trigger {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent);
 }

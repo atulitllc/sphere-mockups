@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3j" />
+<link rel="stylesheet" href="shared-white.css?v=flow4style" />
 <script>
 (function () {
   try {
@@ -196,8 +196,8 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">FPFV</span> 2024-01-08</span>
-            <span><span class="k">LPLV</span> -</span>
-            <span><span class="k">DB lock</span> -</span>
+            <span><span class="k">LPLV</span> <span class="cell-empty">-</span></span>
+            <span><span class="k">DB lock</span> <span class="cell-empty">-</span></span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v2.0 · SAP draft · 186 subjects</span>
@@ -209,20 +209,20 @@
           <div class="study-card-top">
             <div>
               <div class="study-id">VAC-302-011</div>
-              <div class="study-title">RSV vaccine - adults ≥60</div>
+              <div class="study-title">RSV vaccine · adults 60 and older</div>
             </div>
             <span class="badge running">Startup</span>
           </div>
           <div class="study-meta-row">
             <span><span class="k">Lead Programmer</span> Sam Okonkwo</span>
-            <span><span class="k">Deliverable</span> Interim analysis</span>
+            <span><span class="k">Deliverable</span> Custom</span>
             <span><span class="k">Phase</span> 3</span>
             <span><span class="k">Lead Statistician</span> Taylor Kim</span>
           </div>
           <div class="study-meta-row">
             <span><span class="k">FPFV</span> 2025-09-01</span>
-            <span><span class="k">LPLV</span> -</span>
-            <span><span class="k">DB lock</span> -</span>
+            <span><span class="k">LPLV</span> <span class="cell-empty">-</span></span>
+            <span><span class="k">DB lock</span> <span class="cell-empty">-</span></span>
           </div>
           <div class="study-card-foot">
             <span class="muted">Protocol v1.1 · libraries provisioning</span>
@@ -240,7 +240,7 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">Lead Programmer</span> Chris Nguyen</span>
-            <span><span class="k">Deliverable</span> Regulatory</span>
+            <span><span class="k">Deliverable</span> Submission</span>
             <span><span class="k">Phase</span> 1/2</span>
             <span><span class="k">Lead Statistician</span> Priya Shah</span>
           </div>
@@ -305,23 +305,23 @@
               <td>Alex Rivera</td>
               <td>Dana Brooks</td>
               <td class="num">2024-01-08</td>
-              <td class="num">-</td>
-              <td class="num">-</td>
+              <td class="num"><span class="cell-empty">-</span></td>
+              <td class="num"><span class="cell-empty">-</span></td>
               <td>2</td>
               <td><span class="badge locked">Active</span></td>
             </tr>
             <tr class="row-link" data-href="study-home.html?study=VAC-302-011" data-folder="VAC-302-011">
               <td class="num">VAC-302-011</td>
               <td>
-                <div class="study-name-cell">RSV vaccine - adults ≥60</div>
-                <div class="study-sub muted">Interim analysis · RSV prevention</div>
+                <div class="study-name-cell">RSV vaccine · adults 60 and older</div>
+                <div class="study-sub muted">Custom · RSV prevention</div>
               </td>
-              <td><span class="tag-chip">Interim analysis</span></td>
+              <td><span class="tag-chip">Custom</span></td>
               <td>Sam Okonkwo</td>
               <td>Taylor Kim</td>
               <td class="num">2025-09-01</td>
-              <td class="num">-</td>
-              <td class="num">-</td>
+              <td class="num"><span class="cell-empty">-</span></td>
+              <td class="num"><span class="cell-empty">-</span></td>
               <td>3</td>
               <td><span class="badge running">Startup</span></td>
             </tr>
@@ -329,9 +329,9 @@
               <td class="num">HEM-220-015</td>
               <td>
                 <div class="study-name-cell">Relapsed / refractory AML</div>
-                <div class="study-sub muted">Regulatory · R/R AML</div>
+                <div class="study-sub muted">Submission · R/R AML</div>
               </td>
-              <td><span class="tag-chip">Regulatory</span></td>
+              <td><span class="tag-chip">Submission</span></td>
               <td>Chris Nguyen</td>
               <td>Priya Shah</td>
               <td class="num">2021-06-20</td>
@@ -415,8 +415,7 @@
             <select class="field-input" id="nsType" name="type" required>
               <option value="Submission">Submission</option>
               <option value="DMC">DMC</option>
-              <option value="Interim analysis">Interim analysis</option>
-              <option value="Regulatory">Regulatory</option>
+              <option value="Custom">Custom</option>
               <option value="CSR">CSR</option>
               <option value="Exploratory">Exploratory</option>
               <option value="Other">Other</option>
@@ -738,7 +737,11 @@
     }
 
     function fmtDate(v) {
-      return v ? v : '-';
+      return v ? esc(v) : '<span class="cell-empty">-</span>';
+    }
+    function personCell(v) {
+      var s = String(v || '').trim();
+      return s && s !== '-' ? esc(s) : '<span class="cell-empty">-</span>';
     }
 
     function esc(s) {
@@ -762,11 +765,11 @@
           '<div class="study-sub muted">' + esc(data.type) + (data.indication ? ' · ' + esc(data.indication) : '') + '</div>' +
           (data.path ? '<div class="study-path-line" title="Folder path">' + esc(data.path) + '</div>' : '') + '</td>' +
           '<td><span class="tag-chip">' + esc(data.type) + '</span></td>' +
-          '<td>' + esc(data.lead || '-') + '</td>' +
-          '<td>' + esc(data.statistician || '-') + '</td>' +
-          '<td class="num">' + esc(fmtDate(data.fpfv)) + '</td>' +
-          '<td class="num">' + esc(fmtDate(data.lplv)) + '</td>' +
-          '<td class="num">' + esc(fmtDate(data.dblock)) + '</td>' +
+          '<td>' + personCell(data.lead) + '</td>' +
+          '<td>' + personCell(data.statistician) + '</td>' +
+          '<td class="num">' + fmtDate(data.fpfv) + '</td>' +
+          '<td class="num">' + fmtDate(data.lplv) + '</td>' +
+          '<td class="num">' + fmtDate(data.dblock) + '</td>' +
           '<td>' + esc(data.phase) + '</td>' +
           '<td><span class="badge ' + (data.status === 'Active' ? 'locked' : 'running') + '">' + esc(data.status || 'Startup') + '</span></td>';
 
@@ -788,14 +791,14 @@
           '<div class="study-title">' + esc(data.name) + '</div></div>' +
           '<span class="badge running">Startup</span></div>' +
           '<div class="study-meta-row">' +
-          '<span><span class="k">Lead Programmer</span> ' + esc(data.lead || '-') + '</span>' +
-          '<span><span class="k">Delivery type</span> ' + esc(data.studyType || '-') + '</span>' +
+          '<span><span class="k">Lead Programmer</span> ' + personCell(data.lead) + '</span>' +
+          '<span><span class="k">Delivery type</span> ' + (data.studyType ? '<span class="tag-chip">' + esc(data.studyType) + '</span>' : '<span class="cell-empty">-</span>') + '</span>' +
           '<span><span class="k">Phase</span> ' + esc(data.phase) + '</span>' +
-          '<span><span class="k">Lead Statistician</span> ' + esc(data.statistician || '-') + '</span></div>' +
+          '<span><span class="k">Lead Statistician</span> ' + personCell(data.statistician) + '</span></div>' +
           '<div class="study-meta-row">' +
-          '<span><span class="k">FPFV</span> ' + esc(fmtDate(data.fpfv)) + '</span>' +
-          '<span><span class="k">LPLV</span> ' + esc(fmtDate(data.lplv)) + '</span>' +
-          '<span><span class="k">DB lock</span> ' + esc(fmtDate(data.dblock)) + '</span></div>' +
+          '<span><span class="k">FPFV</span> ' + fmtDate(data.fpfv) + '</span>' +
+          '<span><span class="k">LPLV</span> ' + fmtDate(data.lplv) + '</span>' +
+          '<span><span class="k">DB lock</span> ' + fmtDate(data.dblock) + '</span></div>' +
           (data.path ? '<div class="study-path-line">' + esc(data.path) + '</div>' : '') +
           '<div class="study-card-foot"><span class="muted">' + esc(data.description || 'New study') + '</span>' +
           '<span class="open-link">Open workspace →</span></div>';
@@ -955,31 +958,67 @@
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
+  function tidy(s) {
+    return String(s || '').replace(/\u2014/g, ' · ').replace(/\u2013/g, '-').replace(/\s+-\s+/g, ' · ');
+  }
+  function empty(v) {
+    var s = String(v == null ? '' : v).trim();
+    if (!s || s === '-') return '<span class="cell-empty">-</span>';
+    return esc(s);
+  }
+  function badge(e) {
+    var label = e.status || 'Active';
+    var cls = e.statusBadge || (label === 'Closed' ? 'not-started' : label === 'Startup' ? 'running' : 'locked');
+    return '<span class="badge ' + cls + '">' + esc(label) + '</span>';
+  }
+  function chips(e) {
+    var html = '<span class="tag-chip">' + esc(e.deliverable || 'CSR') + '</span>';
+    if (e.studyType) html += ' <span class="tag-chip">' + esc(e.studyType) + '</span>';
+    return html;
+  }
   var groups = {};
+  var order = [];
   L.registry().forEach(function (e) {
     var p = e.protocol || e.compound || '';
     if (!p) return;
-    if (!groups[p]) groups[p] = [];
+    if (!groups[p]) { groups[p] = []; order.push(p); }
     groups[p].push(e);
   });
   tbody.innerHTML = '';
-  Object.keys(groups).sort().forEach(function (p) {
+  order.forEach(function (p) {
     var rows = groups[p];
-    var first = rows[0];
+    var primary = rows.filter(function (e) { return e.current || e.row; })[0] || rows[0];
     var tr = document.createElement('tr');
     tr.className = 'protocol-row';
     tr.innerHTML =
-      '<td class="num"><button type="button" class="proto-plus" aria-expanded="false" aria-label="Show folders for ' + esc(p) + '">+</button> ' + esc(p) + '</td>' +
-      '<td><div class="study-name-cell">' + esc(first.name || p) + '</div></td>' +
-      '<td colspan="8" class="muted">' + rows.length + ' folder' + (rows.length === 1 ? '' : 's') + '</td>';
+      '<td class="num"><button type="button" class="proto-toggle" aria-expanded="false" aria-label="Show folders for ' + esc(p) + '">' +
+      '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button> ' + esc(p) + '</td>' +
+      '<td><div class="study-name-cell">' + esc(tidy(primary.name || p)) + '</div>' +
+      '<div class="study-sub muted">' + rows.length + ' folder' + (rows.length === 1 ? '' : 's') + '</div></td>' +
+      '<td>' + chips(primary) + '</td>' +
+      '<td>' + empty(primary.lead) + '</td>' +
+      '<td>' + empty(primary.statistician) + '</td>' +
+      '<td class="num">' + empty(primary.fpfv) + '</td>' +
+      '<td class="num">' + empty(primary.lplv) + '</td>' +
+      '<td class="num">' + empty(primary.dblock) + '</td>' +
+      '<td>' + empty(primary.phase) + '</td>' +
+      '<td>' + badge(primary) + '</td>';
     tbody.appendChild(tr);
     var folderRows = rows.map(function (e) {
       var fr = document.createElement('tr');
       fr.className = 'protocol-folder';
       fr.hidden = true;
-      var folder = e.deliverable || 'CSR';
-      var delivery = e.studyType || '-';
-      fr.innerHTML = '<td></td><td colspan="9" class="protocol-folder-name">' + esc(folder) + ' · Delivery type ' + esc(delivery) + '</td>';
+      fr.innerHTML =
+        '<td></td>' +
+        '<td><div class="study-name-cell">' + esc(tidy(e.name || e.deliverable || p)) + '</div></td>' +
+        '<td>' + chips(e) + '</td>' +
+        '<td>' + empty(e.lead) + '</td>' +
+        '<td>' + empty(e.statistician) + '</td>' +
+        '<td class="num">' + empty(e.fpfv) + '</td>' +
+        '<td class="num">' + empty(e.lplv) + '</td>' +
+        '<td class="num">' + empty(e.dblock) + '</td>' +
+        '<td>' + empty(e.phase) + '</td>' +
+        '<td>' + badge(e) + '</td>';
       fr.addEventListener('click', function () {
         var path = L.entryPath(e);
         location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p) + '&path=' + encodeURIComponent(path);
@@ -987,11 +1026,10 @@
       tbody.appendChild(fr);
       return fr;
     });
-    tr.querySelector('.proto-plus').addEventListener('click', function (ev) {
+    tr.querySelector('.proto-toggle').addEventListener('click', function (ev) {
       ev.stopPropagation();
       var open = this.getAttribute('aria-expanded') === 'true';
       this.setAttribute('aria-expanded', open ? 'false' : 'true');
-      this.textContent = open ? '+' : '\u2212';
       folderRows.forEach(function (fr) { fr.hidden = open; });
     });
   });

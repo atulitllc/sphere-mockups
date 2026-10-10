@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow3j" />
+<link rel="stylesheet" href="shared-white.css?v=flow4style" />
 <script>
 (function () {
   try {
@@ -255,12 +255,29 @@
                 </label>
               </div>
               <div class="shell-actions shell-actions-icons">
+                <div class="export-wrap">
+                  <button class="btn sm export-trigger" type="button" id="btnExport" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                    Export
+                  </button>
+                  <div class="export-menu" id="exportMenu" role="menu" hidden>
+                    <button type="button" role="menuitem" data-export="pdf">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+                      PDF
+                    </button>
+                    <button type="button" role="menuitem" data-export="word">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 17l1.2-3.6h1.2L12 17M8.4 15.2h2.4"/></svg>
+                      Word
+                    </button>
+                    <button type="button" role="menuitem" data-export="rtf">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h8"/></svg>
+                      RTF
+                    </button>
+                  </div>
+                </div>
                 <button class="btn icon-btn accent-icon" type="button" id="btnMetadata" title="Metadata" aria-label="Metadata">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 16h18M9 4v16M15 4v16"/></svg>
                 </button>
-                <button class="btn sm" type="button" id="btnExportPdf">Export PDF</button>
-                <button class="btn sm" type="button" id="btnExportWord">Export Word</button>
-                <button class="btn sm" type="button" id="btnExportRtf">Export RTF</button>
                 <button class="btn icon-btn accent-icon" type="button" id="btnCopyShell" title="Copy to study" aria-label="Copy to study">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
                 </button>
@@ -1322,10 +1339,18 @@
     }
   }
 
+  function tidyVisible(text) {
+    return String(text || '')
+      .replace(/characteristicsq1/gi, 'characteristics')
+      .replace(/\u2014/g, ' · ')
+      .replace(/\u2013/g, '-');
+  }
   function loadShellIntoEditor(sh) {
     if (!sh) return;
     var lay = sh.layout || blankLayout(sh.title);
-    state.title = lay.title || sh.title;
+    state.title = tidyVisible(lay.title || sh.title);
+    if (lay.title) lay.title = state.title;
+    if (sh.title) sh.title = tidyVisible(sh.title);
     state.subgroup = lay.subgroup || sh.subgroup || '';
     state.subtitle = lay.subtitle || '';
     state.columns = cloneData(lay.columns || ['Treatment A', 'Treatment B', 'Total']);
@@ -3664,14 +3689,55 @@
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
-  var btnExportPdf = document.getElementById('btnExportPdf');
-  if (btnExportPdf) btnExportPdf.addEventListener('click', function () {
+  function exportShells(kind) {
     persistEditorToSelected();
     var shells = shellsForExport();
     if (!shells.length) { showToast('Select a shell to export'); return; }
-    var name = shells.length === 1 ? ('shell-' + String(shells[0].number).replace(/[^\d.]+/g, '') + '.pdf') : ('shells-' + shells.length + '.pdf');
-    downloadText(name, 'application/pdf', buildPdf(shells.map(shellExportLines)));
-    showToast('PDF downloaded · ' + shells.length + ' shell' + (shells.length === 1 ? '' : 's'));
+    var spec = {
+      pdf: { ext: 'pdf', mime: 'application/pdf', build: function (list) { return buildPdf(list.map(shellExportLines)); }, label: 'PDF' },
+      word: { ext: 'doc', mime: 'application/msword', build: buildWordHtml, label: 'Word' },
+      rtf: { ext: 'rtf', mime: 'application/rtf', build: buildRtf, label: 'RTF' }
+    }[kind];
+    if (!spec) return;
+    var name = shells.length === 1
+      ? ('shell-' + String(shells[0].number).replace(/[^\d.]+/g, '') + '.' + spec.ext)
+      : ('shells-' + shells.length + '.' + spec.ext);
+    downloadText(name, spec.mime, spec.build(shells));
+    showToast(spec.label + ' downloaded · ' + shells.length + ' shell' + (shells.length === 1 ? '' : 's'));
+  }
+  function closeExportMenu() {
+    var menu = document.getElementById('exportMenu');
+    var btn = document.getElementById('btnExport');
+    var wrap = document.querySelector('.export-wrap');
+    if (menu) menu.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (wrap) wrap.classList.remove('is-open');
+  }
+  var btnExport = document.getElementById('btnExport');
+  if (btnExport) btnExport.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    var menu = document.getElementById('exportMenu');
+    var opening = menu && menu.hidden;
+    closeExportMenu();
+    if (opening) {
+      menu.hidden = false;
+      btnExport.setAttribute('aria-expanded', 'true');
+      var wrap = btnExport.closest('.export-wrap');
+      if (wrap) wrap.classList.add('is-open');
+    }
+  });
+  var exportMenu = document.getElementById('exportMenu');
+  if (exportMenu) exportMenu.addEventListener('click', function (ev) {
+    var item = ev.target.closest('[data-export]');
+    if (!item) return;
+    closeExportMenu();
+    exportShells(item.getAttribute('data-export'));
+  });
+  document.addEventListener('click', function (ev) {
+    if (!ev.target.closest || !ev.target.closest('.export-wrap')) closeExportMenu();
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') closeExportMenu();
   });
   function buildRtf(shells) {
     var body = shells.map(function (sh) {
@@ -3689,20 +3755,6 @@
     }).join('');
     return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Mock shells</title></head><body>' + pages + '</body></html>';
   }
-  function bindExport(id, ext, mime, build, label) {
-    var btn = document.getElementById(id);
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      persistEditorToSelected();
-      var shells = shellsForExport();
-      if (!shells.length) { showToast('Select a shell to export'); return; }
-      var name = shells.length === 1 ? ('shell-' + String(shells[0].number).replace(/[^\d.]+/g, '') + '.' + ext) : ('shells-' + shells.length + '.' + ext);
-      downloadText(name, mime, build(shells));
-      showToast(label + ' downloaded · ' + shells.length + ' shell' + (shells.length === 1 ? '' : 's'));
-    });
-  }
-  bindExport('btnExportWord', 'doc', 'application/msword', buildWordHtml, 'Word');
-  bindExport('btnExportRtf', 'rtf', 'application/rtf', buildRtf, 'RTF');
   document.getElementById('btnCopyShell').addEventListener('click', openCopyModal);
   document.getElementById('copyClose').addEventListener('click', closeCopyModal);
   document.getElementById('copyCancel').addEventListener('click', closeCopyModal);
