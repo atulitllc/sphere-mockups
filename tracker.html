@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4scroll" />
+<link rel="stylesheet" href="shared-white.css?v=flow4focus" />
 <script>
 (function () {
   try {
@@ -1219,7 +1219,7 @@
 
 <script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4e"></script>
+<script src="demo-flow.js?v=flow4job"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -2000,16 +2000,24 @@
     renderJobCell(row);
   });
 
+  var JOB_SEQ_KEY = 'sphere-tracker-job-seq';
   function nextJobBatchId() {
-    jobSeq += 1;
     var raw = String(trackerStoreId() || TRACKER_HOME);
-    if (raw === TRACKER_HOME) return 'JOB-' + jobSeq;
+    var map = {};
+    try { map = JSON.parse(localStorage.getItem(JOB_SEQ_KEY) || '{}') || {}; } catch (eJob) { map = {}; }
+    var n = parseInt(map[raw], 10);
+    if (!n || n < 1850) n = 1850;
+    n += 1;
+    map[raw] = n;
+    jobSeq = n;
+    try { localStorage.setItem(JOB_SEQ_KEY, JSON.stringify(map)); } catch (eJobWrite) {}
+    if (raw === TRACKER_HOME) return 'JOB-' + n;
     var cut = raw.indexOf('::');
     var protocol = (cut < 0 ? raw : raw.slice(0, cut)).replace(/[^A-Za-z0-9]/g, '');
     var deliverable = cut < 0 ? '' : raw.slice(cut + 2).replace(/[^A-Za-z0-9]/g, '');
     var tag = protocol || 'S';
     if (deliverable && deliverable !== 'CSR') tag += '-' + deliverable;
-    return 'JOB-' + tag + '-' + jobSeq;
+    return 'JOB-' + tag + '-' + n;
   }
   function simEnqueue(rows, mode, note) {
     var fresh = [], busy = 0;
@@ -2254,10 +2262,26 @@
     return m ? m[1].toUpperCase() : null;
   }
   function runOutId(prog) {
-    var m = prog.match(/^tfl_(\d+(?:_\d+)*)/i);
+    var m = String(prog || '').match(/^tfl_(\d+(?:_\d+)*)/i);
     if (!m) return 'out';
     var nums = m[1].split('_');
     return 't_' + nums.slice(0, 4).join('_');
+  }
+  function logOutputStem(j) {
+    var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '');
+    var fromTfl = runOutId(prog);
+    if (fromTfl !== 'out') return fromTfl;
+    var stem = prog.replace(/\.[^.]+$/, '');
+    if (/^[tfl]_\d/i.test(stem)) return stem;
+    var row = j && j.row;
+    var id = row ? rowOutputId(row) : '';
+    if (id) {
+      var type = row.getAttribute('data-type') || 'Table';
+      var pre = type === 'Figure' ? 'f_' : (type === 'Listing' ? 'l_' : 't_');
+      return pre + String(id).replace(/\./g, '_');
+    }
+    if (stem && stem.toLowerCase() !== 'out') return stem;
+    return fromTfl;
   }
   function runRowTitle(row) { return (((row && row.querySelector('.artifact-title')) || {}).textContent || '').trim(); }
   function secs(x) { return x.toFixed(2) + ' seconds'; }
@@ -2397,7 +2421,7 @@
         L.push('');
       }
     } else {
-      var out = runOutId(j.prog);
+      var out = logOutputStem(j);
       src('proc freq data=work.adsl noprint;');
       src('  tables trt01a * sex / out=work.stats outpct;');
       src('run;');
@@ -2526,7 +2550,7 @@
         L.push('Wrote ' + nRec + ' records to ' + d + '.xpt');
       }
     } else {
-      var out = runOutId(j.prog);
+      var out = logOutputStem(j);
       L.push('> library(rtables)');
       L.push('> adsl <- filter(adsl, SAFFL == "Y")');
       L.push('> lyt <- basic_table(show_colcounts = TRUE) |>');
@@ -5240,6 +5264,51 @@
     if (clr) clr.addEventListener('click', function () { setMyAssign(false); });
   })();
 
+  function findFocusRow(focus) {
+    if (!focus) return null;
+    var rows = allRows();
+    var i, row, title;
+    if (focus.indexOf('num:') === 0) {
+      var num = focus.slice(4);
+      for (i = 0; i < rows.length; i++) {
+        row = rows[i];
+        title = ((row.querySelector('.artifact-title') || {}).textContent || '').replace(/\s+/g, ' ').trim();
+        if (title.indexOf(num + ' ·') === 0 || rowOutputId(row) === num) return row;
+      }
+      return null;
+    }
+    for (i = 0; i < rows.length; i++) {
+      row = rows[i];
+      if (row.getAttribute('data-flow-id') === focus || row.getAttribute('data-record-id') === focus || row.getAttribute('data-shell-id') === focus) return row;
+    }
+    return null;
+  }
+  function holdTrackerFocus(row) {
+    var sec = row.closest('.sap-section');
+    if (sec && sec.classList.contains('collapsed')) {
+      var head = sec.querySelector('.sap-section-head');
+      if (head) head.click();
+    }
+    row.scrollIntoView({ behavior: 'auto', block: 'center' });
+    row.classList.remove('is-settled');
+    row.classList.add('is-tracker-focus');
+    setTimeout(function () {
+      if (row.classList.contains('is-tracker-focus')) row.classList.add('is-settled');
+    }, 3000);
+  }
+  function clearTrackerFocus() {
+    if (!board) return;
+    board.querySelectorAll('.artifact-row.is-tracker-focus').forEach(function (r) {
+      r.classList.remove('is-tracker-focus');
+      r.classList.remove('is-settled');
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest('.artifact-row.is-tracker-focus')) return;
+    clearTrackerFocus();
+  }, true);
+
   function flashRow(row, scroll) {
     var sec = row.closest('.sap-section');
     if (sec && sec.classList.contains('collapsed')) {
@@ -5861,15 +5930,10 @@
     var focus = '';
     try { focus = new URLSearchParams(location.search).get('focus') || ''; } catch (e) {}
     setTimeout(function () {
-      var target = null;
-      if (focus.indexOf('num:') === 0) {
-        var num = focus.slice(4);
-        target = allRows().filter(function (r) { return ((r.querySelector('.artifact-title') || {}).textContent || '').trim().indexOf(num + ' · ') === 0; })[0];
-      } else if (focus) {
-        target = board.querySelector('.artifact-row[data-flow-id="' + focus.replace(/"/g, '') + '"]');
-      }
+      var target = findFocusRow(focus);
+      if (focus && !target) showToast('Tracker record not found');
       if (target) {
-        flashRow(target, true);
+        holdTrackerFocus(target);
         var rec = flowRecord(target);
         if (rec && rec.isNew) showToast('Synced from Mock Shells · ' + rec.program + ' + ' + SPHERE_DEMO.qcName(rec.program) + ' generated');
       }
@@ -5909,6 +5973,6 @@
   if (trackerSort.key) applyTrackerSort();
 })();
 </script>
-<script src="shared-chrome.js?v=flow3j"></script>
+<script src="shared-chrome.js?v=flow4crumb"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4style" />
+<link rel="stylesheet" href="shared-white.css?v=flow4focus" />
 <script>
 (function () {
   try {
@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4e"></script>
+<script src="demo-flow.js?v=flow4job"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -1382,6 +1382,7 @@
   }
 
   function persistEditorToSelected() {
+    if (shellMissingId) return;
     var sh = selectedShell();
     if (!sh) return;
     sh.number = document.getElementById('metaNumber').value.trim() || sh.number;
@@ -1496,6 +1497,7 @@
     }
     syncMetadataButton(sh);
     render();
+    paintMissingEditor();
   }
 
   function setMetaSapValue(sap) {
@@ -2036,6 +2038,7 @@
 
   /* -- editing -- */
   function startCellEdit(td) {
+    if (shellMissingId) return;
     if (!td || td.classList.contains('col-idx') || td.classList.contains('col-add')) return;
     if (td.querySelector('input.cell-input')) return;
     var ri = +td.dataset.row;
@@ -2127,6 +2130,7 @@
   }
 
   function startTextEdit(el, getVal, setVal, opts) {
+    if (shellMissingId) return;
     if (el.querySelector('input, textarea')) return;
     opts = opts || {};
     var isBlock = el.classList.contains('block-value') || el.classList.contains('sheet-subtitle');
@@ -2456,6 +2460,7 @@
   }
 
   document.getElementById('btnAddRow').addEventListener('click', function () {
+    if (shellMissingId) return;
     insertRow(state.rows.length);
   });
   headEl.addEventListener('click', function (e) {
@@ -2754,6 +2759,7 @@
   });
 
   document.getElementById('metaType').addEventListener('change', function () {
+    if (shellMissingId) return;
     var lab = document.getElementById('typeMenuLabel');
     if (lab) lab.textContent = this.value;
   });
@@ -2770,6 +2776,7 @@
     return;
   });
   document.getElementById('metaSap').addEventListener('change', function () {
+    if (shellMissingId) return;
     var sh = selectedShell();
     if (!sh) return;
     var sap = normalizeSap(this.value);
@@ -3169,6 +3176,7 @@
     }
   }
   function openContentAudit() {
+    if (shellMissingId) return;
     var sh = selectedShell();
     var list = (sh && sh.contentAudit ? sh.contentAudit.slice() : []).reverse();
     var host = document.getElementById('contentAuditList');
@@ -3180,6 +3188,7 @@
     document.getElementById('contentAuditModal').hidden = false;
   }
   function openStatusHistory() {
+    if (shellMissingId) return;
     var sh = selectedShell();
     var list = (sh && sh.statusHistory ? sh.statusHistory.slice() : []).reverse();
     var host = document.getElementById('statusHistoryList');
@@ -3220,6 +3229,7 @@
   })();
   document.getElementById('metaStatus').addEventListener('focus', function () { this.dataset.prev = this.value; });
   document.getElementById('metaStatus').addEventListener('change', function () {
+    if (shellMissingId) { this.value = this.dataset.prev || this.value; return; }
     var sel = this;
     var prev = canonStatus(sel.dataset.prev || 'Draft');
     var next = canonStatus(sel.value);
@@ -3586,6 +3596,7 @@
   }
 
   function openCopyModal(ids) {
+    if (shellMissingId) return;
     persistEditorToSelected();
     var list = ids && ids.length ? ids.slice() : (selectedShell() ? [selectedShell().id] : []);
     list = list.filter(function (id) { return !!findShell(id); });
@@ -3847,6 +3858,7 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
   function exportShells(kind) {
+    if (shellMissingId) return;
     persistEditorToSelected();
     var shells = shellsForExport();
     if (!shells.length) { showToast('Select a shell to export'); return; }
@@ -3872,6 +3884,7 @@
   }
   var btnExport = document.getElementById('btnExport');
   if (btnExport) btnExport.addEventListener('click', function (ev) {
+    if (shellMissingId) { ev.preventDefault(); ev.stopPropagation(); return; }
     ev.stopPropagation();
     var menu = document.getElementById('exportMenu');
     var opening = menu && menu.hidden;
@@ -4132,7 +4145,10 @@
       '<text x="70" y="236" class="fp-tick">Number at risk: xx  xx  xx  xx  xx  xx  xx</text>' +
       '</svg>';
   }
-  document.getElementById('metaType').addEventListener('change', function () { persistEditorToSelected(); render(); renderCatalog(); });
+  document.getElementById('metaType').addEventListener('change', function () {
+    if (shellMissingId) return;
+    persistEditorToSelected(); render(); renderCatalog();
+  });
 
   window.addEventListener('load', function () { syncMetadataButton(selectedShell()); });
 
@@ -4152,6 +4168,35 @@
     updateStudyChrome();
     document.addEventListener('DOMContentLoaded', updateStudyChrome);
     renderCatalog();
+  }
+  function paintMissingEditor() {
+    var missing = !!shellMissingId;
+    var editor = document.querySelector('.shell-editor');
+    if (editor) editor.classList.toggle('is-missing', missing);
+    ['btnExport', 'btnCopyShell', 'btnContentAudit', 'btnStatusHistory', 'btnLock', 'btnMetadata', 'btnAddRow'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.disabled = missing;
+      if (missing) el.setAttribute('aria-disabled', 'true');
+      else el.removeAttribute('aria-disabled');
+    });
+    ['metaType', 'metaSet', 'metaStatus', 'metaSap'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.disabled = missing;
+    });
+    ['shellTitle', 'shellSubgroup', 'shellSubtitle'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('contenteditable', 'false');
+      if (missing) el.removeAttribute('title');
+      else if (!el.getAttribute('title')) el.setAttribute('title', 'Double-click to edit');
+    });
+    if (missing) {
+      var menu = document.getElementById('exportMenu');
+      if (menu) menu.hidden = true;
+      var wrap = document.querySelector('.export-wrap');
+      if (wrap) wrap.classList.remove('is-open');
+    }
   }
   function showShellNotFound(id) {
     shellMissingId = String(id || '');
@@ -4180,6 +4225,7 @@
     updateStudyChrome();
     renderCatalog();
     render();
+    paintMissingEditor();
   }
   (function bootFromShellQuery() {
     if (shellQueryMissing) return;
@@ -4283,6 +4329,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow3j"></script>
+<script src="shared-chrome.js?v=flow4crumb"></script>
 </body>
 </html>

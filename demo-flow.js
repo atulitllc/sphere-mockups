@@ -43,6 +43,7 @@
       localStorage.removeItem('sphere-tenant-study-layout');
       localStorage.removeItem('sphere-tracker-runtime-rows');
       localStorage.removeItem('sphere-tracker-id-seq');
+      localStorage.removeItem('sphere-tracker-job-seq');
       justReset = true;
       qs.delete('reset');
       var q = qs.toString();
