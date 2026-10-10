@@ -3098,8 +3098,12 @@
     { k: 'mw', label: 'Medical writer', short: 'MW', multi: false }
   ];
   function teamMembers() {
+    var dead = {};
+    if (window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
+      SPHERE_ACCESS.users().forEach(function (u) { if (u.deactivated) dead[u.name] = 1; });
+    }
     var seen = {};
-    [].concat(ROLE_POOL.prod, QC_POOL, ROLE_POOL.qc, ROLE_POOL.stats, ROLE_POOL.mw).forEach(function (n) { seen[n] = 1; });
+    [].concat(ROLE_POOL.prod, QC_POOL, ROLE_POOL.qc, ROLE_POOL.stats, ROLE_POOL.mw).forEach(function (n) { if (!dead[n]) seen[n] = 1; });
     return Object.keys(seen).sort();
   }
   var rolesPop = null, rolesCtx = null;
@@ -5488,6 +5492,15 @@
   window.addEventListener('load', function () { refreshAllWorkflowUI(); paintMyAssign(); applyFilters(); });
   refreshAssignedFilter();
   paintShellLinks();
+  (function filterAssignedTo() {
+    var sel = document.getElementById('reAssigned');
+    if (!sel || !window.SPHERE_ACCESS || !SPHERE_ACCESS.users) return;
+    var dead = {};
+    SPHERE_ACCESS.users().forEach(function (u) { if (u.deactivated) dead[u.name] = 1; });
+    Array.prototype.slice.call(sel.options).forEach(function (o) {
+      if (dead[(o.textContent || '').trim()]) o.remove();
+    });
+  })();
 
   syncSectionCounts();
   syncBulk();

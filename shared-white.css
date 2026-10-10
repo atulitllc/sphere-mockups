@@ -1081,6 +1081,13 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
+/* Compound-lead user pickers: content width, capped. Global select width stays 100% elsewhere. */
+#compoundLeads select[data-add] {
+  width: auto;
+  max-width: 280px;
+  flex: 0 0 auto;
+}
+
 textarea { min-height: 72px; resize: vertical; }
 
 /* -- Table -- */
