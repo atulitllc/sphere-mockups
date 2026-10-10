@@ -267,7 +267,7 @@
 
     var replies = {
       'draft-shell': 'Draft suggestion (demo): create shell <strong>14.3.5 Laboratory - chemistry shifts</strong> from SAP 11.4. Columns Placebo / Drug X; rows AST, ALT, ALP, BILI. Status stays <em>Draft</em> until you lock - Copilot cannot lock or run.',
-      'fill-meta': 'For automatable safety tables, metadata could include: analysis dataset, population flag, treatment variable, sort vars, subgroup, and denominator. Open <strong>Metadata</strong> (if the module is on) to edit the spreadsheet stub.',
+      'fill-meta': 'For automatable safety tables, metadata could include: analysis dataset, population flag, treatment variable, sort vars, subgroup, and denominator. Open <strong>Metadata</strong> (if the module is on) to edit the spreadsheet.',
       'footnotes': 'Suggested footnotes (demo): “Baseline = last non-missing before first dose.” “N = subjects in Safety population.” Accept would create a Draft note on the shell only.',
       'explain-fail': 'Demo read of a typical fail: missing treatment label for TRT01A = “Drug X 200mg” (n=2). Suggested action: add a label map entry, then re-run from Tracker. Copilot will not re-run for you.',
       'fix-note': 'Fix note (demo): “Add TRT01A label for Drug X 200mg before re-run of tfl_14_3_1_ae.R.” Accept lands in the governed Suggestions inbox - human lock still required.',
@@ -387,7 +387,7 @@
   /* programsFolders: 'single' = one programs/ tree with editable+locked files
      'dev-qc-prod' = programs/dev (editable) + programs/qc (QC copies) + programs/prod (approved)
      legacy 'dev-prod' is treated as 'dev-qc-prod'
-     versionControl: 'local' (default) | 'github' (Enterprise GitHub backend stub) */
+     versionControl: 'local' (default) | 'github' (Enterprise GitHub backend, not connected) */
 
   function normalizeProgramsFolderMode(mode) {
     if (mode === 'dev-qc-prod' || mode === 'dev-prod') return 'dev-qc-prod';
@@ -753,9 +753,12 @@
       name = localStorage.getItem('sphere-user-name') || '';
       email = localStorage.getItem('sphere-user-email') || '';
     } catch (e) {}
+    email = String(email || '')
+      .replace(/@xpharma\.com/ig, '@northwindbio.example')
+      .replace(/@xpharma\.example/ig, '@northwindbio.example');
     if (!name && !email) {
       name = 'Jordan Patel';
-      email = 'jordan.patel@xpharma.com';
+      email = 'jordan.patel@northwindbio.example';
     } else if (!name && email) {
       name = email.split('@')[0];
     }
