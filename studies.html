@@ -166,7 +166,7 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">Lead Programmer</span> Jordan Patel</span>
-            <span><span class="k">Deliverable</span> Submission</span>
+            <span><span class="k">Delivery type</span> Submission</span>
             <span><span class="k">Phase</span> 3</span>
             <span><span class="k">Lead Statistician</span> Riley Nguyen</span>
           </div>
@@ -191,7 +191,7 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">Lead Programmer</span> Alex Rivera</span>
-            <span><span class="k">Deliverable</span> DMC</span>
+            <span><span class="k">Delivery type</span> DMC</span>
             <span><span class="k">Phase</span> 2</span>
             <span><span class="k">Lead Statistician</span> Dana Brooks</span>
           </div>
@@ -216,7 +216,7 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">Lead Programmer</span> Sam Okonkwo</span>
-            <span><span class="k">Deliverable</span> Custom</span>
+            <span><span class="k">Delivery type</span> Custom</span>
             <span><span class="k">Phase</span> 3</span>
             <span><span class="k">Lead Statistician</span> Taylor Kim</span>
           </div>
@@ -241,7 +241,7 @@
           </div>
           <div class="study-meta-row">
             <span><span class="k">Lead Programmer</span> Chris Nguyen</span>
-            <span><span class="k">Deliverable</span> Submission</span>
+            <span><span class="k">Delivery type</span> Submission</span>
             <span><span class="k">Phase</span> 1/2</span>
             <span><span class="k">Lead Statistician</span> Priya Shah</span>
           </div>
@@ -270,7 +270,7 @@
             <tr>
               <th>Protocol</th>
               <th>Study name</th>
-              <th>Deliverable Type</th>
+              <th>Delivery type</th>
               <th>Lead Programmer</th>
               <th>Lead Statistician</th>
               <th>FPFV</th>
@@ -765,9 +765,9 @@
         tr.innerHTML =
           '<td class="num">' + esc(data.folder) + '</td>' +
           '<td><div class="study-name-cell">' + esc(data.name) + '</div>' +
-          '<div class="study-sub muted">' + esc(data.type) + (data.indication ? ' · ' + esc(data.indication) : '') + '</div>' +
+          '<div class="study-sub muted">' + esc(data.studyType || '') + (data.indication ? ' · ' + esc(data.indication) : '') + '</div>' +
           (data.path ? '<div class="study-path-line" title="Folder path">' + esc(data.path) + '</div>' : '') + '</td>' +
-          '<td><span class="tag-chip">' + esc(data.type) + '</span></td>' +
+          '<td>' + (data.studyType ? '<span class="tag-chip">' + esc(data.studyType) + '</span>' : '<span class="cell-empty">-</span>') + '</td>' +
           '<td>' + personCell(data.lead) + '</td>' +
           '<td>' + personCell(data.statistician) + '</td>' +
           '<td class="num">' + fmtDate(data.fpfv) + '</td>' +
@@ -850,7 +850,7 @@
           return;
         }
         addStudy({
-          folder: id, path: path, name: e.name, description: e.description, type: e.type || e.deliverable || 'CSR',
+          folder: id, path: path, name: e.name, description: e.description, type: e.type || e.deliverable || 'CSR', studyType: e.studyType || '',
           phase: e.phase || '-', indication: e.indication, lead: e.lead, statistician: e.statistician,
           fpfv: e.fpfv, lplv: e.lplv, dblock: e.dblock, status: e.seedStatus || (e.created < '2026-09-01' ? 'Active' : 'Startup')
         }, { append: true, silent: true });
@@ -981,9 +981,8 @@
     return '<span class="badge ' + cls + '">' + esc(label) + '</span>';
   }
   function chips(e) {
-    var html = '<span class="tag-chip">' + esc(e.deliverable || 'CSR') + '</span>';
-    if (e.studyType) html += ' <span class="tag-chip">' + esc(e.studyType) + '</span>';
-    return html;
+    if (!e.studyType) return '<span class="cell-empty">-</span>';
+    return '<span class="tag-chip">' + esc(e.studyType) + '</span>';
   }
   var groups = {};
   var order = [];
