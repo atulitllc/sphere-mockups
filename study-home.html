@@ -432,13 +432,44 @@
   }
   var q = new URLSearchParams(location.search);
   var reg = L.registry();
-  var e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
-    reg.filter(function (x) { return x.current; })[0];
-  if (!e) return;
+  var askedStudy = q.get('study') || '';
+  var askedDel = q.get('deliverable') || '';
+  var askedPath = q.get('path') || '';
+  var legacyCut = askedStudy.indexOf('::');
+  if (legacyCut >= 0) {
+    if (!askedDel) askedDel = askedStudy.slice(legacyCut + 2) || 'CSR';
+    askedStudy = askedStudy.slice(0, legacyCut);
+  }
+  var asked = !!(askedStudy || askedDel || askedPath);
+  var e = null;
+  if (askedStudy && askedDel) {
+    e = reg.filter(function (x) {
+      return (x.protocol === askedStudy || L.studyId(x) === askedStudy) && x.deliverable === askedDel;
+    })[0] || null;
+  } else if (askedPath) {
+    e = L.findByPath(askedPath);
+  } else if (askedStudy) {
+    e = L.openedStudy();
+  } else {
+    e = L.openedStudy() || reg.filter(function (x) { return x.current; })[0];
+  }
+  if (!e) {
+    if (asked && L.showStudyNotFound) {
+      var missingName = askedStudy ? (askedDel && askedDel !== 'CSR' ? askedStudy + ' / ' + askedDel : askedStudy) : askedPath;
+      L.showStudyNotFound(missingName);
+    }
+    return;
+  }
   if (L.setCurrent) e = L.setCurrent(e) || e;
   var path = L.entryPath(e);
-  var filesHref = 'files.html?study=' + encodeURIComponent(L.studyId(e)) + '&path=' + encodeURIComponent(path);
+  var scope = 'study=' + encodeURIComponent(L.studyId(e)) + '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR');
+  var filesHref = 'files.html?' + scope + '&path=' + encodeURIComponent(path);
   document.querySelectorAll('a[href^="files.html"]').forEach(function (a) { a.setAttribute('href', filesHref); });
+  document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+    if (a.classList.contains('shell-open-link')) return;
+    a.setAttribute('href', 'mock-shells.html?' + scope);
+  });
+  document.querySelectorAll('a[href^="tracker.html"]').forEach(function (a) { a.setAttribute('href', 'tracker.html?' + scope); });
   var grid = document.querySelector('.study-hero-meta');
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';
   if (!defaultHero) {

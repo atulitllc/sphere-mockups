@@ -113,6 +113,23 @@
     var l = '* ' + (label + '              ').slice(0, 15) + ': ' + val;
     return l;
   }
+  function programScope(rec) {
+    var scope = String((rec && rec.study) || STUDY);
+    var cut = scope.indexOf('::');
+    var protocol = cut < 0 ? scope : scope.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : (scope.slice(cut + 2) || 'CSR');
+    var root = '/studies/' + protocol.toLowerCase() + '/';
+    if (deliverable !== 'CSR') root += deliverable.toLowerCase() + '/';
+    var label = deliverable === 'CSR' ? protocol : (protocol + ' / ' + deliverable);
+    var phase = '';
+    if (window.SPHERE_LAYOUT && SPHERE_LAYOUT.registry) {
+      var hit = SPHERE_LAYOUT.registry().filter(function (e) {
+        return e.protocol === protocol && (e.deliverable || 'CSR') === deliverable;
+      })[0];
+      if (hit && hit.phase) phase = ' (Phase ' + hit.phase + ')';
+    }
+    return { label: label + phase, root: root };
+  }
   function programHeader(rec, which) {
     var isQc = which === 'qc';
     var prog = isQc ? qcName(rec.program) : rec.program;
@@ -121,17 +138,18 @@
     var bar = '*' + new Array(79).join('*');
     var dash = '*' + new Array(79).join('-');
     var outId = (rec.type || 'Table') + ' ' + rec.number;
+    var scopeBits = programScope(rec);
     var L = [];
     L.push('/' + bar);
     L.push(line('Program', prog + (isQc ? '   [QC / VALIDATION PROGRAM]' : '')));
-    L.push(line('Study/Protocol', STUDY + ' (Phase 3)'));
+    L.push(line('Study/Protocol', scopeBits.label));
     L.push(line('Output ID', outId));
     L.push(line('Title', rec.title));
     L.push(line('Population', rec.population));
     L.push(line('Source data', (rec.sources || []).join(', ')));
     if (rec.keyVars) L.push(line('Key variables', rec.keyVars));
     if (rec.sortOrder) L.push(line('Sort order', rec.sortOrder));
-    L.push(line('Output file', '/studies/onc-204-301/output/tlf/' + (isQc ? 'qc/' : '') + rec.program.replace(/\.sas$/i, '') + (isQc ? '.sas7bdat' : '.rtf')));
+    L.push(line('Output file', scopeBits.root + 'output/tlf/' + (isQc ? 'qc/' : '') + rec.program.replace(/\.sas$/i, '') + (isQc ? '.sas7bdat' : '.rtf')));
     L.push(line('Mock shell', 'Mock Shells ' + rec.number + ' v' + (rec.shellVersion || '0.1') + ' · synced ' + rec.syncedAt));
     if (isQc) {
       L.push(line('Purpose', 'Independent double programming of ' + rec.program));
@@ -267,6 +285,11 @@
     getShells: function (study) { var s = read(); return s.shells[study || STUDY] || null; },
     setShells: function (study, shells) { var s = read(); s.shells[study || STUDY] = shells; write(s); },
     records: function () { return read().records; },
+    /* Records with no study belong to the home CSR board. Other stores are explicit. */
+    recordsFor: function (study) {
+      var id = study || STUDY;
+      return read().records.filter(function (r) { return (r.study || STUDY) === id; });
+    },
     addRecord: function (rec) {
       var s = read();
       s.records = s.records || [];
@@ -285,14 +308,17 @@
       return r;
     },
     /* Create (or return existing) tracker record from a finalized mock shell. */
-    syncShell: function (shell) {
+    syncShell: function (shell, study) {
       var s = read();
-      var ex = s.records.filter(function (x) { return x.shellId === shell.id; })[0];
+      var home = study || STUDY;
+      var ex = s.records.filter(function (x) {
+        return x.shellId === shell.id && (x.study || STUDY) === home;
+      })[0];
       if (ex) return ex;
       var lay = shell.layout || {};
       var now = new Date();
       var rec = {
-        id: 'rec-' + String(shell.id).replace(/[^A-Za-z0-9]+/g, '-'),
+        id: 'rec-' + String(home).replace(/[^A-Za-z0-9]+/g, '-') + '-' + String(shell.id).replace(/[^A-Za-z0-9]+/g, '-'),
         shellId: shell.id,
         number: shell.number,
         title: shell.title,
@@ -311,7 +337,8 @@
         roles: rolesFor(shell),
         syncedAt: stamp(now),
         isNew: true,
-        history: []
+        history: [],
+        study: home
       };
       rec.history.push({ at: stamp(now), action: 'Synced from Mock Shells', status: 'Not started', person: CURRENT_USER, note: 'Shell ' + shell.number + ' finalized → tracker record created' });
       rec.history.push({ at: stamp(now), action: 'SAS header generated', status: 'In dev', person: 'SPHERE', note: rec.program + ' + ' + qcName(rec.program) + ' created with standard header' });
@@ -356,6 +383,7 @@
       };
       s.shellSync[key] = rec;
       s.records.forEach(function (r) {
+        if ((r.study || STUDY) !== (study || STUDY)) return;
         var hit = (info.shellId && r.shellId === info.shellId) || String(r.number) === String(info.number);
         if (!hit) return;
         if (pending.indexOf('title') >= 0) r.title = title;
@@ -374,18 +402,20 @@
       if (lastRunIso && String(lastRunIso) >= rec.changedAt) return '';
       return rec.why || '';
     },
-    markProgramRan: function (prog, iso, shellNumber) {
+    markProgramRan: function (prog, iso, shellNumber, study) {
       var name = String(prog || '').split('/').pop();
       if (!name) return;
       var s = read();
       var when = iso || new Date().toISOString();
-      s.lastRun[name] = when;
+      var scope = study || STUDY;
+      s.lastRun[scope + '|' + name] = when;
+      if (scope === STUDY) s.lastRun[name] = when;
       var num = shellNumber ? String(shellNumber) : '';
+      var prefix = scope + '|';
       Object.keys(s.shellSync).forEach(function (k) {
+        if (k.indexOf(prefix) !== 0) return;
         var rec = s.shellSync[k];
-        if (!rec) return;
-        if (num && String(rec.number) !== num) return;
-        if (!num) return;
+        if (!rec || !num || String(rec.number) !== num) return;
         rec.pending = [];
         rec.changed = [];
         rec.clearedAt = when;
@@ -412,6 +442,7 @@
       if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
       if (info.oldName) s.fileRenames[info.oldName] = info.newName;
       (s.records || []).forEach(function (r) {
+        if ((r.study || STUDY) !== (info.study || STUDY)) return;
         var hit = (info.shellId && r.shellId === info.shellId) ||
           (info.oldName && r.program === info.oldName) ||
           (info.number && String(r.number) === String(info.number));
@@ -437,20 +468,24 @@
       return read().programByNumber[(study || STUDY) + '|' + number] || '';
     },
     fileRenames: function () { return Object.assign({}, read().fileRenames); },
-    lastRun: function (prog) {
+    lastRun: function (prog, study) {
       var name = String(prog || '').split('/').pop();
       var s = read();
-      return s.lastRun[name] || '';
+      var scope = study || STUDY;
+      if (s.lastRun[scope + '|' + name]) return s.lastRun[scope + '|' + name];
+      if (scope === STUDY) return s.lastRun[name] || '';
+      return '';
     },
-    /* SPH-R-602: Tracker send-to-QC moves the linked shell to In Review. */
-    noteShellSentToQc: function (number) {
+    /* SPH-R-602: Tracker send-to-QC moves the linked shell in that same scope to In Review. */
+    noteShellSentToQc: function (number, study) {
       var num = String(number || '');
       if (!num) return null;
+      var scope = study || STUDY;
       var s = read();
       var user = CURRENT_USER;
       try { if (window.SPHERE_ACCESS && SPHERE_ACCESS.username) user = SPHERE_ACCESS.username() || user; } catch (e) {}
       var at = new Date().toISOString();
-      var list = s.shells[STUDY];
+      var list = s.shells[scope];
       if (list && list.length) {
         var sh = null;
         for (var i = 0; i < list.length; i++) if (String(list[i].number) === num) sh = list[i];
@@ -465,16 +500,19 @@
         return sh;
       }
       s.qcShell = s.qcShell || {};
-      s.qcShell[num] = { user: user, at: at, cause: 'Tracker record sent to QC' };
+      s.qcShell[scope + '|' + num] = { user: user, at: at, cause: 'Tracker record sent to QC' };
       write(s);
-      return { queued: true, number: num };
+      return { queued: true, number: num, study: scope };
     },
     applyQueuedQc: function (study, shells) {
       var s = read();
+      var scope = study || STUDY;
       var qmap = s.qcShell || {};
       var changed = false;
       (shells || []).forEach(function (sh) {
-        var q = qmap[String(sh.number)];
+        var num = String(sh.number);
+        var q = qmap[scope + '|' + num];
+        if (!q && scope === STUDY) q = qmap[num];
         if (!q) return;
         var cur = sh.status === 'In review' ? 'In Review' : (sh.status === 'Locked' ? 'Final' : (sh.status || 'Draft'));
         if (cur !== 'In Review') {
@@ -483,16 +521,45 @@
           sh.status = 'In Review';
           sh.qc = 'In Review';
         }
-        delete qmap[String(sh.number)];
+        delete qmap[scope + '|' + num];
+        if (scope === STUDY) delete qmap[num];
         changed = true;
       });
       if (changed) {
-        s.shells[study || STUDY] = shells;
+        s.shells[scope] = shells;
         s.qcShell = qmap;
         write(s);
       }
       return shells;
     }
   };
+  /* 14.1.3 is a catalog shell with a Tracker record that the static board omitted. */
+  (function ensureDispositionRecord() {
+    var s = read();
+    var id = 'rec-14-1-3';
+    var exists = (s.records || []).some(function (r) { return r.id === id || r.shellId === '14.1.3'; });
+    if (exists) return;
+    s.records.push({
+      id: id,
+      shellId: '14.1.3',
+      number: '14.1.3',
+      title: 'Subject disposition',
+      type: 'Table',
+      sap: 'Demographics',
+      analysisSet: 'ITT',
+      population: 'Intent-to-treat set (ITTFL = "Y")',
+      sources: ['ADAM.ADSL', 'ADAM.ADDS'],
+      keyVars: 'USUBJID, TRT01P, RANDFL, SAFFL, EOTSTT, DCTREAS, EOSSTT, DCSREAS',
+      sortOrder: 'Status then reason (descending frequency)',
+      shellVersion: '1.0',
+      program: 't_14_1_3_subj_disp.sas',
+      status: 'In dev',
+      roles: { prod: CURRENT_USER, qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' },
+      syncedAt: '2026-09-02 11:05',
+      isNew: false,
+      history: [{ at: '2026-09-02 11:05', action: 'Synced from Mock Shells', status: 'In dev', person: CURRENT_USER, note: 'Shell 14.1.3' }]
+    });
+    write(s);
+  })();
   window.SPHERE_DEMO = api;
 })();

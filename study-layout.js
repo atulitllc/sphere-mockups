@@ -202,37 +202,137 @@
     return '<ul class="lt-tree lt-root">' + body + '</ul>';
   }
 
+  /* ?study=PRO-001::DSUR is the older store id. Split it into study plus deliverable. */
+  function legacyStudyQuery(q) {
+    var study = q.get('study') || '';
+    var del = q.get('deliverable') || '';
+    var cut = study.indexOf('::');
+    if (cut >= 0) {
+      if (!del) del = study.slice(cut + 2) || 'CSR';
+      study = study.slice(0, cut);
+    }
+    return { study: study, deliverable: del };
+  }
   function openedStudy() {
     try {
       var q = new URLSearchParams(location.search);
       var reg = registry();
-      function pick(list) { return list.filter(function (x) { return x.current; })[0] || list[0]; }
-      var e = (q.get('path') && pick(reg.filter(function (x) { return entryPath(x) === q.get('path'); }))) ||
-        (q.get('study') && pick(reg.filter(function (x) { return studyId(x) === q.get('study'); })));
+      function pick(list) {
+        if (!list || !list.length) return null;
+        return list.filter(function (x) { return x.current; })[0] || list[0];
+      }
+      var parts = legacyStudyQuery(q);
+      var del = parts.deliverable;
+      var studyKey = parts.study;
+      var asked = !!(q.get('path') || q.get('study') || q.get('deliverable'));
+      function narrow(list) {
+        if (!del) return list;
+        return list.filter(function (x) { return x.deliverable === del; });
+      }
+      var e = (q.get('path') && pick(narrow(reg.filter(function (x) { return entryPath(x) === q.get('path'); })))) ||
+        (studyKey && pick(narrow(reg.filter(function (x) {
+          return studyId(x) === studyKey || x.protocol === studyKey || x.compound === studyKey;
+        }))));
       if (e) return setCurrent(e) || e;
-      if (/studies\.html/.test(location.pathname)) return null;
+      if (asked || /studies\.html/.test(location.pathname)) return null;
       var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
       if (saved) return reg.filter(function (x) { return x.compound === saved.c && x.protocol === saved.p && x.deliverable === saved.d; })[0] || null;
     } catch (err) {}
     return null;
   }
+  function askedStudyLabel() {
+    try {
+      var q = new URLSearchParams(location.search);
+      var parts = legacyStudyQuery(q);
+      var study = parts.study;
+      var del = parts.deliverable;
+      if (study && del && del !== 'CSR') return study + ' / ' + del;
+      if (study) return study;
+      return q.get('path') || '';
+    } catch (e) { return ''; }
+  }
+  function setCrumbTitle(crumb) {
+    if (!crumb) return;
+    var text = (crumb.textContent || '').replace(/\s+/g, ' ').trim();
+    if (text) crumb.setAttribute('title', text);
+  }
+  function queryAskedStudy() {
+    try {
+      var q = new URLSearchParams(location.search);
+      return !!(q.get('study') || q.get('path') || q.get('deliverable'));
+    } catch (e) { return false; }
+  }
+  function showStudyNotFound(name) {
+    var content = document.querySelector('.content');
+    if (content) {
+      while (content.firstChild) content.removeChild(content.firstChild);
+      var box = document.createElement('div');
+      box.id = 'studyMissing';
+      box.className = 'page-intro';
+      var h = document.createElement('h1');
+      h.className = 'page-title';
+      h.textContent = 'Study not found';
+      var p = document.createElement('p');
+      p.className = 'page-sub';
+      var shown = String(name || '').replace(/::/g, ' / ');
+      p.textContent = shown ? (shown + ' is not in the study registry.') : 'That study is not in the study registry.';
+      var back = document.createElement('p');
+      var a = document.createElement('a');
+      a.href = 'studies.html';
+      a.textContent = 'Back to Studies';
+      back.appendChild(a);
+      box.appendChild(h);
+      box.appendChild(p);
+      box.appendChild(back);
+      content.appendChild(box);
+    }
+    var crumb = document.querySelector('.crumb');
+    if (crumb) {
+      crumb.textContent = '';
+      var ca = document.createElement('a');
+      ca.href = 'studies.html';
+      ca.textContent = 'Studies';
+      crumb.appendChild(ca);
+      crumb.appendChild(document.createTextNode(' / '));
+      var st = document.createElement('strong');
+      st.textContent = 'Study not found';
+      crumb.appendChild(st);
+      setCrumbTitle(crumb);
+    }
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = 'Study not found';
+  }
   function paintOpenedStudy() {
     var e = openedStudy();
-    if (!e) return;
+    if (!e) {
+      if (queryAskedStudy() && !/studies\.html/.test(location.pathname) && !/admin\.html/.test(location.pathname)) {
+        showStudyNotFound(askedStudyLabel());
+      }
+      return;
+    }
     var path = entryPath(e);
-    var label = studyId(e) + (getLayout().level >= 2 && e.deliverable ? ' · ' + e.deliverable : '');
+    var label = studyId(e) + (e.deliverable && e.deliverable !== 'CSR' ? ' / ' + e.deliverable : '');
     if (!/studies\.html/.test(location.pathname)) {
       var crumb = document.querySelector('.crumb strong');
       if (crumb) crumb.textContent = label;
+      setCrumbTitle(document.querySelector('.crumb'));
       var foot = document.querySelector('.nav-footer');
       if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '-');
     }
-    var qs = 'study=' + encodeURIComponent(studyId(e)) + '&path=' + encodeURIComponent(path);
+    var scope = 'study=' + encodeURIComponent(studyId(e)) + '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR');
+    var qs = scope + '&path=' + encodeURIComponent(path);
     document.querySelectorAll('a[href^="files.html"]').forEach(function (a) {
       a.setAttribute('href', a.getAttribute('href').split('?')[0] + '?' + qs);
     });
-    document.querySelectorAll('.nav a[href^="study-home.html"]').forEach(function (a) {
+    document.querySelectorAll('a[href^="study-home.html"]').forEach(function (a) {
       a.setAttribute('href', 'study-home.html?' + qs);
+    });
+    document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+      if (a.classList.contains('shell-open-link')) return;
+      a.setAttribute('href', 'mock-shells.html?' + scope);
+    });
+    document.querySelectorAll('a[href^="tracker.html"]').forEach(function (a) {
+      a.setAttribute('href', 'tracker.html?' + scope);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintOpenedStudy);
@@ -255,6 +355,7 @@
     pathFor: pathFor,
     entryPath: entryPath,
     studyId: studyId,
+    showStudyNotFound: showStudyNotFound,
     segsFor: segsFor,
     treeHtml: treeHtml,
     exampleTreeHtml: exampleTreeHtml,

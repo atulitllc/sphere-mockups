@@ -1030,7 +1030,9 @@
         '<td>' + badge(e) + '</td>';
       fr.addEventListener('click', function () {
         var path = L.entryPath(e);
-        location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p) + '&path=' + encodeURIComponent(path);
+        location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p) +
+          '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR') +
+          '&path=' + encodeURIComponent(path);
       });
       tbody.appendChild(fr);
       return fr;
