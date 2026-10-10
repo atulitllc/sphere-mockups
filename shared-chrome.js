@@ -505,7 +505,7 @@
   /** Next handoff from a status given current tenant workflow. */
   function nextHandoff(status) {
     var f = readWorkflowFlags();
-    if (status === 'Not started' || status === 'In dev' || status === 'Revise') {
+    if (status === 'Not started' || status === 'Draft' || status === 'In dev' || status === 'Revise') {
       return { action: 'to-qc', label: 'Send to QC', nextStatus: 'In QC' };
     }
     if (status === 'In QC') {
@@ -802,4 +802,30 @@
   } else {
     initUserChrome();
   }
+})();
+
+/* Full breadcrumb path as the title tooltip when the crumb is truncated. */
+(function () {
+  function crumbPath(el) {
+    return String(el.textContent || '').replace(/\s+/g, ' ').replace(/\s*\/\s*/g, ' / ').trim();
+  }
+  function syncCrumbTitle() {
+    var crumbs = document.querySelectorAll('.crumb');
+    for (var i = 0; i < crumbs.length; i++) {
+      var text = crumbPath(crumbs[i]);
+      if (text) crumbs[i].title = text;
+    }
+  }
+  function watchCrumbs() {
+    syncCrumbTitle();
+    if (!window.MutationObserver) return;
+    var crumbs = document.querySelectorAll('.crumb');
+    if (!crumbs.length) return;
+    var obs = new MutationObserver(function () { syncCrumbTitle(); });
+    for (var i = 0; i < crumbs.length; i++) {
+      obs.observe(crumbs[i], { childList: true, characterData: true, subtree: true });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchCrumbs);
+  else watchCrumbs();
 })();

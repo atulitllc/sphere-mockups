@@ -2076,6 +2076,7 @@ label .req::after { content: " *"; color: var(--danger); }
   padding: 20px;
 }
 .modal-backdrop[hidden] { display: none !important; }
+#stageJustifyWrap[hidden] { display: none; }
 .modal {
   width: min(560px, 100%);
   max-height: min(80vh, 640px);
@@ -6335,6 +6336,26 @@ a.shell-open-link:hover { text-decoration: underline; }
 .artifact-row.flow-flash { animation: flowFlash 2.4s ease; }
 @keyframes flowFlash { 0%, 40% { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); } 100% { background: transparent; box-shadow: none; } }
 .artifact-row.is-flow-new { box-shadow: inset 3px 0 0 var(--accent); }
+/* In Tracker focus: inset bar so the column grid width stays put (flow4focus) */
+.sap-section-body > .artifact-row.is-tracker-focus,
+.artifact-row.is-tracker-focus {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+  transition: background .4s ease, box-shadow .4s ease;
+}
+.sap-section-body > .artifact-row.is-tracker-focus.is-settled,
+.artifact-row.is-tracker-focus.is-settled {
+  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.sap-section-body > .artifact-row.is-tracker-focus:hover,
+.artifact-row.is-tracker-focus:hover {
+  background: var(--accent-soft);
+}
+.sap-section-body > .artifact-row.is-tracker-focus.is-settled:hover,
+.artifact-row.is-tracker-focus.is-settled:hover {
+  background: color-mix(in srgb, var(--accent-soft) 55%, transparent);
+}
 
 /* Workflow popover */
 .wf-pop {
@@ -6820,6 +6841,19 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 .shell-editor.is-locked .row-float-toolbar,
 .shell-editor.is-locked .col-select-toolbar { display: none !important; }
 .shell-editor.is-locked .shell-props select:not(#metaStatus) { opacity: .6; pointer-events: none; }
+/* Shell query missed this study: message only, no editable sheet (flow4focus) */
+.shell-editor.is-missing .shell-props,
+.shell-editor.is-missing .sheet-grid-wrap,
+.shell-editor.is-missing .sheet-blocks,
+.shell-editor.is-missing .fig-preview,
+.shell-editor.is-missing .sheet-type-controls,
+.shell-editor.is-missing #btnAddRow,
+.shell-editor.is-missing .row-float-toolbar,
+.shell-editor.is-missing .col-select-toolbar,
+.shell-editor.is-missing #shellSubgroup,
+.shell-editor.is-missing #shellOutId { display: none !important; }
+.shell-editor.is-missing .sheet-title,
+.shell-editor.is-missing .sheet-subtitle { pointer-events: none; user-select: none; }
 #btnLock.is-active { color: var(--accent); background: var(--accent-soft); border-color: var(--blue-border); }
 /* Tracker toolbar tidy (flow3e): no separators, uniform buttons; blue = toggle ON / view active only */
 #trackerListsBar { gap: 8px; align-items: center; }
