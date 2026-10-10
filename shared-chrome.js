@@ -505,7 +505,7 @@
   /** Next handoff from a status given current tenant workflow. */
   function nextHandoff(status) {
     var f = readWorkflowFlags();
-    if (status === 'Not started' || status === 'In dev' || status === 'Revise') {
+    if (status === 'Not started' || status === 'Draft' || status === 'In dev' || status === 'Revise') {
       return { action: 'to-qc', label: 'Send to QC', nextStatus: 'In QC' };
     }
     if (status === 'In QC') {

@@ -940,6 +940,7 @@
       <label>Status
         <select id="reStatus" name="status">
           <option>Not started</option>
+          <option>Draft</option>
           <option>In dev</option>
           <option>Revise</option>
           <option>In QC</option>
@@ -1215,6 +1216,44 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="stageModal" hidden role="dialog" aria-modal="true" aria-labelledby="stageModalTitle">
+  <div class="modal" role="document">
+    <div class="modal-head">
+      <div>
+        <h2 id="stageModalTitle">Change stage</h2>
+        <div class="hint" id="stageModalFromTo"></div>
+      </div>
+      <button class="btn ghost sm" type="button" id="stageModalClose" aria-label="Close">Close</button>
+    </div>
+    <form class="modal-body" id="stageModalForm" autocomplete="off">
+      <p class="hint" id="stageModalCount" hidden></p>
+      <label id="stageJustifyWrap" hidden>
+        <span class="req">Justification</span>
+        <select id="stageJustify">
+          <option value="">Choose a justification</option>
+          <option>QC finding (output mismatch)</option>
+          <option>Spec or SAP change</option>
+          <option>Mock shell change</option>
+          <option>Data update or new snapshot</option>
+          <option>Derivation or programming error</option>
+          <option>Log issue (warning or error)</option>
+          <option>Statistician or reviewer request</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>
+        <span>Comment <span class="hint" id="stageCommentHint">(optional)</span></span>
+        <textarea id="stageComment" rows="3"></textarea>
+      </label>
+      <p class="hint" id="stageCommentError" hidden>A comment is required when the justification is Other.</p>
+    </form>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="stageModalCancel">Cancel</button>
+      <button class="btn primary" type="button" id="stageModalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
 
 <script src="study-layout.js?v=flow4e"></script>
@@ -1460,13 +1499,16 @@
       btn.textContent = label;
       btn.title = count + ' of ' + sel.length + ' → ' + g.hand.nextStatus;
       btn.addEventListener('click', function () {
-        if (!confirm(flowHandLabel(g.hand, g.rows[0].getAttribute('data-status')) + ' - ' + g.rows.length + ' row(s) → ' + flowStatusLabel(g.hand.nextStatus) + '?')) return;
-        g.rows.forEach(function (row) {
-          applyTransition(row, g.hand);
+        var items = g.rows.map(function (row) {
+          return { row: row, from: row.getAttribute('data-status') || '', to: g.hand.nextStatus, hand: g.hand };
+        }).filter(function (it) { return it.from !== it.to; });
+        if (!items.length) return;
+        askStageChange(items, function (info) {
+          items.forEach(function (it) { applyTransition(it.row, it.hand, info); });
+          showToast(flowHandLabel(g.hand, '') + ' · ' + flowStatusLabel(g.hand.nextStatus) + ' · ' + items.length + ' record' + (items.length === 1 ? '' : 's') + ' · recorded in History');
+          applyFilters();
+          syncBulk();
         });
-        showToast(flowHandLabel(g.hand, '') + ' → ' + flowStatusLabel(g.hand.nextStatus) + ' · ' + g.rows.length + ' row(s) · recorded in History');
-        applyFilters();
-        syncBulk();
       });
       host.appendChild(btn);
     });
@@ -2901,7 +2943,7 @@
     dragState = null;
   }
 
-  function saveRowEditor() {
+  function writeRowEditor() {
     if (!editingRow) return;
     var row = editingRow;
     var title = document.getElementById('reTitle').value.trim();
@@ -3037,6 +3079,24 @@
     });
   });
 
+  function saveRowEditor() {
+    if (!editingRow) return;
+    var row = editingRow;
+    var next = document.getElementById('reStatus').value;
+    var from = row.getAttribute('data-status') || '';
+    if (next && next !== from) {
+      askStageChange([{ row: row, from: from, to: next, hand: null }], function (info) {
+        applyTransition(row, { action: 'status', label: 'Change stage', nextStatus: next }, info);
+        writeRowEditor();
+      }, function () {
+        var sel = document.getElementById('reStatus');
+        if (sel) sel.value = from;
+      });
+      return;
+    }
+    writeRowEditor();
+  }
+
   document.getElementById('btnCloseRowEditor').addEventListener('click', closeRowEditor);
   document.getElementById('btnCancelRowEditor').addEventListener('click', closeRowEditor);
   document.getElementById('btnSaveRowEditor').addEventListener('click', saveRowEditor);
@@ -3080,6 +3140,8 @@
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
+      var stage = document.getElementById('stageModal');
+      if (stage && !stage.hidden) return;
       setOpen(false);
       closeImport();
       closeRowEditor();
@@ -4087,7 +4149,15 @@
         { at: '2026-09-01 08:00', action: 'Frozen', status: 'Frozen', person: 'System', note: 'Files ACL freeze' }
       ])
     };
-    var events = (byStatus[status] || base).concat(window.SPHERE_DEMO ? SPHERE_DEMO.getEvents(flowKey(row)) : []);
+    var events = (byStatus[status] || base).slice();
+    if (window.SPHERE_DEMO && SPHERE_DEMO.getEvents) {
+      var seenKey = {};
+      [flowKey(row), row.getAttribute('data-record-id') || ''].forEach(function (k) {
+        if (!k || seenKey[k]) return;
+        seenKey[k] = 1;
+        events = events.concat(SPHERE_DEMO.getEvents(k) || []);
+      });
+    }
     return { title: title.trim(), program: prog, status: row.getAttribute('data-status') || status, owner: owner || 'Jordan Patel', events: events };
   }
 
@@ -4219,12 +4289,18 @@
     var tl = document.getElementById('historyTimeline');
     if (!tl) return;
     tl.innerHTML = data.events.map(function (ev) {
+      var fromTo = (ev.from && (ev.to || ev.status))
+        ? '<div class="txn-note">From ' + escapeHtml(flowStatusLabel(ev.from)) + ' to ' + escapeHtml(flowStatusLabel(ev.to || ev.status)) + '</div>'
+        : '';
+      var just = ev.justification ? ('<div class="txn-note">Justification: ' + escapeHtml(ev.justification) + '</div>') : '';
+      var comment = ev.comment ? ('<div class="txn-note">Comment: ' + escapeHtml(ev.comment) + '</div>') : '';
+      var legacy = (!fromTo && ev.note) ? ('<div class="txn-note">' + escapeHtml(ev.note) + '</div>') : '';
       return '<li class="txn-item">' +
         '<div class="txn-dot" aria-hidden="true"></div>' +
         '<div class="txn-body">' +
-          '<div class="txn-top"><strong>' + ev.action + '</strong><span class="txn-status">' + flowStatusLabel(ev.status) + '</span></div>' +
-          '<div class="txn-meta"><span>' + ev.at + '</span><span>' + ev.person + '</span></div>' +
-          (ev.note ? ('<div class="txn-note">' + ev.note + '</div>') : '') +
+          '<div class="txn-top"><strong>' + escapeHtml(ev.action || '') + '</strong><span class="txn-status">' + escapeHtml(flowStatusLabel(ev.status || '')) + '</span></div>' +
+          '<div class="txn-meta"><span>' + escapeHtml(ev.at || '') + '</span><span>' + escapeHtml(ev.person || '') + '</span></div>' +
+          fromTo + just + comment + legacy +
         '</div></li>';
     }).join('');
   }
@@ -5021,6 +5097,8 @@
     return hand.label;
   }
   function flowActionName(hand, from) {
+    if (!hand) return 'Status changed';
+    if (hand.action === 'status') return 'Status changed';
     if (hand.action === 'to-qc') return 'Sent to QC';
     if (hand.action === 'to-stats') return 'QC passed → Stats review';
     if (hand.action === 'to-mw') return (from === 'In QC' ? 'QC passed' : 'Stats approved') + ' → Released to MW';
@@ -5322,21 +5400,171 @@
     setTimeout(function () { row.classList.remove('flow-flash'); }, 2600);
   }
 
-  function applyTransition(row, hand) {
+  function stageUser() {
+    try {
+      if (window.SPHERE_ACCESS && SPHERE_ACCESS.current) {
+        var who = SPHERE_ACCESS.current();
+        if (who && who.name) return who.name;
+      }
+    } catch (eUser) {}
+    return FLOW_ME;
+  }
+  function stageStampET(d) {
+    d = d || new Date();
+    try {
+      var fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+      });
+      var map = {};
+      fmt.formatToParts(d).forEach(function (p) { map[p.type] = p.value; });
+      var hour = map.hour === '24' ? '00' : map.hour;
+      return map.year + '-' + map.month + '-' + map.day + ' ' + hour + ':' + map.minute + ' ET';
+    } catch (eStamp) {
+      return (window.SPHERE_DEMO && SPHERE_DEMO.stamp ? SPHERE_DEMO.stamp(d) : '') + ' ET';
+    }
+  }
+  function stageHistoryKey(row) {
+    var rid = row.getAttribute('data-record-id') || '';
+    if (rid.indexOf('rec-runtime-') === 0) return rid;
+    return flowKey(row);
+  }
+  var stagePending = null;
+  function stageFromLabels(items) {
+    var froms = [];
+    items.forEach(function (it) {
+      var lab = flowStatusLabel(it.from);
+      if (froms.indexOf(lab) < 0) froms.push(lab);
+    });
+    return froms;
+  }
+  function syncStageConfirm() {
+    var btn = document.getElementById('stageModalConfirm');
+    var justify = (document.getElementById('stageJustify') || {}).value || '';
+    var comment = String((document.getElementById('stageComment') || {}).value || '').trim();
+    var to = stagePending ? stagePending.to : '';
+    var revise = to === 'Revise';
+    var needComment = revise && justify === 'Other';
+    var ok = !(revise && !justify) && !(needComment && !comment);
+    if (btn) btn.disabled = !ok;
+    var hint = document.getElementById('stageCommentHint');
+    if (hint) hint.textContent = needComment ? '(required)' : '(optional)';
+    var err = document.getElementById('stageCommentError');
+    if (err) err.hidden = !(needComment && !comment);
+    var commentEl = document.getElementById('stageComment');
+    if (commentEl) {
+      if (needComment && !comment) commentEl.setAttribute('aria-invalid', 'true');
+      else commentEl.removeAttribute('aria-invalid');
+    }
+  }
+  function closeStageModal(commit) {
+    var modal = document.getElementById('stageModal');
+    var pending = stagePending;
+    stagePending = null;
+    if (modal) modal.hidden = true;
+    if (!pending) return;
+    if (commit && pending.onOk) pending.onOk(pending.info());
+    else if (pending.onCancel) pending.onCancel();
+  }
+  function askStageChange(items, onOk, onCancel) {
+    if (!items || !items.length || stagePending) return;
+    var modal = document.getElementById('stageModal');
+    if (!modal) return;
+    var to = items[0].to;
+    var froms = stageFromLabels(items);
+    var hand = items[0].hand;
+    var title = 'Change stage';
+    if (hand) title = froms.length === 1 ? (flowHandLabel(hand, items[0].from) || hand.label || title) : (hand.label || title);
+    stagePending = {
+      to: to,
+      onOk: onOk,
+      onCancel: onCancel || null,
+      info: function () {
+        return {
+          justification: to === 'Revise' ? ((document.getElementById('stageJustify') || {}).value || '') : '',
+          comment: String((document.getElementById('stageComment') || {}).value || '').trim(),
+          user: stageUser()
+        };
+      }
+    };
+    var titleEl = document.getElementById('stageModalTitle');
+    if (titleEl) titleEl.textContent = title;
+    var line = document.getElementById('stageModalFromTo');
+    if (line) line.textContent = 'From ' + froms.join(', ') + ' to ' + flowStatusLabel(to);
+    var count = document.getElementById('stageModalCount');
+    if (count) {
+      count.hidden = items.length < 2;
+      count.textContent = items.length + ' records';
+    }
+    var justifyWrap = document.getElementById('stageJustifyWrap');
+    var justify = document.getElementById('stageJustify');
+    if (justify) justify.value = '';
+    if (justifyWrap) justifyWrap.hidden = to !== 'Revise';
+    var commentEl = document.getElementById('stageComment');
+    if (commentEl) commentEl.value = '';
+    document.body.appendChild(modal);
+    modal.hidden = false;
+    syncStageConfirm();
+    var focusEl = to === 'Revise' ? justify : commentEl;
+    if (focusEl) setTimeout(function () { focusEl.focus(); }, 30);
+  }
+  (function bindStageModal() {
+    var modal = document.getElementById('stageModal');
+    if (!modal) return;
+    var form = document.getElementById('stageModalForm');
+    if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
+    ['stageJustify', 'stageComment'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', syncStageConfirm);
+      el.addEventListener('change', syncStageConfirm);
+    });
+    var okBtn = document.getElementById('stageModalConfirm');
+    if (okBtn) okBtn.addEventListener('click', function () {
+      syncStageConfirm();
+      if (okBtn.disabled) return;
+      closeStageModal(true);
+    });
+    var cancelBtn = document.getElementById('stageModalCancel');
+    if (cancelBtn) cancelBtn.addEventListener('click', function () { closeStageModal(false); });
+    var closeBtn = document.getElementById('stageModalClose');
+    if (closeBtn) closeBtn.addEventListener('click', function () { closeStageModal(false); });
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeStageModal(false); });
+    document.addEventListener('keydown', function (e) {
+      if (modal.hidden || e.key !== 'Escape') return;
+      e.preventDefault();
+      closeStageModal(false);
+    });
+  })();
+
+  function applyTransition(row, hand, info) {
     if (!hand || !window.SPHERE_DEMO) return;
+    info = info || {};
     var from = row.getAttribute('data-status') || '';
-    var r = rowRoles(row);
-    var person = ({ 'to-qc': r.prod[0], 'to-stats': r.qc[0], 'to-mw': from === 'In QC' ? r.qc[0] : r.stats[0], 'approve': r.mw[0] })[hand.action] ||
-      ({ 'In QC': r.qc[0], 'In Stats': r.stats[0], 'In MW': r.mw[0] })[from] || r.prod[0];
-    var ev = { at: SPHERE_DEMO.stamp(), action: flowActionName(hand, from), status: hand.nextStatus, person: person, note: flowStatusLabel(from) + ' → ' + flowStatusLabel(hand.nextStatus) };
+    var to = hand.nextStatus;
+    if (!to || to === from) return;
+    var comment = String(info.comment || '').replace(/\s+/g, ' ').trim();
+    var justification = to === 'Revise' ? String(info.justification || '').trim() : '';
+    var ev = {
+      at: stageStampET(),
+      action: flowActionName(hand, from),
+      status: to,
+      from: from,
+      to: to,
+      person: info.user || stageUser(),
+      note: comment,
+      comment: comment,
+      justification: justification
+    };
     if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
-    row.setAttribute('data-status', hand.nextStatus);
+    row.setAttribute('data-status', to);
     var rec = flowRecord(row);
     if (rec) {
-      SPHERE_DEMO.updateRecord(rec.id, function (x) { x.status = hand.nextStatus; x.isNew = false; x.history.push(ev); });
+      SPHERE_DEMO.updateRecord(rec.id, function (x) { x.status = to; x.isNew = false; x.history = x.history || []; x.history.push(ev); });
     } else {
-      SPHERE_DEMO.setStatus(flowKey(row), hand.nextStatus);
-      SPHERE_DEMO.addEvent(flowKey(row), ev);
+      SPHERE_DEMO.setStatus(flowKey(row), to);
+      SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
     }
     row.classList.remove('is-flow-new');
     var chip = row.querySelector('.new-chip');
@@ -5415,19 +5643,21 @@
     var status = row.getAttribute('data-status') || '';
     if (act === 'close') { closeWfPop(); return; }
     if (act === 'history') { closeWfPop(); openHistoryModal(row); return; }
-    if (act === 'next') { paintWfPop(SPHERE.nextHandoff(status)); positionWfPop(); return; }
-    if (act === 'revise') { paintWfPop(SPHERE.returnHandoff(status)); positionWfPop(); return; }
-    if (act === 'cancel') { paintWfPop(null); positionWfPop(); return; }
-    if (act === 'confirm' && wfPop._confirm) {
-      var hand = wfPop._confirm;
-      applyTransition(row, hand);
-      showToast(flowActionName(hand, status) + ' · ' + (((row.querySelector('.artifact-title')) || {}).textContent || '').trim().split(' · ')[0] + ' · ' + SPHERE_DEMO.hhmm());
-      var anchor = row.querySelector('.wf-pill');
-      wfPopAnchor = anchor || wfPopAnchor;
-      paintWfPop(null);
-      positionWfPop();
-      applyFilters();
+    if (act === 'next' || act === 'revise') {
+      var hand = act === 'next'
+        ? (window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null)
+        : (window.SPHERE && SPHERE.returnHandoff ? SPHERE.returnHandoff(status) : null);
+      if (!hand || hand.nextStatus === status) return;
+      closeWfPop();
+      askStageChange([{ row: row, from: status, to: hand.nextStatus, hand: hand }], function (info) {
+        applyTransition(row, hand, info);
+        var bits = (((row.querySelector('.artifact-title')) || {}).textContent || '').trim().split(' · ');
+        showToast(flowActionName(hand, status) + ' · ' + (bits[0] || 'record'));
+        applyFilters();
+      });
+      return;
     }
+    if (act === 'cancel' || act === 'confirm') { paintWfPop(null); positionWfPop(); return; }
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !wfPop.hidden) closeWfPop(); });
   document.addEventListener('mousedown', function (e) {
@@ -5973,6 +6203,6 @@
   if (trackerSort.key) applyTrackerSort();
 })();
 </script>
-<script src="shared-chrome.js?v=flow4crumb"></script>
+<script src="shared-chrome.js?v=flow4stage"></script>
 </body>
 </html>
