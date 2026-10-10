@@ -55,20 +55,32 @@
       });
     });
   }
+  /* The uploaded logo floats, faded, in the bottom-right corner of every app page
+     (not in the header pill). Nothing is shown without a logo; login has no badge. */
   function paintLogo() {
+    document.querySelectorAll('img.tenant-logo').forEach(function (img) { img.remove(); });
+    document.querySelectorAll('.has-tenant-logo').forEach(function (el) { el.classList.remove('has-tenant-logo'); });
     var logo = read().logo || '';
-    document.querySelectorAll('.tenant-pill, .company-pill, [data-tenant-logo-host]').forEach(function (pill) {
-      var img = pill.querySelector('img.tenant-logo');
-      if (!logo) { if (img) img.remove(); pill.classList.remove('has-tenant-logo'); return; }
-      if (!img) {
-        img = document.createElement('img');
-        img.className = 'tenant-logo';
-        img.alt = '';
-        pill.insertBefore(img, pill.firstChild);
-      }
-      if (img.getAttribute('src') !== logo) img.setAttribute('src', logo);
-      pill.classList.add('has-tenant-logo');
-    });
+    var box = document.getElementById('tenantFloatLogo');
+    var appPage = !!document.querySelector('header.top, .app, .sidebar');
+    if (!logo || !appPage) {
+      if (box) box.remove();
+      document.body.classList.remove('has-tenant-float-logo');
+      return;
+    }
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'tenantFloatLogo';
+      box.className = 'tenant-float-logo';
+      box.setAttribute('aria-hidden', 'true');
+      box.appendChild(document.createElement('img'));
+      document.body.appendChild(box);
+    }
+    var img = box.querySelector('img');
+    img.alt = '';
+    if (img.getAttribute('src') !== logo) img.setAttribute('src', logo);
+    box.title = name();
+    document.body.classList.add('has-tenant-float-logo');
   }
   var observer = null;
   function applyDom() {

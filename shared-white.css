@@ -7784,9 +7784,30 @@ body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
   --nav-active-bg: color-mix(in srgb, var(--tenant-accent) 30%, transparent);
 }
 /* Tenant logo inside the tenant pill */
-.tenant-pill.has-tenant-logo,
-.company-pill.has-tenant-logo { padding-left: 7px; }
-.tenant-logo { height: 18px; width: auto; max-width: 64px; object-fit: contain; border-radius: 4px; vertical-align: middle; margin: -3px 7px -1px 0; }
+/* Tenant logo (Admin > Branding): small faded badge fixed at the bottom-right of app pages.
+   Sits below the bulk bar (25), header (30), background jobs (70), modals and toasts (80+),
+   lets clicks pass through, and hides while the jobs panel is open and on phones. */
+.tenant-float-logo {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: 20;
+  pointer-events: none;
+  line-height: 0;
+  opacity: 0.42;
+  filter: grayscale(0.35);
+  transition: opacity 0.15s ease;
+}
+.tenant-float-logo img { display: block; height: 32px; width: auto; max-width: 120px; object-fit: contain; }
+[data-theme="dark"] .tenant-float-logo { opacity: 0.5; filter: grayscale(0.35) brightness(1.15); }
+body.has-tenant-float-logo .content { padding-bottom: 56px; }
+body:has(.bgjobs:not([hidden])) .tenant-float-logo,
+body:has(.copilot-panel:not([hidden])) .tenant-float-logo,
+body:has(.modal-backdrop:not([hidden])) .tenant-float-logo { opacity: 0; }
+@media (max-width: 639px) {
+  .tenant-float-logo { display: none; }
+  body.has-tenant-float-logo .content { padding-bottom: 0; }
+}
 /* Admin > Branding */
 .brand-logo-row { display: flex; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
 .logo-placeholder.has-logo { border-style: solid; background: var(--surface); padding: 6px; }
