@@ -34,6 +34,7 @@
 })();
 </script>
 <script src="study-layout.js?v=flow4a"></script>
+<script src="sphere-access.js?v=acct1"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -423,6 +424,18 @@
   var L = window.SPHERE_LAYOUT;
   if (!L) return;
   function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function personHtml(name) {
+    var s = String(name || '').trim();
+    if (!s || s === '-') return '<span class="cell-empty">-</span>';
+    var mark = '';
+    if (window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
+      var dead = SPHERE_ACCESS.users().some(function (u) {
+        return u.deactivated && String(u.name || '').trim().toLowerCase() === s.toLowerCase();
+      });
+      if (dead) mark = ' <span class="muted">(deactivated)</span>';
+    }
+    return esc(s) + mark;
+  }
   var q = new URLSearchParams(location.search);
   var reg = L.registry();
   var e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
@@ -446,7 +459,8 @@
       var k = m.querySelector('.k'), v = m.querySelector('.v');
       if (k && v && Object.prototype.hasOwnProperty.call(map, k.textContent)) {
         var shown = map[k.textContent];
-        v.innerHTML = shown ? esc(shown) : '<span class="cell-empty">-</span>';
+        var leadField = k.textContent === 'Lead programmer' || k.textContent === 'Lead biostat';
+        v.innerHTML = shown ? (leadField ? personHtml(shown) : esc(shown)) : '<span class="cell-empty">-</span>';
       }
     });
   }

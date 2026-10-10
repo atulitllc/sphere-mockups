@@ -633,19 +633,19 @@
                     <tbody>
                       <tr>
                         <td><strong>Stats programmers</strong></td>
-                        <td>J. Patel · S. Ortiz · +2</td>
+                        <td>Jordan Patel · Sam Okonkwo</td>
                         <td><span class="badge info">Folder ACL</span></td>
                         <td><span class="badge ok">Active</span></td>
                       </tr>
                       <tr>
                         <td><strong>QC reviewers</strong></td>
-                        <td>M. Chen · R. Nguyen</td>
+                        <td>Mei Chen · Riley Nguyen</td>
                         <td><span class="badge info">Folder ACL</span></td>
                         <td><span class="badge ok">Active</span></td>
                       </tr>
                       <tr>
                         <td><strong>Study leads</strong></td>
-                        <td>A. Rivera · +1</td>
+                        <td>Alex Rivera · Jordan Patel</td>
                         <td><span class="badge">Folder ACL · View</span></td>
                         <td><span class="badge ok">Active</span></td>
                       </tr>
@@ -1391,19 +1391,58 @@
     var head = document.getElementById('userActionsHead');
     if (head) head.hidden = !me.admin;
     if (!body) return;
+    var activeAdmins = A.users().filter(function (u) { return u.admin && !u.deactivated; }).length;
     body.innerHTML = A.users().map(function (u) {
-      var role = u.admin ? '<span class="badge">Admin</span>' : '<span class="badge info">Programmer</span>';
+      var role = u.admin
+        ? '<span class="badge">Admin</span>'
+        : (u.role === 'Reviewer' ? '<span class="badge review">Reviewer</span>' : '<span class="badge info">Programmer</span>');
       var status = u.deactivated
         ? '<span class="badge not-started">Deactivated</span>'
-        : '<span class="badge ok">Active</span>';
+        : (u.invited ? '<span class="badge warn">Invited</span>' : '<span class="badge ok">Active</span>');
       var action = '';
       if (me.admin) {
-        action = u.deactivated
-          ? '<td><button type="button" class="btn sm" data-reactivate="' + esc(u.id) + '">Reactivate</button></td>'
-          : '<td><button type="button" class="btn sm" data-deactivate="' + esc(u.id) + '">Deactivate</button></td>';
+        if (u.deactivated) {
+          action = '<td><button type="button" class="btn sm" data-reactivate="' + esc(u.id) + '">Reactivate</button></td>';
+        } else if (u.id === me.id) {
+          var ownWhy = u.admin && activeAdmins <= 1
+            ? 'You cannot deactivate your own account. The last active Admin cannot be deactivated'
+            : 'You cannot deactivate your own account';
+          action = '<td><button type="button" class="btn sm" disabled title="' + esc(ownWhy) + '">Deactivate</button></td>';
+        } else if (u.admin && activeAdmins <= 1) {
+          action = '<td><button type="button" class="btn sm" disabled title="The last active Admin cannot be deactivated">Deactivate</button></td>';
+        } else {
+          action = '<td><button type="button" class="btn sm" data-deactivate="' + esc(u.id) + '">Deactivate</button></td>';
+        }
       }
       return '<tr><td><strong>' + esc(u.name) + '</strong></td><td>' + esc(u.email) + '</td><td>' + role + '</td><td>' + status + '</td><td>-</td>' + action + '</tr>';
     }).join('');
+  }
+  function formatEt(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso || '');
+    var parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(d);
+    function part(type) {
+      var hit = parts.filter(function (p) { return p.type === type; })[0];
+      return hit ? hit.value : '';
+    }
+    return part('year') + '-' + part('month') + '-' + part('day') + ' ' + part('hour') + ':' + part('minute') + ' ET';
+  }
+  function auditSentence(e) {
+    if (e.note === 'company change' || e.type === 'company change') {
+      var bits = [e.user || 'User', 'company change'];
+      if (e.company) bits.push(e.company);
+      return bits.join(' · ');
+    }
+    var verb = e.type === 'reactivate' ? 'reactivated' : 'deactivated';
+    return (e.actor || 'Admin') + ' ' + verb + ' ' + (e.user || '');
   }
   function paintAudit() {
     var list = document.getElementById('accountAudit');
@@ -1412,10 +1451,8 @@
     var rows = A.audit ? A.audit().slice().reverse() : [];
     if (empty) empty.hidden = rows.length > 0;
     list.innerHTML = rows.map(function (e) {
-      var verb = e.type === 'reactivate' ? 'reactivated' : 'deactivated';
-      return '<li><span class="when">' + esc(String(e.at || '').replace('T', ' ').slice(0, 16)) + '</span>' +
-        '<span>' + esc(e.actor || 'Admin') + ' ' + verb + ' ' + esc(e.user || '') + '</span>' +
-        '<span class="who">' + esc(e.actor || '') + '</span></li>';
+      return '<li><span class="when">' + esc(formatEt(e.at)) + '</span>' +
+        '<span>' + esc(auditSentence(e)) + '</span></li>';
     }).join('');
   }
   function closeAccountModal() {
@@ -1427,9 +1464,14 @@
     if (!u || !accountModal) return;
     pendingAccount = { kind: kind, id: id };
     document.getElementById('accountModalTitle').textContent = kind === 'reactivate' ? 'Reactivate account' : 'Deactivate account';
-    document.getElementById('accountModalText').textContent = kind === 'reactivate'
+    var text = kind === 'reactivate'
       ? (u.name + ' can sign in again. Folder access and compound-lead roles stay revoked until they are granted again.')
       : (u.name + ' will not be able to sign in. Folder, protocol, and compound access and every compound-lead role are revoked. Their name stays in the audit trail.');
+    if (kind === 'deactivate' && A.soleLeadOf) {
+      var sole = A.soleLeadOf(id);
+      if (sole.length) text += ' ' + sole.join(', ') + ' will have no lead.';
+    }
+    document.getElementById('accountModalText').textContent = text;
     document.getElementById('accountModalConfirm').textContent = kind === 'reactivate' ? 'Reactivate' : 'Deactivate';
     accountModal.removeAttribute('hidden');
   }
@@ -1446,6 +1488,9 @@
   });
   if (accountModal) accountModal.addEventListener('click', function (e) {
     if (e.target === accountModal) closeAccountModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && accountModal && !accountModal.hasAttribute('hidden')) closeAccountModal();
   });
   var confirmBtn = document.getElementById('accountModalConfirm');
   if (confirmBtn) confirmBtn.addEventListener('click', function () {

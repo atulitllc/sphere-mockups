@@ -34,6 +34,7 @@
 })();
 </script>
 <script src="study-layout.js?v=flow3j"></script>
+<script src="sphere-access.js?v=acct1"></script>
 </head>
 <body class="studies-view-list">
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -741,7 +742,15 @@
     }
     function personCell(v) {
       var s = String(v || '').trim();
-      return s && s !== '-' ? esc(s) : '<span class="cell-empty">-</span>';
+      if (!s || s === '-') return '<span class="cell-empty">-</span>';
+      var mark = '';
+      if (window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
+        var dead = SPHERE_ACCESS.users().some(function (u) {
+          return u.deactivated && String(u.name || '').trim().toLowerCase() === s.toLowerCase();
+        });
+        if (dead) mark = ' <span class="muted">(deactivated)</span>';
+      }
+      return esc(s) + mark;
     }
 
     function esc(s) {
@@ -966,6 +975,18 @@
     if (!s || s === '-') return '<span class="cell-empty">-</span>';
     return esc(s);
   }
+  function personCell(v) {
+    var s = String(v == null ? '' : v).trim();
+    if (!s || s === '-') return '<span class="cell-empty">-</span>';
+    var mark = '';
+    if (window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
+      var dead = SPHERE_ACCESS.users().some(function (u) {
+        return u.deactivated && String(u.name || '').trim().toLowerCase() === s.toLowerCase();
+      });
+      if (dead) mark = ' <span class="muted">(deactivated)</span>';
+    }
+    return esc(s) + mark;
+  }
   function badge(e) {
     var label = e.status || 'Active';
     var cls = e.statusBadge || (label === 'Closed' ? 'not-started' : label === 'Startup' ? 'running' : 'locked');
@@ -996,8 +1017,8 @@
       '<td><div class="study-name-cell">' + esc(tidy(primary.name || p)) + '</div>' +
       '<div class="study-sub muted">' + rows.length + ' folder' + (rows.length === 1 ? '' : 's') + '</div></td>' +
       '<td>' + chips(primary) + '</td>' +
-      '<td>' + empty(primary.lead) + '</td>' +
-      '<td>' + empty(primary.statistician) + '</td>' +
+      '<td>' + personCell(primary.lead) + '</td>' +
+      '<td>' + personCell(primary.statistician) + '</td>' +
       '<td class="num">' + empty(primary.fpfv) + '</td>' +
       '<td class="num">' + empty(primary.lplv) + '</td>' +
       '<td class="num">' + empty(primary.dblock) + '</td>' +
@@ -1012,8 +1033,8 @@
         '<td></td>' +
         '<td><div class="study-name-cell">' + esc(tidy(e.name || e.deliverable || p)) + '</div></td>' +
         '<td>' + chips(e) + '</td>' +
-        '<td>' + empty(e.lead) + '</td>' +
-        '<td>' + empty(e.statistician) + '</td>' +
+        '<td>' + personCell(e.lead) + '</td>' +
+        '<td>' + personCell(e.statistician) + '</td>' +
         '<td class="num">' + empty(e.fpfv) + '</td>' +
         '<td class="num">' + empty(e.lplv) + '</td>' +
         '<td class="num">' + empty(e.dblock) + '</td>' +

@@ -698,6 +698,34 @@
     });
   }
 
+  function fillAccessUsers() {
+    if (!accessAddWho || !window.SPHERE_ACCESS || !SPHERE_ACCESS.users) return;
+    function escOpt(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+    var teams = [];
+    Array.prototype.forEach.call(accessAddWho.querySelectorAll('optgroup[label="Teams"] option'), function (o) {
+      teams.push({ value: o.value, text: o.textContent });
+    });
+    if (!teams.length) {
+      teams = [
+        { value: 'team:Stats programmers', text: 'Stats programmers' },
+        { value: 'team:QC reviewers', text: 'QC reviewers' },
+        { value: 'team:Study leads', text: 'Study leads' }
+      ];
+    }
+    var html = '<option value="">Add user or team…</option><optgroup label="Users">';
+    SPHERE_ACCESS.users().filter(function (u) { return !u.deactivated; }).forEach(function (u) {
+      html += '<option value="user:' + escOpt(u.id) + '">' + escOpt(u.name) + '</option>';
+    });
+    html += '</optgroup><optgroup label="Teams">';
+    teams.forEach(function (t) {
+      html += '<option value="' + escOpt(t.value) + '">' + escOpt(t.text) + '</option>';
+    });
+    html += '</optgroup>';
+    accessAddWho.innerHTML = html;
+  }
+
   function openAccess(target) {
     if (target && target.kind === 'file') return;
     try {
@@ -721,6 +749,7 @@
       ? '<option value="View">View</option>'
       : '<option value="View">View</option><option value="Edit">Edit</option>';
     accessAddRole.value = 'View';
+    fillAccessUsers();
     accessAddWho.value = '';
 
     var rows = cloneAcl(folder);
@@ -964,6 +993,12 @@
     var kind = parts[0];
     var userId = parts.slice(1).join(':');
     var name = (opt && opt.textContent.trim()) || userId;
+    if (kind === 'user' && window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
+      var blocked = SPHERE_ACCESS.users().filter(function (u) {
+        return u.deactivated && (u.id === userId || u.name === name);
+      })[0];
+      if (blocked) { showToast('A deactivated account cannot be granted access'); return; }
+    }
     var role = accessTarget.frozen ? 'View' : accessAddRole.value;
     var exists = accessTarget.rows.some(function (r) { return r.name === name; });
     if (exists) { showToast('Already on ACL'); return; }

@@ -10,7 +10,9 @@
     { id: 'jpatel', name: 'Jordan Patel', username: 'jpatel', email: 'jordan.patel@xpharma.com', admin: true, company: 'X Pharma' },
     { id: 'rlee', name: 'Riley Nguyen', username: 'rlee', email: 'riley.nguyen@xpharma.com', admin: false, company: 'X Pharma' },
     { id: 'u3', name: 'Alex Rivera', username: 'arivera', email: 'alex.rivera@xpharma.com', admin: false, company: 'X Pharma' },
-    { id: 'u4', name: 'Sam Okonkwo', username: 'sokonkwo', email: 'sam.okonkwo@xpharma.com', admin: false, company: 'X Pharma' }
+    { id: 'u4', name: 'Sam Okonkwo', username: 'sokonkwo', email: 'sam.okonkwo@xpharma.com', admin: false, company: 'X Pharma' },
+    { id: 'mchen', name: 'Mei Chen', username: 'mchen', email: 'm.chen@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma' },
+    { id: 'rnguyen', name: 'R. Nguyen', username: 'rnguyen', email: 'r.nguyen@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma', invited: true }
   ];
   function deny(msg) {
     var err = new Error(msg || 'Not authorized');
@@ -35,15 +37,11 @@
         if (raw.users) s.users = raw.users;
         if (raw.leads) s.leads = raw.leads;
         if (raw.grants) s.grants = raw.grants;
-        if (raw.audit) {
-          s.audit = raw.audit.filter(function (e) {
-            return e && e.note !== 'company change' && e.type !== 'company change';
-          });
-        }
+        if (raw.audit) s.audit = raw.audit.filter(function (e) { return !!e; });
       }
     } catch (e) {}
     USERS.forEach(function (u) {
-      if (!s.users[u.id]) s.users[u.id] = { company: u.company, admin: u.admin, name: u.name, username: u.username, email: u.email, deactivated: false, accessRevoked: false };
+      if (!s.users[u.id]) s.users[u.id] = { company: u.company, admin: u.admin, name: u.name, username: u.username, email: u.email, role: u.role || '', invited: !!u.invited, deactivated: false, accessRevoked: false };
     });
     return s;
   }
@@ -64,8 +62,32 @@
       company: over.company || (base && base.company) || '',
       email: over.email || (base && base.email) || '',
       deactivated: !!over.deactivated,
-      accessRevoked: !!over.accessRevoked
+      accessRevoked: !!over.accessRevoked,
+      role: over.role || (base && base.role) || '',
+      invited: !!(over.invited != null ? over.invited : base && base.invited)
     };
+  }
+  function resolveUser(token, s) {
+    if (!token) return null;
+    var key = String(token);
+    var ids = [];
+    USERS.forEach(function (u) { ids.push(u.id); });
+    Object.keys(s.users || {}).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+    var hit = null;
+    ids.forEach(function (id) {
+      var u = user(id, s);
+      if (!u) return;
+      if (u.id === key || u.username === key || u.name === key || u.email === key) hit = u;
+    });
+    return hit;
+  }
+  function activeAdminIds(s) {
+    var ids = [];
+    USERS.forEach(function (u) {
+      var row = user(u.id, s);
+      if (row && row.admin && !row.deactivated) ids.push(row.id);
+    });
+    return ids;
   }
   var api = {
     users: function () { return USERS.map(function (u) { return user(u.id); }); },
@@ -140,6 +162,10 @@
       }
       api.assertManage(compound);
       var s = read();
+      (grants || []).forEach(function (g) {
+        var who = resolveUser(g.userId || g.who || g.name, s);
+        if (who && who.deactivated) throw deny('A deactivated account cannot be granted access');
+      });
       s.grants[compound + '|' + level + '|' + path] = grants || [];
       (grants || []).forEach(function (g) {
         var id = g.userId || g.who;
@@ -171,11 +197,22 @@
       return ok;
     },
     audit: function () { return read().audit.slice(); },
+    soleLeadOf: function (userId) {
+      var s = read();
+      var out = [];
+      Object.keys(s.leads || {}).forEach(function (c) {
+        var ids = s.leads[c] || [];
+        if (ids.length === 1 && ids[0] === userId) out.push(c);
+      });
+      return out;
+    },
     deactivate: function (userId) {
       if (!api.isAdmin()) throw deny('Only Admin can deactivate an account');
       var s = read();
       var before = user(userId, s);
       if (!before) throw deny('Unknown user');
+      if (userId === s.currentId) throw deny('You cannot deactivate your own account');
+      if (before.admin && !before.deactivated && activeAdminIds(s).length <= 1) throw deny('The last active Admin cannot be deactivated');
       if (!s.users[userId]) s.users[userId] = {};
       s.users[userId].deactivated = true;
       s.users[userId].accessRevoked = true;
