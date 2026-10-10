@@ -6643,7 +6643,8 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
   /* 54px for the longest type word plus 12px breathing room before Status. */
   --tracker-type: 66px;
   --tracker-status: 126px;
-  --tracker-shell: 52px;
+  /* 52px for the longest shell word plus 12px breathing room before Job. */
+  --tracker-shell: 64px;
   --tracker-job: 140px;
   --tracker-actions: 122px;
   --tracker-programs-min: 168px;

@@ -1472,7 +1472,6 @@
       });
     });
     var keys = Object.keys(groups);
-    var approvedRows = sel.filter(function (row) { return (row.getAttribute('data-status') || '') === 'Approved'; });
     if (!keys.length) {
       var allReleased = sel.every(function (r) { return r.getAttribute('data-status') === 'In MW'; });
       if (hint) hint.textContent = sel.length + ' selected · ' + (allReleased ? 'Released to MW is the final stage' : 'no Send actions for these statuses');
@@ -1518,44 +1517,6 @@
       host.appendChild(btn);
     });
     }
-    var freezeBtn = document.createElement('button');
-    freezeBtn.type = 'button';
-    freezeBtn.className = 'btn';
-    var freezeCount = approvedRows.length;
-    freezeBtn.textContent = 'Freeze' + (freezeCount && freezeCount !== sel.length ? ' (' + freezeCount + ')' : '');
-    if (!freezeCount) {
-      freezeBtn.disabled = true;
-      freezeBtn.title = 'Frozen is only available from Approved';
-    } else {
-      freezeBtn.title = '';
-      freezeBtn.addEventListener('click', function () {
-        var hand = { action: 'freeze', label: 'Freeze', nextStatus: 'Frozen' };
-        var items = [];
-        sel.forEach(function (row) {
-          if ((row.getAttribute('data-status') || '') !== 'Approved') return;
-          items.push({ row: row, from: 'Approved', to: 'Frozen', hand: hand });
-        });
-        var skipped = sel.length - items.length;
-        if (!items.length) {
-          showToast('Frozen is only available from Approved');
-          return;
-        }
-        items.freezeSkipped = skipped;
-        askStageChange(items, function (info) {
-          var applied = 0;
-          items.forEach(function (it) {
-            if ((it.row.getAttribute('data-status') || '') !== 'Approved') return;
-            if (applyTransition(it.row, hand, info) !== false) applied++;
-          });
-          var msg = 'Frozen · ' + applied + ' record' + (applied === 1 ? '' : 's');
-          if (skipped) msg += ' · ' + skipped + ' skipped';
-          showToast(msg);
-          applyFilters();
-          syncBulk();
-        }, null, freezeBtn);
-      });
-    }
-    host.appendChild(freezeBtn);
   }
 
 
@@ -3835,14 +3796,6 @@
       openRolesPop(bb, rows, true);
     });
   })();
-
-  /* Truncated output titles show the full title on hover. */
-  document.addEventListener('mouseover', function (e) {
-    var t = e.target && e.target.closest ? e.target.closest('.artifact-row .artifact-title') : null;
-    if (!t) return;
-    if (t.scrollWidth > t.clientWidth + 1) t.setAttribute('title', t.textContent.replace(/\s+/g, ' ').trim());
-    else t.removeAttribute('title');
-  });
 
   function buildArtifactRow(opts) {
     var row = document.createElement('article');
