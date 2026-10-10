@@ -3017,6 +3017,8 @@
     if (hit) return hit;
     var saved = window.SPHERE_DEMO && SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells(store) : null;
     if (String(store || '') === 'ONC-204-301' && !(saved && saved.length) && HOME_SEED_SHELL_IDS[id]) return id;
+    /* Not materialized yet: Mock Shells creates the linked Draft shell when it opens. */
+    if (id.indexOf('trk-rec-') === 0) return id;
     return '';
   }
   function shellIdForRow(row) {
@@ -3061,6 +3063,10 @@
     var i;
     for (i = 0; i < shells.length; i++) if (String(shells[i].id) === String(key)) return shells[i].id;
     for (i = 0; i < shells.length; i++) if (String(shells[i].number) === String(key)) return shells[i].id;
+    /* trk-<record id>: the shell Mock Shells made or linked for a Tracker record. */
+    if (String(key).indexOf('trk-') === 0) {
+      for (i = 0; i < shells.length; i++) if (shells[i].trackerRecordId === String(key).slice(4)) return shells[i].id;
+    }
     return '';
   }
 
@@ -3944,16 +3950,22 @@
       else { field('nrProgram').removeAttribute('aria-invalid'); field('nrProgramError').hidden = true; }
       if (bad) return;
       var before = allRows().length;
+      var nrId = mintRecordId();
+      var nrType = field('nrType').value;
+      /* Table / Listing / Figure: link the matching shell, or the Draft shell Mock Shells
+         creates for this record (trk-<record id>). Datasets have no shell. */
+      var nrShellId = linkedShellId(title, field('nrShell').value, runtimeScopeId());
+      if (!nrShellId && nrType !== 'Dataset') nrShellId = 'trk-' + nrId;
       var spec = {
-        type: field('nrType').value,
+        type: nrType,
         status: 'Draft',
         tags: field('nrTags').value,
         sap: field('nrSap').value,
         program: program,
         title: title,
         shell: field('nrShell').value,
-        shellId: linkedShellId(title, field('nrShell').value, runtimeScopeId()),
-        recordId: mintRecordId()
+        shellId: nrShellId,
+        recordId: nrId
       };
       rememberRuntimeRow(spec);
       var row = buildArtifactRow(spec);
@@ -6511,6 +6523,13 @@
       el.innerHTML = first + list.map(function (sd) { return '<option>' + escapeHtml(sd.name) + '</option>'; }).join('');
       el.value = cur;
     });
+    /* New Record offers every shared SAP section, custom ones included. */
+    var nrSapEl = document.getElementById('nrSap');
+    if (nrSapEl) {
+      var nrCur = nrSapEl.value;
+      nrSapEl.innerHTML = list.map(function (sd) { return '<option>' + escapeHtml(sd.name) + '</option>'; }).join('');
+      if (list.some(function (sd) { return sd.name === nrCur; })) nrSapEl.value = nrCur;
+    }
     if (typeof syncSectionCounts === 'function') syncSectionCounts();
   }
 
@@ -6695,6 +6714,7 @@
       if ((spec.scope || RUNTIME_HOME) !== scope) return;
       var id = String(spec.recordId).replace(/"/g, '');
       if (board.querySelector('.artifact-row[data-record-id="' + id + '"]')) return;
+      if (!spec.shellId && /^(Table|Listing|Figure)$/.test(spec.type || '')) spec.shellId = 'trk-' + spec.recordId;
       var built = buildArtifactRow(spec);
       if (spec.programFile && spec.program) {
         noteProgramFile(spec.scope || scope, spec.program);
