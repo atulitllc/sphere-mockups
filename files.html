@@ -36,7 +36,7 @@
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
 <script src="sphere-access.js?v=acct1"></script>
-<script src="demo-flow.js?v=flow4round4"></script>
+<script src="demo-flow.js?v=progname1"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -552,6 +552,23 @@
       });
     });
     NESTED.forEach(function (f) { if (map[f.name]) f.name = map[f.name]; });
+    var scope = window.SPHERE_filesScope || 'ONC-204-301';
+    if (TREE.programs && SPHERE_DEMO.fileExists) {
+      var have = {};
+      Object.keys(TREE).forEach(function (key) {
+        (TREE[key] || []).forEach(function (f) { if (f && f.name) have[f.name] = 1; });
+      });
+      Object.keys(map).forEach(function (oldName) {
+        var neu = map[oldName];
+        if (!neu || have[neu]) return;
+        if (!SPHERE_DEMO.fileExists(scope, neu)) return;
+        var ext = String(neu.split('.').pop() || '').toLowerCase();
+        var type = ext === 'sas' ? 'sas' : (ext === 'r' ? 'R' : 'file');
+        var stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        TREE.programs.push({ name: neu, type: type, size: '12 KB', modified: stamp });
+        have[neu] = 1;
+      });
+    }
   }
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function parseWhen(raw) {
