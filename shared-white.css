@@ -6301,6 +6301,8 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 .artifact-row .artifact-meta .qc-program-name b { font-weight: 650; color: var(--muted-2); margin-right: 3px; font-size: 9.5px; letter-spacing: .03em; }
 .artifact-row .artifact-meta .program-open-link { color: var(--accent); text-decoration: none; cursor: pointer; }
 .artifact-row .artifact-meta .program-open-link:hover { text-decoration: underline; }
+.artifact-row .artifact-meta .program-open-link.is-unwritten { color: var(--muted); }
+.artifact-row .artifact-meta .unwritten-mark { color: var(--muted-2); font-size: 10px; margin-left: 4px; }
 a.shell-open-link {
   color: var(--accent);
   font-weight: 600;

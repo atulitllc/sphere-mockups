@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4qc" />
+<link rel="stylesheet" href="shared-white.css?v=flow4tabs" />
 <script>
 (function () {
   try {
@@ -2021,6 +2021,93 @@
       : '<span class="run-st ' + face.cls + '" title="' + runEsc(title) + '">' + inner + '</span>';
   }
 
+  /* Study-tree files, saved sources, and finished runs. Not filename patterns. */
+  var programFileSet = {};
+  function programFileKey(scope, name) {
+    return String(scope || TRACKER_HOME) + '|' + String(name || '').split('/').pop();
+  }
+  function noteProgramFile(scope, name) {
+    var n = String(name || '').split('/').pop();
+    if (!n || n === '-') return;
+    programFileSet[programFileKey(scope, n)] = 1;
+  }
+  function qcProgramName(row) {
+    var marked = row && row.getAttribute ? row.getAttribute('data-qc') : null;
+    if (marked === '' || marked === 'not-created') return '';
+    if (marked) return String(marked).split('/').pop();
+    var prog = runProgName(row);
+    if (!prog) return '';
+    if (window.SPHERE_DEMO && SPHERE_DEMO.qcName) return SPHERE_DEMO.qcName(prog);
+    return 'qc-' + prog;
+  }
+  function programWritten(row, scope) {
+    var name = scope === 'qc' ? qcProgramName(row) : runProgName(row);
+    if (!name) return false;
+    if (programFileSet[programFileKey(rowStudyScope(row), name)]) return true;
+    var side = scope === 'qc' ? 'qc' : 'prod';
+    if (window.SPHERE_DEMO && SPHERE_DEMO.getSource && SPHERE_DEMO.getSource(flowKey(row) + ':' + side)) return true;
+    return false;
+  }
+  function logExists(row, scope) {
+    return !!(row && (scope === 'qc' ? row._qcRan : row._prodRan));
+  }
+  function rtfExists(row) {
+    var type = row ? (row.getAttribute('data-type') || '') : '';
+    if (type !== 'Table' && type !== 'Listing' && type !== 'Figure') return false;
+    return !!(row && row._outputReady);
+  }
+  function sealPhase(j, idx, ok) {
+    var phase = j && j.phases ? j.phases[idx] : null;
+    var row = j && j.row;
+    if (!phase || !row || phase._sealed) return;
+    phase._sealed = true;
+    var isQc = phase.kind === 'QC';
+    if (isQc) row._qcRan = true;
+    else row._prodRan = true;
+    if (!isQc && ok) row._outputReady = true;
+    var name = isQc ? qcProgramName(row) : runProgName(row);
+    if (name) noteProgramFile(rowStudyScope(row), name);
+    row._sideLogs = row._sideLogs || {};
+    row._sideLogs[isQc ? 'qc' : 'prod'] = { lang: j.lang, text: runLogText(j, idx) };
+    if (typeof refreshArtifactPresence === 'function') refreshArtifactPresence(row);
+  }
+  function sealFinishedJob(j) {
+    if (!j || !j.phases) return;
+    var ok = j.state !== 'error';
+    j.phases.forEach(function (p, i) { sealPhase(j, i, ok); });
+  }
+  function registerStudyFiles() {
+    allRows().forEach(function (row) {
+      var id = row.getAttribute('data-record-id') || '';
+      if (id.indexOf('seed-') !== 0) return;
+      var prog = runProgName(row);
+      if (prog) noteProgramFile(TRACKER_HOME, prog);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#folderList .import-file'), function (f) {
+      var name = String(f.value || '').split('/').pop();
+      if (name) noteProgramFile(TRACKER_HOME, name);
+    });
+    if (window.SPHERE_DEMO && SPHERE_DEMO.records) {
+      SPHERE_DEMO.records().forEach(function (rec) {
+        if (!rec || !rec.program) return;
+        var scope = rec.study || TRACKER_HOME;
+        noteProgramFile(scope, rec.program);
+        var qc = SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(rec.program) : '';
+        if (qc) noteProgramFile(scope, qc);
+      });
+    }
+  }
+  function rememberFinishedSide(row, scope, ok) {
+    if (!row) return;
+    if (scope === 'qc') row._qcRan = true;
+    else {
+      row._prodRan = true;
+      if (ok) row._outputReady = true;
+    }
+    var name = scope === 'qc' ? qcProgramName(row) : runProgName(row);
+    if (name) noteProgramFile(rowStudyScope(row), name);
+  }
+
   /* Seeded jobs are finished. Running and Queued exist only after the user clicks Run. */
   allRows().forEach(function (row) {
     var st = row.getAttribute('data-job');
@@ -2040,7 +2127,9 @@
     row.setAttribute('data-job', j.state);
     row.setAttribute('data-last-run', j.endDate.toISOString());
     renderJobCell(row);
+    sealFinishedJob(j);
   });
+  registerStudyFiles();
 
   var JOB_SEQ_KEY = 'sphere-tracker-job-seq';
   function nextJobBatchId() {
@@ -2105,8 +2194,11 @@
     runJobs.forEach(function (j) {
       if (j.state !== 'running') return;
       if (now - j.phaseAt >= j.phases[j.phase].dur) {
-        if (j.phase < j.phases.length - 1) { j.phase++; j.phaseAt = now; }
-        else finishRunJob(j, now);
+        if (j.phase < j.phases.length - 1) {
+          sealPhase(j, j.phase, true);
+          j.phase++;
+          j.phaseAt = now;
+        } else finishRunJob(j, now);
       }
     });
     var running = runJobs.filter(function (j) { return j.state === 'running'; }).length;
@@ -2133,6 +2225,7 @@
     var row = j.row;
     row.setAttribute('data-job', 'done');
     row.setAttribute('data-last-run', j.endDate.toISOString());
+    sealFinishedJob(j);
     if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row), rowStudyScope(row));
     if (typeof decorateRerunDot === 'function') decorateRerunDot(row);
     renderJobCell(row);
@@ -3574,6 +3667,7 @@
       rememberRuntimeRow(spec);
       var row = buildArtifactRow(spec);
       moveRowToSap(row, sap);
+      refreshRowWorkflowUI(row);
       f.checked = false;
     });
     closeImport();
@@ -4548,16 +4642,6 @@
   function artifactFileName(meta, scope) {
     return scope === 'qc' ? (meta.qc || '') : (meta.prog || '');
   }
-  function artifactTabDefs(meta, scope) {
-    var file = artifactFileName(meta, scope);
-    var progPath = scope === 'qc' ? meta.qcProgPath : meta.progPath;
-    var logPath = scope === 'qc' ? meta.qcLogPath : meta.logPath;
-    return [
-      { id: 'prog', label: 'Program', path: progPath, file: file },
-      { id: 'log', label: 'Log', path: logPath, file: file },
-      { id: 'rtf', label: 'RTF', path: meta.outPath, file: file }
-    ];
-  }
   function programEditableFor(row, scope) {
     var status = (row && row.getAttribute('data-status')) || '';
     if (scope === 'qc') return qcEditable(status);
@@ -4578,14 +4662,18 @@
     var body = lang ? highlightLog(text, lang) : escapeHtml(text);
     return '<pre class="run-log-pre artifact-code" tabindex="0">' + body + '</pre>';
   }
-  function demoLogPack(row, kind) {
+  function sideLogPack(row, scope) {
+    var key = scope === 'qc' ? 'qc' : 'prod';
+    if (row._sideLogs && row._sideLogs[key]) return row._sideLogs[key];
     var job = row._runJob;
-    if (job && job.state === 'done' && job.phases) {
+    var kind = scope === 'qc' ? 'QC' : 'Prod';
+    if (job && (job.state === 'done' || job.state === 'error') && job.phases) {
       for (var i = 0; i < job.phases.length; i++) {
         if (job.phases[i].kind === kind) return { lang: job.lang, text: runLogText(job, i) };
       }
     }
-    var prog = runProgName(row);
+    if (!logExists(row, scope)) return null;
+    var prog = scope === 'qc' ? qcProgramName(row) : runProgName(row);
     if (!prog) return null;
     var lang = programLang(prog, row);
     var fake = {
@@ -4602,11 +4690,35 @@
     };
     return { lang: lang, text: lang === 'SAS' ? buildSasLog(fake, 0) : buildRLog(fake, 0) };
   }
+  function availableArtifactTabs(row, scope) {
+    var meta = artifactMeta(row);
+    var file = artifactFileName(meta, scope);
+    var progPath = scope === 'qc' ? meta.qcProgPath : meta.progPath;
+    var logPath = scope === 'qc' ? meta.qcLogPath : meta.logPath;
+    var tabs = [];
+    if (programWritten(row, scope)) tabs.push({ id: 'prog', label: 'Program', path: progPath, file: file });
+    if (logExists(row, scope)) tabs.push({ id: 'log', label: 'Log', path: logPath, file: file });
+    if (rtfExists(row)) tabs.push({ id: 'rtf', label: 'RTF', path: meta.outPath, file: file });
+    return tabs;
+  }
+  function paintArtifactTabButtons(scope, tabs, selected) {
+    var host = document.getElementById('artifactTabs');
+    if (!host) return;
+    host.innerHTML = '';
+    host.setAttribute('aria-label', artifactSideLabel(scope) + ' artifacts');
+    tabs.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'artifact-tab';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('data-art-tab', t.id);
+      b.setAttribute('aria-selected', t.id === selected ? 'true' : 'false');
+      b.textContent = t.label;
+      if (t.path) b.title = t.path;
+      host.appendChild(b);
+    });
+  }
   function renderArtifactRtf(pane, row, meta, gen, scope) {
-    if (scope === 'qc') {
-      pane.innerHTML = emptyArtifact('No QC RTF on this record. QC programs validate production output; open the production program name to preview the TLF RTF.');
-      return;
-    }
     if (meta.type === 'Dataset') {
       pane.innerHTML = emptyArtifact('No TLF RTF for this dataset. Production writes an analysis dataset' + (meta.outPath ? ' at ' + meta.outPath : '') + '.');
       return;
@@ -4641,7 +4753,6 @@
     var side = artifactSideLabel(scope);
     var file = artifactFileName(meta, scope);
     if (tab.id === 'rtf') {
-      if (scope === 'qc') return side + ' · ' + (file || 'QC program') + ' · no QC RTF';
       if (meta.type === 'Dataset') return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (meta.outPath ? ' · ' + meta.outPath : '');
       if (!meta.sample) return side + ' · No output file on this record';
       var id = rowOutputId(row);
@@ -4660,10 +4771,11 @@
     var ro = document.getElementById('artifactRoNote');
     if (!modal || !row || !pane) return;
     var meta = artifactMeta(row);
-    var tabs = artifactTabDefs(meta, scope);
+    var tabs = availableArtifactTabs(row, scope);
     var tab = null;
     tabs.forEach(function (t) { if (t.id === id) tab = t; });
     if (!tab) tab = tabs[0];
+    if (!tab) return;
     modal._tab = tab.id;
     var gen = ++artifactGen;
     Array.prototype.forEach.call(document.querySelectorAll('#artifactTabs .artifact-tab'), function (b) {
@@ -4702,7 +4814,7 @@
     }
     setArtifactFoot(false, false);
     if (tab.id === 'log') {
-      var pack = demoLogPack(row, scope === 'qc' ? 'QC' : 'Prod');
+      var pack = sideLogPack(row, scope);
       if (!pack) {
         pane.innerHTML = emptyArtifact('No ' + (scope === 'qc' ? 'QC' : 'production') + ' program on this record, so there is no log.');
         return;
@@ -4717,33 +4829,49 @@
     var titleEl = document.getElementById('rtfModalTitle');
     var host = document.getElementById('artifactTabs');
     if (!modal || !host || !row) return;
-    if (!row.getAttribute('data-program')) {
+    if (!row.getAttribute('data-program') && scope !== 'qc') {
       showToast('No program file linked to this row yet');
       return;
     }
     scope = scope === 'qc' ? 'qc' : 'prod';
+    var tabs = availableArtifactTabs(row, scope);
+    if (!tabs.length) {
+      if (!modal.hasAttribute('hidden')) closeRtfPreview();
+      showToast('No program, log or output yet');
+      return;
+    }
     modal._row = row;
     modal._scope = scope;
     var meta = artifactMeta(row);
-    var file = artifactFileName(meta, scope) || (scope === 'qc' ? 'QC program' : 'Program');
-    var title = ((row.querySelector('.artifact-title') || {}).textContent || '').trim();
-    var editable = programEditableFor(row, scope);
-    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + file + ' · ' + artifactSideLabel(scope);
-    host.innerHTML = '';
-    host.setAttribute('aria-label', artifactSideLabel(scope) + ' artifacts');
-    artifactTabDefs(meta, scope).forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'artifact-tab';
-      b.setAttribute('role', 'tab');
-      b.setAttribute('data-art-tab', t.id);
-      b.setAttribute('aria-selected', 'false');
-      b.textContent = t.label;
-      if (t.path) b.title = t.path;
-      host.appendChild(b);
-    });
+    var file = artifactFileName(meta, scope) || (scope === 'qc' ? 'QC' : 'Program');
+    var editable = tabs[0].id === 'prog' && programEditableFor(row, scope);
+    var heading = programWritten(row, scope) ? file : tabs.map(function (t) { return t.label; }).join(' · ');
+    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + heading + ' · ' + artifactSideLabel(scope);
+    paintArtifactTabButtons(scope, tabs, tabs[0].id);
     modal.removeAttribute('hidden');
-    showArtifactTab('prog');
+    showArtifactTab(tabs[0].id);
+  }
+  function refreshArtifactTabs(row) {
+    var modal = document.getElementById('rtfModal');
+    if (!modal || modal.hasAttribute('hidden') || modal._row !== row) return;
+    var scope = modal._scope || 'prod';
+    var tabs = availableArtifactTabs(row, scope);
+    if (!tabs.length) {
+      closeRtfPreview();
+      showToast('No program, log or output yet');
+      return;
+    }
+    var current = modal._tab;
+    var still = false;
+    tabs.forEach(function (t) { if (t.id === current) still = true; });
+    paintArtifactTabButtons(scope, tabs, still ? current : tabs[0].id);
+    if (!still) showArtifactTab(tabs[0].id);
+  }
+  function refreshArtifactPresence(row) {
+    if (!row) return;
+    var cells = row.querySelectorAll('.artifact-meta > .meta-cell');
+    if (cells[0] && typeof paintProgramCell === 'function') paintProgramCell(row, cells[0], row.getAttribute('data-status') || '');
+    if (typeof refreshArtifactTabs === 'function') refreshArtifactTabs(row);
   }
   function closeRtfPreview() {
     var modal = document.getElementById('rtfModal');
@@ -4766,6 +4894,7 @@
     var prog = (row.getAttribute('data-program') || 'program').split('/').pop();
     var file = scope === 'qc' ? (window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog) : prog;
     var len = code ? code.value.length : 0;
+    if (file) noteProgramFile(rowStudyScope(row), file);
     if (window.SPHERE_DEMO && code) {
       SPHERE_DEMO.setSource(flowKey(row) + ':' + scope, code.value);
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
@@ -4986,8 +5115,9 @@
     var code = document.getElementById('programEditCode');
     if (code && code.readOnly) { closeProgramEditor(); return; }
     var prog = (row.getAttribute('data-program') || 'program').split('/').pop();
-    var file = programEditWhich === 'qc' ? SPHERE_DEMO.qcName(prog) : prog;
+    var file = programEditWhich === 'qc' ? (window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : ('qc-' + prog)) : prog;
     var len = code ? code.value.length : 0;
+    if (file) noteProgramFile(rowStudyScope(row), file);
     if (window.SPHERE_DEMO && code) {
       SPHERE_DEMO.setSource(flowKey(row) + ':' + programEditWhich, code.value);
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
@@ -5192,14 +5322,36 @@
         '<span class="wf-lbl">' + s.label + '</span>' + (when && i <= idx ? '<span class="wf-when">' + when + '</span>' : '') + '</li>';
     }).join('') + '</ol>';
   }
+  function artifactOpenTitle(row, scope) {
+    var bits = [];
+    if (programWritten(row, scope)) bits.push('Program');
+    if (logExists(row, scope)) bits.push('Log');
+    if (rtfExists(row)) bits.push('RTF');
+    var side = scope === 'qc' ? 'QC' : 'production';
+    if (!bits.length) return 'No program, log or output yet';
+    var title = 'Open ' + side + ' · ' + bits.join(' · ');
+    if (!programWritten(row, scope)) title = 'not created · ' + title;
+    return title;
+  }
+  function programLinkHtml(row, scope, cls, inner) {
+    var unwritten = !programWritten(row, scope);
+    var title = artifactOpenTitle(row, scope);
+    return '<a href="#" class="' + cls + ' program-open-link' + (unwritten ? ' is-unwritten' : '') + '" data-which="' + (scope === 'qc' ? 'qc' : 'prod') + '" title="' + escapeHtml(title) + '">' +
+      inner + (unwritten ? '<span class="unwritten-mark">not created</span>' : '') + '</a>';
+  }
   function paintProgramCell(row, cell, status) {
     if (!cell) return;
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
     if (!prog) return;
-    var qc = window.SPHERE_DEMO ? SPHERE_DEMO.qcName(prog) : 'qc-' + prog;
+    var qc = qcProgramName(row);
     var hint = window.SPHERE && SPHERE.programPathHint ? SPHERE.programPathHint(prog, status) : prog;
-    cell.innerHTML = '<a href="#" class="meta-v program-name program-open-link" data-which="prod" title="Open production · Program · Log · RTF · ' + escapeHtml(hint) + '">' + escapeHtml(prog) + '</a>' +
-      '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
+    var prod = programLinkHtml(row, 'prod', 'meta-v program-name', escapeHtml(prog));
+    var qcHtml = qc
+      ? programLinkHtml(row, 'qc', 'qc-program-name', '<b>QC</b>' + escapeHtml(qc))
+      : '<span class="qc-program-name is-unwritten" title="not created"><b>QC</b><span class="unwritten-mark">not created</span></span>';
+    cell.innerHTML = prod + qcHtml;
+    var prodLink = cell.querySelector('[data-which="prod"]');
+    if (prodLink && hint) prodLink.setAttribute('title', artifactOpenTitle(row, 'prod') + ' · ' + hint);
     decorateRerunDot(row);
   }
   function rowStudyScope(row) {
@@ -6101,7 +6253,10 @@
       if ((spec.scope || RUNTIME_HOME) !== scope) return;
       var id = String(spec.recordId).replace(/"/g, '');
       if (board.querySelector('.artifact-row[data-record-id="' + id + '"]')) return;
-      moveRowToSap(buildArtifactRow(spec), spec.sap || 'Demographics');
+      var built = buildArtifactRow(spec);
+      moveRowToSap(built, spec.sap || 'Demographics');
+      var job = String(spec.job || '').toLowerCase();
+      if (job === 'done' || job === 'error') rememberFinishedSide(built, 'prod', job === 'done');
     });
   }
 
