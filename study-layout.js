@@ -202,6 +202,17 @@
     return '<ul class="lt-tree lt-root">' + body + '</ul>';
   }
 
+  /* ?study=PRO-001::DSUR is the older store id. Split it into study plus deliverable. */
+  function legacyStudyQuery(q) {
+    var study = q.get('study') || '';
+    var del = q.get('deliverable') || '';
+    var cut = study.indexOf('::');
+    if (cut >= 0) {
+      if (!del) del = study.slice(cut + 2) || 'CSR';
+      study = study.slice(0, cut);
+    }
+    return { study: study, deliverable: del };
+  }
   function openedStudy() {
     try {
       var q = new URLSearchParams(location.search);
@@ -210,16 +221,17 @@
         if (!list || !list.length) return null;
         return list.filter(function (x) { return x.current; })[0] || list[0];
       }
-      var del = q.get('deliverable') || '';
-      var asked = !!(q.get('path') || q.get('study') || del);
+      var parts = legacyStudyQuery(q);
+      var del = parts.deliverable;
+      var studyKey = parts.study;
+      var asked = !!(q.get('path') || q.get('study') || q.get('deliverable'));
       function narrow(list) {
         if (!del) return list;
         return list.filter(function (x) { return x.deliverable === del; });
       }
       var e = (q.get('path') && pick(narrow(reg.filter(function (x) { return entryPath(x) === q.get('path'); })))) ||
-        (q.get('study') && pick(narrow(reg.filter(function (x) {
-          var id = q.get('study');
-          return studyId(x) === id || x.protocol === id || x.compound === id;
+        (studyKey && pick(narrow(reg.filter(function (x) {
+          return studyId(x) === studyKey || x.protocol === studyKey || x.compound === studyKey;
         }))));
       if (e) return setCurrent(e) || e;
       if (asked || /studies\.html/.test(location.pathname)) return null;
@@ -231,12 +243,18 @@
   function askedStudyLabel() {
     try {
       var q = new URLSearchParams(location.search);
-      var study = q.get('study') || '';
-      var del = q.get('deliverable') || '';
+      var parts = legacyStudyQuery(q);
+      var study = parts.study;
+      var del = parts.deliverable;
       if (study && del && del !== 'CSR') return study + ' / ' + del;
       if (study) return study;
       return q.get('path') || '';
     } catch (e) { return ''; }
+  }
+  function setCrumbTitle(crumb) {
+    if (!crumb) return;
+    var text = (crumb.textContent || '').replace(/\s+/g, ' ').trim();
+    if (text) crumb.setAttribute('title', text);
   }
   function queryAskedStudy() {
     try {
@@ -279,6 +297,7 @@
       var st = document.createElement('strong');
       st.textContent = 'Study not found';
       crumb.appendChild(st);
+      setCrumbTitle(crumb);
     }
     var foot = document.querySelector('.nav-footer');
     if (foot) foot.textContent = 'Study not found';
@@ -296,6 +315,7 @@
     if (!/studies\.html/.test(location.pathname)) {
       var crumb = document.querySelector('.crumb strong');
       if (crumb) crumb.textContent = label;
+      setCrumbTitle(document.querySelector('.crumb'));
       var foot = document.querySelector('.nav-footer');
       if (foot && !/admin\.html/.test(location.pathname)) foot.textContent = label + ' · Phase ' + (e.phase || '-');
     }

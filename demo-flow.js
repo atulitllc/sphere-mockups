@@ -113,6 +113,23 @@
     var l = '* ' + (label + '              ').slice(0, 15) + ': ' + val;
     return l;
   }
+  function programScope(rec) {
+    var scope = String((rec && rec.study) || STUDY);
+    var cut = scope.indexOf('::');
+    var protocol = cut < 0 ? scope : scope.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : (scope.slice(cut + 2) || 'CSR');
+    var root = '/studies/' + protocol.toLowerCase() + '/';
+    if (deliverable !== 'CSR') root += deliverable.toLowerCase() + '/';
+    var label = deliverable === 'CSR' ? protocol : (protocol + ' / ' + deliverable);
+    var phase = '';
+    if (window.SPHERE_LAYOUT && SPHERE_LAYOUT.registry) {
+      var hit = SPHERE_LAYOUT.registry().filter(function (e) {
+        return e.protocol === protocol && (e.deliverable || 'CSR') === deliverable;
+      })[0];
+      if (hit && hit.phase) phase = ' (Phase ' + hit.phase + ')';
+    }
+    return { label: label + phase, root: root };
+  }
   function programHeader(rec, which) {
     var isQc = which === 'qc';
     var prog = isQc ? qcName(rec.program) : rec.program;
@@ -121,17 +138,18 @@
     var bar = '*' + new Array(79).join('*');
     var dash = '*' + new Array(79).join('-');
     var outId = (rec.type || 'Table') + ' ' + rec.number;
+    var scopeBits = programScope(rec);
     var L = [];
     L.push('/' + bar);
     L.push(line('Program', prog + (isQc ? '   [QC / VALIDATION PROGRAM]' : '')));
-    L.push(line('Study/Protocol', STUDY + ' (Phase 3)'));
+    L.push(line('Study/Protocol', scopeBits.label));
     L.push(line('Output ID', outId));
     L.push(line('Title', rec.title));
     L.push(line('Population', rec.population));
     L.push(line('Source data', (rec.sources || []).join(', ')));
     if (rec.keyVars) L.push(line('Key variables', rec.keyVars));
     if (rec.sortOrder) L.push(line('Sort order', rec.sortOrder));
-    L.push(line('Output file', '/studies/onc-204-301/output/tlf/' + (isQc ? 'qc/' : '') + rec.program.replace(/\.sas$/i, '') + (isQc ? '.sas7bdat' : '.rtf')));
+    L.push(line('Output file', scopeBits.root + 'output/tlf/' + (isQc ? 'qc/' : '') + rec.program.replace(/\.sas$/i, '') + (isQc ? '.sas7bdat' : '.rtf')));
     L.push(line('Mock shell', 'Mock Shells ' + rec.number + ' v' + (rec.shellVersion || '0.1') + ' · synced ' + rec.syncedAt));
     if (isQc) {
       L.push(line('Purpose', 'Independent double programming of ' + rec.program));

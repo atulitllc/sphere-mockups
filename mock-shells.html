@@ -1287,7 +1287,10 @@
   function updateStudyChrome() {
     var label = studyChromeLabel(CURRENT_STUDY);
     var crumb = document.querySelector('.crumb');
-    if (crumb) crumb.innerHTML = '<a href="studies.html">Studies</a> / <strong>' + escapeHtml(label) + '</strong> / Mock Shells';
+    if (crumb) {
+      crumb.innerHTML = '<a href="studies.html">Studies</a> / <strong>' + escapeHtml(label) + '</strong> / Mock Shells';
+      crumb.title = 'Studies / ' + label + ' / Mock Shells';
+    }
     var foot = document.querySelector('.nav-footer');
     if (foot) foot.textContent = label + ' · Phase ' + phaseForStore(CURRENT_STUDY);
   }
@@ -1448,6 +1451,7 @@
   }
   function loadShellIntoEditor(sh) {
     if (!sh) return;
+    shellMissingId = '';
     var lay = sh.layout || blankLayout(sh.title);
     state.title = tidyVisible(lay.title || sh.title);
     if (lay.title) lay.title = state.title;
@@ -4090,8 +4094,15 @@
     loadShellIntoEditor(sh);
     renderCatalog();
   }
+  var shellMissingId = '';
   function paintOutIdAndFigure() {
     var out = document.getElementById('shellOutId');
+    if (shellMissingId) {
+      if (out) out.textContent = '';
+      var figMiss = document.getElementById('figPreview');
+      if (figMiss) { figMiss.hidden = true; figMiss.innerHTML = ''; }
+      return;
+    }
     var type = (document.getElementById('metaType') || {}).value || 'Table';
     var num = (document.getElementById('metaNumber') || {}).value || '';
     if (out) out.textContent = type + ' ' + num;
@@ -4142,6 +4153,34 @@
     document.addEventListener('DOMContentLoaded', updateStudyChrome);
     renderCatalog();
   }
+  function showShellNotFound(id) {
+    shellMissingId = String(id || '');
+    if (studyStore[CURRENT_STUDY]) studyStore[CURRENT_STUDY].selectedId = null;
+    catalogSelectedIds = [];
+    catalogAnchorId = null;
+    state.title = 'Shell not found';
+    state.subtitle = (shellMissingId ? shellMissingId + ' is not in this study.' : 'That shell is not in this study.');
+    state.subgroup = '';
+    state.columns = [];
+    state.colGroups = [];
+    state.rows = [];
+    state.selectedCols = [];
+    state.selectedGroupId = null;
+    state.selectedGroupIds = [];
+    state.footnotes = '';
+    state.notes = '';
+    state.program = '';
+    state.sapRef = '';
+    state.custom = false;
+    state.activeRow = -1;
+    var numEl = document.getElementById('metaNumber');
+    if (numEl) numEl.value = '';
+    var badge = document.getElementById('shellStatusBadge');
+    if (badge) badge.textContent = '';
+    updateStudyChrome();
+    renderCatalog();
+    render();
+  }
   (function bootFromShellQuery() {
     if (shellQueryMissing) return;
     var requested = '';
@@ -4184,17 +4223,11 @@
         renderCatalog();
         loadShellIntoEditor(stay);
       } else {
-        if (requested && studyStore[CURRENT_STUDY]) {
-          studyStore[CURRENT_STUDY].selectedId = null;
-          catalogSelectedIds = [];
-          catalogAnchorId = null;
-          var numEl = document.getElementById('metaNumber');
-          if (numEl) numEl.value = '';
-          var titleEl = document.getElementById('shellTitle');
-          if (titleEl) titleEl.textContent = '';
+        if (requested) showShellNotFound(requested);
+        else {
+          updateStudyChrome();
+          renderCatalog();
         }
-        updateStudyChrome();
-        renderCatalog();
       }
     }
     var id = (studyStore[CURRENT_STUDY] && studyStore[CURRENT_STUDY].selectedId) || '';

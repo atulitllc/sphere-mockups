@@ -435,6 +435,11 @@
   var askedStudy = q.get('study') || '';
   var askedDel = q.get('deliverable') || '';
   var askedPath = q.get('path') || '';
+  var legacyCut = askedStudy.indexOf('::');
+  if (legacyCut >= 0) {
+    if (!askedDel) askedDel = askedStudy.slice(legacyCut + 2) || 'CSR';
+    askedStudy = askedStudy.slice(0, legacyCut);
+  }
   var asked = !!(askedStudy || askedDel || askedPath);
   var e = null;
   if (askedStudy && askedDel) {

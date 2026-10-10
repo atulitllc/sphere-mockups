@@ -819,7 +819,7 @@
       <button class="btn ghost" type="button" id="btnCloseImport" aria-label="Close">Close</button>
     </div>
     <div class="modal-body">
-      <div class="folder-path">ONC-204-301 / programs/</div>
+      <div class="folder-path" id="importFolderPath">ONC-204-301 / programs/</div>
       <ul class="folder-list" id="folderList">
         <li class="dir">📁 adam/</li>
         <li>
@@ -1310,6 +1310,14 @@
   });
   syncNavBtn();
 
+  var TRACKER_HOME = 'ONC-204-301';
+  /* Unknown studies replace .content. Stop before filters, jobs, sort, or timers touch those nodes. */
+  if (trackerQueryAsked() && !registryEntryForStore(trackerStoreId())) {
+    if (window.SPHERE_LAYOUT && SPHERE_LAYOUT.showStudyNotFound) {
+      SPHERE_LAYOUT.showStudyNotFound(String(trackerStoreId()).replace(/::/g, ' / '));
+    }
+    return;
+  }
 
   /* -- Tracker interactions -- */
   var board = document.getElementById('trackerBoard');
@@ -1992,6 +2000,17 @@
     renderJobCell(row);
   });
 
+  function nextJobBatchId() {
+    jobSeq += 1;
+    var raw = String(trackerStoreId() || TRACKER_HOME);
+    if (raw === TRACKER_HOME) return 'JOB-' + jobSeq;
+    var cut = raw.indexOf('::');
+    var protocol = (cut < 0 ? raw : raw.slice(0, cut)).replace(/[^A-Za-z0-9]/g, '');
+    var deliverable = cut < 0 ? '' : raw.slice(cut + 2).replace(/[^A-Za-z0-9]/g, '');
+    var tag = protocol || 'S';
+    if (deliverable && deliverable !== 'CSR') tag += '-' + deliverable;
+    return 'JOB-' + tag + '-' + jobSeq;
+  }
   function simEnqueue(rows, mode, note) {
     var fresh = [], busy = 0;
     rows.forEach(function (row) {
@@ -2003,8 +2022,7 @@
       showToast(busy ? (busy === 1 ? 'Already queued or running' : busy + ' programs already queued or running') : 'Nothing to run');
       return 0;
     }
-    jobSeq += 1;
-    var batch = { id: 'JOB-' + jobSeq, mode: mode, total: fresh.length, done: 0, warn: 0, startedAt: new Date(), jobs: [], tr: null };
+    var batch = { id: nextJobBatchId(), mode: mode, total: fresh.length, done: 0, warn: 0, startedAt: new Date(), jobs: [], tr: null };
     var now = Date.now();
     fresh.forEach(function (row, i) {
       var j = makeRunJob(row, mode, batch);
@@ -2267,6 +2285,9 @@
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var title = runRowTitle(j.row);
+    var bits = scopePathParts(rowStudyScope(j.row));
+    var studyRoot = bits.root;
+    var studyLabel = bits.label;
     var warn = j.warn && j.warnPhase === idx;
     var L = [];
     var n = 0;
@@ -2293,13 +2314,13 @@
     L.push('      real time           ' + secs(0.08 + rnd() * 0.06));
     L.push('      cpu time            ' + secs(0.03 + rnd() * 0.03));
     L.push('');
-    L.push('NOTE: AUTOEXEC processing beginning; file is /sphere/compute/onc-204-301/autoexec.sas.');
+    L.push('NOTE: AUTOEXEC processing beginning; file is /sphere/compute/' + bits.slug + (bits.deliverable !== 'CSR' ? '/' + bits.deliverable.toLowerCase() : '') + '/autoexec.sas.');
     L.push('NOTE: Libref SDTM was successfully assigned as follows:');
     L.push('      Engine:        V9');
-    L.push('      Physical Name: /studies/onc-204-301/data/sdtm');
+    L.push('      Physical Name: ' + studyRoot + 'data/sdtm');
     L.push('NOTE: Libref ADAM was successfully assigned as follows:');
     L.push('      Engine:        V9');
-    L.push('      Physical Name: /studies/onc-204-301/data/adam');
+    L.push('      Physical Name: ' + studyRoot + 'data/adam');
     L.push('NOTE: AUTOEXEC processing completed.');
     L.push('');
     if (j.mode === 'both') {
@@ -2308,9 +2329,9 @@
     }
     src('/*--------------------------------------------------------------------*/');
     src('/* Program : ' + prog + (isQc ? '   (independent QC)' : '   (production)'));
-    src('/* Study   : ONC-204-301' + (title ? '   ' + title : ''));
+    src('/* Study   : ' + studyLabel + (title ? '   ' + title : ''));
     src('/*--------------------------------------------------------------------*/');
-    src('%let outdir = /studies/onc-204-301/output;');
+    src('%let outdir = ' + studyRoot + 'output;');
     src('');
     if (dom === 'ADSL') {
       src('data work.adsl;');
@@ -2371,7 +2392,7 @@
         L.push('NOTE: No unequal values were found. All values compared are exactly equal.');
         step('PROCEDURE COMPARE', 0.18);
       } else {
-        src('%sphere_define_meta(ds=' + dom + ', spec=/studies/onc-204-301/specs/adam_spec.xlsx);');
+        src('%sphere_define_meta(ds=' + dom + ', spec=' + studyRoot + 'specs/adam_spec.xlsx);');
         L.push('NOTE: SPHERE_DEFINE_META: ' + dom + ' variable attributes applied from specification (' + (dom === 'ADSL' ? 48 : nVars) + ' variables).');
         L.push('');
       }
@@ -2409,7 +2430,7 @@
         src('  column trt01a col;');
         src('run;');
         src('ods rtf close;');
-        L.push('NOTE: Writing RTF Body file: /studies/onc-204-301/output/tlf/' + out + '.rtf');
+        L.push('NOTE: Writing RTF Body file: ' + studyRoot + 'output/tlf/' + out + '.rtf');
         L.push('NOTE: There were 6 observations read from the data set WORK.FINAL.');
         step('PROCEDURE REPORT', 0.22);
       }
@@ -2432,6 +2453,8 @@
     var dom = runDomain(j.prog);
     var type = j.row.getAttribute('data-type') || 'Table';
     var warn = j.warn && j.warnPhase === idx;
+    var rBits = scopePathParts(rowStudyScope(j.row));
+    var studyRoot = rBits.root;
     var folder = type === 'Dataset' ? 'adam' : 'tlf';
     var L = [
       'R version 4.5.1 (2025-06-13)',
@@ -2456,11 +2479,12 @@
       '',
       '── SPHERE run ──────────────────────────────────────────────',
       'Program : programs/' + folder + '/' + (isQc ? 'qc/' : '') + prog + (isQc ? '  (independent QC)' : '  (production)'),
+      'Study   : ' + rBits.label,
       'Started : ' + isoLocal(t.start),
       'renv    : lockfile restored (47 packages)',
       '',
       '> library(dplyr); library(haven)',
-      '> adsl <- read_sas("/studies/onc-204-301/data/adam/adsl.sas7bdat")',
+      '> adsl <- read_sas("' + studyRoot + 'data/adam/adsl.sas7bdat")',
       '> dim(adsl)',
       '[1] 254  48'
     ];
@@ -2476,13 +2500,13 @@
       var nV = dom === 'ADSL' ? 48 : 58 + Math.floor(rnd() * 12);
       L.push('> library(admiral)');
       if (dom !== 'ADSL') {
-        L.push('> ' + sd + ' <- read_sas("/studies/onc-204-301/data/sdtm/' + sd + '.sas7bdat")');
+        L.push('> ' + sd + ' <- read_sas("' + studyRoot + 'data/sdtm/' + sd + '.sas7bdat")');
         L.push('> ' + d + ' <- ' + sd + ' |>');
         L.push('+   derive_vars_merged(dataset_add = adsl, by_vars = exprs(STUDYID, USUBJID),');
         L.push('+                      new_vars = exprs(TRT01A, TRTSDT, SAFFL)) |>');
         L.push('+   derive_vars_dt(new_vars_prefix = "AST", dtc = ' + sd.toUpperCase() + 'STDTC)');
       } else {
-        L.push('> dm <- read_sas("/studies/onc-204-301/data/sdtm/dm.sas7bdat")');
+        L.push('> dm <- read_sas("' + studyRoot + 'data/sdtm/dm.sas7bdat")');
         L.push('> adsl <- dm |> derive_vars_merged(dataset_add = ex_first, by_vars = exprs(STUDYID, USUBJID))');
       }
       if (warn) {
@@ -2494,11 +2518,11 @@
       L.push('> dim(' + d + ')');
       L.push('[1] ' + nRec + '  ' + nV);
       if (isQc) {
-        L.push('> prod <- read_sas("/studies/onc-204-301/data/adam/' + d + '.sas7bdat")');
+        L.push('> prod <- read_sas("' + studyRoot + 'data/adam/' + d + '.sas7bdat")');
         L.push('> diffdf::diffdf(prod, ' + d + ', keys = c("USUBJID"' + (dom === 'ADSL' ? '' : ', "ASTDT", "AESEQ"') + '))');
         L.push('No issues were found!');
       } else {
-        L.push('> xportr::xportr_write(' + d + ', "/studies/onc-204-301/data/adam/' + d + '.xpt", domain = "' + dom + '")');
+        L.push('> xportr::xportr_write(' + d + ', "' + studyRoot + 'data/adam/' + d + '.xpt", domain = "' + dom + '")');
         L.push('Wrote ' + nRec + ' records to ' + d + '.xpt');
       }
     } else {
@@ -2517,12 +2541,12 @@
       L.push('> dim(result)');
       L.push('[1] ' + (12 + Math.floor(rnd() * 6)) + '  3');
       if (isQc) {
-        L.push('> prod <- readRDS("/studies/onc-204-301/output/tlfdata/' + out + '.rds")');
+        L.push('> prod <- readRDS("' + studyRoot + 'output/tlfdata/' + out + '.rds")');
         L.push('> diffdf::diffdf(as_result_df(prod), as_result_df(result))');
         L.push('No issues were found!');
       } else {
-        L.push('> export_as_rtf(result, file = "/studies/onc-204-301/output/tlf/' + out + '.rtf")');
-        L.push('Output written: /studies/onc-204-301/output/tlf/' + out + '.rtf (' + (1 + Math.floor(rnd() * 3)) + ' pages)');
+        L.push('> export_as_rtf(result, file = "' + studyRoot + 'output/tlf/' + out + '.rtf")');
+        L.push('Output written: ' + studyRoot + 'output/tlf/' + out + '.rtf (' + (1 + Math.floor(rnd() * 3)) + ' pages)');
       }
     }
     var user = total * (0.3 + rnd() * 0.15);
@@ -2672,7 +2696,10 @@
 
   /* Import modal */
   var importModal = document.getElementById('importModal');
-  function openImport() { importModal.removeAttribute('hidden'); }
+  function openImport() {
+    paintImportFolder(trackerStoreId());
+    importModal.removeAttribute('hidden');
+  }
   function closeImport() { importModal.setAttribute('hidden', ''); }
   document.getElementById('btnImport').addEventListener('click', openImport);
   document.getElementById('btnCloseImport').addEventListener('click', closeImport);
@@ -2710,15 +2737,38 @@
     return /^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(id) ? id : '';
   }
 
+  /* Home CSR catalog ids before Mock Shells has saved them. 14.3.5 has no shell. */
+  var HOME_SEED_SHELL_IDS = {
+    '14.1.1': 1, '14.1.2': 1, '14.1.3': 1, '14.2.1': 1, '14.2.3': 1, '14.3.0': 1, '14.3.1': 1,
+    '14.3.1.1': 1, '14.3.1.2': 1, '14.3.1.3': 1, '14.3.1.4': 1, '14.3.1.5': 1, '14.3.1.6': 1,
+    '14.3.2': 1, '14.3.2.1': 1, '14.3.2.2': 1, '14.3.3': 1, '14.3.4': 1, '14.3.5.1': 1, '14.3.5.2': 1,
+    '14.3.7': 1, '14.3.8': 1
+  };
+  function shellResolves(store, key) {
+    var id = String(key || '').trim();
+    if (!id) return '';
+    var hit = shellIdInStore(store, id);
+    if (hit) return hit;
+    var saved = window.SPHERE_DEMO && SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells(store) : null;
+    if (String(store || '') === 'ONC-204-301' && !(saved && saved.length) && HOME_SEED_SHELL_IDS[id]) return id;
+    return '';
+  }
   function shellIdForRow(row) {
+    var scope = rowStudyScope(row);
     var flowId = row && row.getAttribute('data-flow-id');
     if (flowId && window.SPHERE_DEMO && SPHERE_DEMO.record) {
       var rec = SPHERE_DEMO.record(flowId);
-      if (rec && rec.shellId) return rec.shellId;
+      if (rec && rec.shellId) {
+        var fromRec = shellResolves(rec.study || scope, rec.shellId);
+        if (fromRec) return fromRec;
+      }
     }
     var stored = row && row.getAttribute('data-shell-id');
-    if (stored) return stored;
-    return rowOutputId(row);
+    if (stored) {
+      var fromStored = shellResolves(scope, stored);
+      if (fromStored) return fromStored;
+    }
+    return shellResolves(scope, rowOutputId(row));
   }
 
   function shellStatusLinks(label) {
@@ -2759,12 +2809,7 @@
     }
     if (!key) return '';
     var scope = store || (typeof runtimeScopeId === 'function' ? runtimeScopeId() : '') || 'ONC-204-301';
-    var hit = shellIdInStore(scope, key);
-    if (hit) return hit;
-    /* Home CSR seed shells use the output number as their id, including before the catalog is saved. */
-    var saved = window.SPHERE_DEMO && SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells(scope) : null;
-    if (scope === 'ONC-204-301' && !(saved && saved.length)) return key;
-    return '';
+    return shellResolves(scope, key);
   }
 
   function shellCellHtml(label, shellId, studyId) {
@@ -3366,6 +3411,10 @@
     var progHtml = prog === '-'
       ? '<span class="meta-v muted program-name">-</span>'
       : '<span class="meta-v program-name">' + prog + '</span>';
+    var assignedName = String(opts.assigned || '').replace(/\s+/g, ' ').trim();
+    var assignedHtml = assignedName
+      ? '<span class="meta-v">' + escapeHtml(assignedName) + '</span>'
+      : '<span class="meta-v muted">-</span>';
     row.innerHTML =
       '<div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ' + opts.title + '" /></div>' +
       '<div class="artifact-main">' +
@@ -3377,7 +3426,7 @@
           '<div class="meta-cell">' + progHtml + '</div>' +
           '<div class="meta-cell"><span class="meta-v">' + opts.type + '</span></div>' +
           '<div class="meta-cell"><span class="meta-v">' + (opts.status || 'Not started') + '</span></div>' +
-          '<div class="meta-cell"><span class="meta-v muted">-</span></div>' +
+          '<div class="meta-cell">' + assignedHtml + '</div>' +
           '<div class="meta-cell"><span class="meta-v">' + escapeHtml(opts.shell || 'n/a') + '</span></div>' +
           '<div class="meta-cell job-cell"><span class="meta-v muted">-</span></div>' +
           '<div class="meta-cell actions-cell">' + rowActionsHtml() + '</div>' +
@@ -4302,10 +4351,20 @@
   function rtfSampleFor(row) {
     return RTF_SAMPLES[row.getAttribute('data-type') || ''] || null;
   }
+  function scopePathParts(scope) {
+    var raw = String(scope || trackerStoreId() || TRACKER_HOME);
+    var cut = raw.indexOf('::');
+    var protocol = (cut < 0 ? raw : raw.slice(0, cut)) || TRACKER_HOME;
+    var deliverable = cut < 0 ? 'CSR' : (raw.slice(cut + 2) || 'CSR');
+    var slug = protocol.toLowerCase();
+    var root = '/studies/' + slug + '/';
+    if (deliverable !== 'CSR') root += deliverable.toLowerCase() + '/';
+    var label = deliverable === 'CSR' ? protocol : (protocol + ' / ' + deliverable);
+    return { protocol: protocol, deliverable: deliverable, slug: slug, root: root, label: label };
+  }
   function studyPath(rel, row) {
-    var scope = row ? rowStudyScope(row) : trackerStoreId();
-    var protocol = String(scope || TRACKER_HOME).split('::')[0].toLowerCase();
-    return rel ? '/studies/' + protocol + '/' + rel.replace(/^\//, '') : '';
+    var bits = scopePathParts(row ? rowStudyScope(row) : trackerStoreId());
+    return rel ? bits.root + String(rel).replace(/^\//, '') : bits.root;
   }
   function artifactMeta(row) {
     var prog = runProgName(row);
@@ -5375,6 +5434,12 @@
       badge.style.color = 'var(--muted)';
     }
   }
+  function paintImportFolder(store) {
+    var el = document.getElementById('importFolderPath');
+    if (!el) return;
+    var bits = scopePathParts(store);
+    el.textContent = bits.label + ' / programs/';
+  }
   function paintTrackerChrome(store) {
     var raw = String(store || TRACKER_HOME);
     var cut = raw.indexOf('::');
@@ -5384,7 +5449,11 @@
     var entry = registryEntryForStore(raw);
     var phase = entry && entry.phase ? entry.phase : '-';
     var crumb = document.querySelector('.crumb');
-    if (crumb) crumb.innerHTML = '<a href="studies.html">Studies</a> / <strong>' + escapeHtml(label) + '</strong> / Tracker';
+    if (crumb) {
+      crumb.innerHTML = '<a href="studies.html">Studies</a> / <strong>' + escapeHtml(label) + '</strong> / Tracker';
+      crumb.title = 'Studies / ' + label + ' / Tracker';
+    }
+    paintImportFolder(raw);
     var foot = document.querySelector('.nav-footer');
     if (foot) foot.textContent = label + ' · Phase ' + phase;
     var study = protocol;
@@ -5438,7 +5507,9 @@
     var cells = metaCells(row);
     if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml((rec.roles && rec.roles.prod) || '') + '</span>';
     if (rec.study) row.setAttribute('data-shell-study', rec.study);
-    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row), rec.study || trackerStoreId());
+    var flowScope = rec.study || trackerStoreId();
+    var flowShell = shellResolves(flowScope, rec.shellId) || shellResolves(flowScope, rec.number);
+    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', flowShell, flowScope);
     if (rec.isNew) {
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
@@ -5560,6 +5631,7 @@
       title: spec.title || '',
       shell: spec.shell || 'n/a',
       shellId: spec.shellId || '',
+      assigned: spec.assigned || '',
       job: spec.job || ''
     };
     var idx = -1;
@@ -5575,6 +5647,8 @@
     var titleEl = row.querySelector('.artifact-title');
     var cells = metaCells(row);
     var shell = cells[4] ? String(cells[4].textContent || '').replace(/\s+/g, ' ').trim() : '';
+    var assigned = cells[3] ? String(cells[3].textContent || '').replace(/\s+/g, ' ').trim() : '';
+    if (assigned === '-') assigned = '';
     var snap = {
       recordId: id,
       scope: row.getAttribute('data-runtime-scope') || runtimeScopeId(),
@@ -5586,6 +5660,7 @@
       title: titleEl ? String(titleEl.textContent || '').replace(/\s+/g, ' ').trim() : '',
       shell: shell || 'n/a',
       shellId: row.getAttribute('data-shell-id') || '',
+      assigned: assigned,
       job: row.getAttribute('data-job') || ''
     };
     var list = readRuntimeRows();
