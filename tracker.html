@@ -3819,6 +3819,14 @@
     });
   })();
 
+  /* Truncated output titles show the full title on hover. */
+  document.addEventListener('mouseover', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('.artifact-row .artifact-title') : null;
+    if (!t) return;
+    if (t.scrollWidth > t.clientWidth + 1) t.setAttribute('title', t.textContent.replace(/\s+/g, ' ').trim());
+    else t.removeAttribute('title');
+  });
+
   function buildArtifactRow(opts) {
     var row = document.createElement('article');
     row.className = 'artifact-row';
@@ -5630,17 +5638,19 @@
     if (rtfExists(row, scope)) bits.push('RTF');
     var side = scope === 'qc' ? 'QC' : 'production';
     if (!bits.length) return 'No program, log or output yet';
-    var title = 'Open ' + side + ' · ' + bits.join(' · ');
-    if (!programWritten(row, scope)) title = 'not created · ' + title;
-    return title;
+    return 'Open ' + side + ' · ' + bits.join(' · ');
   }
   function programLinkHtml(row, scope, cls, inner) {
-    var unwritten = !programWritten(row, scope);
     var file = scope === 'qc' ? qcProgramName(row) : runProgName(row);
+    /* Program not written yet: plain name, no link. */
+    if (!programWritten(row, scope)) {
+      return '<span class="' + cls + ' is-unwritten"' + (file ? ' title="' + escapeHtml(file) + '"' : '') + '>' +
+        '<span class="prog-file">' + inner + '</span></span>';
+    }
     var title = artifactOpenTitle(row, scope);
     if (file) title = file + ' · ' + title;
-    return '<a href="#" class="' + cls + ' program-open-link' + (unwritten ? ' is-unwritten' : '') + '" data-which="' + (scope === 'qc' ? 'qc' : 'prod') + '" title="' + escapeHtml(title) + '">' +
-      '<span class="prog-file">' + inner + '</span>' + (unwritten ? '<span class="unwritten-mark">not created</span>' : '') + '</a>';
+    return '<a href="#" class="' + cls + ' program-open-link" data-which="' + (scope === 'qc' ? 'qc' : 'prod') + '" title="' + escapeHtml(title) + '">' +
+      '<span class="prog-file">' + inner + '</span></a>';
   }
   function paintProgramCell(row, cell, status) {
     if (!cell) return;
@@ -5651,7 +5661,7 @@
     var prod = programLinkHtml(row, 'prod', 'meta-v program-name', escapeHtml(prog));
     var qcHtml = qc
       ? programLinkHtml(row, 'qc', 'qc-program-name', '<b>QC</b>' + escapeHtml(qc))
-      : '<span class="qc-program-name is-unwritten" title="not created"><span class="prog-file"><b>QC</b></span><span class="unwritten-mark">not created</span></span>';
+      : '<span class="qc-program-name is-unwritten"><span class="prog-file"><b>QC</b></span></span>';
     cell.innerHTML = prod + qcHtml;
     var prodLink = cell.querySelector('[data-which="prod"]');
     if (prodLink) {
