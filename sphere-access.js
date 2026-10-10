@@ -14,6 +14,12 @@
     { id: 'mchen', name: 'Mei Chen', username: 'mchen', email: 'm.chen@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma' },
     { id: 'alopez', name: 'Avery Lopez', username: 'alopez', email: 'a.lopez@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma', invited: true }
   ];
+  /* Legacy demo addresses stay stored. Screens show the Northwind domain. */
+  function displayEmail(email) {
+    return String(email || '')
+      .replace(/@xpharma\.com/ig, '@northwindbio.example')
+      .replace(/@xpharma\.example/ig, '@northwindbio.example');
+  }
   function deny(msg) {
     var err = new Error(msg || 'Not authorized');
     err.code = 'authorization';
@@ -60,7 +66,7 @@
       username: over.username || (base && base.username) || id,
       admin: !!(over.admin != null ? over.admin : base && base.admin),
       company: over.company || (base && base.company) || '',
-      email: over.email || (base && base.email) || '',
+      email: displayEmail(over.email || (base && base.email) || ''),
       deactivated: !!over.deactivated,
       accessRevoked: !!over.accessRevoked,
       role: over.role || (base && base.role) || '',
@@ -77,7 +83,7 @@
     ids.forEach(function (id) {
       var u = user(id, s);
       if (!u) return;
-      if (u.id === key || u.username === key || u.name === key || u.email === key) hit = u;
+      if (u.id === key || u.username === key || u.name === key || displayEmail(u.email).toLowerCase() === displayEmail(key).toLowerCase()) hit = u;
     });
     return hit;
   }
@@ -109,11 +115,11 @@
       return user(id, s);
     },
     findByEmail: function (email) {
-      var key = String(email || '').trim().toLowerCase();
+      var key = displayEmail(String(email || '').trim()).toLowerCase();
       if (!key) return null;
       var hit = null;
       api.users().forEach(function (u) {
-        if ((u.email || '').toLowerCase() === key || (u.username || '').toLowerCase() === key) hit = u;
+        if (displayEmail(u.email || '').toLowerCase() === key || (u.username || '').toLowerCase() === key) hit = u;
       });
       return hit;
     },
