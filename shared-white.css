@@ -5758,14 +5758,42 @@ html[data-contrast="low"][data-theme="dark"] {
 }
 
 
-/* Studies - wide table + new study form */
+/* Studies table. Protocol ids, dates, phase, headers, and pills stay
+   on one line. Study names may wrap, up to two lines. Padding is tight
+   so the row fits at 1280; narrower cards scroll inside the table pane. */
 .studies-table-wide {
-  min-width: 1080px;
+  width: 100%;
+  min-width: 0;
 }
 .studies-table-wide th,
 .studies-table-wide td {
-  font-size: 12.5px;
+  font-size: 12px;
   vertical-align: middle;
+  padding: 8px 4px;
+  white-space: nowrap;
+}
+.studies-table-wide th {
+  font-size: 10.5px;
+  letter-spacing: 0;
+}
+.studies-table-wide th:nth-child(2),
+.studies-table-wide td:nth-child(2) {
+  min-width: 136px;
+}
+.studies-table-wide th:nth-child(6),
+.studies-table-wide td:nth-child(6),
+.studies-table-wide th:nth-child(7),
+.studies-table-wide td:nth-child(7),
+.studies-table-wide th:nth-child(8),
+.studies-table-wide td:nth-child(8) {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.studies-table-wide td:nth-child(2) {
+  white-space: normal;
+}
+.studies-table-wide .study-name-cell {
+  white-space: normal;
 }
 .study-name-cell {
   font-weight: 600;
@@ -7140,7 +7168,16 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
 .proto-toggle .sap-chevron { width: 14px; height: 14px; transform: rotate(-90deg); }
 .proto-toggle[aria-expanded="true"] .sap-chevron { transform: rotate(0deg); }
 .proto-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.proto-toggle-spacer {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+tr.protocol-row.is-link { cursor: pointer; }
 tr.protocol-folder { cursor: pointer; }
+tr.protocol-folder:focus-visible td { outline: 2px solid var(--accent); outline-offset: -2px; }
 tr.protocol-folder td { background: color-mix(in srgb, var(--accent) 4%, var(--surface)); }
 
 /* Tracker: New Record matches the toolbar, primary fill */
