@@ -211,10 +211,10 @@
         return list.filter(function (x) { return x.current; })[0] || list[0];
       }
       var del = q.get('deliverable') || '';
+      var asked = !!(q.get('path') || q.get('study') || del);
       function narrow(list) {
         if (!del) return list;
-        var exact = list.filter(function (x) { return x.deliverable === del; });
-        return exact.length ? exact : list;
+        return list.filter(function (x) { return x.deliverable === del; });
       }
       var e = (q.get('path') && pick(narrow(reg.filter(function (x) { return entryPath(x) === q.get('path'); })))) ||
         (q.get('study') && pick(narrow(reg.filter(function (x) {
@@ -222,15 +222,81 @@
           return studyId(x) === id || x.protocol === id || x.compound === id;
         }))));
       if (e) return setCurrent(e) || e;
-      if (/studies\.html/.test(location.pathname)) return null;
+      if (asked || /studies\.html/.test(location.pathname)) return null;
       var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
       if (saved) return reg.filter(function (x) { return x.compound === saved.c && x.protocol === saved.p && x.deliverable === saved.d; })[0] || null;
     } catch (err) {}
     return null;
   }
+  function askedStudyLabel() {
+    try {
+      var q = new URLSearchParams(location.search);
+      var study = q.get('study') || '';
+      var del = q.get('deliverable') || '';
+      if (study && del && del !== 'CSR') return study + ' / ' + del;
+      if (study) return study;
+      return q.get('path') || '';
+    } catch (e) { return ''; }
+  }
+  function queryAskedStudy() {
+    try {
+      var q = new URLSearchParams(location.search);
+      return !!(q.get('study') || q.get('path') || q.get('deliverable'));
+    } catch (e) { return false; }
+  }
+  function showStudyNotFound(name) {
+    var content = document.querySelector('.content');
+    if (content) {
+      Array.prototype.forEach.call(content.children, function (el) {
+        if (el.id !== 'studyMissing') el.hidden = true;
+      });
+      var box = document.getElementById('studyMissing');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'studyMissing';
+        box.className = 'page-intro';
+        var h = document.createElement('h1');
+        h.className = 'page-title';
+        h.textContent = 'Study not found';
+        var p = document.createElement('p');
+        p.className = 'page-sub';
+        var shown = String(name || '').replace(/::/g, ' / ');
+        p.textContent = shown ? (shown + ' is not in the study registry.') : 'That study is not in the study registry.';
+        var back = document.createElement('p');
+        var a = document.createElement('a');
+        a.href = 'studies.html';
+        a.textContent = 'Back to Studies';
+        back.appendChild(a);
+        box.appendChild(h);
+        box.appendChild(p);
+        box.appendChild(back);
+        content.appendChild(box);
+      }
+      box.hidden = false;
+    }
+    var crumb = document.querySelector('.crumb');
+    if (crumb) {
+      crumb.textContent = '';
+      var ca = document.createElement('a');
+      ca.href = 'studies.html';
+      ca.textContent = 'Studies';
+      crumb.appendChild(ca);
+      crumb.appendChild(document.createTextNode(' / '));
+      var st = document.createElement('strong');
+      st.textContent = 'Study not found';
+      crumb.appendChild(st);
+    }
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = 'Study not found';
+  }
   function paintOpenedStudy() {
     var e = openedStudy();
-    if (!e) return;
+    if (!e) {
+      if (queryAskedStudy() && !/studies\.html/.test(location.pathname) && !/admin\.html/.test(location.pathname)) {
+        showStudyNotFound(askedStudyLabel());
+      }
+      return;
+    }
     var path = entryPath(e);
     var label = studyId(e) + (e.deliverable && e.deliverable !== 'CSR' ? ' / ' + e.deliverable : '');
     if (!/studies\.html/.test(location.pathname)) {
@@ -274,6 +340,7 @@
     pathFor: pathFor,
     entryPath: entryPath,
     studyId: studyId,
+    showStudyNotFound: showStudyNotFound,
     segsFor: segsFor,
     treeHtml: treeHtml,
     exampleTreeHtml: exampleTreeHtml,

@@ -432,15 +432,29 @@
   }
   var q = new URLSearchParams(location.search);
   var reg = L.registry();
+  var askedStudy = q.get('study') || '';
+  var askedDel = q.get('deliverable') || '';
+  var askedPath = q.get('path') || '';
+  var asked = !!(askedStudy || askedDel || askedPath);
   var e = null;
-  if (q.get('deliverable') && q.get('study')) {
+  if (askedStudy && askedDel) {
     e = reg.filter(function (x) {
-      return (x.protocol === q.get('study') || L.studyId(x) === q.get('study')) && x.deliverable === q.get('deliverable');
+      return (x.protocol === askedStudy || L.studyId(x) === askedStudy) && x.deliverable === askedDel;
     })[0] || null;
+  } else if (askedPath) {
+    e = L.findByPath(askedPath);
+  } else if (askedStudy) {
+    e = L.openedStudy();
+  } else {
+    e = L.openedStudy() || reg.filter(function (x) { return x.current; })[0];
   }
-  if (!e) e = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
-    reg.filter(function (x) { return x.current; })[0];
-  if (!e) return;
+  if (!e) {
+    if (asked && L.showStudyNotFound) {
+      var missingName = askedStudy ? (askedDel && askedDel !== 'CSR' ? askedStudy + ' / ' + askedDel : askedStudy) : askedPath;
+      L.showStudyNotFound(missingName);
+    }
+    return;
+  }
   if (L.setCurrent) e = L.setCurrent(e) || e;
   var path = L.entryPath(e);
   var scope = 'study=' + encodeURIComponent(L.studyId(e)) + '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR');

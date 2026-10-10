@@ -1272,12 +1272,24 @@
     if (focus) href += '&focus=' + encodeURIComponent(focus);
     return href;
   }
+  function phaseForStore(storeId) {
+    var raw = String(storeId || '');
+    var cut = raw.indexOf('::');
+    var protocol = cut < 0 ? raw : raw.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : raw.slice(cut + 2);
+    var L = window.SPHERE_LAYOUT;
+    if (!L || !L.registry) return '-';
+    var hit = L.registry().filter(function (e) {
+      return (e.protocol === protocol || (L.studyId && L.studyId(e) === protocol)) && (e.deliverable || 'CSR') === deliverable;
+    })[0];
+    return hit && hit.phase ? hit.phase : '-';
+  }
   function updateStudyChrome() {
     var label = studyChromeLabel(CURRENT_STUDY);
     var crumb = document.querySelector('.crumb');
-    if (crumb) crumb.innerHTML = 'Studies / <strong>' + escapeHtml(label) + '</strong> / Mock Shells';
+    if (crumb) crumb.innerHTML = '<a href="studies.html">Studies</a> / <strong>' + escapeHtml(label) + '</strong> / Mock Shells';
     var foot = document.querySelector('.nav-footer');
-    if (foot) foot.textContent = label + ' · Phase 3';
+    if (foot) foot.textContent = label + ' · Phase ' + phaseForStore(CURRENT_STUDY);
   }
 
   function statusBadge(status) {
@@ -4114,10 +4126,24 @@
   window.addEventListener('load', function () { syncMetadataButton(selectedShell()); });
 
   /* boot */
-  updateStudyChrome();
-  document.addEventListener('DOMContentLoaded', updateStudyChrome);
-  renderCatalog();
+  var shellQueryMissing = '';
+  try {
+    var qsMiss = new URLSearchParams(location.search);
+    var qStudyM = qsMiss.get('study') || '';
+    var qDelM = qsMiss.get('deliverable') || '';
+    if (qStudyM.indexOf('::') >= 0) shellQueryMissing = qStudyM;
+    else if (qStudyM) shellQueryMissing = storeIdFromParts(qStudyM, qDelM || 'CSR');
+    if (shellQueryMissing && studyStore[shellQueryMissing]) shellQueryMissing = '';
+  } catch (eMiss) { shellQueryMissing = ''; }
+  if (shellQueryMissing) {
+    if (window.SPHERE_LAYOUT && SPHERE_LAYOUT.showStudyNotFound) SPHERE_LAYOUT.showStudyNotFound(studyChromeLabel(shellQueryMissing));
+  } else {
+    updateStudyChrome();
+    document.addEventListener('DOMContentLoaded', updateStudyChrome);
+    renderCatalog();
+  }
   (function bootFromShellQuery() {
+    if (shellQueryMissing) return;
     var requested = '';
     var explicitStore = '';
     try {

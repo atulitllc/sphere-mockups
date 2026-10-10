@@ -1217,6 +1217,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
+<script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
 <script src="demo-flow.js?v=flow4e"></script>
 <script src="rtf-html.js?v=flow3k"></script>
@@ -2015,7 +2016,7 @@
     if ((mode === 'qc' || mode === 'both') && window.SPHERE_DEMO && SPHERE_DEMO.noteShellSentToQc) {
       fresh.forEach(function (row) {
         var num = rowOutputId(row);
-        if (num) SPHERE_DEMO.noteShellSentToQc(num);
+        if (num) SPHERE_DEMO.noteShellSentToQc(num, rowStudyScope(row));
       });
     }
     runJobs.forEach(function (j) { if (isActive(j)) renderJobCell(j.row); });
@@ -2063,7 +2064,7 @@
     var row = j.row;
     row.setAttribute('data-job', 'done');
     row.setAttribute('data-last-run', j.endDate.toISOString());
-    if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row));
+    if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row), rowStudyScope(row));
     if (typeof decorateRerunDot === 'function') decorateRerunDot(row);
     renderJobCell(row);
     var b = j.batch;
@@ -2091,6 +2092,8 @@
     var tr = document.createElement('tr');
     tr.innerHTML = '<td>' + b.id + '</td><td>' + runEsc(txt) + ' <span class="muted">(' + runEsc(modeLabel(b.mode)) + ')</span></td>' +
       '<td>Today · ' + fmt12(b.startedAt) + ' ET</td><td><span class="meta-v" data-jstat></span></td>';
+    var empty = tb.querySelector('[data-job-empty]');
+    if (empty) empty.remove();
     tb.insertBefore(tr, tb.firstChild);
     b.tr = tr;
     updateJobTableRow(b);
@@ -4246,8 +4249,10 @@
   function rtfSampleFor(row) {
     return RTF_SAMPLES[row.getAttribute('data-type') || ''] || null;
   }
-  function studyPath(rel) {
-    return rel ? '/studies/onc-204-301/' + rel.replace(/^\//, '') : '';
+  function studyPath(rel, row) {
+    var scope = row ? rowStudyScope(row) : trackerStoreId();
+    var protocol = String(scope || TRACKER_HOME).split('::')[0].toLowerCase();
+    return rel ? '/studies/' + protocol + '/' + rel.replace(/^\//, '') : '';
   }
   function artifactMeta(row) {
     var prog = runProgName(row);
@@ -4269,11 +4274,11 @@
     }
     return {
       prog: prog, qc: qc, lang: lang, type: type, dom: dom, sample: sample,
-      progPath: prog ? studyPath('programs/' + folder + '/' + prog) : '',
-      logPath: prog ? studyPath('logs/' + stem + '.log') : '',
-      outPath: studyPath(outRel),
-      qcProgPath: qc ? studyPath('programs/' + folder + '/qc/' + qc) : '',
-      qcLogPath: qc ? studyPath('logs/' + qc.replace(/\.[^.]+$/, '') + '.log') : ''
+      progPath: prog ? studyPath('programs/' + folder + '/' + prog, row) : '',
+      logPath: prog ? studyPath('logs/' + stem + '.log', row) : '',
+      outPath: studyPath(outRel, row),
+      qcProgPath: qc ? studyPath('programs/' + folder + '/qc/' + qc, row) : '',
+      qcLogPath: qc ? studyPath('logs/' + qc.replace(/\.[^.]+$/, '') + '.log', row) : ''
     };
   }
   function artifactSideLabel(scope) {
@@ -4565,7 +4570,7 @@
         body: [
           '/* ' + prog + ' */',
           '/* ' + String(title).trim() + ' */',
-          'libname adam "/studies/onc-204-301/data/adam" access=readonly;',
+          'libname adam "/studies/' + String(rowStudyScope(row) || TRACKER_HOME).split('::')[0].toLowerCase() + '/data/adam" access=readonly;',
           '',
           'data work.adsl;',
           '  set adam.adsl;',
@@ -4934,13 +4939,32 @@
       '<a href="#" class="qc-program-name program-open-link" data-which="qc" title="Open QC · Program · Log · RTF · ' + escapeHtml(qc) + '"><b>QC</b>' + escapeHtml(qc) + '</a>';
     decorateRerunDot(row);
   }
+  function rowStudyScope(row) {
+    var stamped = row && row.getAttribute ? (row.getAttribute('data-shell-study') || '') : '';
+    if (stamped) return stamped;
+    return trackerStoreId();
+  }
+  function shellInScope(row) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.getShells || !row) return null;
+    var shells = SPHERE_DEMO.getShells(rowStudyScope(row)) || [];
+    var sid = row.getAttribute('data-shell-id') || '';
+    var i;
+    if (sid) {
+      for (i = 0; i < shells.length; i++) if (String(shells[i].id) === sid) return shells[i];
+    }
+    var num = rowOutputId(row);
+    if (!num) return null;
+    for (i = 0; i < shells.length; i++) if (String(shells[i].number) === String(num)) return shells[i];
+    return null;
+  }
   function rerunWhyForRow(row) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.rerunWhy) return '';
     var num = rowOutputId(row);
     if (!num) return '';
+    var scope = rowStudyScope(row);
     var prog = (row.getAttribute('data-program') || '').split('/').pop();
-    var last = SPHERE_DEMO.lastRun(prog) || row.getAttribute('data-last-run') || '';
-    return SPHERE_DEMO.rerunWhy('ONC-204-301', num, last) || '';
+    var last = (SPHERE_DEMO.lastRun ? SPHERE_DEMO.lastRun(prog, scope) : '') || row.getAttribute('data-last-run') || '';
+    return SPHERE_DEMO.rerunWhy(scope, num, last) || '';
   }
   function decorateRerunDot(row) {
     if (!row) return;
@@ -4968,9 +4992,9 @@
     if (!window.SPHERE_DEMO) return null;
     var num = rowOutputId(row);
     if (!num) return null;
-    var sync = SPHERE_DEMO.shellContent ? SPHERE_DEMO.shellContent('ONC-204-301', num) : null;
-    var shells = SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells('ONC-204-301') : null;
-    var sh = shells && shells.filter(function (s) { return String(s.number) === String(num); })[0];
+    var scope = rowStudyScope(row);
+    var sync = SPHERE_DEMO.shellContent ? SPHERE_DEMO.shellContent(scope, num) : null;
+    var sh = shellInScope(row);
     var title = tidyVisible((sync && sync.title) || (sh && ((sh.layout && sh.layout.title) || sh.title)) || '');
     var footnotes = (sync && sync.footnotes) || (sh && sh.layout && sh.layout.footnotes) || '';
     if (!title && !footnotes) return null;
@@ -4981,7 +5005,7 @@
     allRows().forEach(function (row) {
       var num = rowOutputId(row);
       if (num && SPHERE_DEMO.programForNumber) {
-        var renamed = SPHERE_DEMO.programForNumber('ONC-204-301', num);
+        var renamed = SPHERE_DEMO.programForNumber(rowStudyScope(row), num);
         if (renamed && row.getAttribute('data-program') !== renamed) {
           row.setAttribute('data-program', renamed);
           var progCell = row.querySelector('.program-name');
@@ -5270,20 +5294,46 @@
     } catch (e2) {}
     return TRACKER_HOME;
   }
+  function registryEntryForStore(store) {
+    if (!window.SPHERE_LAYOUT || !SPHERE_LAYOUT.registry) return null;
+    var raw = String(store || '');
+    var cut = raw.indexOf('::');
+    var protocol = cut < 0 ? raw : raw.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : raw.slice(cut + 2);
+    return SPHERE_LAYOUT.registry().filter(function (e) {
+      var id = SPHERE_LAYOUT.studyId ? SPHERE_LAYOUT.studyId(e) : (e.protocol || '');
+      return (e.protocol === protocol || id === protocol || e.compound === protocol) && (e.deliverable || 'CSR') === deliverable;
+    })[0] || null;
+  }
+  function trackerQueryAsked() {
+    try {
+      var q = new URLSearchParams(location.search);
+      return !!(q.get('study') || q.get('deliverable'));
+    } catch (e) { return false; }
+  }
+  function scopeJobPanel(store) {
+    if (store === TRACKER_HOME) return;
+    var tb = document.getElementById('jobBody');
+    if (tb) tb.innerHTML = '<tr data-job-empty><td colspan="4">No jobs for this deliverable.</td></tr>';
+    var badge = document.getElementById('jobRunningBadge');
+    if (badge) {
+      badge.textContent = 'No jobs';
+      badge.style.color = 'var(--muted)';
+    }
+  }
   function paintTrackerChrome(store) {
     var raw = String(store || TRACKER_HOME);
     var cut = raw.indexOf('::');
-    var label = cut < 0 ? raw : (raw.slice(0, cut) + ' / ' + raw.slice(cut + 2));
-    var crumb = document.querySelector('.crumb');
-    if (crumb) {
-      crumb.innerHTML = cut < 0
-        ? ('Studies / <strong>' + escapeHtml(raw) + '</strong> / Tracker')
-        : ('Studies / <strong>' + escapeHtml(raw.slice(0, cut)) + '</strong> / ' + escapeHtml(raw.slice(cut + 2)) + ' / Tracker');
-    }
-    var foot = document.querySelector('.nav-footer');
-    if (foot) foot.textContent = label + ' · Phase 3';
-    var study = cut < 0 ? raw : raw.slice(0, cut);
+    var protocol = cut < 0 ? raw : raw.slice(0, cut);
     var deliverable = cut < 0 ? 'CSR' : raw.slice(cut + 2);
+    var label = deliverable === 'CSR' ? protocol : (protocol + ' / ' + deliverable);
+    var entry = registryEntryForStore(raw);
+    var phase = entry && entry.phase ? entry.phase : '-';
+    var crumb = document.querySelector('.crumb');
+    if (crumb) crumb.innerHTML = '<a href="studies.html">Studies</a> / <strong>' + escapeHtml(label) + '</strong> / Tracker';
+    var foot = document.querySelector('.nav-footer');
+    if (foot) foot.textContent = label + ' · Phase ' + phase;
+    var study = protocol;
     var scope = 'study=' + encodeURIComponent(study) + '&deliverable=' + encodeURIComponent(deliverable);
     document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
       a.setAttribute('href', 'mock-shells.html?' + scope);
@@ -5407,7 +5457,12 @@
       }
     });
     var trackerStore = trackerStoreId();
+    if (trackerQueryAsked() && !registryEntryForStore(trackerStore)) {
+      if (window.SPHERE_LAYOUT && SPHERE_LAYOUT.showStudyNotFound) SPHERE_LAYOUT.showStudyNotFound(String(trackerStore).replace('::', ' / '));
+      return;
+    }
     paintTrackerChrome(trackerStore);
+    scopeJobPanel(trackerStore);
     if (trackerStore !== TRACKER_HOME) {
       allRows().forEach(function (row) {
         if (!row.getAttribute('data-flow-id')) row.remove();

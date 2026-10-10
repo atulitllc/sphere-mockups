@@ -382,18 +382,20 @@
       if (lastRunIso && String(lastRunIso) >= rec.changedAt) return '';
       return rec.why || '';
     },
-    markProgramRan: function (prog, iso, shellNumber) {
+    markProgramRan: function (prog, iso, shellNumber, study) {
       var name = String(prog || '').split('/').pop();
       if (!name) return;
       var s = read();
       var when = iso || new Date().toISOString();
-      s.lastRun[name] = when;
+      var scope = study || STUDY;
+      s.lastRun[scope + '|' + name] = when;
+      if (scope === STUDY) s.lastRun[name] = when;
       var num = shellNumber ? String(shellNumber) : '';
+      var prefix = scope + '|';
       Object.keys(s.shellSync).forEach(function (k) {
+        if (k.indexOf(prefix) !== 0) return;
         var rec = s.shellSync[k];
-        if (!rec) return;
-        if (num && String(rec.number) !== num) return;
-        if (!num) return;
+        if (!rec || !num || String(rec.number) !== num) return;
         rec.pending = [];
         rec.changed = [];
         rec.clearedAt = when;
@@ -446,20 +448,24 @@
       return read().programByNumber[(study || STUDY) + '|' + number] || '';
     },
     fileRenames: function () { return Object.assign({}, read().fileRenames); },
-    lastRun: function (prog) {
+    lastRun: function (prog, study) {
       var name = String(prog || '').split('/').pop();
       var s = read();
-      return s.lastRun[name] || '';
+      var scope = study || STUDY;
+      if (s.lastRun[scope + '|' + name]) return s.lastRun[scope + '|' + name];
+      if (scope === STUDY) return s.lastRun[name] || '';
+      return '';
     },
-    /* SPH-R-602: Tracker send-to-QC moves the linked shell to In Review. */
-    noteShellSentToQc: function (number) {
+    /* SPH-R-602: Tracker send-to-QC moves the linked shell in that same scope to In Review. */
+    noteShellSentToQc: function (number, study) {
       var num = String(number || '');
       if (!num) return null;
+      var scope = study || STUDY;
       var s = read();
       var user = CURRENT_USER;
       try { if (window.SPHERE_ACCESS && SPHERE_ACCESS.username) user = SPHERE_ACCESS.username() || user; } catch (e) {}
       var at = new Date().toISOString();
-      var list = s.shells[STUDY];
+      var list = s.shells[scope];
       if (list && list.length) {
         var sh = null;
         for (var i = 0; i < list.length; i++) if (String(list[i].number) === num) sh = list[i];
@@ -474,16 +480,19 @@
         return sh;
       }
       s.qcShell = s.qcShell || {};
-      s.qcShell[num] = { user: user, at: at, cause: 'Tracker record sent to QC' };
+      s.qcShell[scope + '|' + num] = { user: user, at: at, cause: 'Tracker record sent to QC' };
       write(s);
-      return { queued: true, number: num };
+      return { queued: true, number: num, study: scope };
     },
     applyQueuedQc: function (study, shells) {
       var s = read();
+      var scope = study || STUDY;
       var qmap = s.qcShell || {};
       var changed = false;
       (shells || []).forEach(function (sh) {
-        var q = qmap[String(sh.number)];
+        var num = String(sh.number);
+        var q = qmap[scope + '|' + num];
+        if (!q && scope === STUDY) q = qmap[num];
         if (!q) return;
         var cur = sh.status === 'In review' ? 'In Review' : (sh.status === 'Locked' ? 'Final' : (sh.status || 'Draft'));
         if (cur !== 'In Review') {
@@ -492,11 +501,12 @@
           sh.status = 'In Review';
           sh.qc = 'In Review';
         }
-        delete qmap[String(sh.number)];
+        delete qmap[scope + '|' + num];
+        if (scope === STUDY) delete qmap[num];
         changed = true;
       });
       if (changed) {
-        s.shells[study || STUDY] = shells;
+        s.shells[scope] = shells;
         s.qcShell = qmap;
         write(s);
       }

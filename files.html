@@ -1079,8 +1079,13 @@
     function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
     var q = new URLSearchParams(location.search);
     var reg = L.registry();
-    var active = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy() ||
-      reg.filter(function (e) { return e.current; })[0] || reg[0];
+    var asked = !!(q.get('path') || q.get('study') || q.get('deliverable'));
+    var active = (q.get('path') && L.findByPath(q.get('path'))) || L.openedStudy();
+    if (!active && asked) {
+      if (L.showStudyNotFound) L.showStudyNotFound(q.get('study') || q.get('path') || '');
+      return;
+    }
+    if (!active) active = reg.filter(function (e) { return e.current; })[0] || reg[0];
     if (!active) return;
     if (L.setCurrent) active = L.setCurrent(active) || active;
     var activePath = L.entryPath(active);
