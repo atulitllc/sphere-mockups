@@ -843,7 +843,7 @@
         study: info.study || STUDY,
         shellId: info.shellId || '',
         number: info.number || '',
-        action: 'Program renamed'
+        action: 'Renamed from ' + (info.oldName || '') + ' to ' + info.newName
       };
       s.programTx.push(tx);
       if (info.number) s.programByNumber[(info.study || STUDY) + '|' + info.number] = info.newName;
@@ -864,7 +864,7 @@
         if (!hit) return;
         r.program = info.newName;
         r.history = r.history || [];
-        r.history.push({ at: when, action: 'Program renamed', person: user, oldName: tx.oldName, newName: info.newName, note: tx.oldName + ' -> ' + info.newName });
+        r.history.push({ at: when, action: tx.action, person: user, oldName: tx.oldName, newName: info.newName, note: '' });
       });
       if (info.oldName && s.status[info.oldName]) {
         s.status[info.newName] = s.status[info.oldName];
@@ -873,7 +873,7 @@
       if (info.oldName) {
         (s.events[info.newName] = s.events[info.newName] || s.events[info.oldName] || []).push({
           id: 'ev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
-          at: stamp(new Date()), action: 'Program renamed', person: user, status: '', note: tx.oldName + ' -> ' + info.newName, oldName: tx.oldName, newName: info.newName
+          at: stamp(new Date()), action: tx.action, person: user, status: '', note: '', oldName: tx.oldName, newName: info.newName
         });
       }
       function moveStoredName(oldName, newName) {
