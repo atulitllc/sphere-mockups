@@ -278,14 +278,14 @@
             </label>
           </div>
           <div class="artifact-main">
-            <div class="col-head-output"><span class="col-head-label">Output</span><span class="col-head-sub">Roles</span></div>
+            <div class="col-head-output"><button type="button" class="sort-h" data-sort="output" aria-sort="none">Output</button><span class="col-head-sub">Roles</span></div>
             <div class="artifact-meta">
-              <div class="meta-cell col-head-program-spacer"><span class="col-head-label">Programs</span></div>
-              <div class="meta-cell"><span class="col-head-label">Type</span></div>
-              <div class="meta-cell"><span class="col-head-label">Status</span></div>
+              <div class="meta-cell col-head-program-spacer"><button type="button" class="sort-h" data-sort="programs" aria-sort="none">Programs</button></div>
+              <div class="meta-cell"><button type="button" class="sort-h" data-sort="type" aria-sort="none">Type</button></div>
+              <div class="meta-cell"><button type="button" class="sort-h" data-sort="status" aria-sort="none">Status</button></div>
               <div class="meta-cell"><span class="col-head-label">Assigned To</span></div>
-              <div class="meta-cell"><span class="col-head-label">Shell</span></div>
-              <div class="meta-cell"><span class="col-head-label">Job</span></div>
+              <div class="meta-cell"><button type="button" class="sort-h" data-sort="shell" aria-sort="none">Shell</button></div>
+              <div class="meta-cell"><button type="button" class="sort-h" data-sort="job" aria-sort="none">Job</button></div>
               <div class="meta-cell"><span class="col-head-label">Actions</span></div>
             </div>
           </div>
@@ -1700,6 +1700,7 @@
       bodyEl.setAttribute('aria-hidden', 'false');
       bodyEl.appendChild(row);
     }
+    applyTrackerSort();
   }
 
   document.getElementById('bulkTag').addEventListener('change', function () {
@@ -5302,6 +5303,124 @@
     if (typeof syncSectionCounts === 'function') syncSectionCounts();
   }
 
+  var TRACKER_SORT_STORE = 'sphere-tracker-sort';
+  var trackerSort = { key: '', dir: 1 };
+  try {
+    var savedSort = JSON.parse(localStorage.getItem(TRACKER_SORT_STORE) || '');
+    if (savedSort && savedSort.key) trackerSort = { key: savedSort.key, dir: savedSort.dir === -1 ? -1 : 1 };
+  } catch (eSort) {}
+
+  function saveTrackerSort() {
+    try {
+      if (!trackerSort.key) localStorage.removeItem(TRACKER_SORT_STORE);
+      else localStorage.setItem(TRACKER_SORT_STORE, JSON.stringify({ key: trackerSort.key, dir: trackerSort.dir }));
+    } catch (eSave) {}
+  }
+
+  function outputSortLabel(row) {
+    var titleEl = row.querySelector('.artifact-title');
+    var raw = '';
+    if (titleEl) {
+      for (var i = 0; i < titleEl.childNodes.length; i++) {
+        if (titleEl.childNodes[i].nodeType === 3) raw += titleEl.childNodes[i].textContent;
+      }
+      if (!raw.trim()) raw = titleEl.textContent || '';
+    }
+    return raw.split('·')[0].replace(/\s+/g, ' ').trim();
+  }
+
+  function cmpNatural(a, b) {
+    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+  }
+
+  function jobSortWord(row) {
+    var el = row.querySelector('.job-cell .run-st-txt');
+    if (el && el.textContent.trim()) return el.textContent.replace(/\s+/g, ' ').trim();
+    var j = row._runJob;
+    if (j) {
+      if (j.state === 'queued') return 'Queued';
+      if (j.state === 'running') return 'Running';
+      if (j.state === 'error') return 'Error';
+      if (j.warn) return 'Warning';
+      if (j.state === 'done' || j.state === 'completed') return 'Completed';
+    }
+    var raw = (row.getAttribute('data-job') || '').toLowerCase();
+    if (raw === 'done') return 'Completed';
+    if (raw === 'queued') return 'Queued';
+    if (raw === 'running') return 'Running';
+    if (raw === 'error') return 'Error';
+    return '';
+  }
+
+  function jobSortTime(row) {
+    var j = row._runJob;
+    if (j) {
+      var d = j.endDate || j.prevEnd;
+      if (d && d.getTime && !isNaN(d.getTime())) return d.getTime();
+      if (j.endedAt) return j.endedAt;
+    }
+    var t = Date.parse(row.getAttribute('data-last-run') || '');
+    return isNaN(t) ? 0 : t;
+  }
+
+  function rowSortText(row, key) {
+    if (key === 'output') return outputSortLabel(row);
+    if (key === 'type') return row.getAttribute('data-type') || '';
+    if (key === 'status') return row.getAttribute('data-status') || '';
+    if (key === 'programs') return (row.getAttribute('data-program') || '').split('/').pop();
+    if (key === 'shell') {
+      var cells = metaCells(row);
+      return cells[4] ? (cells[4].textContent || '').replace(/\s+/g, ' ').trim() : '';
+    }
+    return '';
+  }
+
+  function compareTrackerRows(a, b) {
+    var dir = trackerSort.dir === -1 ? -1 : 1;
+    if (trackerSort.key === 'job') {
+      var byStatus = cmpNatural(jobSortWord(a), jobSortWord(b));
+      if (byStatus) return byStatus * dir;
+      return (jobSortTime(a) - jobSortTime(b)) * dir;
+    }
+    return cmpNatural(rowSortText(a, trackerSort.key), rowSortText(b, trackerSort.key)) * dir;
+  }
+
+  function paintTrackerSortHeaders() {
+    document.querySelectorAll('.tracker-col-head .sort-h').forEach(function (h) {
+      var key = h.getAttribute('data-sort');
+      var label = key.charAt(0).toUpperCase() + key.slice(1);
+      var active = key === trackerSort.key;
+      var arrow = active ? (trackerSort.dir > 0 ? '↑' : '↓') : '';
+      h.innerHTML = '<span>' + label + '</span>' + (arrow ? '<span class="sort-arrow" aria-hidden="true">' + arrow + '</span>' : '');
+      h.setAttribute('aria-sort', active ? (trackerSort.dir > 0 ? 'ascending' : 'descending') : 'none');
+    });
+  }
+
+  function applyTrackerSort() {
+    if (!trackerSort.key || !board) return;
+    Array.prototype.forEach.call(board.querySelectorAll('.sap-section-body'), function (body) {
+      var rows = Array.prototype.slice.call(body.querySelectorAll(':scope > .artifact-row'));
+      if (rows.length < 2) return;
+      var note = body.querySelector(':scope > .sap-empty-note');
+      rows.sort(compareTrackerRows);
+      rows.forEach(function (row) {
+        if (note) body.insertBefore(row, note);
+        else body.appendChild(row);
+      });
+    });
+    paintTrackerSortHeaders();
+  }
+
+  document.querySelectorAll('.tracker-col-head .sort-h').forEach(function (h) {
+    h.addEventListener('click', function () {
+      var key = h.getAttribute('data-sort');
+      if (trackerSort.key === key) trackerSort.dir = trackerSort.dir === 1 ? -1 : 1;
+      else { trackerSort.key = key; trackerSort.dir = 1; }
+      saveTrackerSort();
+      applyTrackerSort();
+    });
+  });
+
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
     allRows().forEach(function (row) {
@@ -5352,6 +5471,8 @@
   window.addEventListener('storage', function (e) {
     if (window.SPHERE_DEMO && e.key === SPHERE_DEMO.KEY) applyShellChrome();
   });
+  paintTrackerSortHeaders();
+  if (trackerSort.key) applyTrackerSort();
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>
