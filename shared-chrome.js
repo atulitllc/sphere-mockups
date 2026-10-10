@@ -198,7 +198,8 @@
     launch.type = 'button';
     launch.id = 'copilotLaunch';
     launch.className = 'copilot-launch';
-    launch.title = 'Ask Copilot - help for ' + screenLabel;
+    launch.title = 'Ask Copilot';
+    launch.setAttribute('aria-label', 'Ask Copilot');
     launch.setAttribute('aria-haspopup', 'dialog');
     launch.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 6.6L21 12l-6.8 2.4L12 21l-2.2-6.6L3 12l6.8-2.4z"/></svg><span>Ask Copilot</span>';
     topRight.insertBefore(launch, topRight.firstChild);
@@ -770,7 +771,7 @@
     box.className = 'user-chrome';
     box.id = 'userChrome';
     box.innerHTML =
-      '<div class="user-chrome-who" title="' + (u.email || u.name).replace(/"/g, '&quot;') + '">' +
+      '<div class="user-chrome-who" title="' + (u.email || u.name).replace(/"/g, '&quot;') + '" aria-label="Signed in as ' + u.name.replace(/"/g, '&quot;') + '">' +
         '<span class="user-chrome-avatar" aria-hidden="true">' +
           '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>' +
         '</span>' +
@@ -801,6 +802,47 @@
     document.addEventListener('DOMContentLoaded', initUserChrome);
   } else {
     initUserChrome();
+  }
+})();
+
+/* Narrow top bar: keep the current page in the crumb, and park client + sign-out in the nav. */
+(function () {
+  function initNarrowChrome() {
+    document.querySelectorAll('header.top .crumb').forEach(function (crumb) {
+      if (crumb.querySelector('.crumb-fit')) return;
+      var span = document.createElement('span');
+      span.className = 'crumb-fit';
+      while (crumb.firstChild) span.appendChild(crumb.firstChild);
+      crumb.appendChild(span);
+    });
+
+    var nav = document.querySelector('aside.nav');
+    if (!nav || document.getElementById('navMobileTools')) return;
+    var pill = document.querySelector('header.top .company-pill, header.top .tenant-pill');
+    var label = pill ? pill.textContent.replace(/\s+/g, ' ').trim() : '';
+    var block = document.createElement('div');
+    block.className = 'nav-mobile-tools';
+    block.id = 'navMobileTools';
+    block.innerHTML =
+      (label ? '<div class="nav-mobile-client">' + label.replace(/</g, '&lt;') + '</div>' : '') +
+      '<button type="button" class="nav-mobile-signout" id="navSignOut">Sign out</button>';
+    var footer = nav.querySelector('.nav-footer');
+    if (footer) nav.insertBefore(block, footer);
+    else nav.appendChild(block);
+    var sign = document.getElementById('navSignOut');
+    if (sign) {
+      sign.addEventListener('click', function () {
+        var main = document.getElementById('btnLogout');
+        if (main) main.click();
+        else location.href = 'login.html';
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNarrowChrome);
+  } else {
+    initNarrowChrome();
   }
 })();
 

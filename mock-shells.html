@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4focus" />
+<link rel="stylesheet" href="shared-white.css?v=flow4phone" />
 <script>
 (function () {
   try {
@@ -959,7 +959,7 @@
         L(0, 'Discontinued study', NP), L(1, 'Lost to follow-up', NP), L(1, 'Death', NP)],
       footnotes: 'Percentages are based on the number of randomized subjects.\nPrimary reason for discontinuation as recorded on the End of Treatment CRF.\n' + srcLine('ADSL, ADDS', 't_14_1_3_disp.sas'),
       program: 't_14_1_3_disp.sas', sapRef: 'SAP 10.0 Subject disposition', templateKey: 'Disposition' }); },
-    '14.2.1': function () { return lay({ title: 'Primary endpoint - Objective response rate (ORR) by BICR assessment', subtitle: MITT, columns: ARMS2,
+    '14.2.1': function () { return lay({ title: 'Primary endpoint: Objective response rate (ORR) by BICR assessment', subtitle: MITT, columns: ARMS2,
       rows: [L(0, 'Best overall response, n (%)', ['', '']), L(1, 'Complete response (CR)', NP2), L(1, 'Partial response (PR)', NP2), L(1, 'Stable disease (SD)', NP2),
         L(1, 'Progressive disease (PD)', NP2), L(1, 'Not evaluable (NE)', NP2), L(0, 'Objective response rate (CR + PR), n (%)', NP2),
         L(1, '95% CI [a]', ['(xx.x, xx.x)', '(xx.x, xx.x)']), L(0, 'Difference in ORR vs placebo (%)', ['', 'xx.x']), L(1, '95% CI [b]', ['', '(xx.x, xx.x)']), L(1, 'p-value [c]', ['', 'x.xxxx'])],
@@ -1111,7 +1111,7 @@
       return [
         makeShell({ id: '14.1.1', number: '14.1.1', type: 'Table', title: 'Demographics and baseline characteristics of the Safety analysis set', status: 'Draft', analysisSet: 'Safety', sap: 'Demographics', layout: demogPreset, templateKey: 'Demographics', automate: true, metadata: DEMOG_META }),
         makeShell({ id: '14.1.2', number: '14.1.2', type: 'Table', title: 'Baseline disease characteristics and prior anticancer therapies (ITT)', status: 'Final', locked: false, analysisSet: 'ITT', sap: 'Demographics', templateKey: 'Baseline characteristics' }),
-        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint - Objective response rate (ORR) by BICR assessment', status: 'In Review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint - ORR' }),
+        makeShell({ id: '14.2.1', number: '14.2.1', type: 'Table', title: 'Primary endpoint: Objective response rate (ORR) by BICR assessment', status: 'In Review', qc: 'In review', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Primary endpoint - ORR' }),
         makeShell({ id: '14.2.3', number: '14.2.3', type: 'Table', title: 'Duration of response and time to response among confirmed responders (FAS)', status: 'Draft', analysisSet: 'mITT', sap: 'Efficacy', templateKey: 'Duration of response' }),
         makeShell({ id: '14.3.0', number: '14.3.0', type: 'Table', title: 'Overall safety summary - treatment-emergent adverse events (Safety analysis set)', status: 'In Review', analysisSet: 'Safety', sap: 'Safety TLFs', layout: safetySummaryPreset, templateKey: 'Safety summary', automate: true, metadata: SAFETY_SUMMARY_META }),
         makeShell({ id: '14.3.1', number: '14.3.1', type: 'Table', title: 'Adverse events - overview of TEAE, SAE, Grade ≥3, and discontinuations', status: 'Draft', analysisSet: 'Safety', sap: 'Safety TLFs', layout: aeOverviewPreset, templateKey: 'Adverse events - overview', automate: true, metadata: AE_OVERVIEW_META }),
@@ -1173,7 +1173,12 @@
       var saved = SPHERE_DEMO.getShells(sid);
       if (saved && saved.length) studyStore[sid].shells = saved;
       /* shared SAP sections: map seed section ids to current (possibly renamed) names */
-      (studyStore[sid].shells || []).forEach(function (sh) { if (sh.sap) sh.sap = SPHERE_DEMO.sectionName(sh.sap); });
+      var dashDirty = false;
+      (studyStore[sid].shells || []).forEach(function (sh) {
+        if (sh.sap) sh.sap = SPHERE_DEMO.sectionName(sh.sap);
+        if (tidyShell(sh)) dashDirty = true;
+      });
+      if (dashDirty && saved && saved.length && SPHERE_DEMO.setShells) SPHERE_DEMO.setShells(sid, studyStore[sid].shells);
     });
   }
   /* Pre-linked shells are real Tracker rows: syncedAt + recordId, not a separate icon state. */
@@ -1447,8 +1452,26 @@
   function tidyVisible(text) {
     return String(text || '')
       .replace(/characteristicsq1/gi, 'characteristics')
+      .replace(/Primary endpoint\s*[\u2014\u2013-]\s*/g, 'Primary endpoint: ')
       .replace(/\u2014/g, ' · ')
       .replace(/\u2013/g, '-');
+  }
+  function tidyShell(sh) {
+    if (!sh) return false;
+    var changed = false;
+    function apply(obj, key) {
+      if (!obj || typeof obj[key] !== 'string') return;
+      var next = tidyVisible(obj[key]);
+      if (next !== obj[key]) { obj[key] = next; changed = true; }
+    }
+    apply(sh, 'title');
+    if (sh.layout) {
+      ['title', 'subtitle', 'footnotes', 'notes', 'subgroup', 'labelHeader'].forEach(function (key) {
+        apply(sh.layout, key);
+      });
+      (sh.layout.rows || []).forEach(function (row) { apply(row, 'label'); });
+    }
+    return changed;
   }
   function loadShellIntoEditor(sh) {
     if (!sh) return;
@@ -1594,7 +1617,7 @@
         if (catalogSelectedIds.indexOf(sh.id) >= 0) classes.push('is-multi');
         html += '<tr class="' + classes.join(' ') + '" data-id="' + escapeHtml(sh.id) + '" data-type="' + escapeHtml(sh.type) + '" data-sap="' + escapeHtml(normalizeSap(sh.sap)) + '">';
         html += '<td class="num">' + catalogGripHtml() + escapeHtml(sh.number) + '</td>';
-        html += '<td>' + escapeHtml(sh.title);
+        html += '<td>' + escapeHtml(tidyVisible(sh.title));
         if (sh.copiedFrom) {
           html += ' <span class="sub" style="color:var(--muted)">· from ' + escapeHtml(studyChromeLabel(sh.copiedFrom.study)) + '</span>';
         }
@@ -4329,6 +4352,6 @@
   setTimeout(fit, 300);
 })();
 </script>
-<script src="shared-chrome.js?v=flow4crumb"></script>
+<script src="shared-chrome.js?v=flow4phone"></script>
 </body>
 </html>

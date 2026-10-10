@@ -8,7 +8,19 @@
 
   function read() {
     var s = null;
-    try { var raw = localStorage.getItem(KEY) || 'null'; if (raw.indexOf('\u00a7') >= 0) raw = raw.replace(/SAP \u00a7/g, 'SAP ').replace(/\u00a7\s*/g, ''); s = JSON.parse(raw); } catch (e) { s = null; }
+    try {
+      var raw = localStorage.getItem(KEY) || 'null';
+      if (raw.indexOf('\u00a7') >= 0) raw = raw.replace(/SAP \u00a7/g, 'SAP ').replace(/\u00a7\s*/g, '');
+      var tidied = raw
+        .replace(/Primary endpoint\s*[\u2014\u2013-]\s*/g, 'Primary endpoint: ')
+        .replace(/\u2014/g, ' · ')
+        .replace(/\u2013/g, '-');
+      if (tidied !== raw) {
+        raw = tidied;
+        try { localStorage.setItem(KEY, raw); } catch (eWrite) {}
+      }
+      s = JSON.parse(raw);
+    } catch (e) { s = null; }
     s = s || {};
     s.shells = s.shells || {};      /* studyId -> shells[] */
     s.records = s.records || [];    /* tracker records created from Mock Shells */
