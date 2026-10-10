@@ -278,14 +278,14 @@
             </label>
           </div>
           <div class="artifact-main">
-            <div class="col-head-output"><span class="col-head-label">Output</span><span class="col-head-sub">Roles</span></div>
+            <div class="col-head-output"><span class="col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="output">Output</button></span><span class="col-head-sub">Roles</span></div>
             <div class="artifact-meta">
-              <div class="meta-cell col-head-program-spacer"><span class="col-head-label">Programs</span></div>
-              <div class="meta-cell"><span class="col-head-label">Type</span></div>
-              <div class="meta-cell"><span class="col-head-label">Status</span></div>
+              <div class="meta-cell col-head-program-spacer col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="programs">Programs</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="type">Type</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="status">Status</button></div>
               <div class="meta-cell"><span class="col-head-label">Assigned To</span></div>
-              <div class="meta-cell"><span class="col-head-label">Shell</span></div>
-              <div class="meta-cell"><span class="col-head-label">Job</span></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="shell">Shell</button></div>
+              <div class="meta-cell col-head-label" role="columnheader" aria-sort="none"><button type="button" class="sort-h" data-sort="job">Job</button></div>
               <div class="meta-cell"><span class="col-head-label">Actions</span></div>
             </div>
           </div>
@@ -302,7 +302,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Demographics" aria-label="Select all in Demographics">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-demographics">
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R">
+            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_1_demog.R" data-record-id="seed-14.1.1">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Demographics" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -320,7 +320,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Dataset" data-status="In QC" data-tags="CSR" data-sap="Demographics" data-job="done" data-program="adam_adsl.sas">
+            <article class="artifact-row is-readonly" data-type="Dataset" data-status="In QC" data-tags="CSR" data-sap="Demographics" data-job="done" data-program="adam_adsl.sas" data-record-id="seed-ADSL">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADSL" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -338,7 +338,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_2_base.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR,DMC" data-sap="Demographics" data-job="done" data-program="tfl_14_1_2_base.R" data-record-id="seed-14.1.2">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Baseline characteristics" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -368,7 +368,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Efficacy" aria-label="Select all in Efficacy">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-efficacy">
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="done" data-program="tfl_14_2_1_orr.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,Second wave" data-sap="Efficacy" data-job="done" data-program="tfl_14_2_1_orr.R" data-record-id="seed-14.2.1">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -386,7 +386,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Dataset" data-status="Revise" data-tags="" data-sap="Efficacy" data-program="">
+            <article class="artifact-row" data-type="Dataset" data-status="Revise" data-tags="" data-sap="Efficacy" data-program="" data-record-id="seed-ADTTE">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADTTE" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -404,7 +404,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Figure" data-status="Approved" data-tags="Second wave" data-sap="Efficacy" data-program="">
+            <article class="artifact-row is-readonly" data-type="Figure" data-status="Approved" data-tags="Second wave" data-sap="Efficacy" data-program="" data-record-id="seed-14.3.2">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Kaplan-Meier" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -422,7 +422,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR" data-sap="Efficacy" data-job="done" data-program="tfl_14_2_3_orr_dorr.sas">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR" data-sap="Efficacy" data-job="done" data-program="tfl_14_2_3_orr_dorr.sas" data-record-id="seed-14.2.3">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Objective response rate and duration of " /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -453,7 +453,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Safety TLFs" aria-label="Select all in Safety TLFs">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-safety-tlfs">
-            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="adam_adae.sas">
+            <article class="artifact-row" data-type="Dataset" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="adam_adae.sas" data-record-id="seed-ADAE">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select ADAE" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -471,7 +471,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Listing" data-status="Not started" data-tags="DMC,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_ae.R">
+            <article class="artifact-row is-readonly" data-type="Listing" data-status="Not started" data-tags="DMC,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_ae.R" data-record-id="seed-14.3.1">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select AE overview" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -489,7 +489,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_8_cm.sas">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_8_cm.sas" data-record-id="seed-14.3.8">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Concomitant medications" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -507,7 +507,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="CSR,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_1_ae_soc_pt.R">
+            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="CSR,First look" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_1_ae_soc_pt.R" data-record-id="seed-14.3.1.1">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Treatment-emergent adverse events by Sys" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -525,7 +525,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_2_sae_rel.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In QC" data-tags="CSR,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_2_sae_rel.R" data-record-id="seed-14.3.1.2">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Serious adverse events by System Organ C" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -543,7 +543,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_3_ae_disc.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_3_ae_disc.R" data-record-id="seed-14.3.1.3">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events leading to permanent disc" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -561,7 +561,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="Revise" data-tags="CSR,Second wave" data-sap="Safety TLFs" data-job="" data-program="tfl_14_3_1_4_ae_g3.R">
+            <article class="artifact-row" data-type="Table" data-status="Revise" data-tags="CSR,Second wave" data-sap="Safety TLFs" data-job="" data-program="tfl_14_3_1_4_ae_g3.R" data-record-id="seed-14.3.1.4">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Grade 3 or higher treatment-emergent adv" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -579,7 +579,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_5_aesi.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In MW" data-tags="CSR,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_5_aesi.R" data-record-id="seed-14.3.1.5">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events of special interest (AESI" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -597,7 +597,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Figure" data-status="In QC" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_6_ae_ttf.R">
+            <article class="artifact-row is-readonly" data-type="Figure" data-status="In QC" data-tags="CSR" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_1_6_ae_ttf.R" data-record-id="seed-14.3.1.6">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Time to first Grade ≥3 treatment-emergen" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -615,7 +615,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Listing" data-status="Not started" data-tags="First look" data-sap="Safety TLFs" data-job="" data-program="tfl_14_3_2_1_sae_list.R">
+            <article class="artifact-row is-readonly" data-type="Listing" data-status="Not started" data-tags="First look" data-sap="Safety TLFs" data-job="" data-program="tfl_14_3_2_1_sae_list.R" data-record-id="seed-14.3.2.1">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Listing of serious adverse events with o" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -633,7 +633,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Listing" data-status="In QC" data-tags="CSR,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_2_2_death_list.R">
+            <article class="artifact-row is-readonly" data-type="Listing" data-status="In QC" data-tags="CSR,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_2_2_death_list.R" data-record-id="seed-14.3.2.2">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Listing of deaths and adverse events wit" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -651,7 +651,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="Approved" data-tags="CSR,Second wave" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_3_ae_sev.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="Approved" data-tags="CSR,Second wave" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_3_ae_sev.R" data-record-id="seed-14.3.3">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Adverse events by maximum severity grade" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -669,7 +669,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_4_ae_common.R">
+            <article class="artifact-row" data-type="Table" data-status="In dev" data-tags="First look,DMC" data-sap="Safety TLFs" data-job="done" data-program="tfl_14_3_4_ae_common.R" data-record-id="seed-14.3.4">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Common adverse events (≥5% in any treatm" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -700,7 +700,7 @@
               <button type="button" class="sap-section-select-btn" data-sap-select title="Select all in Labs" aria-label="Select all in Labs">Select all</button>
             </div>
             <div class="sap-section-body" id="sap-body-labs">
-            <article class="artifact-row is-readonly" data-type="Table" data-status="Frozen" data-tags="Second wave" data-sap="Labs" data-program="tfl_14_3_5_lb.R">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="Frozen" data-tags="Second wave" data-sap="Labs" data-program="tfl_14_3_5_lb.R" data-record-id="seed-14.3.5">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -718,7 +718,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Labs" data-job="done" data-program="tfl_14_3_5_1_lb_chem.sas">
+            <article class="artifact-row is-readonly" data-type="Table" data-status="In Stats" data-tags="CSR" data-sap="Labs" data-job="done" data-program="tfl_14_3_5_1_lb_chem.sas" data-record-id="seed-14.3.5.1">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Laboratory chemistry shifts from baselin" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -736,7 +736,7 @@
                 </div>
               </div>
             </article>
-            <article class="artifact-row" data-type="Figure" data-status="In dev" data-tags="First look" data-sap="Labs" data-job="" data-program="tfl_14_3_5_2_lb_heme.R">
+            <article class="artifact-row" data-type="Figure" data-status="In dev" data-tags="First look" data-sap="Labs" data-job="" data-program="tfl_14_3_5_2_lb_heme.R" data-record-id="seed-14.3.5.2">
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Hematology parameters: change from basel" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
@@ -1702,6 +1702,7 @@
       bodyEl.setAttribute('aria-hidden', 'false');
       bodyEl.appendChild(row);
     }
+    applyTrackerSort();
   }
 
   document.getElementById('bulkTag').addEventListener('change', function () {
@@ -2855,6 +2856,7 @@
     refreshAssignedFilter();
     syncSectionCounts();
     applyFilters();
+    persistRuntimeRowFromDom(row);
     closeRowEditor();
     showToast('Row updated');
   }
@@ -3314,6 +3316,8 @@
     row.setAttribute('data-sap', opts.sap);
     row.setAttribute('data-job', opts.job || '');
     row.setAttribute('data-program', opts.program || '');
+    if (opts.recordId) row.setAttribute('data-record-id', opts.recordId);
+    if (opts.scope) row.setAttribute('data-runtime-scope', opts.scope);
     /* checkout removed */
     var tags = (opts.tags || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var tagsHtml = tags.length
@@ -3354,7 +3358,8 @@
       var title = f.getAttribute('data-title');
       var type = f.getAttribute('data-type');
       var sap = f.getAttribute('data-sap');
-      var row = buildArtifactRow({
+      var recordId = mintRecordId();
+      var spec = {
         type: type,
         status: 'Not started',
         tags: 'First look',
@@ -3362,8 +3367,11 @@
         program: fname,
         path: 'programs/' + f.value,
         title: title,
-        note: 'imported from programs/'
-      });
+        note: 'imported from programs/',
+        recordId: recordId
+      };
+      rememberRuntimeRow(spec);
+      var row = buildArtifactRow(spec);
       moveRowToSap(row, sap);
       f.checked = false;
     });
@@ -3412,15 +3420,18 @@
       else { field('nrProgram').removeAttribute('aria-invalid'); field('nrProgramError').hidden = true; }
       if (bad) return;
       var before = allRows().length;
-      var row = buildArtifactRow({
+      var spec = {
         type: field('nrType').value,
         status: 'Draft',
         tags: field('nrTags').value,
         sap: field('nrSap').value,
         program: program,
         title: title,
-        shell: field('nrShell').value
-      });
+        shell: field('nrShell').value,
+        recordId: mintRecordId()
+      };
+      rememberRuntimeRow(spec);
+      var row = buildArtifactRow(spec);
       moveRowToSap(row, field('nrSap').value);
       refreshRowWorkflowUI(row);
       applyFilters();
@@ -5162,6 +5173,7 @@
     if (chip) chip.remove();
     refreshRowWorkflowUI(row);
     flashRow(row, false);
+    persistRuntimeRowFromDom(row);
   }
 
   /* Workflow popover (status pill) */
@@ -5377,6 +5389,7 @@
   function buildFlowRow(rec) {
     var row = buildArtifactRow({ type: rec.type, status: rec.status, tags: '', sap: rec.sap, job: '', program: rec.program, title: escapeHtml(rec.number + ' · ' + rec.title) });
     row.setAttribute('data-flow-id', rec.id);
+    if (rec.id) row.setAttribute('data-record-id', rec.id);
     row.setAttribute('data-orig-status', rec.status);
     if (rec.shellId) row.setAttribute('data-shell-id', rec.shellId);
     var cells = metaCells(row);
@@ -5446,6 +5459,255 @@
     });
     if (typeof syncSectionCounts === 'function') syncSectionCounts();
   }
+
+  var RUNTIME_ROWS_KEY = 'sphere-tracker-runtime-rows';
+  var RUNTIME_ID_SEQ = 'sphere-tracker-id-seq';
+
+  function mintRecordId() {
+    var n = 1;
+    try {
+      n = (parseInt(localStorage.getItem(RUNTIME_ID_SEQ) || '0', 10) || 0) + 1;
+      localStorage.setItem(RUNTIME_ID_SEQ, String(n));
+    } catch (eMint) {}
+    return 'rec-runtime-' + n;
+  }
+
+  function readRuntimeRows() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(RUNTIME_ROWS_KEY) || '[]');
+      if (!Array.isArray(raw)) return [];
+      var changed = false;
+      raw.forEach(function (row) {
+        if (row && !row.scope) { row.scope = RUNTIME_HOME; changed = true; }
+      });
+      if (changed) writeRuntimeRows(raw);
+      return raw;
+    } catch (eRead) { return []; }
+  }
+
+  var RUNTIME_HOME = 'ONC-204-301';
+  function runtimeScopeId() {
+    if (typeof trackerStoreId === 'function') return trackerStoreId();
+    try {
+      var q = new URLSearchParams(location.search);
+      var qStudy = q.get('study') || '';
+      var qDel = q.get('deliverable') || '';
+      if (qStudy.indexOf('::') >= 0) return qStudy;
+      if (qStudy) return (!qDel || qDel === 'CSR') ? qStudy : (qStudy + '::' + qDel);
+      var saved = JSON.parse(sessionStorage.getItem('sphere-open-study') || 'null');
+      if (saved && saved.p) return (!saved.d || saved.d === 'CSR') ? saved.p : (saved.p + '::' + saved.d);
+    } catch (eScope) {}
+    return RUNTIME_HOME;
+  }
+  function writeRuntimeRows(list) {
+    try { localStorage.setItem(RUNTIME_ROWS_KEY, JSON.stringify(list)); } catch (eSaveRow) {}
+  }
+  function rememberRuntimeRow(spec) {
+    var list = readRuntimeRows();
+    var scope = spec.scope || runtimeScopeId();
+    spec.scope = scope;
+    var row = {
+      recordId: spec.recordId,
+      scope: scope,
+      type: spec.type || 'Table',
+      status: spec.status || 'Draft',
+      tags: spec.tags || '',
+      sap: spec.sap || '',
+      program: spec.program || '',
+      title: spec.title || '',
+      shell: spec.shell || 'n/a',
+      job: spec.job || ''
+    };
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].recordId === spec.recordId) idx = i;
+    if (idx >= 0) list[idx] = row;
+    else list.push(row);
+    writeRuntimeRows(list);
+  }
+  function persistRuntimeRowFromDom(row) {
+    if (!row) return;
+    var id = row.getAttribute('data-record-id') || '';
+    if (id.indexOf('rec-runtime-') !== 0) return;
+    var titleEl = row.querySelector('.artifact-title');
+    var cells = metaCells(row);
+    var shell = cells[4] ? String(cells[4].textContent || '').replace(/\s+/g, ' ').trim() : '';
+    var snap = {
+      recordId: id,
+      scope: row.getAttribute('data-runtime-scope') || runtimeScopeId(),
+      type: row.getAttribute('data-type') || 'Table',
+      status: row.getAttribute('data-status') || 'Draft',
+      tags: row.getAttribute('data-tags') || '',
+      sap: row.getAttribute('data-sap') || '',
+      program: row.getAttribute('data-program') || '',
+      title: titleEl ? String(titleEl.textContent || '').replace(/\s+/g, ' ').trim() : '',
+      shell: shell || 'n/a',
+      job: row.getAttribute('data-job') || ''
+    };
+    var list = readRuntimeRows();
+    var found = false;
+    for (var i = 0; i < list.length; i++) {
+      if (!list[i] || list[i].recordId !== id) continue;
+      snap.scope = list[i].scope || snap.scope;
+      list[i] = snap;
+      found = true;
+      break;
+    }
+    if (!found) list.push(snap);
+    writeRuntimeRows(list);
+  }
+
+  function hydrateRuntimeRows() {
+    var scope = runtimeScopeId();
+    readRuntimeRows().forEach(function (spec) {
+      if (!spec || !spec.recordId || !board) return;
+      if ((spec.scope || RUNTIME_HOME) !== scope) return;
+      var id = String(spec.recordId).replace(/"/g, '');
+      if (board.querySelector('.artifact-row[data-record-id="' + id + '"]')) return;
+      moveRowToSap(buildArtifactRow(spec), spec.sap || 'Demographics');
+    });
+  }
+
+  var TRACKER_SORT_STORE = 'sphere-tracker-sort';
+  var trackerSort = { key: '', dir: 1 };
+  try {
+    var savedSort = JSON.parse(localStorage.getItem(TRACKER_SORT_STORE) || '');
+    if (savedSort && savedSort.key) trackerSort = { key: savedSort.key, dir: savedSort.dir === -1 ? -1 : 1 };
+  } catch (eSort) {}
+
+  function saveTrackerSort() {
+    try {
+      if (!trackerSort.key) localStorage.removeItem(TRACKER_SORT_STORE);
+      else localStorage.setItem(TRACKER_SORT_STORE, JSON.stringify({ key: trackerSort.key, dir: trackerSort.dir }));
+    } catch (eSave) {}
+  }
+
+  function outputSortLabel(row) {
+    var titleEl = row.querySelector('.artifact-title');
+    var raw = '';
+    if (titleEl) {
+      for (var i = 0; i < titleEl.childNodes.length; i++) {
+        if (titleEl.childNodes[i].nodeType === 3) raw += titleEl.childNodes[i].textContent;
+      }
+      if (!raw.trim()) raw = titleEl.textContent || '';
+    }
+    return raw.split('·')[0].replace(/\s+/g, ' ').trim();
+  }
+
+  function cmpNatural(a, b) {
+    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+  }
+
+  function jobSortWord(row) {
+    var el = row.querySelector('.job-cell .run-st-txt');
+    if (el && el.textContent.trim()) return el.textContent.replace(/\s+/g, ' ').trim();
+    var j = row._runJob;
+    if (j) {
+      if (j.state === 'queued') return 'Queued';
+      if (j.state === 'running') return 'Running';
+      if (j.state === 'error') return 'Error';
+      if (j.warn) return 'Warning';
+      if (j.state === 'done' || j.state === 'completed') return 'Completed';
+    }
+    var raw = (row.getAttribute('data-job') || '').toLowerCase();
+    if (raw === 'done') return 'Completed';
+    if (raw === 'queued') return 'Queued';
+    if (raw === 'running') return 'Running';
+    if (raw === 'error') return 'Error';
+    return '';
+  }
+
+  function jobSortTime(row) {
+    var j = row._runJob;
+    if (j) {
+      var d = j.endDate || j.prevEnd;
+      if (d && d.getTime && !isNaN(d.getTime())) return d.getTime();
+      if (j.endedAt) return j.endedAt;
+    }
+    var t = Date.parse(row.getAttribute('data-last-run') || '');
+    return isNaN(t) ? 0 : t;
+  }
+
+  function rowSortText(row, key) {
+    if (key === 'output') return outputSortLabel(row);
+    if (key === 'type') return row.getAttribute('data-type') || '';
+    if (key === 'status') return row.getAttribute('data-status') || '';
+    if (key === 'programs') return (row.getAttribute('data-program') || '').split('/').pop();
+    if (key === 'shell') {
+      var cells = metaCells(row);
+      return cells[4] ? (cells[4].textContent || '').replace(/\s+/g, ' ').trim() : '';
+    }
+    return '';
+  }
+
+  var TRACKER_STATUS_ORDER = ['Draft', 'Not started', 'In dev', 'Revise', 'In QC', 'In Stats', 'Released to MW', 'Approved', 'Frozen'];
+  function statusSortRank(row) {
+    var st = row.getAttribute('data-status') || '';
+    if (st === 'In MW') st = 'Released to MW';
+    var i = TRACKER_STATUS_ORDER.indexOf(st);
+    return i < 0 ? TRACKER_STATUS_ORDER.length : i;
+  }
+
+  function recordSortId(row) {
+    return row.getAttribute('data-record-id') || '';
+  }
+  /* Ties: Output ID natural order, then the persisted record id. Both stay ascending in either sort direction. */
+  function tieBreak(a, b) {
+    var cmp = cmpNatural(outputSortLabel(a), outputSortLabel(b));
+    if (cmp) return cmp;
+    return cmpNatural(recordSortId(a), recordSortId(b));
+  }
+  function compareTrackerRows(a, b) {
+    var dir = trackerSort.dir === -1 ? -1 : 1;
+    var cmp = 0;
+    if (trackerSort.key === 'job') {
+      cmp = cmpNatural(jobSortWord(a), jobSortWord(b));
+      if (!cmp) cmp = jobSortTime(a) - jobSortTime(b);
+    } else if (trackerSort.key === 'status') {
+      cmp = statusSortRank(a) - statusSortRank(b);
+    } else {
+      cmp = cmpNatural(rowSortText(a, trackerSort.key), rowSortText(b, trackerSort.key));
+    }
+    if (!cmp) return tieBreak(a, b);
+    return cmp * dir;
+  }
+
+  function paintTrackerSortHeaders() {
+    document.querySelectorAll('.tracker-col-head .sort-h').forEach(function (h) {
+      var key = h.getAttribute('data-sort');
+      var label = key.charAt(0).toUpperCase() + key.slice(1);
+      var active = key === trackerSort.key;
+      var arrow = active ? (trackerSort.dir > 0 ? '↑' : '↓') : '';
+      h.innerHTML = '<span>' + label + '</span>' + (arrow ? '<span class="sort-arrow" aria-hidden="true">' + arrow + '</span>' : '');
+      h.removeAttribute('aria-sort');
+      var head = h.closest('[role="columnheader"]');
+      if (head) head.setAttribute('aria-sort', active ? (trackerSort.dir > 0 ? 'ascending' : 'descending') : 'none');
+    });
+  }
+
+  function applyTrackerSort() {
+    if (!trackerSort.key || !board) return;
+    Array.prototype.forEach.call(board.querySelectorAll('.sap-section-body'), function (body) {
+      var rows = Array.prototype.slice.call(body.querySelectorAll(':scope > .artifact-row'));
+      if (rows.length < 2) return;
+      var note = body.querySelector(':scope > .sap-empty-note');
+      rows.sort(compareTrackerRows);
+      rows.forEach(function (row) {
+        if (note) body.insertBefore(row, note);
+        else body.appendChild(row);
+      });
+    });
+    paintTrackerSortHeaders();
+  }
+
+  document.querySelectorAll('.tracker-col-head .sort-h').forEach(function (h) {
+    h.addEventListener('click', function () {
+      var key = h.getAttribute('data-sort');
+      if (trackerSort.key === key) trackerSort.dir = trackerSort.dir === 1 ? -1 : 1;
+      else { trackerSort.key = key; trackerSort.dir = 1; }
+      saveTrackerSort();
+      applyTrackerSort();
+    });
+  });
 
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
@@ -5520,6 +5782,9 @@
   window.addEventListener('storage', function (e) {
     if (window.SPHERE_DEMO && e.key === SPHERE_DEMO.KEY) applyShellChrome();
   });
+  paintTrackerSortHeaders();
+  hydrateRuntimeRows();
+  if (trackerSort.key) applyTrackerSort();
 })();
 </script>
 <script src="shared-chrome.js?v=flow3j"></script>
