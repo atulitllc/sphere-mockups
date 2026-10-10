@@ -1807,10 +1807,17 @@ label .req::after { content: " *"; color: var(--danger); }
   margin-bottom: 6px;
 }
 .tracker-section .sap-section-head {
-  padding: 6px 4px 4px;
+  padding: 2px 4px 2px;
 }
 .tracker-section .artifact-row {
-  padding: 5px 8px 5px 4px;
+  padding: 3px 6px 3px 2px;
+  gap: 0 6px;
+}
+.tracker-section .sap-section {
+  padding-bottom: 0;
+}
+.tracker-section .sap-section-body {
+  padding-bottom: 2px;
 }
 
 
@@ -1818,10 +1825,10 @@ label .req::after { content: " *"; color: var(--danger); }
 .tracker-col-head {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
-  gap: 0 8px;
-  padding: 9px 7px 9px 3px;
-  margin: 0 0 2px;
-  min-height: 40px;
+  gap: 0 6px;
+  padding: 4px 6px 4px 2px;
+  margin: 0;
+  min-height: 0;
   align-items: center;
   position: sticky;
   top: 0;
@@ -1871,7 +1878,7 @@ label .req::after { content: " *"; color: var(--danger); }
 
 .tracker-board {
   display: grid;
-  gap: 8px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -4432,7 +4439,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 /* Tracker: pull main grid up */
 .tracker-section {
   margin-top: 0;
-  gap: 4px;
+  gap: 2px;
 }
 .tracker-section > .section-head.tracker-tools-only {
   margin-top: 0;
@@ -4453,7 +4460,7 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 
 /* Tracker: kill header whitespace */
 .stack.tracker-stack {
-  gap: 6px;
+  gap: 4px;
   container-type: inline-size;
   container-name: tracker;
 }
@@ -6618,67 +6625,50 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 .new-study-grid .new-study-preview { display: grid; grid-template-columns: minmax(0, 1fr); }
 
 /* Tracker row layout: title column, then one shared meta template.
-   The meta column is a fraction of the row, never shrink-to-fit content,
-   so the header and every row resolve the same tracks. */
+   Meta tracks are fixed to their longest content. Leftover width goes to
+   the output title, so Programs does not open a gap before Actions. */
 .tracker-section {
-  --tracker-gap: 6px;
-  --tracker-type: 62px;
+  --tracker-gap: 4px;
+  --tracker-type: 54px;
   --tracker-status: 126px;
-  --tracker-shell: 56px;
-  --tracker-job: 146px;
+  --tracker-shell: 52px;
+  --tracker-job: 140px;
   --tracker-actions: 122px;
-  --tracker-programs-min: 170px;
-  /* Sum of the fixed tracks, the Programs floor, and the five gaps.
-     The meta column cannot shrink below this, or Programs overflows the board. */
+  --tracker-programs-min: 168px;
+  /* Sum of the fixed tracks and the five gaps. The meta column stays this
+     wide so header and rows share one grid and Programs cannot overflow. */
   --tracker-meta-min: calc(
     var(--tracker-type) + var(--tracker-status) + var(--tracker-shell) +
     var(--tracker-job) + var(--tracker-actions) + var(--tracker-programs-min) +
     (5 * var(--tracker-gap))
   );
-  /* Row chrome (4px + 8px padding) plus the checkbox, its gap, the 160px
-     title floor, the title/meta gap, and the meta floor. */
-  --tracker-grid-min: calc(4px + 36px + 8px + 160px + 8px + var(--tracker-meta-min) + 8px);
+  /* Row chrome plus the checkbox, its gap, the 160px title floor, the
+     title/meta gap, and the meta width. */
+  --tracker-grid-min: calc(2px + 36px + 6px + 160px + 6px + var(--tracker-meta-min) + 6px);
   --tracker-cols:
     var(--tracker-type)
     var(--tracker-status)
     var(--tracker-shell)
     var(--tracker-job)
-    minmax(var(--tracker-programs-min), 1fr)
+    var(--tracker-programs-min)
     var(--tracker-actions);
 }
 .artifact-row .artifact-main,
 .tracker-col-head .artifact-main {
   display: grid;
-  /* Title and meta both flex. The title track cannot shrink below 160px, so
-     the output name stays readable. Meta's 2fr share stays under its 170px
-     Programs floor at 1280, so that floor wins and the title keeps the leftover
-     (already above 160px). On a wide row the 2fr share exceeds the floor and
-     Programs grows. At 1280 and 1920 the used widths match the previous floor. */
-  grid-template-columns: minmax(160px, 1fr) minmax(var(--tracker-meta-min), 2fr);
-  column-gap: 8px;
+  /* Title takes every pixel the fixed meta tracks do not need. */
+  grid-template-columns: minmax(160px, 1fr) var(--tracker-meta-min);
+  column-gap: 6px;
   align-items: center;
   width: 100%;
   min-width: 0;
-}
-/* 125% of a 1280 screen is about a 744px section. Keep a readable title and
-   Programs floor here. The row may scroll inside the tracker card. At 1280
-   and 100% the section is 1000px, so this block does not apply. */
-@container tracker (max-width: 900px) {
-  .tracker-section {
-    --tracker-gap: 4px;
-    --tracker-type: 54px;
-    --tracker-shell: 48px;
-    --tracker-job: 164px;
-    --tracker-actions: 122px;
-    --tracker-programs-min: 170px;
-  }
 }
 .artifact-row .artifact-title-band {
   grid-column: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, auto);
-  column-gap: 8px;
-  row-gap: 5px;
+  column-gap: 6px;
+  row-gap: 2px;
   align-items: center;
   min-width: 0;
   overflow: hidden;
@@ -6694,9 +6684,8 @@ html[data-ui-zoom="125"] .role-chip .role-nm, html[data-ui-zoom="150"] .role-chi
 
 /* Six visible columns on one row: Type, Status, Shell, Job, Programs, Actions.
    Assigned To (nth-child 4) is display:none and does not take a track.
-   Tracks come from --tracker-cols once. Programs is minmax(170px, 1fr) and
-   every cell is min-width: 0, so content never sizes a track. The meta column
-   minimum matches that template so the 170px floor fits inside the board.
+   Tracks come from --tracker-cols once and are fixed, so content never sizes
+   a track and spare width stays on the output title.
    Do not set grid-column to a later column and then an earlier one. Sparse
    auto-placement will not move backward, so the next cell wraps to row 2. */
 .tracker-col-head .artifact-meta,
