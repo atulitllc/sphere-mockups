@@ -12,7 +12,7 @@
     { id: 'u3', name: 'Alex Rivera', username: 'arivera', email: 'alex.rivera@xpharma.com', admin: false, company: 'X Pharma' },
     { id: 'u4', name: 'Sam Okonkwo', username: 'sokonkwo', email: 'sam.okonkwo@xpharma.com', admin: false, company: 'X Pharma' },
     { id: 'mchen', name: 'Mei Chen', username: 'mchen', email: 'm.chen@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma' },
-    { id: 'rnguyen', name: 'R. Nguyen', username: 'rnguyen', email: 'r.nguyen@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma', invited: true }
+    { id: 'alopez', name: 'Avery Lopez', username: 'alopez', email: 'a.lopez@xpharma.example', admin: false, role: 'Reviewer', company: 'X Pharma', invited: true }
   ];
   function deny(msg) {
     var err = new Error(msg || 'Not authorized');
@@ -81,6 +81,13 @@
     });
     return hit;
   }
+  function requireActiveActor() {
+    var s = read();
+    var who = s.currentId ? user(s.currentId, s) : null;
+    if (!who) throw deny('Unknown user');
+    if (who.deactivated) throw deny('A deactivated account cannot perform this action');
+    return who;
+  }
   function activeAdminIds(s) {
     var ids = [];
     USERS.forEach(function (u) {
@@ -113,13 +120,33 @@
     username: function () { return api.current().username; },
     isAdmin: function (id) {
       var u = id ? user(id) : api.current();
-      return !!(u && u.admin);
+      return !!(u && u.admin && !u.deactivated);
+    },
+    matchesName: function (display, userName) {
+      var a = String(display || '').trim().toLowerCase();
+      var b = String(userName || '').trim().toLowerCase();
+      if (!a || !b) return false;
+      if (a === b) return true;
+      var parts = b.split(/\s+/);
+      if (parts.length < 2) return false;
+      var last = parts[parts.length - 1];
+      var initial = parts[0].charAt(0);
+      return a === initial + '. ' + last || a === initial + ' ' + last;
+    },
+    deactivatedLabel: function (display) {
+      var s = String(display || '').trim();
+      if (!s || !api.users) return '';
+      var dead = api.users().some(function (u) {
+        return u.deactivated && api.matchesName(s, u.name);
+      });
+      return dead ? ' <span class="muted">(deactivated)</span>' : '';
     },
     leads: function (compound) { return (read().leads[compound] || []).slice(); },
     isLead: function (compound, id) {
       return (read().leads[compound] || []).indexOf(id || read().currentId) >= 0;
     },
     setLeads: function (compound, ids) {
+      requireActiveActor();
       if (!api.isAdmin()) throw deny('Only Admin can assign or remove compound leads');
       var s = read();
       var next = [];
@@ -132,6 +159,7 @@
       return next;
     },
     assignLead: function (compound, id) {
+      requireActiveActor();
       var who = user(id);
       if (who && who.deactivated) throw deny('A deactivated account cannot be assigned as a lead');
       var cur = api.leads(compound);
@@ -145,6 +173,7 @@
       return next;
     },
     removeLead: function (compound, id) {
+      requireActiveActor();
       return api.setLeads(compound, api.leads(compound).filter(function (x) { return x !== id; }));
     },
     canManage: function (compound, id) {
@@ -157,6 +186,7 @@
       return true;
     },
     setFolderAccess: function (compound, level, path, grants) {
+      requireActiveActor();
       if (level !== 'compound' && level !== 'protocol' && level !== 'folder') {
         throw deny('Access can be set only at compound, protocol, or folder level');
       }
@@ -207,6 +237,7 @@
       return out;
     },
     deactivate: function (userId) {
+      requireActiveActor();
       if (!api.isAdmin()) throw deny('Only Admin can deactivate an account');
       var s = read();
       var before = user(userId, s);
@@ -239,6 +270,11 @@
       return user(userId, s);
     },
     reactivate: function (userId) {
+      var s0 = read();
+      var actor0 = s0.currentId ? user(s0.currentId, s0) : null;
+      if (!actor0) throw deny('Unknown user');
+      if (actor0.deactivated && actor0.id === userId) throw deny('A deactivated account cannot reactivate itself');
+      if (actor0.deactivated) throw deny('A deactivated account cannot perform this action');
       if (!api.isAdmin()) throw deny('Only Admin can reactivate an account');
       var s = read();
       var before = user(userId, s);

@@ -633,19 +633,19 @@
                     <tbody>
                       <tr>
                         <td><strong>Stats programmers</strong></td>
-                        <td>Jordan Patel · Sam Okonkwo</td>
+                        <td class="team-members" data-members="Jordan Patel|Sam Okonkwo">Jordan Patel · Sam Okonkwo</td>
                         <td><span class="badge info">Folder ACL</span></td>
                         <td><span class="badge ok">Active</span></td>
                       </tr>
                       <tr>
                         <td><strong>QC reviewers</strong></td>
-                        <td>Mei Chen · Riley Nguyen</td>
+                        <td class="team-members" data-members="Mei Chen|Riley Nguyen">Mei Chen · Riley Nguyen</td>
                         <td><span class="badge info">Folder ACL</span></td>
                         <td><span class="badge ok">Active</span></td>
                       </tr>
                       <tr>
                         <td><strong>Study leads</strong></td>
-                        <td>Alex Rivera · Jordan Patel</td>
+                        <td class="team-members" data-members="Alex Rivera|Jordan Patel">Alex Rivera · Jordan Patel</td>
                         <td><span class="badge">Folder ACL · View</span></td>
                         <td><span class="badge ok">Active</span></td>
                       </tr>
@@ -1385,6 +1385,14 @@
   }
   var pendingAccount = null;
   var accountModal = document.getElementById('accountModal');
+  function paintTeams() {
+    document.querySelectorAll('.team-members').forEach(function (td) {
+      var names = (td.getAttribute('data-members') || '').split('|').filter(Boolean);
+      td.innerHTML = names.map(function (name) {
+        return esc(name) + (A.deactivatedLabel ? A.deactivatedLabel(name) : '');
+      }).join(' · ');
+    });
+  }
   function paintUsers() {
     var me = A.current();
     var body = document.getElementById('userRows');
@@ -1404,10 +1412,7 @@
         if (u.deactivated) {
           action = '<td><button type="button" class="btn sm" data-reactivate="' + esc(u.id) + '">Reactivate</button></td>';
         } else if (u.id === me.id) {
-          var ownWhy = u.admin && activeAdmins <= 1
-            ? 'You cannot deactivate your own account. The last active Admin cannot be deactivated'
-            : 'You cannot deactivate your own account';
-          action = '<td><button type="button" class="btn sm" disabled title="' + esc(ownWhy) + '">Deactivate</button></td>';
+          action = '<td></td>';
         } else if (u.admin && activeAdmins <= 1) {
           action = '<td><button type="button" class="btn sm" disabled title="The last active Admin cannot be deactivated">Deactivate</button></td>';
         } else {
@@ -1510,6 +1515,7 @@
     if (L) L.registry().forEach(function (e) { if (e.compound && compounds.indexOf(e.compound) < 0) compounds.push(e.compound); });
     var who = '<p class="hint" style="margin:0 16px 8px">Signed in as ' + esc(me.name) + (me.admin ? ' (Admin)' : '') + '.</p>';
     paintUsers();
+    paintTeams();
     paintAudit();
     if (!me.admin) {
       box.innerHTML = who + '<p class="hint" style="margin:0 16px 12px">No control to add or remove compound leads.</p>';

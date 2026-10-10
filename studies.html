@@ -743,13 +743,7 @@
     function personCell(v) {
       var s = String(v || '').trim();
       if (!s || s === '-') return '<span class="cell-empty">-</span>';
-      var mark = '';
-      if (window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
-        var dead = SPHERE_ACCESS.users().some(function (u) {
-          return u.deactivated && String(u.name || '').trim().toLowerCase() === s.toLowerCase();
-        });
-        if (dead) mark = ' <span class="muted">(deactivated)</span>';
-      }
+      var mark = window.SPHERE_ACCESS && SPHERE_ACCESS.deactivatedLabel ? SPHERE_ACCESS.deactivatedLabel(s) : '';
       return esc(s) + mark;
     }
 
@@ -978,13 +972,7 @@
   function personCell(v) {
     var s = String(v == null ? '' : v).trim();
     if (!s || s === '-') return '<span class="cell-empty">-</span>';
-    var mark = '';
-    if (window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
-      var dead = SPHERE_ACCESS.users().some(function (u) {
-        return u.deactivated && String(u.name || '').trim().toLowerCase() === s.toLowerCase();
-      });
-      if (dead) mark = ' <span class="muted">(deactivated)</span>';
-    }
+    var mark = window.SPHERE_ACCESS && SPHERE_ACCESS.deactivatedLabel ? SPHERE_ACCESS.deactivatedLabel(s) : '';
     return esc(s) + mark;
   }
   function badge(e) {
