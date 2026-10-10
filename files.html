@@ -35,7 +35,7 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
-<script src="sphere-access.js?v=flow4c"></script>
+<script src="sphere-access.js?v=acct1"></script>
 <script src="demo-flow.js?v=flow4e"></script>
 </head>
 <body>
@@ -871,11 +871,19 @@
     }
   }
   var clip = null;
+  function fileChangeRefusal(action) {
+    if (!window.SPHERE_ACCESS) return '';
+    var who = SPHERE_ACCESS.current && SPHERE_ACCESS.current();
+    if (who && who.deactivated) return action + ' refused: this account is deactivated.';
+    var path = (window.SPHERE_filesPath || '') + current;
+    if (!SPHERE_ACCESS.canEdit(path)) return action + ' refused: no edit permission on this folder.';
+    return '';
+  }
   function pasteClip() {
     if (!clip) return;
-    var path = (window.SPHERE_filesPath || '') + current;
-    if (window.SPHERE_ACCESS && !SPHERE_ACCESS.canEdit(path)) {
-      window.alert('Paste refused: no edit permission on this folder.');
+    var refusal = fileChangeRefusal('Paste');
+    if (refusal) {
+      window.alert(refusal);
       return;
     }
     TREE[current] = TREE[current] || [];
@@ -894,6 +902,12 @@
     if (action === 'manage') {
       openAccess(ctxTarget);
     } else if (action === 'copy') {
+      var copyRefusal = fileChangeRefusal('Copy');
+      if (copyRefusal) {
+        window.alert(copyRefusal);
+        closeCtx();
+        return;
+      }
       var file = (TREE[current] || []).filter(function (f) { return f.name === ctxTarget.name; })[0];
       if (ctxTarget.kind === 'folder') {
         var kids = (TREE[ctxTarget.name] || TREE[current + '/' + ctxTarget.name] || (file ? [] : [])).map(function (f) { return JSON.parse(JSON.stringify(f)); });

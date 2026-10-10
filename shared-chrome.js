@@ -716,6 +716,30 @@
 })();
 
 
+/* SPH-R-405/406: a deactivated account cannot use guarded routes. */
+(function () {
+  function deactivatedSession() {
+    try {
+      if (window.SPHERE_ACCESS && SPHERE_ACCESS.current) {
+        var who = SPHERE_ACCESS.current();
+        return !!(who && who.deactivated);
+      }
+      var s = JSON.parse(localStorage.getItem('sphere-access-v1') || 'null');
+      var row = s && s.users && s.currentId && s.users[s.currentId];
+      return !!(row && row.deactivated);
+    } catch (e) { return false; }
+  }
+  function guard() {
+    var path = (location.pathname || '').split('/').pop() || '';
+    if (/^login\.html$/i.test(path)) return;
+    if (!deactivatedSession()) return;
+    try { localStorage.removeItem('sphere-signed-in'); } catch (e) {}
+    location.replace('login.html?deactivated=1');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', guard);
+  else guard();
+})();
+
 /* Signed-in user chip + logout (all chrome pages) */
 (function () {
   function readUser() {

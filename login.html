@@ -481,7 +481,7 @@
             Continue with company SSO
           </button>
 
-          <p class="login-hint">Demo mock - any email/password signs you in to the Studies workspace. SSO uses the same path.</p>
+          <p class="login-hint">Demo mock. A deactivated account cannot sign in. Any other email and password signs you in to the Studies workspace. SSO uses the same path.</p>
         </div>
       </div>
 
@@ -498,6 +498,7 @@
     </main>
   </div>
 
+<script src="sphere-access.js?v=acct1"></script>
 <script>
 (function () {
   var root = document.documentElement;
@@ -533,27 +534,50 @@
   }
   var form = document.getElementById('loginForm');
   var err = document.getElementById('loginError');
+  function showError(msg) {
+    if (!err) return;
+    err.textContent = msg;
+    err.classList.add('is-visible');
+  }
+  function knownUser(email) {
+    if (!window.SPHERE_ACCESS || !SPHERE_ACCESS.findByEmail) return null;
+    return SPHERE_ACCESS.findByEmail(email);
+  }
   function goIn() {
     var emailEl = document.getElementById('loginEmail');
     var email = ((emailEl && emailEl.value) || '').trim() || 'jordan.patel@xpharma.com';
+    var account = knownUser(email);
+    if (account && account.deactivated) {
+      showError('This account is deactivated.');
+      return;
+    }
     var local = email.split('@')[0] || 'user';
-    var name = local.split(/[._-]+/).filter(Boolean).map(function (p) {
+    var name = account ? account.name : (local.split(/[._-]+/).filter(Boolean).map(function (p) {
       return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
-    }).join(' ') || 'Jordan Patel';
+    }).join(' ') || 'Jordan Patel');
     try {
+      if (account && window.SPHERE_ACCESS && SPHERE_ACCESS.setCurrent) SPHERE_ACCESS.setCurrent(account.id);
       localStorage.setItem('sphere-signed-in', '1');
       localStorage.setItem('sphere-user-email', email);
       localStorage.setItem('sphere-user-name', name);
-    } catch (e) {}
+    } catch (e) {
+      if (account && account.deactivated) {
+        showError('This account is deactivated.');
+        return;
+      }
+    }
     location.href = 'studies.html';
   }
+  try {
+    if (new URLSearchParams(location.search).get('deactivated') === '1') showError('This account is deactivated.');
+  } catch (e) {}
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var email = (document.getElementById('loginEmail') || {}).value || '';
       var pass = (document.getElementById('loginPassword') || {}).value || '';
       if (!email.trim() || !pass) {
-        if (err) err.classList.add('is-visible');
+        showError('Enter a work email and password to continue.');
         return;
       }
       if (err) err.classList.remove('is-visible');

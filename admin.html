@@ -34,7 +34,7 @@
 })();
 </script>
 <script src="study-layout.js?v=flow3j"></script>
-<script src="sphere-access.js?v=flow4c"></script>
+<script src="sphere-access.js?v=acct1"></script>
 </head>
 <body>
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -592,49 +592,17 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Last active</th>
+                        <th id="userActionsHead" hidden>Actions</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      <tr>
-                        <td><strong>J. Patel</strong></td>
-                        <td>j.patel@xpharma.example</td>
-                        <td><span class="badge info">Programmer</span></td>
-                        <td><span class="badge ok">Active</span></td>
-                        <td>Today · 4:48 PM ET</td>
-                      </tr>
-                      <tr>
-                        <td><strong>M. Chen</strong></td>
-                        <td>m.chen@xpharma.example</td>
-                        <td><span class="badge review">Reviewer</span></td>
-                        <td><span class="badge ok">Active</span></td>
-                        <td>Today · 4:12 PM ET</td>
-                      </tr>
-                      <tr>
-                        <td><strong>S. Ortiz</strong></td>
-                        <td>s.ortiz@xpharma.example</td>
-                        <td><span class="badge info">Programmer</span></td>
-                        <td><span class="badge ok">Active</span></td>
-                        <td>Tue · 5:30 PM ET</td>
-                      </tr>
-                      <tr>
-                        <td><strong>A. Rivera</strong></td>
-                        <td>a.rivera@xpharma.example</td>
-                        <td><span class="badge">Admin</span></td>
-                        <td><span class="badge ok">Active</span></td>
-                        <td>Mon · 10:02 AM ET</td>
-                      </tr>
-                      <tr>
-                        <td><strong>R. Nguyen</strong></td>
-                        <td>r.nguyen@xpharma.example</td>
-                        <td><span class="badge review">Reviewer</span></td>
-                        <td><span class="badge warn">Invited</span></td>
-                        <td>-</td>
-                      </tr>
-                    </tbody>
+                    <tbody id="userRows"></tbody>
                   </table>
                 </div>
                 <div class="card-body" style="padding-top:0">
-                  <p class="hint">Roles: programmer · reviewer · admin. Invite is stub - SSO will map groups later.</p>
+                  <p class="hint">Deactivate is Admin only. It blocks sign-in and revokes folder, protocol, compound, and compound-lead access. Reactivate restores sign-in only. The person's name stays in the audit trail.</p>
+                  <p class="section-title">Account audit</p>
+                  <ul class="activity" id="accountAudit"></ul>
+                  <p class="hint" id="accountAuditEmpty">No account changes yet.</p>
                 </div>
               </div>
 
@@ -983,6 +951,22 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
+
+<div class="modal-backdrop" id="accountModal" hidden role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="accountModalTitle">Deactivate account</h2>
+      <button class="btn ghost sm" type="button" id="accountModalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="accountModalText"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="accountModalCancel">Cancel</button>
+      <button class="btn primary" type="button" id="accountModalConfirm">Deactivate</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -1396,26 +1380,105 @@
   var L = window.SPHERE_LAYOUT;
   var box = document.getElementById('compoundLeads');
   if (!A || !box) return;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  var pendingAccount = null;
+  var accountModal = document.getElementById('accountModal');
+  function paintUsers() {
+    var me = A.current();
+    var body = document.getElementById('userRows');
+    var head = document.getElementById('userActionsHead');
+    if (head) head.hidden = !me.admin;
+    if (!body) return;
+    body.innerHTML = A.users().map(function (u) {
+      var role = u.admin ? '<span class="badge">Admin</span>' : '<span class="badge info">Programmer</span>';
+      var status = u.deactivated
+        ? '<span class="badge not-started">Deactivated</span>'
+        : '<span class="badge ok">Active</span>';
+      var action = '';
+      if (me.admin) {
+        action = u.deactivated
+          ? '<td><button type="button" class="btn sm" data-reactivate="' + esc(u.id) + '">Reactivate</button></td>'
+          : '<td><button type="button" class="btn sm" data-deactivate="' + esc(u.id) + '">Deactivate</button></td>';
+      }
+      return '<tr><td><strong>' + esc(u.name) + '</strong></td><td>' + esc(u.email) + '</td><td>' + role + '</td><td>' + status + '</td><td>-</td>' + action + '</tr>';
+    }).join('');
+  }
+  function paintAudit() {
+    var list = document.getElementById('accountAudit');
+    var empty = document.getElementById('accountAuditEmpty');
+    if (!list) return;
+    var rows = A.audit ? A.audit().slice().reverse() : [];
+    if (empty) empty.hidden = rows.length > 0;
+    list.innerHTML = rows.map(function (e) {
+      var verb = e.type === 'reactivate' ? 'reactivated' : 'deactivated';
+      return '<li><span class="when">' + esc(String(e.at || '').replace('T', ' ').slice(0, 16)) + '</span>' +
+        '<span>' + esc(e.actor || 'Admin') + ' ' + verb + ' ' + esc(e.user || '') + '</span>' +
+        '<span class="who">' + esc(e.actor || '') + '</span></li>';
+    }).join('');
+  }
+  function closeAccountModal() {
+    pendingAccount = null;
+    if (accountModal) accountModal.setAttribute('hidden', '');
+  }
+  function openAccountModal(kind, id) {
+    var u = A.users().filter(function (x) { return x.id === id; })[0];
+    if (!u || !accountModal) return;
+    pendingAccount = { kind: kind, id: id };
+    document.getElementById('accountModalTitle').textContent = kind === 'reactivate' ? 'Reactivate account' : 'Deactivate account';
+    document.getElementById('accountModalText').textContent = kind === 'reactivate'
+      ? (u.name + ' can sign in again. Folder access and compound-lead roles stay revoked until they are granted again.')
+      : (u.name + ' will not be able to sign in. Folder, protocol, and compound access and every compound-lead role are revoked. Their name stays in the audit trail.');
+    document.getElementById('accountModalConfirm').textContent = kind === 'reactivate' ? 'Reactivate' : 'Deactivate';
+    accountModal.removeAttribute('hidden');
+  }
+  var userRows = document.getElementById('userRows');
+  if (userRows) userRows.addEventListener('click', function (e) {
+    var off = e.target.closest('[data-deactivate]');
+    var on = e.target.closest('[data-reactivate]');
+    if (off) openAccountModal('deactivate', off.getAttribute('data-deactivate'));
+    if (on) openAccountModal('reactivate', on.getAttribute('data-reactivate'));
+  });
+  ['accountModalClose', 'accountModalCancel'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener('click', closeAccountModal);
+  });
+  if (accountModal) accountModal.addEventListener('click', function (e) {
+    if (e.target === accountModal) closeAccountModal();
+  });
+  var confirmBtn = document.getElementById('accountModalConfirm');
+  if (confirmBtn) confirmBtn.addEventListener('click', function () {
+    if (!pendingAccount) return;
+    try {
+      if (pendingAccount.kind === 'reactivate') A.reactivate(pendingAccount.id);
+      else A.deactivate(pendingAccount.id);
+    } catch (err) {
+      window.alert(err.message || 'Not authorized');
+    }
+    closeAccountModal();
+    paint();
+  });
   function paint() {
     var me = A.current();
     var compounds = [];
     if (L) L.registry().forEach(function (e) { if (e.compound && compounds.indexOf(e.compound) < 0) compounds.push(e.compound); });
-    var who = '<p class="hint" style="margin:0 16px 8px">Signed in as ' + me.name + (me.admin ? ' (Admin)' : '') + '.</p>';
+    var who = '<p class="hint" style="margin:0 16px 8px">Signed in as ' + esc(me.name) + (me.admin ? ' (Admin)' : '') + '.</p>';
+    paintUsers();
+    paintAudit();
     if (!me.admin) {
       box.innerHTML = who + '<p class="hint" style="margin:0 16px 12px">No control to add or remove compound leads.</p>';
       return;
     }
     box.innerHTML = who + compounds.map(function (c) {
       var leads = A.leads(c);
-      var opts = A.users().map(function (u) { return '<option value="' + u.id + '">' + u.name + '</option>'; }).join('');
-      var companyOpts = ['X Pharma', 'Amisoft Solutions'].map(function (n) { return '<option>' + n + '</option>'; }).join('');
-      return '<div style="padding:8px 16px" data-compound="' + c + '"><strong>' + c + '</strong> leads: ' +
+      var opts = A.users().filter(function (u) { return !u.deactivated; }).map(function (u) { return '<option value="' + esc(u.id) + '">' + esc(u.name) + '</option>'; }).join('');
+      return '<div style="padding:8px 16px" data-compound="' + esc(c) + '"><strong>' + esc(c) + '</strong> leads: ' +
         (leads.map(function (id) {
           var u = A.users().filter(function (x) { return x.id === id; })[0];
-          return (u ? u.name : id) + ' <button type="button" class="btn sm" data-remove="' + id + '">Remove</button>';
+          return esc(u ? u.name : id) + ' <button type="button" class="btn sm" data-remove="' + esc(id) + '">Remove</button>';
         }).join(' ') || 'none') +
-        ' <select data-add>' + opts + '</select> <button type="button" class="btn sm" data-assign>Assign</button>' +
-        '<div style="margin-top:6px">Company for selected user <select data-company>' + companyOpts + '</select> <button type="button" class="btn sm" data-company-btn>Change company</button></div></div>';
+        ' <select data-add>' + opts + '</select> <button type="button" class="btn sm" data-assign>Assign</button></div>';
     }).join('');
   }
   box.addEventListener('click', function (e) {
@@ -1426,9 +1489,6 @@
       if (e.target.hasAttribute('data-assign')) A.assignLead(c, row.querySelector('[data-add]').value);
       var rm = e.target.getAttribute('data-remove');
       if (rm) A.removeLead(c, rm);
-      if (e.target.hasAttribute('data-company-btn')) {
-        A.changeCompany(row.querySelector('[data-add]').value, row.querySelector('[data-company]').value);
-      }
     } catch (err) {
       window.alert(err.message || 'Not authorized');
     }
