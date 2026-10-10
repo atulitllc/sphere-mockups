@@ -1478,7 +1478,7 @@
           var u = A.users().filter(function (x) { return x.id === id; })[0];
           return esc(u ? u.name : id) + ' <button type="button" class="btn sm" data-remove="' + esc(id) + '">Remove</button>';
         }).join(' ') || 'none') +
-        ' <select data-add>' + opts + '</select> <button type="button" class="btn sm" data-assign>Assign</button></div>';
+        ' <span class="row-actions"><select data-add>' + opts + '</select><button type="button" class="btn sm" data-assign>Assign</button></span></div>';
     }).join('');
   }
   box.addEventListener('click', function (e) {
