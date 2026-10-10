@@ -202,9 +202,7 @@
               <div class="sheet-titles">
                 <div class="sheet-outid" id="shellOutId">Table 14.1.1</div>
                 <div class="sheet-title" id="shellTitle" data-placeholder="Demographics" contenteditable="false" title="Double-click to edit">Demographics</div>
-                <label class="sheet-subgroup">Subgroup
-                  <input id="shellSubgroup" type="text" autocomplete="off" placeholder="Subgroup" />
-                </label>
+                <div class="sheet-subtitle empty" id="shellSubgroup" data-placeholder="Subgroup" contenteditable="false" title="Double-click to edit">Subgroup</div>
                 <div class="sheet-subtitle empty" id="shellSubtitle" data-placeholder="Double-click to add subtitle" contenteditable="false" title="Double-click to edit">Double-click to add subtitle</div>
               </div>
               <div class="sheet-type-controls">
@@ -1296,6 +1294,7 @@
     var prevFoot = prevLay.footnotes || '';
     var prevNotes = prevLay.notes || '';
     var prevSub = prevLay.subtitle || '';
+    var prevGroup = prevLay.subgroup || '';
     var prevSap = sh.sap || '';
     var prevRows = prevLay.rows || [];
     sh.title = state.title || sh.title;
@@ -1324,6 +1323,7 @@
     pushContentAudit(sh, 'Footnotes', prevFoot, sh.layout.footnotes || '');
     pushContentAudit(sh, 'Programming notes', prevNotes, sh.layout.notes || '');
     pushContentAudit(sh, 'Subsection', prevSub, sh.layout.subtitle || '');
+    pushContentAudit(sh, 'Subgroup', prevGroup, sh.layout.subgroup || '');
     if (sapEl && normalizeSap(sapEl.value) !== prevSap) pushContentAudit(sh, 'Subsection', prevSap, normalizeSap(sapEl.value));
     auditRowCells(sh, prevRows, state.rows || []);
     if (changed.length && window.SPHERE_DEMO && isTrackerLinked(sh)) {
@@ -1370,8 +1370,6 @@
     state.templateMissing = !!sh.templateMissing;
     state.activeRow = state.rows.length ? 0 : -1;
 
-    var subgroupEl = document.getElementById('shellSubgroup');
-    if (subgroupEl) subgroupEl.value = state.subgroup || '';
     document.getElementById('metaNumber').value = sh.number;
     document.getElementById('metaType').value = sh.type;
     document.getElementById('typeMenuLabel').textContent = sh.type;
@@ -1867,14 +1865,8 @@
 
     document.getElementById('shellTitle').textContent = state.title || document.getElementById('shellTitle').dataset.placeholder;
     document.getElementById('shellTitle').classList.toggle('empty', !state.title);
-    var sub = document.getElementById('shellSubtitle');
-    if (state.subtitle) {
-      sub.textContent = state.subtitle;
-      sub.classList.remove('empty');
-    } else {
-      sub.textContent = sub.dataset.placeholder;
-      sub.classList.add('empty');
-    }
+    paintInlineLine(document.getElementById('shellSubgroup'), state.subgroup);
+    paintInlineLine(document.getElementById('shellSubtitle'), state.subtitle);
 
     paintOutIdAndFigure();
     setBlock('footnotes', state.footnotes);
@@ -1888,6 +1880,17 @@
     if (state.activeRow >= 0) positionToolbar(state.activeRow);
     else toolbar.hidden = true;
     updateColToolbar();
+  }
+
+  function paintInlineLine(el, value) {
+    if (!el) return;
+    if (value) {
+      el.textContent = value;
+      el.classList.remove('empty');
+    } else {
+      el.textContent = el.dataset.placeholder || '';
+      el.classList.add('empty');
+    }
   }
 
   function setBlock(field, value) {
@@ -2044,13 +2047,11 @@
     if (th) startHeaderEdit(th);
   });
 
-  var subgroupInput = document.getElementById('shellSubgroup');
-  if (subgroupInput) subgroupInput.addEventListener('change', function () {
-    state.subgroup = subgroupInput.value;
-    persistEditorToSelected();
-  });
   document.getElementById('shellTitle').addEventListener('dblclick', function () {
     startTextEdit(this, function () { return state.title; }, function (v) { state.title = v; persistEditorToSelected(); renderCatalog(); }, { multiline: true });
+  });
+  document.getElementById('shellSubgroup').addEventListener('dblclick', function () {
+    startTextEdit(this, function () { return state.subgroup; }, function (v) { state.subgroup = v; persistEditorToSelected(); });
   });
   document.getElementById('shellSubtitle').addEventListener('dblclick', function () {
     startTextEdit(this, function () { return state.subtitle; }, function (v) { state.subtitle = v; });
