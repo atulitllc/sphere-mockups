@@ -3805,26 +3805,26 @@
       if (!text || !fromName || !toName || fromName === toName) return text || '';
       var fromStem = fromName.replace(/\.[^.]+$/, '');
       var toStem = toName.replace(/\.[^.]+$/, '');
+      function esc(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
       return String(text).split('\n').map(function (row) {
         if (/Output file/.test(row)) return row;
         var next = row.split(fromName).join(toName);
-        if (fromStem && fromStem !== toStem) next = next.split(fromStem).join(toStem);
+        if (fromStem && toStem && fromStem !== toStem) next = next.replace(new RegExp(esc(fromStem) + '(?![A-Za-z0-9_])', 'g'), toStem);
         return next;
       }).join('\n');
     }
     function textFor(sourceName, side, destName) {
       if (!copySideExists(sourceId, sourceName, side, legacyId, existing)) return '';
       var stored = readCopiedSource(sourceId, sourceName, side, legacyId);
-      var text = '';
-      if (stored && SPHERE_DEMO.retargetProgramText) text = SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope);
-      else if (stored) text = stored;
-      else if (SPHERE_DEMO.programHeader) {
-        var headerRec = JSON.parse(JSON.stringify(rec));
-        headerRec.study = destScope;
-        headerRec.program = program;
-        text = SPHERE_DEMO.programHeader(headerRec, side);
+      if (stored) {
+        var moved = SPHERE_DEMO.retargetProgramText ? SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope) : stored;
+        return rewriteProgramName(moved, sourceName, destName);
       }
-      return rewriteProgramName(text, sourceName, destName);
+      if (!SPHERE_DEMO.programHeader) return '';
+      var headerRec = JSON.parse(JSON.stringify(rec));
+      headerRec.study = destScope;
+      headerRec.program = program;
+      return SPHERE_DEMO.programHeader(headerRec, side);
     }
     var prodText = origProgram ? textFor(origProgram, 'prod', program) : '';
     var qcText = origQc ? textFor(origQc, 'qc', qc) : '';
