@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010h" />
-<script src="tenant-brand.js?v=20261010g"></script>
+<link rel="stylesheet" href="shared-white.css?v=20261010i" />
+<script src="tenant-brand.js?v=20261010i"></script>
 <script>
 (function () {
   try {
@@ -331,7 +331,14 @@
                           <button class="btn ghost" type="button" id="brandLogoRemove" hidden>Remove logo</button>
                         </div>
                         <input type="file" id="brandLogoFile" accept="image/png,image/svg+xml,image/jpeg" hidden />
-                        <div class="hint brand-logo-hint">PNG, SVG or JPG up to 1 MB. Shown in the header next to the tenant name.</div>
+                        <div class="hint brand-logo-hint">PNG, SVG or JPG up to 1 MB. Shown faded in the bottom-right corner of every page.</div>
+                        <div class="brand-logo-size">
+                          <label class="brand-logo-size-label" for="brandLogoSize">Logo size</label>
+                          <button class="btn sm ghost" type="button" id="brandLogoSmaller" aria-label="Smaller logo">-</button>
+                          <input type="range" id="brandLogoSize" min="24" max="120" step="4" value="48" aria-describedby="brandLogoSizeOut" />
+                          <button class="btn sm ghost" type="button" id="brandLogoBigger" aria-label="Bigger logo">+</button>
+                          <output id="brandLogoSizeOut" for="brandLogoSize">48 px</output>
+                        </div>
                         <div class="brand-logo-error" id="brandLogoError" role="alert" hidden></div>
                       </div>
                     </div>
@@ -1571,6 +1578,17 @@
   var logoErr = document.getElementById('brandLogoError');
   var saved = document.getElementById('brandSaved');
   var pendingLogo = null;
+  var sizeEl = document.getElementById('brandLogoSize');
+  var sizeOut = document.getElementById('brandLogoSizeOut');
+  function setSize(px, live) {
+    px = Math.max(B.MIN_LOGO_SIZE, Math.min(B.MAX_LOGO_SIZE, parseInt(px, 10) || B.DEFAULT_LOGO_SIZE));
+    sizeEl.value = px;
+    sizeOut.textContent = px + ' px';
+    if (live) B.previewLogoSize(px);
+  }
+  sizeEl.addEventListener('input', function () { setSize(sizeEl.value, true); });
+  document.getElementById('brandLogoSmaller').addEventListener('click', function () { setSize(+sizeEl.value - 4, true); });
+  document.getElementById('brandLogoBigger').addEventListener('click', function () { setSize(+sizeEl.value + 4, true); });
   function showLogo(url) {
     prev.classList.toggle('has-logo', !!url);
     prev.innerHTML = url ? '<img alt="Tenant logo preview" />' : 'Logo<br/>placeholder';
@@ -1584,6 +1602,9 @@
     hex.value = b.accent.toUpperCase();
     pendingLogo = b.logo || '';
     showLogo(pendingLogo);
+    setSize(b.logoSize, false);
+    B.previewLogoSize(b.logoSize);
+    B.previewLogo(null);
     logoErr.hidden = true;
   }
   fill();
@@ -1605,10 +1626,10 @@
       logoErr.textContent = 'That file is ' + (f.size / 1048576).toFixed(1) + ' MB. The limit is 1 MB.'; logoErr.hidden = false; return;
     }
     var r = new FileReader();
-    r.onload = function () { pendingLogo = String(r.result || ''); showLogo(pendingLogo); };
+    r.onload = function () { pendingLogo = String(r.result || ''); showLogo(pendingLogo); B.previewLogo(pendingLogo); };
     r.readAsDataURL(f);
   });
-  rm.addEventListener('click', function () { pendingLogo = ''; showLogo(''); });
+  rm.addEventListener('click', function () { pendingLogo = ''; showLogo(''); B.previewLogo(''); });
   function flashSaved(text) {
     saved.lastChild.textContent = text;
     saved.hidden = false;
@@ -1624,7 +1645,7 @@
     document.getElementById('brandNameError').hidden = !nameBad;
     document.getElementById('brandAccentError').hidden = !hexBad;
     if (nameBad || hexBad) return;
-    var ok = B.save({ name: n, accent: h.toUpperCase(), logo: pendingLogo || '' });
+    var ok = B.save({ name: n, accent: h.toUpperCase(), logo: pendingLogo || '', logoSize: parseInt(sizeEl.value, 10) || B.DEFAULT_LOGO_SIZE });
     if (!ok) { logoErr.textContent = 'Could not save: browser storage is full. Try a smaller logo.'; logoErr.hidden = false; return; }
     fill();
     flashSaved('Saved');

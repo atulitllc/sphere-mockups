@@ -8,6 +8,16 @@
   var KEY = 'sphere-tenant-branding';
   var DEFAULT_NAME = 'Northwind Biopharma';
   var DEFAULT_ACCENT = '#2563EB';
+  /* Floating logo height in px (Admin > Branding > Logo size). Width caps at 4x. */
+  var DEFAULT_LOGO_SIZE = 48, MIN_LOGO_SIZE = 24, MAX_LOGO_SIZE = 120;
+  function logoSize(v) {
+    var n = parseInt(v, 10);
+    if (!isFinite(n)) return DEFAULT_LOGO_SIZE;
+    return Math.max(MIN_LOGO_SIZE, Math.min(MAX_LOGO_SIZE, n));
+  }
+  function applyLogoSize(px) {
+    document.documentElement.style.setProperty('--tenant-logo-h', logoSize(px == null ? read().logoSize : px) + 'px');
+  }
   var PERSONAL_AT = 'sphere-accent-chosen-at';
   function read() {
     try {
@@ -18,6 +28,7 @@
   function name() { var n = String(read().name || '').trim(); return n || DEFAULT_NAME; }
   function validHex(v) { return /^#[0-9a-f]{6}$/i.test(String(v || '')); }
   function applyAccent() {
+    applyLogoSize();
     var root = document.documentElement;
     var b = read();
     var personal = 0;
@@ -57,10 +68,11 @@
   }
   /* The uploaded logo floats, faded, in the bottom-right corner of every app page
      (not in the header pill). Nothing is shown without a logo; login has no badge. */
+  var previewUrl = null;
   function paintLogo() {
     document.querySelectorAll('img.tenant-logo').forEach(function (img) { img.remove(); });
     document.querySelectorAll('.has-tenant-logo').forEach(function (el) { el.classList.remove('has-tenant-logo'); });
-    var logo = read().logo || '';
+    var logo = previewUrl != null ? previewUrl : (read().logo || '');
     var box = document.getElementById('tenantFloatLogo');
     var appPage = !!document.querySelector('header.top, .app, .sidebar');
     if (!logo || !appPage) {
@@ -136,7 +148,14 @@
   window.SPHERE_BRAND = {
     DEFAULT_NAME: DEFAULT_NAME,
     DEFAULT_ACCENT: DEFAULT_ACCENT,
-    get: function () { var b = read(); return { name: name(), accent: validHex(b.accent) ? b.accent : DEFAULT_ACCENT, logo: b.logo || '' }; },
+    get: function () { var b = read(); return { name: name(), accent: validHex(b.accent) ? b.accent : DEFAULT_ACCENT, logo: b.logo || '', logoSize: logoSize(b.logoSize) }; },
+    DEFAULT_LOGO_SIZE: DEFAULT_LOGO_SIZE,
+    MIN_LOGO_SIZE: MIN_LOGO_SIZE,
+    MAX_LOGO_SIZE: MAX_LOGO_SIZE,
+    /* Live preview from the Admin slider (not saved until Save branding). */
+    previewLogoSize: applyLogoSize,
+    /* Admin preview: show this logo in the floating corner before it is saved ('' hides). */
+    previewLogo: function (url) { previewUrl = url; paintLogo(); },
     name: name,
     save: save,
     reset: reset,

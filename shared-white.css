@@ -7798,9 +7798,9 @@ body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
   filter: grayscale(0.35);
   transition: opacity 0.15s ease;
 }
-.tenant-float-logo img { display: block; height: 32px; width: auto; max-width: 120px; object-fit: contain; }
+.tenant-float-logo img { display: block; height: var(--tenant-logo-h, 48px); width: auto; max-width: calc(var(--tenant-logo-h, 48px) * 4); object-fit: contain; }
 [data-theme="dark"] .tenant-float-logo { opacity: 0.5; filter: grayscale(0.35) brightness(1.15); }
-body.has-tenant-float-logo .content { padding-bottom: 56px; }
+body.has-tenant-float-logo .content { padding-bottom: calc(var(--tenant-logo-h, 48px) + 24px); }
 body:has(.bgjobs:not([hidden])) .tenant-float-logo,
 body:has(.copilot-panel:not([hidden])) .tenant-float-logo,
 body:has(.modal-backdrop:not([hidden])) .tenant-float-logo { opacity: 0; }
@@ -7832,3 +7832,10 @@ body:has(.modal-backdrop:not([hidden])) .tenant-float-logo { opacity: 0; }
 /* File Explorer: dev/ and prod/ areas under each deliverable */
 .files-studies .lt-area-badge { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 600; padding: 0 5px; }
 .files-studies .lt-area-prod .lt-folder .lt-area-badge { margin-left: 4px; vertical-align: 0; }
+
+/* Admin > Branding: floating logo size slider */
+.brand-logo-size { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.brand-logo-size-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 2px; }
+.brand-logo-size input[type="range"] { width: 180px; max-width: 100%; accent-color: var(--accent); padding: 0; border: 0; background: transparent; box-shadow: none; }
+.brand-logo-size .btn.sm { min-width: 28px; padding-left: 0; padding-right: 0; justify-content: center; }
+.brand-logo-size output { min-width: 44px; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text); }
