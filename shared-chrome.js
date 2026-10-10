@@ -788,9 +788,8 @@
         '</button>' +
       '</div>';
 
-    var tenant = topRight.querySelector('.tenant-pill');
-    if (tenant) topRight.insertBefore(box, tenant);
-    else topRight.appendChild(box);
+    topRight.appendChild(box);
+    if (window.SPHERE_orderHeader) SPHERE_orderHeader();
 
     var btn = document.getElementById('btnLogout');
     if (btn) {
@@ -988,4 +987,23 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchCrumbs);
   else watchCrumbs();
+})();
+
+/* One header order on every app page (matches Studies): Ask Copilot, accent color, dark mode,
+   Aa (accessibility), tenant brand pill, then the signed-in user with sign-out LAST.
+   Any other control a page adds keeps its place ahead of these. */
+(function () {
+  var ORDER = ['#copilotLaunch', '.accent-picker', '#themeToggle', '#a11yPicker', '.company-pill, .tenant-pill', '#userChrome'];
+  function orderHeader() {
+    document.querySelectorAll('header.top .top-right').forEach(function (bar) {
+      ORDER.forEach(function (sel) {
+        var el = Array.prototype.filter.call(bar.querySelectorAll(sel), function (n) { return n.parentNode === bar; })[0];
+        if (el) bar.appendChild(el);
+      });
+    });
+  }
+  window.SPHERE_orderHeader = orderHeader;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', orderHeader);
+  else orderHeader();
+  window.addEventListener('load', orderHeader);
 })();
