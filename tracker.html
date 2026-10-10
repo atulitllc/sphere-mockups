@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4rework" />
+<link rel="stylesheet" href="shared-white.css?v=flow4rework2" />
 <script>
 (function () {
   try {
@@ -372,7 +372,7 @@
               <div class="col-check"><input type="checkbox" class="row-check" aria-label="Select Primary endpoint" /></div>
               <div class="artifact-main">
                 <div class="artifact-title-band">
-                  <div class="artifact-title">14.2.1 · Primary endpoint - ORR</div>
+                  <div class="artifact-title">14.2.1 · Primary endpoint: ORR</div>
                   <div class="artifact-tags"><div class="chip-row"><span class="tag-chip">CSR</span><span class="tag-chip">Second wave</span></div></div>
                 </div>
                 <div class="artifact-meta">
@@ -1258,7 +1258,7 @@
 
 <script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4rework"></script>
+<script src="demo-flow.js?v=flow4rework2"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -1522,7 +1522,7 @@
       freezeBtn.disabled = true;
       freezeBtn.title = 'Frozen is only available from Approved';
     } else {
-      freezeBtn.title = freezeCount === sel.length ? ('Freeze ' + freezeCount + ' approved record' + (freezeCount === 1 ? '' : 's')) : 'Frozen is only available from Approved';
+      freezeBtn.title = '';
       freezeBtn.addEventListener('click', function () {
         var hand = { action: 'freeze', label: 'Freeze', nextStatus: 'Frozen' };
         var items = [];
@@ -1535,6 +1535,7 @@
           showToast('Frozen is only available from Approved');
           return;
         }
+        items.freezeSkipped = skipped;
         askStageChange(items, function (info) {
           var applied = 0;
           items.forEach(function (it) {
@@ -2068,6 +2069,7 @@
     var n = String(name || '').split('/').pop();
     if (!n || n === '-') return;
     programFileSet[programFileKey(scope, n)] = 1;
+    if (window.SPHERE_DEMO && SPHERE_DEMO.noteFile) SPHERE_DEMO.noteFile(scope, n);
   }
   function qcProgramName(row) {
     var marked = row && row.getAttribute ? row.getAttribute('data-qc') : null;
@@ -2151,11 +2153,23 @@
       SPHERE_DEMO.records().forEach(function (rec) {
         if (!rec || !rec.program) return;
         var scope = rec.study || TRACKER_HOME;
-        noteProgramFile(scope, rec.program);
+        if (recordSideExists(scope, rec, rec.program, 'prod')) noteProgramFile(scope, rec.program);
         var qc = SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(rec.program) : '';
-        if (qc) noteProgramFile(scope, qc);
+        if (qc && recordSideExists(scope, rec, qc, 'qc')) noteProgramFile(scope, qc);
       });
     }
+  }
+  function recordSideExists(scope, rec, name, side) {
+    if (!name || !window.SPHERE_DEMO) return false;
+    if (SPHERE_DEMO.getSource && SPHERE_DEMO.getSource(scope + '|' + name + ':' + side)) return true;
+    if (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, name)) return true;
+    var hist = (rec && rec.history) || [];
+    var i;
+    for (i = 0; i < hist.length; i++) {
+      var blob = String((hist[i] && hist[i].action) || '') + ' ' + String((hist[i] && hist[i].note) || '');
+      if (/header generated/i.test(blob) && blob.indexOf(name) >= 0) return true;
+    }
+    return false;
   }
   function rememberFinishedSide(row, scope, ok) {
     if (!row) return;
@@ -2170,17 +2184,37 @@
 
   /* Seeded jobs are finished. Running and Queued exist only after the user clicks Run. */
   allRows().forEach(function (row) {
+    var saved = null;
+    var rid = row.getAttribute('data-record-id') || '';
+    if (rid && window.SPHERE_DEMO && SPHERE_DEMO.rowState) saved = SPHERE_DEMO.rowState(rid);
+    if (saved && saved.program) row.setAttribute('data-program', saved.program);
     var st = row.getAttribute('data-job');
     var prog = runProgName(row);
     if (!prog || !st) return;
-    var spec = SEED_JOBS[prog] || { outcome: 'completed', days: 1, h: 9, m: 0, dur: 15 };
+    if (saved && (saved.job === 'done' || saved.job === 'error' || saved.job === 'completed')) {
+      restoreFinishedJob(row, {
+        job: saved.job === 'completed' ? 'done' : saved.job,
+        jobMode: saved.jobMode || row.getAttribute('data-job-mode') || 'prod',
+        jobWarn: saved.jobWarn,
+        lastRun: saved.lastRun || row.getAttribute('data-last-run') || '',
+        prodRan: saved.prodRan,
+        qcRan: saved.qcRan,
+        outputReady: saved.outputReady
+      });
+      if (saved.qcRan) {
+        var savedQc = qcProgramName(row);
+        if (savedQc) noteProgramFile(rowStudyScope(row), savedQc);
+      }
+      return;
+    }
+    var spec = SEED_JOBS[prog] || (saved && saved.origProgram && SEED_JOBS[saved.origProgram]) || { outcome: 'completed', days: 1, h: 9, m: 0, dur: 15 };
     var durMs = spec.dur * 1000;
     var end = seedStamp(spec);
     var outcome = spec.outcome === 'error' ? 'error' : 'completed';
     var j = {
       id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: 'prod',
       phases: [{ kind: 'Prod', dur: durMs }], phase: 0, state: outcome === 'error' ? 'error' : 'done',
-      warn: outcome !== 'error' && spec.outcome === 'warning', warnPhase: 0,
+      warn: outcome !== 'error' && (spec.outcome === 'warning' || !!(saved && saved.jobWarn)), warnPhase: 0,
       batch: null, startedAt: end - durMs, endedAt: end, endDate: new Date(end), logs: {}
     };
     row._runJob = j;
@@ -3171,7 +3205,61 @@
     var program = document.getElementById('reProgram').value.trim();
     var oldName = (row.getAttribute('data-program') || '').split('/').pop();
     var newName = (program || '').split('/').pop();
-    if (oldName && newName && oldName !== newName) clearRunArtifacts(row);
+    if (oldName && newName && oldName !== newName && window.SPHERE_DEMO && SPHERE_DEMO.moveProgramStorage) {
+      var scope = rowStudyScope(row);
+      var oldQc = qcProgramName(row);
+      var newQc = SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(newName) : (newName ? ('qc-' + newName) : '');
+      var recordId = row.getAttribute('data-record-id') || row.getAttribute('data-flow-id') || '';
+      var prior = recordId && SPHERE_DEMO.rowState ? SPHERE_DEMO.rowState(recordId) : null;
+      var job = row._runJob;
+      var hadProd = !!(programFileSet[programFileKey(scope, oldName)] || (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, oldName)) || savedSource(row, 'prod'));
+      var hadQc = !!(oldQc && (programFileSet[programFileKey(scope, oldQc)] || (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, oldQc)) || savedSource(row, 'qc')));
+      SPHERE_DEMO.moveProgramStorage({
+        scope: scope,
+        oldName: oldName,
+        newName: newName,
+        oldQc: oldQc,
+        newQc: newQc,
+        recordId: recordId,
+        origProgram: (prior && prior.origProgram) || oldName,
+        state: {
+          job: row.getAttribute('data-job') || (job && job.state) || '',
+          jobMode: row.getAttribute('data-job-mode') || (job && job.mode) || '',
+          jobWarn: job && job.warn ? 1 : 0,
+          lastRun: row.getAttribute('data-last-run') || '',
+          prodRan: row._prodRan ? 1 : 0,
+          qcRan: row._qcRan ? 1 : 0,
+          outputReady: row._outputReady ? 1 : 0
+        }
+      });
+      delete programFileSet[programFileKey(scope, oldName)];
+      if (oldQc && oldQc !== newQc) delete programFileSet[programFileKey(scope, oldQc)];
+      row.setAttribute('data-program', program || newName);
+      if (hadProd) noteProgramFile(scope, newName);
+      if (hadQc && newQc) noteProgramFile(scope, newQc);
+      if (job) {
+        job.prog = newName;
+        job.lang = programLang(newName, row);
+        job.logs = {};
+        if (job.phases) job.phases.forEach(function (p) { delete p._sealed; });
+        row._sideLogs = null;
+        if (job.state === 'done' || job.state === 'error') sealFinishedJob(job);
+        var jobCell = row.querySelector('.job-cell');
+        if (jobCell) jobCell._runKey = '';
+        renderJobCell(row);
+      }
+      var canon = stageHistoryKey(row);
+      if (SPHERE_DEMO.mergeEvents) {
+        SPHERE_DEMO.mergeEvents(canon, [oldName, newName, flowKey(row), row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '']);
+      }
+      SPHERE_DEMO.addEvent(canon, {
+        at: stageStampET(),
+        action: 'Renamed from ' + oldName + ' to ' + newName,
+        status: row.getAttribute('data-status') || '',
+        person: stageUser(),
+        note: ''
+      });
+    }
     var fromStatus = row.getAttribute('data-status') || '';
     var statusPick = document.getElementById('reStatus').value;
     if (statusPick === 'Frozen' && fromStatus !== 'Approved' && fromStatus !== 'Frozen') statusPick = fromStatus;
@@ -3319,7 +3407,8 @@
     }
     if (next && next !== from) {
       askStageChange([{ row: row, from: from, to: next, hand: null }], function (info) {
-        if (applyTransition(row, { action: 'status', label: 'Change stage', nextStatus: next }, info) === false) return;
+        var stageAction = next === 'Frozen' ? 'freeze' : 'status';
+        if (applyTransition(row, { action: stageAction, label: next === 'Frozen' ? 'Freeze' : 'Change stage', nextStatus: next }, info) === false) return;
         writeRowEditor();
       }, function () {
         var sel = document.getElementById('reStatus');
@@ -3680,7 +3769,7 @@
         var ev = { at: SPHERE_DEMO.stamp(), action: 'Roles updated by ' + FLOW_ME, status: row.getAttribute('data-status') || '', person: FLOW_ME, note: diffs.join(' · ') };
         var rec = flowRecord(row);
         if (rec) SPHERE_DEMO.updateRecord(rec.id, function (x) { x.history.push(ev); });
-        else SPHERE_DEMO.addEvent(flowKey(row), ev);
+        else SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
       }
       var wrap = row.querySelector('.row-people-wrap');
       if (wrap) wrap.removeAttribute('data-filled');
@@ -4403,13 +4492,11 @@
     };
     var recordId = row.getAttribute('data-record-id') || '';
     var events = recordId.indexOf('seed-') === 0 ? (byStatus[status] || base).slice() : [];
-    if (window.SPHERE_DEMO && SPHERE_DEMO.getEvents) {
-      var seenKey = {};
-      [flowKey(row), row.getAttribute('data-record-id') || ''].forEach(function (k) {
-        if (!k || seenKey[k]) return;
-        seenKey[k] = 1;
-        events = events.concat(SPHERE_DEMO.getEvents(k) || []);
-      });
+    if (window.SPHERE_DEMO && SPHERE_DEMO.mergeEvents) {
+      var canon = stageHistoryKey(row);
+      events = events.concat(SPHERE_DEMO.mergeEvents(canon, [flowKey(row), row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '', (row.getAttribute('data-program') || '').split('/').pop()]) || []);
+    } else if (window.SPHERE_DEMO && SPHERE_DEMO.getEvents) {
+      events = events.concat(SPHERE_DEMO.getEvents(stageHistoryKey(row)) || []);
     }
     return { title: title.trim(), program: prog, status: row.getAttribute('data-status') || status, owner: owner || 'Jordan Patel', events: events };
   }
@@ -4840,6 +4927,26 @@
       host.appendChild(b);
     });
   }
+  function rtfEscapeText(s) {
+    return String(s || '').replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
+  }
+  function personalizeSampleRtf(rtf, row, meta) {
+    var typeWord = meta.type === 'Listing' ? 'Listing' : (meta.type === 'Figure' ? 'Figure' : 'Table');
+    var num = rowOutputId(row) || '';
+    var rawTitle = (((row && row.querySelector('.artifact-title')) || {}).textContent || '').trim().replace(/\s*New$/, '').trim();
+    var title = rawTitle.replace(/^\s*[0-9][0-9.]*[a-z]*\s*·\s*/i, '').trim() || typeWord;
+    var heading = typeWord + (num ? ' ' + num : '');
+    var sample = '\\qc\\i Sample output\\i0\\par';
+    var line1 = '\\fs22\\qc\\b ' + rtfEscapeText(heading) + '\\b0\\par';
+    var line2 = '\\qc\\b ' + rtfEscapeText(title) + '\\b0\\par';
+    var n = 0;
+    return String(rtf || '').replace(/(?:\\fs\d+)?\\qc\\b [^\r\n]*\\b0\\par/g, function (hit) {
+      n += 1;
+      if (n === 1) return sample + '\n' + line1;
+      if (n === 2) return line2;
+      return hit;
+    });
+  }
   function renderArtifactRtf(pane, row, meta, gen, scope) {
     if (meta.type === 'Dataset') {
       pane.innerHTML = emptyArtifact('No TLF RTF for this dataset. Production writes an analysis dataset' + (meta.outPath ? ' at ' + meta.outPath : '') + '.');
@@ -4857,7 +4964,7 @@
         pane.innerHTML = emptyArtifact('RTF converter did not load.');
         return;
       }
-      pane.innerHTML = '<div class="rtf-preview">' + SPHERE_RTF.rtfToHtml(rtf) + '</div>';
+      pane.innerHTML = '<div class="rtf-preview">' + SPHERE_RTF.rtfToHtml(personalizeSampleRtf(rtf, row, meta)) + '</div>';
     };
     if (rtfCache[sample.file]) { apply(rtfCache[sample.file]); return; }
     pane.innerHTML = emptyArtifact('Reading ' + escapeHtml(fileName) + '…');
@@ -4877,7 +4984,7 @@
     if (tab.id === 'rtf') {
       if (meta.type === 'Dataset') return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (meta.outPath ? ' · ' + meta.outPath : '');
       if (!meta.outPath) return side + ' · No output file on this record';
-      return side + ' · ' + meta.outPath + ' · RTF converted to HTML';
+      return side + ' · ' + meta.outPath + ' · Sample output · RTF converted to HTML';
     }
     if (tab.id === 'log') return side + ' · ' + (tab.path || 'Not on this record');
     return side + ' · ' + (tab.path || 'Not on this record');
@@ -5039,7 +5146,7 @@
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
       var rec = flowRecord(row);
       if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
-      else SPHERE_DEMO.addEvent(flowKey(row), ev);
+      else SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
     }
     showToast('Saved ' + file + ' (' + len + ' chars) · new version sealed');
     closeRtfPreview();
@@ -5280,7 +5387,7 @@
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
       var rec = flowRecord(row);
       if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
-      else SPHERE_DEMO.addEvent(flowKey(row), ev);
+      else SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
     }
     showToast('Saved ' + file + ' (' + len + ' chars) · new version sealed');
     closeProgramEditor();
@@ -5494,7 +5601,9 @@
   }
   function programLinkHtml(row, scope, cls, inner) {
     var unwritten = !programWritten(row, scope);
+    var file = scope === 'qc' ? qcProgramName(row) : runProgName(row);
     var title = artifactOpenTitle(row, scope);
+    if (file) title = file + ' · ' + title;
     return '<a href="#" class="' + cls + ' program-open-link' + (unwritten ? ' is-unwritten' : '') + '" data-which="' + (scope === 'qc' ? 'qc' : 'prod') + '" title="' + escapeHtml(title) + '">' +
       '<span class="prog-file">' + inner + '</span>' + (unwritten ? '<span class="unwritten-mark">not created</span>' : '') + '</a>';
   }
@@ -5510,7 +5619,13 @@
       : '<span class="qc-program-name is-unwritten" title="not created"><span class="prog-file"><b>QC</b></span><span class="unwritten-mark">not created</span></span>';
     cell.innerHTML = prod + qcHtml;
     var prodLink = cell.querySelector('[data-which="prod"]');
-    if (prodLink && hint) prodLink.setAttribute('title', artifactOpenTitle(row, 'prod') + ' · ' + hint);
+    if (prodLink) {
+      var prodTitle = prog + ' · ' + artifactOpenTitle(row, 'prod');
+      if (hint) prodTitle += ' · ' + hint;
+      prodLink.setAttribute('title', prodTitle);
+    }
+    var qcLink = cell.querySelector('[data-which="qc"]');
+    if (qcLink && qc) qcLink.setAttribute('title', qc + ' · ' + artifactOpenTitle(row, 'qc'));
     decorateRerunDot(row);
   }
   function rowStudyScope(row) {
@@ -5562,6 +5677,7 @@
   function tidyVisible(text) {
     return String(text || '')
       .replace(/characteristicsq1/gi, 'characteristics')
+      .replace(/Primary endpoint\s*[\u2014\u2013-]\s*/g, 'Primary endpoint: ')
       .replace(/\u2014/g, ' · ')
       .replace(/\u2013/g, '-');
   }
@@ -5790,8 +5906,22 @@
   }
   function stageHistoryKey(row) {
     var rid = row.getAttribute('data-record-id') || '';
-    if (rid.indexOf('rec-runtime-') === 0) return rid;
+    if (rid) return rid;
+    var fid = row.getAttribute('data-flow-id') || '';
+    if (fid) return fid;
     return flowKey(row);
+  }
+  function adoptStoredStatus(row, from) {
+    var key = stageHistoryKey(row);
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.rememberStatus) return key;
+    var st = SPHERE_DEMO.getStatus ? SPHERE_DEMO.getStatus(key) : null;
+    if (st == null) {
+      var alias = flowKey(row);
+      if (alias && alias !== key && SPHERE_DEMO.getStatus) st = SPHERE_DEMO.getStatus(alias);
+    }
+    if (st == null) st = from || row.getAttribute('data-status') || '';
+    if (st) SPHERE_DEMO.rememberStatus(key, st);
+    return key;
   }
   var stagePending = null;
   var stageOpener = null;
@@ -5933,8 +6063,16 @@
     if (line) line.textContent = 'From ' + froms.join(', ') + ' to ' + flowStatusLabel(to);
     var count = document.getElementById('stageModalCount');
     if (count) {
-      count.hidden = items.length < 2;
-      count.textContent = items.length + ' records';
+      if (typeof items.freezeSkipped === 'number' && to === 'Frozen') {
+        var nFreeze = items.length;
+        var freezeLine = 'Freeze ' + nFreeze + ' record' + (nFreeze === 1 ? '' : 's') + '.';
+        if (items.freezeSkipped) freezeLine += ' ' + items.freezeSkipped + ' not Approved will be skipped.';
+        count.hidden = false;
+        count.textContent = freezeLine;
+      } else {
+        count.hidden = items.length < 2;
+        count.textContent = items.length + ' record' + (items.length === 1 ? '' : 's');
+      }
     }
     var justifyWrap = document.getElementById('stageJustifyWrap');
     var justify = document.getElementById('stageJustify');
@@ -6002,14 +6140,17 @@
       comment: comment,
       justification: justification
     };
-    if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
-    row.setAttribute('data-status', to);
     var rec = flowRecord(row);
     if (rec) {
+      if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
+      row.setAttribute('data-status', to);
       SPHERE_DEMO.updateRecord(rec.id, function (x) { x.status = to; x.isNew = false; x.history = x.history || []; x.history.push(ev); });
     } else {
-      SPHERE_DEMO.setStatus(flowKey(row), to, from);
-      SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
+      var key = adoptStoredStatus(row, from);
+      if (SPHERE_DEMO.setStatus(key, to) == null) return false;
+      if (!row.hasAttribute('data-orig-status')) row.setAttribute('data-orig-status', from);
+      row.setAttribute('data-status', to);
+      SPHERE_DEMO.addEvent(key, ev);
     }
     row.classList.remove('is-flow-new');
     var chip = row.querySelector('.new-chip');
@@ -6402,7 +6543,8 @@
       qcFile: spec.qcFile ? 1 : 0,
       prodRan: spec.prodRan ? 1 : 0,
       qcRan: spec.qcRan ? 1 : 0,
-      outputReady: spec.outputReady ? 1 : 0
+      outputReady: spec.outputReady ? 1 : 0,
+      jobWarn: spec.jobWarn ? 1 : 0
     };
     var idx = -1;
     for (var i = 0; i < list.length; i++) if (list[i] && list[i].recordId === spec.recordId) idx = i;
@@ -6451,7 +6593,8 @@
       qcFile: programWritten(row, 'qc') ? 1 : 0,
       prodRan: row._prodRan ? 1 : 0,
       qcRan: row._qcRan ? 1 : 0,
-      outputReady: row._outputReady ? 1 : 0
+      outputReady: row._outputReady ? 1 : 0,
+      jobWarn: row._runJob && row._runJob.warn ? 1 : 0
     };
     var list = readRuntimeRows();
     var found = false;
@@ -6479,7 +6622,7 @@
       : [{ kind: mode === 'qc' ? 'QC' : 'Prod', dur: 4000 }];
     var j = {
       id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: mode,
-      phases: phases, phase: phases.length - 1, state: jobState, warn: false, warnPhase: -1,
+      phases: phases, phase: phases.length - 1, state: jobState, warn: !!spec.jobWarn, warnPhase: spec.jobWarn ? 0 : -1,
       batch: null, startedAt: end.getTime() - 4000, endedAt: end.getTime(), endDate: end, logs: {}
     };
     row._runJob = j;
@@ -6487,6 +6630,9 @@
     row.setAttribute('data-job-mode', mode);
     if (spec.lastRun) row.setAttribute('data-last-run', end.toISOString());
     sealFinishedJob(j);
+    if (spec.prodRan) row._prodRan = true;
+    if (spec.qcRan) row._qcRan = true;
+    if (spec.outputReady) row._outputReady = true;
     renderJobCell(row);
   }
 
@@ -6514,6 +6660,10 @@
       var mode = spec.jobMode || '';
       if ((job === 'done' || job === 'error') && (mode === 'prod' || mode === 'qc' || mode === 'both')) {
         restoreFinishedJob(built, spec);
+      }
+      if (window.SPHERE_DEMO) {
+        if (SPHERE_DEMO.rememberStatus) SPHERE_DEMO.rememberStatus(id, built.getAttribute('data-status') || spec.status || '');
+        if (SPHERE_DEMO.mergeEvents) SPHERE_DEMO.mergeEvents(id, [spec.program || '', runProgName(built)]);
       }
     });
   }
@@ -6663,10 +6813,17 @@
   (function bootFlow() {
     if (!window.SPHERE_DEMO) return;
     allRows().forEach(function (row) {
-      var st = SPHERE_DEMO.getStatus(flowKey(row));
+      var key = stageHistoryKey(row);
+      var alias = flowKey(row);
+      var st = SPHERE_DEMO.getStatus(key);
+      if (st == null && alias && alias !== key) st = SPHERE_DEMO.getStatus(alias);
       if (st) {
         row.setAttribute('data-orig-status', row.getAttribute('data-status') || '');
         row.setAttribute('data-status', st);
+      }
+      adoptStoredStatus(row, row.getAttribute('data-status') || '');
+      if (SPHERE_DEMO.mergeEvents) {
+        SPHERE_DEMO.mergeEvents(key, [alias, row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '', runProgName(row)]);
       }
     });
     var trackerStore = trackerStoreId();
@@ -6735,6 +6892,6 @@
   if (trackerSort.key) applyTrackerSort();
 })();
 </script>
-<script src="shared-chrome.js?v=flow4stage"></script>
+<script src="shared-chrome.js?v=flow4phone"></script>
 </body>
 </html>

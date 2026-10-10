@@ -8,7 +8,19 @@
 
   function read() {
     var s = null;
-    try { var raw = localStorage.getItem(KEY) || 'null'; if (raw.indexOf('\u00a7') >= 0) raw = raw.replace(/SAP \u00a7/g, 'SAP ').replace(/\u00a7\s*/g, ''); s = JSON.parse(raw); } catch (e) { s = null; }
+    try {
+      var raw = localStorage.getItem(KEY) || 'null';
+      if (raw.indexOf('\u00a7') >= 0) raw = raw.replace(/SAP \u00a7/g, 'SAP ').replace(/\u00a7\s*/g, '');
+      var tidied = raw
+        .replace(/Primary endpoint\s*[\u2014\u2013-]\s*/g, 'Primary endpoint: ')
+        .replace(/\u2014/g, ' · ')
+        .replace(/\u2013/g, '-');
+      if (tidied !== raw) {
+        raw = tidied;
+        try { localStorage.setItem(KEY, raw); } catch (eWrite) {}
+      }
+      s = JSON.parse(raw);
+    } catch (e) { s = null; }
     s = s || {};
     s.shells = s.shells || {};      /* studyId -> shells[] */
     s.records = s.records || [];    /* tracker records created from Mock Shells */
@@ -21,6 +33,8 @@
     s.programTx = s.programTx || []; /* program renames: old, new, user, time */
     s.programByNumber = s.programByNumber || {}; /* study|number -> program file name */
     s.fileRenames = s.fileRenames || {}; /* old file name -> new file name */
+    s.files = s.files || {}; /* scope|filename -> 1 when that program file exists */
+    s.rowState = s.rowState || {}; /* record id -> persisted program name and run flags */
     if (!s.sourcesScoped) {
       var migrated = {};
       var home = 'ONC-204-301';
@@ -355,14 +369,37 @@
       rec.history.push({ at: stamp(now), action: 'Synced from Mock Shells', status: 'Not started', person: CURRENT_USER, note: 'Shell ' + shell.number + ' finalized → tracker record created' });
       rec.history.push({ at: stamp(now), action: 'SAS header generated', status: 'In dev', person: 'SPHERE', note: rec.program + ' + ' + qcName(rec.program) + ' created with standard header' });
       s.records.push(rec);
+      s.files[home + '|' + rec.program] = 1;
+      s.sources[home + '|' + rec.program + ':prod'] = programHeader(rec, 'prod');
+      var qcProg = qcName(rec.program);
+      if (qcProg) {
+        s.files[home + '|' + qcProg] = 1;
+        s.sources[home + '|' + qcProg + ':qc'] = programHeader(rec, 'qc');
+      }
       write(s);
       return rec;
     },
     programHeader: programHeader,
-    getStatus: function (prog) { return read().status[prog] || null; },
-    setStatus: function (prog, status, from) {
-      if (status === 'Frozen' && from !== 'Approved') return null;
+    getStatus: function (prog) {
       var s = read();
+      if (!prog || !Object.prototype.hasOwnProperty.call(s.status, prog)) return null;
+      return s.status[prog];
+    },
+    /* Record the row's real status the first time we see it. Does not move a status that is already stored. */
+    rememberStatus: function (prog, status) {
+      if (!prog || !status) return null;
+      var s = read();
+      if (Object.prototype.hasOwnProperty.call(s.status, prog)) return s.status[prog];
+      s.status[prog] = status;
+      write(s);
+      return status;
+    },
+    /* Frozen is allowed only when the stored status is Approved. The from argument is not the current status. */
+    setStatus: function (prog, status) {
+      var s = read();
+      var has = Object.prototype.hasOwnProperty.call(s.status, prog);
+      var current = has ? s.status[prog] : null;
+      if (status === 'Frozen' && current !== 'Approved') return null;
       s.status[prog] = status;
       write(s);
       return status;
@@ -370,9 +407,169 @@
     getEvents: function (prog) { return read().events[prog] || []; },
     getRoles: function (key) { return read().roles[key] || null; },
     setRoles: function (key, roles) { var s = read(); s.roles[key] = roles; write(s); },
-    addEvent: function (prog, ev) { var s = read(); (s.events[prog] = s.events[prog] || []).push(ev); write(s); },
+    eventKey: function (ev) {
+      if (!ev) return '';
+      if (ev.id) return String(ev.id);
+      return [ev.at, ev.action, ev.status, ev.person, ev.note, ev.comment, ev.justification, ev.from, ev.to].join('\u0001');
+    },
+    addEvent: function (prog, ev) {
+      if (!prog || !ev) return;
+      var s = read();
+      if (!ev.id) ev.id = api.eventKey(ev);
+      var list = s.events[prog] = s.events[prog] || [];
+      var id = ev.id;
+      for (var i = 0; i < list.length; i++) {
+        if (api.eventKey(list[i]) === id) { write(s); return; }
+      }
+      list.push(ev);
+      write(s);
+    },
+    /* Fold alias keys into one list and drop duplicate events already stored under more than one key. */
+    mergeEvents: function (canon, aliases) {
+      if (!canon) return [];
+      var s = read();
+      var keys = [canon].concat(aliases || []);
+      var seen = {};
+      var out = [];
+      var changed = false;
+      keys.forEach(function (k) {
+        if (!k) return;
+        (s.events[k] || []).forEach(function (ev) {
+          if (!ev) return;
+          var id = api.eventKey(ev);
+          if (!ev.id) { ev.id = id; changed = true; }
+          if (seen[id]) { changed = true; return; }
+          seen[id] = 1;
+          out.push(ev);
+        });
+      });
+      var prev = JSON.stringify(s.events[canon] || []);
+      s.events[canon] = out;
+      if (JSON.stringify(out) !== prev) changed = true;
+      keys.forEach(function (k) {
+        if (!k || k === canon || !s.events[k]) return;
+        delete s.events[k];
+        changed = true;
+      });
+      if (changed) write(s);
+      return out;
+    },
     getSource: function (key) { return read().sources[key] || null; },
     setSource: function (key, src) { var s = read(); s.sources[key] = src; write(s); },
+    fileExists: function (scope, name) {
+      var n = String(name || '').split('/').pop();
+      if (!n) return false;
+      return !!read().files[String(scope || STUDY) + '|' + n];
+    },
+    noteFile: function (scope, name) {
+      var n = String(name || '').split('/').pop();
+      if (!n || n === '-') return;
+      var key = String(scope || STUDY) + '|' + n;
+      var s = read();
+      if (s.files[key]) return;
+      s.files[key] = 1;
+      write(s);
+    },
+    forgetFile: function (scope, name) {
+      var n = String(name || '').split('/').pop();
+      if (!n) return;
+      var key = String(scope || STUDY) + '|' + n;
+      var s = read();
+      if (!s.files[key]) return;
+      delete s.files[key];
+      write(s);
+    },
+    rowState: function (id) {
+      if (!id) return null;
+      return read().rowState[id] || null;
+    },
+    setRowState: function (id, patch) {
+      if (!id) return null;
+      var s = read();
+      s.rowState[id] = Object.assign({}, s.rowState[id] || {}, patch || {});
+      write(s);
+      return s.rowState[id];
+    },
+    retargetProgramText: function (text, sourceId, destId) {
+      if (!text || !destId || sourceId === destId) return text || '';
+      var src = programScope({ study: sourceId || STUDY });
+      var dst = programScope({ study: destId });
+      var out = String(text);
+      if (src.root && src.root !== dst.root) out = out.split(src.root).join(dst.root);
+      if (src.label && src.label !== dst.label) out = out.split(src.label).join(dst.label);
+      var srcProto = String(sourceId || STUDY).split('::')[0];
+      out = out.split('\n').map(function (line) {
+        if (!/Study\/Protocol|Output file/.test(line)) return line;
+        if (srcProto && line.indexOf(srcProto) >= 0 && line.indexOf(dst.label) < 0) return line.split(srcProto).join(dst.label);
+        return line;
+      }).join('\n');
+      return out;
+    },
+    moveProgramStorage: function (info) {
+      if (!info || !info.oldName || !info.newName || info.oldName === info.newName) return null;
+      var s = read();
+      var scope = info.scope || STUDY;
+      function moveSource(oldName, newName, side) {
+        if (!oldName || !newName || oldName === newName) return;
+        var from = scope + '|' + oldName + ':' + side;
+        var to = scope + '|' + newName + ':' + side;
+        if (s.sources[from] != null && s.sources[to] == null) s.sources[to] = s.sources[from];
+        if (s.sources[from] != null) delete s.sources[from];
+      }
+      function moveFile(oldName, newName) {
+        if (!oldName || !newName || oldName === newName) return;
+        var from = scope + '|' + oldName;
+        var to = scope + '|' + newName;
+        if (s.files[from] && !s.files[to]) s.files[to] = 1;
+        if (s.files[from]) delete s.files[from];
+      }
+      function stemOf(name) {
+        return String(name || '').replace(/\.[^.]+$/, '');
+      }
+      function retitle(text, pairs) {
+        var out = text == null ? '' : String(text);
+        pairs.forEach(function (pair) {
+          if (!pair[0] || !pair[1] || pair[0] === pair[1]) return;
+          out = out.split(pair[0]).join(pair[1]);
+        });
+        return out;
+      }
+      moveSource(info.oldName, info.newName, 'prod');
+      moveSource(info.oldQc, info.newQc, 'qc');
+      var pairs = [
+        [info.oldName, info.newName],
+        [info.oldQc, info.newQc],
+        [stemOf(info.oldName), stemOf(info.newName)],
+        [stemOf(info.oldQc), stemOf(info.newQc)]
+      ];
+      ['prod', 'qc'].forEach(function (side) {
+        var name = side === 'qc' ? info.newQc : info.newName;
+        if (!name) return;
+        var key = scope + '|' + name + ':' + side;
+        if (s.sources[key] != null) s.sources[key] = retitle(s.sources[key], pairs);
+      });
+      moveFile(info.oldName, info.newName);
+      moveFile(info.oldQc, info.newQc);
+      var canon = info.recordId || info.newName;
+      if (info.oldName && Object.prototype.hasOwnProperty.call(s.status, info.oldName)) {
+        if (!Object.prototype.hasOwnProperty.call(s.status, canon)) s.status[canon] = s.status[info.oldName];
+        delete s.status[info.oldName];
+      }
+      if (info.newName && info.newName !== canon && Object.prototype.hasOwnProperty.call(s.status, info.newName)) {
+        if (!Object.prototype.hasOwnProperty.call(s.status, canon)) s.status[canon] = s.status[info.newName];
+        delete s.status[info.newName];
+      }
+      if (info.recordId) {
+        var prev = s.rowState[info.recordId] || {};
+        s.rowState[info.recordId] = Object.assign({}, prev, info.state || {}, {
+          program: info.newName,
+          origProgram: prev.origProgram || info.origProgram || info.oldName
+        });
+      }
+      s.fileRenames[info.oldName] = info.newName;
+      write(s);
+      return s.rowState[info.recordId] || null;
+    },
     /* SPH-R-701: title and footnotes only. Programming notes and subgroup are not synced. */
     noteShellContent: function (study, info) {
       if (!info || !info.number) return null;
