@@ -4305,10 +4305,11 @@ a.btn.icon-text-btn.accent-icon-primary:hover,
 #trackerListsBar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: 6px;
   flex-wrap: wrap;
-  margin: 0;
+  flex: 0 0 auto;
+  margin: 0 0 0 auto;
 }
 #trackerListsBar .actions-sep {
   width: 1px;
