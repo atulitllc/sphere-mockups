@@ -35,7 +35,7 @@
 </script>
 <script src="study-layout.js?v=flow4a"></script>
 <script src="ingest-store.js?v=flow4a"></script>
-<script src="sphere-access.js?v=flow4c"></script>
+<script src="sphere-access.js?v=acct1"></script>
 <script src="demo-flow.js?v=flow4e"></script>
 </head>
 <body>
@@ -698,6 +698,34 @@
     });
   }
 
+  function fillAccessUsers() {
+    if (!accessAddWho || !window.SPHERE_ACCESS || !SPHERE_ACCESS.users) return;
+    function escOpt(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+    var teams = [];
+    Array.prototype.forEach.call(accessAddWho.querySelectorAll('optgroup[label="Teams"] option'), function (o) {
+      teams.push({ value: o.value, text: o.textContent });
+    });
+    if (!teams.length) {
+      teams = [
+        { value: 'team:Stats programmers', text: 'Stats programmers' },
+        { value: 'team:QC reviewers', text: 'QC reviewers' },
+        { value: 'team:Study leads', text: 'Study leads' }
+      ];
+    }
+    var html = '<option value="">Add user or team…</option><optgroup label="Users">';
+    SPHERE_ACCESS.users().filter(function (u) { return !u.deactivated; }).forEach(function (u) {
+      html += '<option value="user:' + escOpt(u.id) + '">' + escOpt(u.name) + '</option>';
+    });
+    html += '</optgroup><optgroup label="Teams">';
+    teams.forEach(function (t) {
+      html += '<option value="' + escOpt(t.value) + '">' + escOpt(t.text) + '</option>';
+    });
+    html += '</optgroup>';
+    accessAddWho.innerHTML = html;
+  }
+
   function openAccess(target) {
     if (target && target.kind === 'file') return;
     try {
@@ -721,6 +749,7 @@
       ? '<option value="View">View</option>'
       : '<option value="View">View</option><option value="Edit">Edit</option>';
     accessAddRole.value = 'View';
+    fillAccessUsers();
     accessAddWho.value = '';
 
     var rows = cloneAcl(folder);
@@ -871,11 +900,19 @@
     }
   }
   var clip = null;
+  function fileChangeRefusal(action) {
+    if (!window.SPHERE_ACCESS) return '';
+    var who = SPHERE_ACCESS.current && SPHERE_ACCESS.current();
+    if (who && who.deactivated) return action + ' refused: this account is deactivated.';
+    var path = (window.SPHERE_filesPath || '') + current;
+    if (!SPHERE_ACCESS.canEdit(path)) return action + ' refused: no edit permission on this folder.';
+    return '';
+  }
   function pasteClip() {
     if (!clip) return;
-    var path = (window.SPHERE_filesPath || '') + current;
-    if (window.SPHERE_ACCESS && !SPHERE_ACCESS.canEdit(path)) {
-      window.alert('Paste refused: no edit permission on this folder.');
+    var refusal = fileChangeRefusal('Paste');
+    if (refusal) {
+      window.alert(refusal);
       return;
     }
     TREE[current] = TREE[current] || [];
@@ -894,6 +931,12 @@
     if (action === 'manage') {
       openAccess(ctxTarget);
     } else if (action === 'copy') {
+      var copyRefusal = fileChangeRefusal('Copy');
+      if (copyRefusal) {
+        window.alert(copyRefusal);
+        closeCtx();
+        return;
+      }
       var file = (TREE[current] || []).filter(function (f) { return f.name === ctxTarget.name; })[0];
       if (ctxTarget.kind === 'folder') {
         var kids = (TREE[ctxTarget.name] || TREE[current + '/' + ctxTarget.name] || (file ? [] : [])).map(function (f) { return JSON.parse(JSON.stringify(f)); });
@@ -950,6 +993,12 @@
     var kind = parts[0];
     var userId = parts.slice(1).join(':');
     var name = (opt && opt.textContent.trim()) || userId;
+    if (kind === 'user' && window.SPHERE_ACCESS && SPHERE_ACCESS.users) {
+      var blocked = SPHERE_ACCESS.users().filter(function (u) {
+        return u.deactivated && (u.id === userId || u.name === name);
+      })[0];
+      if (blocked) { showToast('A deactivated account cannot be granted access'); return; }
+    }
     var role = accessTarget.frozen ? 'View' : accessAddRole.value;
     var exists = accessTarget.rows.some(function (r) { return r.name === name; });
     if (exists) { showToast('Already on ACL'); return; }
