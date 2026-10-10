@@ -4171,9 +4171,12 @@
       var stay = null;
       var i;
       if (requested) {
-        for (i = 0; i < shells.length; i++) if (shells[i].id === requested) stay = shells[i];
+        for (i = 0; i < shells.length; i++) if (shells[i].id === requested) { stay = shells[i]; break; }
+        if (!stay) {
+          for (i = 0; i < shells.length; i++) if (String(shells[i].number) === String(requested)) { stay = shells[i]; break; }
+        }
       }
-      if (!stay && shells.length) stay = shells[0];
+      if (!stay && !requested && shells.length) stay = shells[0];
       if (stay) {
         studyStore[CURRENT_STUDY].selectedId = stay.id;
         catalogSelectedIds = [stay.id];

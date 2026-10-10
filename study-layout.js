@@ -247,32 +247,26 @@
   function showStudyNotFound(name) {
     var content = document.querySelector('.content');
     if (content) {
-      Array.prototype.forEach.call(content.children, function (el) {
-        if (el.id !== 'studyMissing') el.hidden = true;
-      });
-      var box = document.getElementById('studyMissing');
-      if (!box) {
-        box = document.createElement('div');
-        box.id = 'studyMissing';
-        box.className = 'page-intro';
-        var h = document.createElement('h1');
-        h.className = 'page-title';
-        h.textContent = 'Study not found';
-        var p = document.createElement('p');
-        p.className = 'page-sub';
-        var shown = String(name || '').replace(/::/g, ' / ');
-        p.textContent = shown ? (shown + ' is not in the study registry.') : 'That study is not in the study registry.';
-        var back = document.createElement('p');
-        var a = document.createElement('a');
-        a.href = 'studies.html';
-        a.textContent = 'Back to Studies';
-        back.appendChild(a);
-        box.appendChild(h);
-        box.appendChild(p);
-        box.appendChild(back);
-        content.appendChild(box);
-      }
-      box.hidden = false;
+      while (content.firstChild) content.removeChild(content.firstChild);
+      var box = document.createElement('div');
+      box.id = 'studyMissing';
+      box.className = 'page-intro';
+      var h = document.createElement('h1');
+      h.className = 'page-title';
+      h.textContent = 'Study not found';
+      var p = document.createElement('p');
+      p.className = 'page-sub';
+      var shown = String(name || '').replace(/::/g, ' / ');
+      p.textContent = shown ? (shown + ' is not in the study registry.') : 'That study is not in the study registry.';
+      var back = document.createElement('p');
+      var a = document.createElement('a');
+      a.href = 'studies.html';
+      a.textContent = 'Back to Studies';
+      back.appendChild(a);
+      box.appendChild(h);
+      box.appendChild(p);
+      box.appendChild(back);
+      content.appendChild(box);
     }
     var crumb = document.querySelector('.crumb');
     if (crumb) {
@@ -314,6 +308,7 @@
       a.setAttribute('href', 'study-home.html?' + qs);
     });
     document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+      if (a.classList.contains('shell-open-link')) return;
       a.setAttribute('href', 'mock-shells.html?' + scope);
     });
     document.querySelectorAll('a[href^="tracker.html"]').forEach(function (a) {

@@ -460,7 +460,10 @@
   var scope = 'study=' + encodeURIComponent(L.studyId(e)) + '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR');
   var filesHref = 'files.html?' + scope + '&path=' + encodeURIComponent(path);
   document.querySelectorAll('a[href^="files.html"]').forEach(function (a) { a.setAttribute('href', filesHref); });
-  document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) { a.setAttribute('href', 'mock-shells.html?' + scope); });
+  document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+    if (a.classList.contains('shell-open-link')) return;
+    a.setAttribute('href', 'mock-shells.html?' + scope);
+  });
   document.querySelectorAll('a[href^="tracker.html"]').forEach(function (a) { a.setAttribute('href', 'tracker.html?' + scope); });
   var grid = document.querySelector('.study-hero-meta');
   var defaultHero = e.protocol === 'ONC-204-301' && e.deliverable === 'CSR';

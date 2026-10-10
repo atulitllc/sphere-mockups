@@ -2729,6 +2729,25 @@
     return true;
   }
 
+  function shellScopeQuery(store) {
+    var raw = String(store || '').trim();
+    if (!raw) return '';
+    var cut = raw.indexOf('::');
+    var protocol = cut < 0 ? raw : raw.slice(0, cut);
+    var deliverable = cut < 0 ? 'CSR' : (raw.slice(cut + 2) || 'CSR');
+    if (!protocol) return '';
+    return '&study=' + encodeURIComponent(protocol) + '&deliverable=' + encodeURIComponent(deliverable);
+  }
+
+  function linkedShellId(title, shellLabel) {
+    var label = String(shellLabel || '').replace(/\s+/g, ' ').trim();
+    if (!shellStatusLinks(label)) return '';
+    if (/^draft-/i.test(label) || /^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(label)) return label;
+    var raw = String(title || '').split('·')[0].replace(/\s+/g, ' ').trim();
+    if (/^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(raw)) return raw;
+    return '';
+  }
+
   function shellCellHtml(label, shellId, studyId) {
     var text = String(label || '').replace(/\s+/g, ' ').trim();
     var show = text || '-';
@@ -2736,8 +2755,7 @@
       var muted = !shellStatusLinks(text);
       return '<span class="meta-v' + (muted ? ' muted' : '') + '">' + escapeHtml(show) + '</span>';
     }
-    var href = 'mock-shells.html?shell=' + encodeURIComponent(shellId);
-    if (studyId) href += '&study=' + encodeURIComponent(studyId);
+    var href = 'mock-shells.html?shell=' + encodeURIComponent(shellId) + shellScopeQuery(studyId);
     return '<a class="shell-open-link meta-v" href="' + href + '" title="Open shell ' + escapeHtml(shellId) + ' in Mock Shells">' + escapeHtml(text) + '</a>';
   }
 
@@ -2747,7 +2765,7 @@
       var cells = metaCells(row);
       if (!cells[4]) return;
       var label = (cells[4].textContent || '').trim();
-      cells[4].innerHTML = shellCellHtml(label, shellIdForRow(row), row.getAttribute('data-shell-study') || '');
+      cells[4].innerHTML = shellCellHtml(label, shellIdForRow(row), rowStudyScope(row));
     });
   }
 
@@ -2842,7 +2860,7 @@
       }
     }
     // Shell
-    if (cells[4]) cells[4].innerHTML = shellCellHtml(shell, shellIdForRow(row), row.getAttribute('data-shell-study') || '');
+    if (cells[4]) cells[4].innerHTML = shellCellHtml(shell, shellIdForRow(row), rowStudyScope(row));
 
     var check = row.querySelector('.row-check');
     if (check) check.setAttribute('aria-label', 'Select ' + (title || 'row'));
@@ -3318,6 +3336,8 @@
     row.setAttribute('data-program', opts.program || '');
     if (opts.recordId) row.setAttribute('data-record-id', opts.recordId);
     if (opts.scope) row.setAttribute('data-runtime-scope', opts.scope);
+    if (opts.shellId) row.setAttribute('data-shell-id', opts.shellId);
+    if (opts.shellId && opts.scope) row.setAttribute('data-shell-study', opts.scope);
     /* checkout removed */
     var tags = (opts.tags || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     var tagsHtml = tags.length
@@ -3339,11 +3359,13 @@
           '<div class="meta-cell"><span class="meta-v">' + opts.type + '</span></div>' +
           '<div class="meta-cell"><span class="meta-v">' + (opts.status || 'Not started') + '</span></div>' +
           '<div class="meta-cell"><span class="meta-v muted">-</span></div>' +
-          '<div class="meta-cell"><span class="meta-v">' + (opts.shell || 'n/a') + '</span></div>' +
+          '<div class="meta-cell"><span class="meta-v">' + escapeHtml(opts.shell || 'n/a') + '</span></div>' +
           '<div class="meta-cell job-cell"><span class="meta-v muted">-</span></div>' +
           '<div class="meta-cell actions-cell">' + rowActionsHtml() + '</div>' +
         '</div>' +
       '</div>';
+    var shellCells = row.querySelectorAll('.artifact-meta > .meta-cell');
+    if (shellCells[4]) shellCells[4].innerHTML = shellCellHtml(opts.shell || 'n/a', shellIdForRow(row), rowStudyScope(row));
     return row;
   }
 
@@ -3428,6 +3450,7 @@
         program: program,
         title: title,
         shell: field('nrShell').value,
+        shellId: linkedShellId(title, field('nrShell').value),
         recordId: mintRecordId()
       };
       rememberRuntimeRow(spec);
@@ -5348,6 +5371,7 @@
     var study = protocol;
     var scope = 'study=' + encodeURIComponent(study) + '&deliverable=' + encodeURIComponent(deliverable);
     document.querySelectorAll('a[href^="mock-shells.html"]').forEach(function (a) {
+      if (a.classList.contains('shell-open-link')) return;
       a.setAttribute('href', 'mock-shells.html?' + scope);
     });
     document.querySelectorAll('a[href^="study-home.html"]').forEach(function (a) {
@@ -5395,7 +5419,7 @@
     var cells = metaCells(row);
     if (cells[3]) cells[3].innerHTML = '<span class="meta-v">' + escapeHtml((rec.roles && rec.roles.prod) || '') + '</span>';
     if (rec.study) row.setAttribute('data-shell-study', rec.study);
-    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row), rec.study || '');
+    if (cells[4]) cells[4].innerHTML = shellCellHtml('Synced', rec.shellId || rowOutputId(row), rec.study || trackerStoreId());
     if (rec.isNew) {
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
@@ -5516,6 +5540,7 @@
       program: spec.program || '',
       title: spec.title || '',
       shell: spec.shell || 'n/a',
+      shellId: spec.shellId || '',
       job: spec.job || ''
     };
     var idx = -1;
@@ -5541,6 +5566,7 @@
       program: row.getAttribute('data-program') || '',
       title: titleEl ? String(titleEl.textContent || '').replace(/\s+/g, ' ').trim() : '',
       shell: shell || 'n/a',
+      shellId: row.getAttribute('data-shell-id') || '',
       job: row.getAttribute('data-job') || ''
     };
     var list = readRuntimeRows();
@@ -5762,6 +5788,7 @@
   window.addEventListener('load', function () { refreshAllWorkflowUI(); paintMyAssign(); applyFilters(); });
   refreshAssignedFilter();
   paintShellLinks();
+  document.addEventListener('DOMContentLoaded', function () { paintShellLinks(); });
   (function filterAssignedTo() {
     var sel = document.getElementById('reAssigned');
     if (!sel || !window.SPHERE_ACCESS || !SPHERE_ACCESS.users) return;
@@ -5784,6 +5811,7 @@
   });
   paintTrackerSortHeaders();
   hydrateRuntimeRows();
+  paintShellLinks();
   if (trackerSort.key) applyTrackerSort();
 })();
 </script>
