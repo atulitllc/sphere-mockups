@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4rework2"></script>
+<script src="demo-flow.js?v=flow4rework3"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -3714,6 +3714,7 @@
     if (!name || !window.SPHERE_DEMO) return false;
     if (readCopiedSource(scope, name, side, legacyId)) return true;
     if (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, name)) return true;
+    if (SPHERE_DEMO.seedFile && SPHERE_DEMO.seedFile(scope, name)) return true;
     var hist = (rec && rec.history) || [];
     var i;
     for (i = 0; i < hist.length; i++) {
@@ -3721,6 +3722,32 @@
       if (/header generated/i.test(blob) && blob.indexOf(name) >= 0) return true;
     }
     return false;
+  }
+  function uniqueCopyProgram(scope, name) {
+    var file = String(name || '').split('/').pop();
+    if (!file || !window.SPHERE_DEMO) return file;
+    var dot = file.lastIndexOf('.');
+    var stem = dot > 0 ? file.slice(0, dot) : file;
+    var ext = dot > 0 ? file.slice(dot) : '';
+    var n = 2;
+    var candidate = file;
+    function taken(nm) {
+      if (SPHERE_DEMO.seedFile && SPHERE_DEMO.seedFile(scope, nm)) return true;
+      if (SPHERE_DEMO.fileExists && SPHERE_DEMO.fileExists(scope, nm)) return true;
+      if (SPHERE_DEMO.getSource && SPHERE_DEMO.getSource(scope + '|' + nm + ':prod')) return true;
+      var list = SPHERE_DEMO.records ? SPHERE_DEMO.records() : [];
+      var i;
+      for (i = 0; i < list.length; i++) {
+        if (!list[i]) continue;
+        if ((list[i].study || 'ONC-204-301') === scope && list[i].program === nm) return true;
+      }
+      return false;
+    }
+    while (taken(candidate)) {
+      candidate = stem + '_c' + n + ext;
+      n++;
+    }
+    return candidate;
   }
   function copyTrackerDraft(src, draft, targetId) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.addRecord) return;
@@ -3746,9 +3773,8 @@
       roles: { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' }
     };
     if (!rec.roles) rec.roles = { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' };
-    var program = String(rec.program || (draft.layout && draft.layout.program) || '').split('/').pop();
-    rec.program = program;
-    var qc = program && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(program) : '';
+    var origProgram = String(rec.program || (draft.layout && draft.layout.program) || '').split('/').pop();
+    var origQc = origProgram && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(origProgram) : '';
     var legacyId = existing && existing.id ? existing.id : '';
     rec.id = 'rec-copy-' + draft.id;
     rec.shellId = draft.id;
@@ -3756,6 +3782,15 @@
     rec.title = draft.title;
     rec.status = 'Draft';
     rec.isNew = false;
+    rec.syncedAt = SPHERE_DEMO.stamp();
+    delete rec.study;
+    if (targetId && targetId !== sourceId) rec.study = targetId;
+    else if (sourceId !== 'ONC-204-301') rec.study = sourceId;
+    var destScope = rec.study || 'ONC-204-301';
+    var program = uniqueCopyProgram(destScope, origProgram);
+    rec.program = program;
+    if (draft.layout) draft.layout.program = program;
+    var qc = program && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(program) : '';
     var bits = copyScopeBits(sourceId);
     var shellNo = src.number || draft.number || '';
     var sentence = 'Copied as Draft from ' + bits.study + ' / ' + bits.deliverable + ' / ' + shellNo + ' (' + program + ')';
@@ -3766,24 +3801,33 @@
       person: copyActorName(),
       note: ''
     }];
-    rec.syncedAt = SPHERE_DEMO.stamp();
-    delete rec.study;
-    if (targetId && targetId !== sourceId) rec.study = targetId;
-    else if (sourceId !== 'ONC-204-301') rec.study = sourceId;
-    var destScope = rec.study || 'ONC-204-301';
-    function textFor(name, side) {
-      if (!copySideExists(sourceId, name, side, legacyId, existing)) return '';
-      var stored = readCopiedSource(sourceId, name, side, legacyId);
-      if (stored && SPHERE_DEMO.retargetProgramText) return SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope);
-      if (stored) return stored;
-      if (!SPHERE_DEMO.programHeader) return '';
-      var headerRec = JSON.parse(JSON.stringify(rec));
-      headerRec.study = destScope;
-      headerRec.program = program;
-      return SPHERE_DEMO.programHeader(headerRec, side);
+    function rewriteProgramName(text, fromName, toName) {
+      if (!text || !fromName || !toName || fromName === toName) return text || '';
+      var fromStem = fromName.replace(/\.[^.]+$/, '');
+      var toStem = toName.replace(/\.[^.]+$/, '');
+      return String(text).split('\n').map(function (row) {
+        if (/Output file/.test(row)) return row;
+        var next = row.split(fromName).join(toName);
+        if (fromStem && fromStem !== toStem) next = next.split(fromStem).join(toStem);
+        return next;
+      }).join('\n');
     }
-    var prodText = program ? textFor(program, 'prod') : '';
-    var qcText = qc ? textFor(qc, 'qc') : '';
+    function textFor(sourceName, side, destName) {
+      if (!copySideExists(sourceId, sourceName, side, legacyId, existing)) return '';
+      var stored = readCopiedSource(sourceId, sourceName, side, legacyId);
+      var text = '';
+      if (stored && SPHERE_DEMO.retargetProgramText) text = SPHERE_DEMO.retargetProgramText(stored, sourceId, destScope);
+      else if (stored) text = stored;
+      else if (SPHERE_DEMO.programHeader) {
+        var headerRec = JSON.parse(JSON.stringify(rec));
+        headerRec.study = destScope;
+        headerRec.program = program;
+        text = SPHERE_DEMO.programHeader(headerRec, side);
+      }
+      return rewriteProgramName(text, sourceName, destName);
+    }
+    var prodText = origProgram ? textFor(origProgram, 'prod', program) : '';
+    var qcText = origQc ? textFor(origQc, 'qc', qc) : '';
     if (program && prodText) {
       SPHERE_DEMO.setSource(destScope + '|' + program + ':prod', prodText);
       if (SPHERE_DEMO.noteFile) SPHERE_DEMO.noteFile(destScope, program);

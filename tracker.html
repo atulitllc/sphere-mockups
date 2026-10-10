@@ -1258,7 +1258,7 @@
 
 <script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4rework2"></script>
+<script src="demo-flow.js?v=flow4rework3"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -2518,16 +2518,16 @@
     return 'qc-' + prog;
   }
   function logOutputStem(j) {
+    var row = j && j.row;
+    var id = row ? rowOutputId(row) : '';
+    if (id) return logNamed('t_' + String(id).replace(/\./g, '_').replace(/-/g, '_'), logRowType(j));
     var prog = String((j && j.prog) || '').split('/').pop().replace(/^qc[-_]/i, '');
     var fromTfl = runOutId(prog);
     var stem = fromTfl;
     if (fromTfl === 'out') {
       stem = prog.replace(/\.[^.]+$/, '');
       if (!/^[tfl]_\d/i.test(stem)) {
-        var row = j && j.row;
-        var id = row ? rowOutputId(row) : '';
-        if (id) stem = 't_' + String(id).replace(/\./g, '_');
-        else if (!stem || stem.toLowerCase() === 'out') stem = fromTfl;
+        if (!stem || stem.toLowerCase() === 'out') stem = fromTfl;
       }
     }
     return logNamed(stem, logRowType(j));
@@ -3249,16 +3249,27 @@
         renderJobCell(row);
       }
       var canon = stageHistoryKey(row);
-      if (SPHERE_DEMO.mergeEvents) {
-        SPHERE_DEMO.mergeEvents(canon, [oldName, newName, flowKey(row), row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '']);
-      }
-      SPHERE_DEMO.addEvent(canon, {
+      var renamed = {
         at: stageStampET(),
         action: 'Renamed from ' + oldName + ' to ' + newName,
         status: row.getAttribute('data-status') || '',
         person: stageUser(),
         note: ''
-      });
+      };
+      var owned = flowRecord(row);
+      if (owned && SPHERE_DEMO.updateRecord) {
+        SPHERE_DEMO.updateRecord(owned.id, function (x) {
+          x.program = newName;
+          x.history = x.history || [];
+          var already = x.history.some(function (ev) { return ev && ev.action === renamed.action; });
+          if (!already) x.history.push(renamed);
+        });
+      } else {
+        if (SPHERE_DEMO.mergeEvents) {
+          SPHERE_DEMO.mergeEvents(canon, [oldName, newName, flowKey(row), row.getAttribute('data-record-id') || '', row.getAttribute('data-flow-id') || '']);
+        }
+        SPHERE_DEMO.addEvent(canon, renamed);
+      }
     }
     var fromStatus = row.getAttribute('data-status') || '';
     var statusPick = document.getElementById('reStatus').value;
@@ -3406,7 +3417,8 @@
       return;
     }
     if (next && next !== from) {
-      askStageChange([{ row: row, from: from, to: next, hand: null }], function (info) {
+      var stageHand = next === 'Frozen' ? { action: 'freeze', label: 'Freeze', nextStatus: next } : null;
+      askStageChange([{ row: row, from: from, to: next, hand: stageHand }], function (info) {
         var stageAction = next === 'Frozen' ? 'freeze' : 'status';
         if (applyTransition(row, { action: stageAction, label: next === 'Frozen' ? 'Freeze' : 'Change stage', nextStatus: next }, info) === false) return;
         writeRowEditor();
@@ -6418,6 +6430,19 @@
       var t = row.querySelector('.artifact-title');
       if (t) t.insertAdjacentHTML('beforeend', '<span class="new-chip" title="Synced from Mock Shells ' + escapeHtml(rec.syncedAt) + '">New</span>');
       row.classList.add('is-flow-new');
+    }
+    var savedFlow = rec.id && window.SPHERE_DEMO && SPHERE_DEMO.rowState ? SPHERE_DEMO.rowState(rec.id) : null;
+    if (savedFlow && savedFlow.program) row.setAttribute('data-program', savedFlow.program);
+    if (savedFlow && (savedFlow.job === 'done' || savedFlow.job === 'error' || savedFlow.job === 'completed')) {
+      restoreFinishedJob(row, {
+        job: savedFlow.job === 'completed' ? 'done' : savedFlow.job,
+        jobMode: savedFlow.jobMode || 'prod',
+        jobWarn: savedFlow.jobWarn,
+        lastRun: savedFlow.lastRun || '',
+        prodRan: savedFlow.prodRan,
+        qcRan: savedFlow.qcRan,
+        outputReady: savedFlow.outputReady
+      });
     }
     return row;
   }

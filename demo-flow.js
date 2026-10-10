@@ -156,10 +156,32 @@
     }
     return { label: label + phase, root: root };
   }
+  function datasetFileBase(prog) {
+    var file = String(prog || '').split('/').pop().replace(/^qc[-_]/i, '');
+    var adam = file.match(/^adam_(ad[a-z0-9]+)/i);
+    if (adam) return adam[1].toLowerCase();
+    return file.replace(/\.[^.]+$/, '').replace(/^adam_/i, '').toLowerCase();
+  }
+  function outputFilePath(rec, isQc) {
+    var scopeBits = programScope(rec);
+    var type = (rec && rec.type) || 'Table';
+    var prog = (rec && rec.program) || '';
+    if (type === 'Dataset') {
+      var ext = /\.r$/i.test(prog) ? '.xpt' : '.sas7bdat';
+      return scopeBits.root + 'data/adam/' + datasetFileBase(prog) + ext;
+    }
+    var num = String((rec && rec.number) || '').replace(/\./g, '_').replace(/-/g, '_');
+    if (!num) {
+      var tfl = String(prog).match(/tfl_(\d+(?:_\d+)*)/i);
+      num = tfl ? tfl[1].split('_').slice(0, 4).join('_') : 'out';
+    }
+    var pre = type === 'Figure' ? 'f_' : (type === 'Listing' ? 'l_' : 't_');
+    return scopeBits.root + 'output/tlf/' + (isQc ? 'qc/' : '') + pre + num + '.rtf';
+  }
   function programHeader(rec, which) {
     var isQc = which === 'qc';
     var prog = isQc ? qcName(rec.program) : rec.program;
-    var macro = prog.replace(/\.sas$/i, '').replace(/[^A-Za-z0-9_]/g, '_');
+    var macro = prog.replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9_]/g, '_');
     var date = String(rec.syncedAt || stamp()).slice(0, 10);
     var bar = '*' + new Array(79).join('*');
     var dash = '*' + new Array(79).join('-');
@@ -175,7 +197,7 @@
     L.push(line('Source data', (rec.sources || []).join(', ')));
     if (rec.keyVars) L.push(line('Key variables', rec.keyVars));
     if (rec.sortOrder) L.push(line('Sort order', rec.sortOrder));
-    L.push(line('Output file', scopeBits.root + 'output/tlf/' + (isQc ? 'qc/' : '') + rec.program.replace(/\.sas$/i, '') + (isQc ? '.sas7bdat' : '.rtf')));
+    L.push(line('Output file', outputFilePath(rec, isQc)));
     L.push(line('Mock shell', 'Mock Shells ' + rec.number + ' v' + (rec.shellVersion || '0.1') + ' · synced ' + rec.syncedAt));
     if (isQc) {
       L.push(line('Purpose', 'Independent double programming of ' + rec.program));
@@ -307,6 +329,7 @@
     stamp: stamp,
     hhmm: hhmm,
     qcName: qcName,
+    seedFile: seedFile,
     reset: function () { try { localStorage.removeItem(KEY); } catch (e) {} },
     getShells: function (study) { var s = read(); return s.shells[study || STUDY] || null; },
     setShells: function (study, shells) { var s = read(); s.shells[study || STUDY] = shells; write(s); },
@@ -528,11 +551,15 @@
       }
       function retitle(text, pairs) {
         var out = text == null ? '' : String(text);
-        pairs.forEach(function (pair) {
-          if (!pair[0] || !pair[1] || pair[0] === pair[1]) return;
-          out = out.split(pair[0]).join(pair[1]);
-        });
-        return out;
+        return out.split('\n').map(function (row) {
+          if (/Output file/.test(row)) return row;
+          var next = row;
+          pairs.forEach(function (pair) {
+            if (!pair[0] || !pair[1] || pair[0] === pair[1]) return;
+            next = next.split(pair[0]).join(pair[1]);
+          });
+          return next;
+        }).join('\n');
       }
       moveSource(info.oldName, info.newName, 'prod');
       moveSource(info.oldQc, info.newQc, 'qc');
@@ -748,33 +775,88 @@
       return shells;
     }
   };
+  /* Home-board programs that exist before Tracker has loaded. QC only where the seed opened with one. */
+  var HOME_SEED_FILES = {
+    'tfl_14_1_1_demog.R': 1,
+    'adam_adsl.sas': 1,
+    'tfl_14_1_2_base.R': 1,
+    'tfl_14_2_1_orr.R': 1,
+    'tfl_14_2_3_orr_dorr.sas': 1,
+    'adam_adae.sas': 1,
+    'tfl_14_3_1_ae.R': 1,
+    'tfl_14_3_8_cm.sas': 1,
+    'tfl_14_3_1_1_ae_soc_pt.R': 1,
+    'tfl_14_3_1_2_sae_rel.R': 1,
+    'tfl_14_3_1_3_ae_disc.R': 1,
+    'tfl_14_3_1_4_ae_g3.R': 1,
+    'tfl_14_3_1_5_aesi.R': 1,
+    'tfl_14_3_1_6_ae_ttf.R': 1,
+    'tfl_14_3_2_1_sae_list.R': 1,
+    'tfl_14_3_2_2_death_list.R': 1,
+    'tfl_14_3_3_ae_sev.R': 1,
+    'tfl_14_3_4_ae_common.R': 1,
+    'tfl_14_3_5_lb.R': 1,
+    'tfl_14_3_5_1_lb_chem.sas': 1,
+    'tfl_14_3_5_2_lb_heme.R': 1,
+    't_14_1_3_subj_disp.sas': 1,
+    'qc-t_14_1_3_subj_disp.sas': 1
+  };
+  function seedFile(scope, name) {
+    var n = String(name || '').split('/').pop();
+    if (!n) return false;
+    if (String(scope || STUDY) !== STUDY) return false;
+    return !!HOME_SEED_FILES[n];
+  }
   /* 14.1.3 is a catalog shell with a Tracker record that the static board omitted. */
   (function ensureDispositionRecord() {
     var s = read();
     var id = 'rec-14-1-3';
-    var exists = (s.records || []).some(function (r) { return r.id === id || r.shellId === '14.1.3'; });
-    if (exists) return;
-    s.records.push({
-      id: id,
-      shellId: '14.1.3',
-      number: '14.1.3',
-      title: 'Subject disposition',
-      type: 'Table',
-      sap: 'Demographics',
-      analysisSet: 'ITT',
-      population: 'Intent-to-treat set (ITTFL = "Y")',
-      sources: ['ADAM.ADSL', 'ADAM.ADDS'],
-      keyVars: 'USUBJID, TRT01P, RANDFL, SAFFL, EOTSTT, DCTREAS, EOSSTT, DCSREAS',
-      sortOrder: 'Status then reason (descending frequency)',
-      shellVersion: '1.0',
-      program: 't_14_1_3_subj_disp.sas',
-      status: 'In dev',
-      roles: { prod: CURRENT_USER, qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' },
-      syncedAt: '2026-09-02 11:05',
-      isNew: false,
-      history: [{ at: '2026-09-02 11:05', action: 'Synced from Mock Shells', status: 'In dev', person: CURRENT_USER, note: 'Shell 14.1.3' }]
-    });
-    write(s);
+    var rec = (s.records || []).filter(function (r) {
+      if (!r) return false;
+      if (r.id === id) return true;
+      return r.shellId === '14.1.3' && (r.study || STUDY) === STUDY;
+    })[0];
+    var changed = false;
+    if (!rec) {
+      rec = {
+        id: id,
+        shellId: '14.1.3',
+        number: '14.1.3',
+        title: 'Subject disposition',
+        type: 'Table',
+        sap: 'Demographics',
+        analysisSet: 'ITT',
+        population: 'Intent-to-treat set (ITTFL = "Y")',
+        sources: ['ADAM.ADSL', 'ADAM.ADDS'],
+        keyVars: 'USUBJID, TRT01P, RANDFL, SAFFL, EOTSTT, DCTREAS, EOSSTT, DCSREAS',
+        sortOrder: 'Status then reason (descending frequency)',
+        shellVersion: '1.0',
+        program: 't_14_1_3_subj_disp.sas',
+        status: 'In dev',
+        roles: { prod: CURRENT_USER, qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' },
+        syncedAt: '2026-09-02 11:05',
+        isNew: false,
+        history: [{ at: '2026-09-02 11:05', action: 'Synced from Mock Shells', status: 'In dev', person: CURRENT_USER, note: 'Shell 14.1.3' }]
+      };
+      s.records.push(rec);
+      changed = true;
+    }
+    if (!rec.program) { rec.program = 't_14_1_3_subj_disp.sas'; changed = true; }
+    if (!rec.roles) {
+      rec.roles = { prod: CURRENT_USER, qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' };
+      changed = true;
+    }
+    var home = rec.study || STUDY;
+    function ensureSide(name, side) {
+      if (!name) return;
+      var fileKey = home + '|' + name;
+      var sourceKey = fileKey + ':' + side;
+      if (!s.files[fileKey]) { s.files[fileKey] = 1; changed = true; }
+      if (!s.sources[sourceKey]) { s.sources[sourceKey] = programHeader(rec, side); changed = true; }
+    }
+    ensureSide(rec.program, 'prod');
+    ensureSide(qcName(rec.program), 'qc');
+    if (changed) write(s);
   })();
   window.SPHERE_DEMO = api;
 })();
