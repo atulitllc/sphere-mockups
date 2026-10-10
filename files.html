@@ -138,11 +138,7 @@
 
         <div class="files-layout">
           <aside class="files-tree" aria-label="Study folders" id="filesTree">
-            <div class="tree-head">
-              <span>Folders</span>
-              <span class="badge info">Template</span>
-            </div>
-            <!-- tree items injected -->
+            <!-- studies tree injected; study subfolders are the browsable folders -->
           </aside>
 
           <div class="files-main">
@@ -487,7 +483,52 @@
     return (TREE[folder] || []).some(function (f) { return f.frozen; });
   }
 
+  function folderCtx(e, f) {
+    openCtx(e, { kind: 'folder', folder: f.id, name: f.id, frozen: folderHasFrozen(f.id) || f.frozen });
+  }
+  /* Study subfolders in the studies tree are the folder browser: click to open,
+     subtle count, folder actions on hover. */
+  function buildStudyTreeFolders(subsUl) {
+    FOLDERS.forEach(function (f) {
+      var li = Array.prototype.filter.call(subsUl.querySelectorAll(':scope > .lt-sub'), function (n) {
+        var d = n.querySelector('.lt-dir');
+        return d && d.textContent.replace(/\/$/, '') === f.id;
+      })[0];
+      if (!li) {
+        li = document.createElement('li');
+        li.className = 'lt-node lt-sub';
+        subsUl.appendChild(li);
+      }
+      li.classList.add('lt-folder-node');
+      li.setAttribute('data-folder', f.id);
+      li.innerHTML = '';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lt-dir lt-folder' + (f.id === current ? ' active' : '');
+      b.setAttribute('data-folder', f.id);
+      b.title = f.title || ('Open ' + f.id + '/');
+      b.innerHTML = '<span class="lt-folder-name">' + f.id + '/</span>' +
+        (/^\d+$/.test(String(f.count)) ? '<span class="lt-count" aria-label="' + f.count + ' items">' + f.count + '</span>' : '');
+      var more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'tree-more';
+      more.setAttribute('aria-label', 'Folder actions for ' + f.id);
+      more.setAttribute('aria-haspopup', 'menu');
+      more.setAttribute('aria-expanded', 'false');
+      more.textContent = '⋯';
+      more.setAttribute('data-folder', f.id);
+      li.appendChild(b);
+      li.appendChild(more);
+      b.addEventListener('click', function () { render(f.id); });
+      more.addEventListener('click', function (e) { e.stopPropagation(); folderCtx(e, f); });
+      li.addEventListener('contextmenu', function (e) { e.preventDefault(); folderCtx(e, f); });
+    });
+  }
+
   function buildTree() {
+    var subsUl = treeRoot.querySelector('#filesStudies .lt-subs');
+    if (subsUl) { buildStudyTreeFolders(subsUl); return; }
+    /* Fallback without a study layout: flat folder list. */
     FOLDERS.forEach(function (f) {
       var wrap = document.createElement('div');
       wrap.className = 'tree-item-wrap';
@@ -616,8 +657,17 @@
     applyStoredFileRenames();
     current = folder;
     crumbHere.textContent = folder;
-    document.querySelectorAll('.tree-item[data-folder]').forEach(function (b) {
-      b.classList.toggle('active', b.getAttribute('data-folder') === folder);
+    /* Highlight the folder, or its closest listed parent for nested paths (programs/dev). */
+    var hit = '';
+    FOLDERS.forEach(function (f) {
+      if ((folder === f.id || folder.indexOf(f.id + '/') === 0) && f.id.length > hit.length) hit = f.id;
+    });
+    document.querySelectorAll('.tree-item[data-folder], .lt-folder[data-folder]').forEach(function (b) {
+      var on = b.getAttribute('data-folder') === hit;
+      b.classList.toggle('active', on);
+      if (b.classList.contains('lt-folder')) {
+        if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+      }
     });
 
     var rows = (TREE[folder] || []).map(function (f) { return Object.assign({ path: folder + '/' + f.name }, f); });
@@ -1119,8 +1169,6 @@
     box.innerHTML = '<div class="tree-head"><span>Studies</span><a class="badge info" href="admin.html?panel=defaults" title="' + L.levelLabel(L.get().level) + ' · change in Admin" style="text-decoration:none">Layout ' + L.get().level + '</a></div>' +
       '<div style="padding:0 8px 4px">' + L.treeHtml({ link: link, activePath: activePath, expandCurrent: true }) + '</div>';
     treeRoot.insertBefore(box, treeRoot.firstChild);
-    var folderHead = Array.prototype.filter.call(treeRoot.querySelectorAll(':scope > .tree-head'), function () { return true; })[0];
-    if (folderHead) folderHead.firstElementChild.textContent = 'Folders';
     var crumb = document.getElementById('filesCrumb');
     if (crumb) {
       var rootBtn = crumb.querySelector('[data-goto="root"]');
@@ -1190,7 +1238,12 @@
     render(current);
   });
   buildTree();
-  render(window.SPHERE_filesStartFolder || 'programs');
+  /* Deep link: files.html?...&folder=adam opens that folder (raw maps to data/raw when needed). */
+  var askFolder = (new URLSearchParams(location.search).get('folder') || '').replace(/^\/+|\/+$/g, '');
+  function hasFolder(id) { return FOLDERS.some(function (f) { return f.id === id; }); }
+  if (askFolder === 'raw' && !hasFolder('raw') && hasFolder('data/raw')) askFolder = 'data/raw';
+  if (askFolder === 'data/raw' && !hasFolder('data/raw') && hasFolder('raw')) askFolder = 'raw';
+  render(askFolder && TREE[askFolder] ? askFolder : (window.SPHERE_filesStartFolder || 'programs'));
   window.SPHERE_filesTree = TREE;
   window.SPHERE_filesRerender = function (folder) {
     render(folder || current);
