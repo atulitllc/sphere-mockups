@@ -7200,3 +7200,204 @@ html[data-theme="dark"] .export-menu {
   background: var(--accent-soft);
   color: var(--accent);
 }
+
+/* Phone and tablet top bar. Desktop (1280px and up) keeps the base rules. */
+.nav-mobile-tools { display: none; }
+
+@media (max-width: 1279px) {
+  .app, .main { min-width: 0; max-width: 100%; }
+  header.top {
+    min-width: 0;
+    max-width: 100%;
+    gap: 8px;
+  }
+  header.top .top-left {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    gap: 8px;
+  }
+  header.top .top-right {
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+  header.top .hamburger {
+    position: relative;
+    z-index: 6;
+    flex: 0 0 auto;
+  }
+  header.top .crumb {
+    direction: rtl;
+    text-align: left;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  header.top .crumb .crumb-fit {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .copilot-launch {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+    flex: 0 0 auto;
+  }
+  .copilot-launch span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .copilot-launch svg { width: 16px; height: 16px; }
+}
+
+/* Tablet: icon controls, breadcrumb keeps the current page, client stays in the bar when it fits. */
+@media (max-width: 860px) {
+  header.top { padding: 6px 8px; gap: 6px; }
+  header.top .top-left { gap: 6px; }
+  header.top .top-right { gap: 4px; }
+  header.top .hamburger {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    flex-basis: 40px;
+  }
+  .copilot-launch,
+  .theme-toggle,
+  .accent-picker-trigger,
+  .a11y-picker-trigger {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .accent-picker-chevron,
+  .a11y-trigger-label,
+  .a11y-picker-chevron { display: none; }
+  .user-chrome { max-width: none; }
+  .user-chrome-name { display: none; }
+  .user-chrome-who {
+    height: 40px;
+    padding: 0 2px 0 6px;
+  }
+  .user-chrome-logout {
+    width: 32px;
+    height: 32px;
+  }
+  .nav-mobile-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: auto;
+    padding: 8px 4px 0;
+    border-top: 1px solid var(--nav-border);
+  }
+  .nav .nav-footer { margin-top: 8px; }
+  .nav-mobile-client {
+    padding: 8px 12px 2px;
+    color: var(--nav-fg, #e8eefc);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .nav-mobile-signout {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--nav-muted, #a8b8e0);
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .nav-mobile-signout:hover {
+    color: var(--nav-fg, #e8eefc);
+    background: var(--nav-hover);
+  }
+}
+
+/* Phone: sign-out leaves the bar so the crumb and icon buttons stay on screen. */
+@media (max-width: 767px) {
+  .user-chrome-logout { display: none; }
+  .user-chrome-who {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+  .user-chrome-avatar,
+  .user-chrome-avatar svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Mock Shells: stack the TOC above the editor on tablet and phone. */
+@media (max-width: 1100px) {
+  .shell-workspace {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    min-height: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .shell-workspace > .shell-catalog {
+    position: relative;
+    top: auto;
+    flex: 0 0 auto;
+    align-self: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    max-height: min(42vh, 320px);
+    overflow: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .shell-catalog .table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(32vh, 220px);
+    overflow: auto;
+  }
+  .shell-workspace > .shell-split-handle { display: none; }
+  .shell-workspace > .shell-editor {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+  }
+  .sheet-canvas,
+  .sheet-grid-wrap,
+  .sheet-blocks,
+  .sheet-add-row {
+    margin-left: 0;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .sheet-grid-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+  .row-float-toolbar { left: 4px; }
+}
