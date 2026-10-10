@@ -6226,11 +6226,17 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 }
 
 
-/* Program and QC names ellipsize inside the shared Programs track. Full name is the title. */
+/* Program name ellipsizes. The "not created" mark stays fully visible on the same line. */
 .artifact-row .artifact-meta .program-name,
 .artifact-row .artifact-meta .qc-program-name {
-  display: block;
+  display: flex;
+  align-items: baseline;
   flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.artifact-row .artifact-meta .prog-file {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6295,14 +6301,19 @@ body.has-bgjobs .toast { bottom: calc(var(--bgjobs-h, 48px) + 32px); }
 
 /* Tracker: QC program line */
 .artifact-row .artifact-meta .qc-program-name {
-  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: 10.5px; color: var(--muted); margin-top: 1px; font-family: inherit;
 }
 .artifact-row .artifact-meta .qc-program-name b { font-weight: 650; color: var(--muted-2); margin-right: 3px; font-size: 9.5px; letter-spacing: .03em; }
 .artifact-row .artifact-meta .program-open-link { color: var(--accent); text-decoration: none; cursor: pointer; }
 .artifact-row .artifact-meta .program-open-link:hover { text-decoration: underline; }
 .artifact-row .artifact-meta .program-open-link.is-unwritten { color: var(--muted); }
-.artifact-row .artifact-meta .unwritten-mark { color: var(--muted-2); font-size: 10px; margin-left: 4px; }
+.artifact-row .artifact-meta .unwritten-mark {
+  flex: none;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 10px;
+  margin-left: 4px;
+}
 a.shell-open-link {
   color: var(--accent);
   font-weight: 600;
@@ -6809,11 +6820,16 @@ html[data-ui-zoom="150"] .artifact-row .role-chip .role-nm { display: inline-blo
   }
   .artifact-row .artifact-meta .program-name,
   .artifact-row .artifact-meta .qc-program-name {
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+  .artifact-row .artifact-meta .prog-file {
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
     overflow-wrap: anywhere;
   }
+  .artifact-row .artifact-meta .unwritten-mark { white-space: nowrap; }
 }
 .artifact-row .role-chip b { padding-left: 4px; }
 /* File Explorer: one compact info bar (study + programs layout) (flow3) */

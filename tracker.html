@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4tabs" />
+<link rel="stylesheet" href="shared-white.css?v=flow4rework" />
 <script>
 (function () {
   try {
@@ -1258,7 +1258,7 @@
 
 <script src="study-layout.js?v=flow4e"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4job"></script>
+<script src="demo-flow.js?v=flow4rework"></script>
 <script src="rtf-html.js?v=flow3k"></script>
 <script>
 (function () {
@@ -1467,11 +1467,11 @@
       });
     });
     var keys = Object.keys(groups);
+    var approvedRows = sel.filter(function (row) { return (row.getAttribute('data-status') || '') === 'Approved'; });
     if (!keys.length) {
       var allReleased = sel.every(function (r) { return r.getAttribute('data-status') === 'In MW'; });
       if (hint) hint.textContent = sel.length + ' selected · ' + (allReleased ? 'Released to MW is the final stage' : 'no Send actions for these statuses');
-      return;
-    }
+    } else {
     keys.sort(function (a, b) {
       var ha = groups[a].hand;
       var hb = groups[b].hand;
@@ -1512,6 +1512,44 @@
       });
       host.appendChild(btn);
     });
+    }
+    var freezeBtn = document.createElement('button');
+    freezeBtn.type = 'button';
+    freezeBtn.className = 'btn';
+    var freezeCount = approvedRows.length;
+    freezeBtn.textContent = 'Freeze' + (freezeCount && freezeCount !== sel.length ? ' (' + freezeCount + ')' : '');
+    if (!freezeCount) {
+      freezeBtn.disabled = true;
+      freezeBtn.title = 'Frozen is only available from Approved';
+    } else {
+      freezeBtn.title = freezeCount === sel.length ? ('Freeze ' + freezeCount + ' approved record' + (freezeCount === 1 ? '' : 's')) : 'Frozen is only available from Approved';
+      freezeBtn.addEventListener('click', function () {
+        var hand = { action: 'freeze', label: 'Freeze', nextStatus: 'Frozen' };
+        var items = [];
+        sel.forEach(function (row) {
+          if ((row.getAttribute('data-status') || '') !== 'Approved') return;
+          items.push({ row: row, from: 'Approved', to: 'Frozen', hand: hand });
+        });
+        var skipped = sel.length - items.length;
+        if (!items.length) {
+          showToast('Frozen is only available from Approved');
+          return;
+        }
+        askStageChange(items, function (info) {
+          var applied = 0;
+          items.forEach(function (it) {
+            if ((it.row.getAttribute('data-status') || '') !== 'Approved') return;
+            if (applyTransition(it.row, hand, info) !== false) applied++;
+          });
+          var msg = 'Frozen · ' + applied + ' record' + (applied === 1 ? '' : 's');
+          if (skipped) msg += ' · ' + skipped + ' skipped';
+          showToast(msg);
+          applyFilters();
+          syncBulk();
+        }, null, freezeBtn);
+      });
+    }
+    host.appendChild(freezeBtn);
   }
 
 
@@ -2038,23 +2076,45 @@
     var prog = runProgName(row);
     if (!prog) return '';
     if (window.SPHERE_DEMO && SPHERE_DEMO.qcName) return SPHERE_DEMO.qcName(prog);
+    if (/^qc[-_]/i.test(prog)) return prog;
     return 'qc-' + prog;
   }
   function programWritten(row, scope) {
-    var name = scope === 'qc' ? qcProgramName(row) : runProgName(row);
+    var side = scope === 'qc' ? 'qc' : 'prod';
+    var name = side === 'qc' ? qcProgramName(row) : runProgName(row);
     if (!name) return false;
     if (programFileSet[programFileKey(rowStudyScope(row), name)]) return true;
-    var side = scope === 'qc' ? 'qc' : 'prod';
-    if (window.SPHERE_DEMO && SPHERE_DEMO.getSource && SPHERE_DEMO.getSource(flowKey(row) + ':' + side)) return true;
+    if (typeof savedSource === 'function' && savedSource(row, side)) return true;
     return false;
   }
   function logExists(row, scope) {
-    return !!(row && (scope === 'qc' ? row._qcRan : row._prodRan));
+    var side = scope === 'qc' ? 'qc' : 'prod';
+    return !!(row && (side === 'qc' ? row._qcRan : row._prodRan));
   }
-  function rtfExists(row) {
+  function rtfExists(row, scope) {
+    if (scope === 'qc') return false;
     var type = row ? (row.getAttribute('data-type') || '') : '';
     if (type !== 'Table' && type !== 'Listing' && type !== 'Figure') return false;
     return !!(row && row._outputReady);
+  }
+  function savedSource(row, side) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.getSource || !row) return '';
+    var which = side === 'qc' ? 'qc' : 'prod';
+    var name = which === 'qc' ? qcProgramName(row) : runProgName(row);
+    var scope = rowStudyScope(row);
+    if (name) {
+      var direct = SPHERE_DEMO.getSource(scope + '|' + name + ':' + which);
+      if (direct) return direct;
+    }
+    if (scope !== TRACKER_HOME) return '';
+    return SPHERE_DEMO.getSource(TRACKER_HOME + '|' + flowKey(row) + ':' + which) || '';
+  }
+  function storeSource(row, side, text) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.setSource || !row) return;
+    var which = side === 'qc' ? 'qc' : 'prod';
+    var name = which === 'qc' ? qcProgramName(row) : runProgName(row);
+    if (!name) return;
+    SPHERE_DEMO.setSource(rowStudyScope(row) + '|' + name + ':' + which, text);
   }
   function sealPhase(j, idx, ok) {
     var phase = j && j.phases ? j.phases[idx] : null;
@@ -2224,8 +2284,10 @@
     j.endDate = new Date(now);
     var row = j.row;
     row.setAttribute('data-job', 'done');
+    row.setAttribute('data-job-mode', j.mode || 'prod');
     row.setAttribute('data-last-run', j.endDate.toISOString());
     sealFinishedJob(j);
+    if (typeof persistRuntimeRowFromDom === 'function') persistRuntimeRowFromDom(row);
     if (window.SPHERE_DEMO && SPHERE_DEMO.markProgramRan) SPHERE_DEMO.markProgramRan(j.prog, j.endDate.toISOString(), rowOutputId(row), rowStudyScope(row));
     if (typeof decorateRerunDot === 'function') decorateRerunDot(row);
     renderJobCell(row);
@@ -2418,7 +2480,7 @@
     var prog = String((j && j.prog) || '').split('/').pop();
     if (!isQc) return prog;
     if (window.SPHERE_DEMO && SPHERE_DEMO.qcName) return SPHERE_DEMO.qcName(prog);
-    if (!prog || /^qc-/i.test(prog)) return prog;
+    if (!prog || /^qc[-_]/i.test(prog)) return prog;
     return 'qc-' + prog;
   }
   function logOutputStem(j) {
@@ -3018,10 +3080,18 @@
     var statusNow = row.getAttribute('data-status') || 'Not started';
     document.getElementById('reStatus').value = statusNow;
     Array.prototype.forEach.call(document.getElementById('reStatus').options, function (opt) {
-      if (opt.value !== 'Draft') return;
-      var showDraft = statusNow === 'Draft';
-      opt.hidden = !showDraft;
-      opt.disabled = !showDraft;
+      if (opt.value === 'Draft') {
+        var showDraft = statusNow === 'Draft';
+        opt.hidden = !showDraft;
+        opt.disabled = !showDraft;
+        opt.title = '';
+        return;
+      }
+      if (opt.value !== 'Frozen') return;
+      var allowFrozen = statusNow === 'Approved' || statusNow === 'Frozen';
+      opt.hidden = false;
+      opt.disabled = !allowFrozen;
+      opt.title = allowFrozen ? '' : 'Frozen is only available from Approved';
     });
     document.getElementById('reSap').value = row.getAttribute('data-sap') || 'Demographics';
     var shellTxt = cells[4] ? (cells[4].textContent || '').trim() : 'n/a';
@@ -3060,13 +3130,53 @@
     dragState = null;
   }
 
+  function clearRunArtifacts(row) {
+    if (!row) return;
+    var rid = row.getAttribute('data-record-id') || '';
+    if (rid && window.SPHERE_DEMO && SPHERE_DEMO.getEvents && SPHERE_DEMO.addEvent) {
+      var fromKey = flowKey(row);
+      if (fromKey && fromKey !== rid) {
+        var have = {};
+        (SPHERE_DEMO.getEvents(rid) || []).forEach(function (ev) {
+          have[(ev.at || '') + '|' + (ev.action || '') + '|' + (ev.note || '')] = 1;
+        });
+        (SPHERE_DEMO.getEvents(fromKey) || []).forEach(function (ev) {
+          var k = (ev.at || '') + '|' + (ev.action || '') + '|' + (ev.note || '');
+          if (have[k]) return;
+          have[k] = 1;
+          SPHERE_DEMO.addEvent(rid, ev);
+        });
+      }
+    }
+    row._prodRan = false;
+    row._qcRan = false;
+    row._outputReady = false;
+    row._sideLogs = null;
+    row._runJob = null;
+    row.removeAttribute('data-job');
+    row.removeAttribute('data-job-mode');
+    row.removeAttribute('data-last-run');
+    row.removeAttribute('data-program-file');
+    var jobCell = row.querySelector('.job-cell');
+    if (jobCell) {
+      jobCell._runKey = '';
+      jobCell.innerHTML = '<span class="meta-v muted">-</span>';
+    }
+  }
+
   function writeRowEditor() {
     if (!editingRow) return;
     var row = editingRow;
     var title = document.getElementById('reTitle').value.trim();
     var program = document.getElementById('reProgram').value.trim();
+    var oldName = (row.getAttribute('data-program') || '').split('/').pop();
+    var newName = (program || '').split('/').pop();
+    if (oldName && newName && oldName !== newName) clearRunArtifacts(row);
+    var fromStatus = row.getAttribute('data-status') || '';
+    var statusPick = document.getElementById('reStatus').value;
+    if (statusPick === 'Frozen' && fromStatus !== 'Approved' && fromStatus !== 'Frozen') statusPick = fromStatus;
     var type = document.getElementById('reType').value;
-    var status = document.getElementById('reStatus').value;
+    var status = statusPick;
     var sap = document.getElementById('reSap').value;
     var shell = document.getElementById('reShell').value;
     var tagsRaw = document.getElementById('reTags').value;
@@ -3201,9 +3311,15 @@
     var row = editingRow;
     var next = document.getElementById('reStatus').value;
     var from = row.getAttribute('data-status') || '';
+    if (next === 'Frozen' && from !== 'Approved' && from !== 'Frozen') {
+      showToast('Frozen is only available from Approved');
+      var back = document.getElementById('reStatus');
+      if (back) back.value = from;
+      return;
+    }
     if (next && next !== from) {
       askStageChange([{ row: row, from: from, to: next, hand: null }], function (info) {
-        applyTransition(row, { action: 'status', label: 'Change stage', nextStatus: next }, info);
+        if (applyTransition(row, { action: 'status', label: 'Change stage', nextStatus: next }, info) === false) return;
         writeRowEditor();
       }, function () {
         var sel = document.getElementById('reStatus');
@@ -3653,6 +3769,8 @@
       var type = f.getAttribute('data-type');
       var sap = f.getAttribute('data-sap');
       var recordId = mintRecordId();
+      var scope = runtimeScopeId();
+      noteProgramFile(scope, fname);
       var spec = {
         type: type,
         status: 'Not started',
@@ -3662,10 +3780,13 @@
         path: 'programs/' + f.value,
         title: title,
         note: 'imported from programs/',
-        recordId: recordId
+        recordId: recordId,
+        scope: scope,
+        programFile: 1
       };
       rememberRuntimeRow(spec);
       var row = buildArtifactRow(spec);
+      row.setAttribute('data-program-file', '1');
       moveRowToSap(row, sap);
       refreshRowWorkflowUI(row);
       f.checked = false;
@@ -4591,6 +4712,7 @@
   };
   var rtfCache = {};
   var artifactGen = 0;
+  var artifactOpener = null;
   function rtfSampleFor(row) {
     return RTF_SAMPLES[row.getAttribute('data-type') || ''] || null;
   }
@@ -4622,10 +4744,9 @@
     if (type === 'Dataset') {
       var base = (dom || stem || '').toLowerCase();
       if (base) outRel = 'data/adam/' + base + (lang === 'R' ? '.xpt' : '.sas7bdat');
-    } else if (sample) {
-      outRel = 'output/tlf/' + sample.file.split('/').pop();
-    } else if (prog) {
-      outRel = 'output/tlf/' + runOutId(prog) + '.rtf';
+    } else {
+      var outStem = logOutputStem({ prog: prog, row: row });
+      if (outStem) outRel = 'output/tlf/' + outStem + '.rtf';
     }
     return {
       prog: prog, qc: qc, lang: lang, type: type, dom: dom, sample: sample,
@@ -4698,7 +4819,7 @@
     var tabs = [];
     if (programWritten(row, scope)) tabs.push({ id: 'prog', label: 'Program', path: progPath, file: file });
     if (logExists(row, scope)) tabs.push({ id: 'log', label: 'Log', path: logPath, file: file });
-    if (rtfExists(row)) tabs.push({ id: 'rtf', label: 'RTF', path: meta.outPath, file: file });
+    if (rtfExists(row, scope)) tabs.push({ id: 'rtf', label: 'RTF', path: meta.outPath, file: file });
     return tabs;
   }
   function paintArtifactTabButtons(scope, tabs, selected) {
@@ -4713,6 +4834,7 @@
       b.setAttribute('role', 'tab');
       b.setAttribute('data-art-tab', t.id);
       b.setAttribute('aria-selected', t.id === selected ? 'true' : 'false');
+      b.tabIndex = t.id === selected ? 0 : -1;
       b.textContent = t.label;
       if (t.path) b.title = t.path;
       host.appendChild(b);
@@ -4728,7 +4850,7 @@
       pane.innerHTML = emptyArtifact('No output file on this record.');
       return;
     }
-    var fileName = sample.file.split('/').pop();
+    var fileName = (meta.outPath || '').split('/').pop() || 'output.rtf';
     var apply = function (rtf) {
       if (gen !== artifactGen) return;
       if (!window.SPHERE_RTF || !SPHERE_RTF.rtfToHtml) {
@@ -4754,9 +4876,7 @@
     var file = artifactFileName(meta, scope);
     if (tab.id === 'rtf') {
       if (meta.type === 'Dataset') return side + ' · ' + (file || 'program') + ' · No TLF RTF' + (meta.outPath ? ' · ' + meta.outPath : '');
-      if (!meta.sample) return side + ' · No output file on this record';
-      var id = rowOutputId(row);
-      if (id && id !== meta.sample.id) return side + ' · Demo ' + meta.sample.label + ' sample · ' + meta.outPath + ' · RTF converted to HTML';
+      if (!meta.outPath) return side + ' · No output file on this record';
       return side + ' · ' + meta.outPath + ' · RTF converted to HTML';
     }
     if (tab.id === 'log') return side + ' · ' + (tab.path || 'Not on this record');
@@ -4779,7 +4899,9 @@
     modal._tab = tab.id;
     var gen = ++artifactGen;
     Array.prototype.forEach.call(document.querySelectorAll('#artifactTabs .artifact-tab'), function (b) {
-      b.setAttribute('aria-selected', b.getAttribute('data-art-tab') === tab.id ? 'true' : 'false');
+      var on = b.getAttribute('data-art-tab') === tab.id;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
     });
     if (sub) sub.textContent = artifactSubtitle(tab, row, meta, scope);
     if (ro) { ro.hidden = true; ro.textContent = ''; }
@@ -4840,16 +4962,22 @@
       showToast('No program, log or output yet');
       return;
     }
+    artifactOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
     modal._row = row;
     modal._scope = scope;
     var meta = artifactMeta(row);
     var file = artifactFileName(meta, scope) || (scope === 'qc' ? 'QC' : 'Program');
     var editable = tabs[0].id === 'prog' && programEditableFor(row, scope);
     var heading = programWritten(row, scope) ? file : tabs.map(function (t) { return t.label; }).join(' · ');
-    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + heading + ' · ' + artifactSideLabel(scope);
+    if (titleEl) titleEl.textContent = (editable ? 'Edit · ' : 'View · ') + heading + ' · ' + artifactSideLabel(scope);
     paintArtifactTabButtons(scope, tabs, tabs[0].id);
     modal.removeAttribute('hidden');
     showArtifactTab(tabs[0].id);
+    var codeFocus = document.getElementById('artifactProgramCode');
+    if (!codeFocus || codeFocus.readOnly) {
+      var selectedTab = host.querySelector('[role="tab"][aria-selected="true"]');
+      if (selectedTab) selectedTab.focus();
+    }
   }
   function refreshArtifactTabs(row) {
     var modal = document.getElementById('rtfModal');
@@ -4875,6 +5003,8 @@
   }
   function closeRtfPreview() {
     var modal = document.getElementById('rtfModal');
+    var back = artifactOpener;
+    artifactOpener = null;
     if (modal) {
       modal.setAttribute('hidden', '');
       modal._row = null;
@@ -4883,6 +5013,7 @@
     }
     setArtifactFoot(false, false);
     artifactGen++;
+    if (back) focusIfVisible(back);
   }
   function saveArtifactProgram() {
     var modal = document.getElementById('rtfModal');
@@ -4896,7 +5027,7 @@
     var len = code ? code.value.length : 0;
     if (file) noteProgramFile(rowStudyScope(row), file);
     if (window.SPHERE_DEMO && code) {
-      SPHERE_DEMO.setSource(flowKey(row) + ':' + scope, code.value);
+      storeSource(row, scope, code.value);
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
       var rec = flowRecord(row);
       if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
@@ -4913,10 +5044,29 @@
   if (artifactCancel) artifactCancel.addEventListener('click', closeRtfPreview);
   var rtfModal = document.getElementById('rtfModal');
   if (rtfModal) {
+    trapModalTab(rtfModal);
     rtfModal.addEventListener('click', function (e) {
       if (e.target === rtfModal) closeRtfPreview();
       var tab = e.target.closest('[data-art-tab]');
       if (tab && rtfModal.contains(tab)) showArtifactTab(tab.getAttribute('data-art-tab'));
+    });
+    rtfModal.addEventListener('keydown', function (e) {
+      if (rtfModal.hidden || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      var el = e.target;
+      if (!el || !el.tagName) return;
+      var tag = el.tagName.toUpperCase();
+      if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || el.isContentEditable) return;
+      var tabs = Array.prototype.slice.call(rtfModal.querySelectorAll('#artifactTabs [role="tab"]'));
+      if (!tabs.length) return;
+      var idx = tabs.indexOf(document.activeElement);
+      if (idx < 0) {
+        tabs.forEach(function (t, i) { if (t.getAttribute('aria-selected') === 'true') idx = i; });
+      }
+      if (idx < 0) idx = 0;
+      var next = e.key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+      e.preventDefault();
+      showArtifactTab(tabs[next].getAttribute('data-art-tab'));
+      if (tabs[next]) tabs[next].focus();
     });
   }
   document.addEventListener('keydown', function (e) {
@@ -5022,8 +5172,7 @@
   }
   function programSourceFor(row, which) {
     var rec = flowPseudoRecord(row);
-    var key = flowKey(row) + ':' + which;
-    var saved = window.SPHERE_DEMO && SPHERE_DEMO.getSource(key);
+    var saved = savedSource(row, which);
     if (saved) return saved;
     if (!window.SPHERE_DEMO) return demoProgramSource(row).body;
     var header = SPHERE_DEMO.programHeader(rec, which);
@@ -5063,7 +5212,7 @@
     var pf = document.getElementById('progTabProdFile'); if (pf) pf.textContent = prog;
     var qf = document.getElementById('progTabQcFile'); if (qf) qf.textContent = qc;
     var rtitle = (((row.querySelector('.artifact-title')) || {}).textContent || '').replace(/\s*New$/, '').trim();
-    if (titleEl) titleEl.textContent = (editable ? 'Edit - ' : 'View - ') + file;
+    if (titleEl) titleEl.textContent = (editable ? 'Edit · ' : 'View · ') + file;
     if (sub) sub.textContent = rtitle + ' · ' + flowStatusLabel(status) + (which === 'qc' ? ' · QC / validation program' : ' · Production program') + (editable ? ' · Save seals a new version (demo)' : '');
     if (ro) {
       ro.hidden = editable;
@@ -5119,7 +5268,7 @@
     var len = code ? code.value.length : 0;
     if (file) noteProgramFile(rowStudyScope(row), file);
     if (window.SPHERE_DEMO && code) {
-      SPHERE_DEMO.setSource(flowKey(row) + ':' + programEditWhich, code.value);
+      storeSource(row, programEditWhich, code.value);
       var ev = { at: SPHERE_DEMO.stamp(), action: 'Program saved', status: row.getAttribute('data-status') || '', person: SPHERE_DEMO.CURRENT_USER, note: file + ' edited (' + len + ' chars) · new version sealed' };
       var rec = flowRecord(row);
       if (rec) SPHERE_DEMO.updateRecord(rec.id, function (r) { r.history.push(ev); });
@@ -5273,6 +5422,7 @@
     if (hand.action === 'to-qc') return 'Send to QC';
     if (hand.action === 'to-stats') return 'QC passed · send to Stats';
     if (hand.action === 'to-mw') return from === 'In QC' ? 'QC passed · release to MW' : 'Stats approved · release to MW';
+    if (hand.action === 'freeze') return 'Freeze';
     return hand.label;
   }
   function flowActionName(hand, from) {
@@ -5283,6 +5433,7 @@
     if (hand.action === 'to-mw') return (from === 'In QC' ? 'QC passed' : 'Stats approved') + ' → Released to MW';
     if (hand.action === 'revise') return 'Returned for revise';
     if (hand.action === 'approve') return 'Approved';
+    if (hand.action === 'freeze') return 'Frozen';
     return hand.label;
   }
   function flowSteps() {
@@ -5326,7 +5477,7 @@
     var bits = [];
     if (programWritten(row, scope)) bits.push('Program');
     if (logExists(row, scope)) bits.push('Log');
-    if (rtfExists(row)) bits.push('RTF');
+    if (rtfExists(row, scope)) bits.push('RTF');
     var side = scope === 'qc' ? 'QC' : 'production';
     if (!bits.length) return 'No program, log or output yet';
     var title = 'Open ' + side + ' · ' + bits.join(' · ');
@@ -5337,7 +5488,7 @@
     var unwritten = !programWritten(row, scope);
     var title = artifactOpenTitle(row, scope);
     return '<a href="#" class="' + cls + ' program-open-link' + (unwritten ? ' is-unwritten' : '') + '" data-which="' + (scope === 'qc' ? 'qc' : 'prod') + '" title="' + escapeHtml(title) + '">' +
-      inner + (unwritten ? '<span class="unwritten-mark">not created</span>' : '') + '</a>';
+      '<span class="prog-file">' + inner + '</span>' + (unwritten ? '<span class="unwritten-mark">not created</span>' : '') + '</a>';
   }
   function paintProgramCell(row, cell, status) {
     if (!cell) return;
@@ -5348,14 +5499,14 @@
     var prod = programLinkHtml(row, 'prod', 'meta-v program-name', escapeHtml(prog));
     var qcHtml = qc
       ? programLinkHtml(row, 'qc', 'qc-program-name', '<b>QC</b>' + escapeHtml(qc))
-      : '<span class="qc-program-name is-unwritten" title="not created"><b>QC</b><span class="unwritten-mark">not created</span></span>';
+      : '<span class="qc-program-name is-unwritten" title="not created"><span class="prog-file"><b>QC</b></span><span class="unwritten-mark">not created</span></span>';
     cell.innerHTML = prod + qcHtml;
     var prodLink = cell.querySelector('[data-which="prod"]');
     if (prodLink && hint) prodLink.setAttribute('title', artifactOpenTitle(row, 'prod') + ' · ' + hint);
     decorateRerunDot(row);
   }
   function rowStudyScope(row) {
-    var stamped = row && row.getAttribute ? (row.getAttribute('data-shell-study') || '') : '';
+    var stamped = row && row.getAttribute ? (row.getAttribute('data-shell-study') || row.getAttribute('data-runtime-scope') || '') : '';
     if (stamped) return stamped;
     return trackerStoreId();
   }
@@ -5673,19 +5824,41 @@
     });
     return froms;
   }
+  function stageIsForwardFreeze(from, to) {
+    return from === 'Approved' && to === 'Frozen';
+  }
+  function stageLeavesLocked(from, to) {
+    if (from !== 'Approved' && from !== 'Frozen') return false;
+    if (!to || to === from) return false;
+    if (stageIsForwardFreeze(from, to)) return false;
+    return true;
+  }
+  function stageNeedsJustify(items, to) {
+    if (to === 'Revise') return true;
+    return (items || []).some(function (it) { return stageLeavesLocked(it.from, to); });
+  }
+  function stageNeedsComment(items, to, justify) {
+    if ((items || []).some(function (it) { return stageLeavesLocked(it.from, to); })) return true;
+    return to === 'Revise' && justify === 'Other';
+  }
   function syncStageConfirm() {
     var btn = document.getElementById('stageModalConfirm');
     var justify = (document.getElementById('stageJustify') || {}).value || '';
     var comment = String((document.getElementById('stageComment') || {}).value || '').trim();
     var to = stagePending ? stagePending.to : '';
-    var revise = to === 'Revise';
-    var needComment = revise && justify === 'Other';
-    var ok = !(revise && !justify) && !(needComment && !comment);
+    var items = stagePending ? stagePending.items : [];
+    var needJustify = stageNeedsJustify(items, to);
+    var needComment = stageNeedsComment(items, to, justify);
+    var leaving = (items || []).some(function (it) { return stageLeavesLocked(it.from, to); });
+    var ok = !(needJustify && !justify) && !(needComment && !comment);
     if (btn) btn.disabled = !ok;
     var hint = document.getElementById('stageCommentHint');
     if (hint) hint.textContent = needComment ? '(required)' : '(optional)';
     var err = document.getElementById('stageCommentError');
-    if (err) err.hidden = !(needComment && !comment);
+    if (err) {
+      err.textContent = leaving ? 'A comment is required.' : 'A comment is required when the justification is Other.';
+      err.hidden = !(needComment && !comment);
+    }
     var commentEl = document.getElementById('stageComment');
     if (commentEl) {
       if (needComment && !comment) commentEl.setAttribute('aria-invalid', 'true');
@@ -5721,10 +5894,13 @@
     var modal = document.getElementById('stageModal');
     if (!modal) return;
     var to = items[0].to;
+    var pendingTo = to;
+    var pendingItems = items.slice();
     var froms = stageFromLabels(items);
     var hand = items[0].hand;
     var title = 'Change stage';
     if (hand) title = froms.length === 1 ? (flowHandLabel(hand, items[0].from) || hand.label || title) : (hand.label || title);
+    var needJustify = stageNeedsJustify(pendingItems, pendingTo);
     stageOpener = opener || null;
     stagePending = {
       to: to,
@@ -5734,7 +5910,7 @@
       onCancel: onCancel || null,
       info: function () {
         return {
-          justification: to === 'Revise' ? ((document.getElementById('stageJustify') || {}).value || '') : '',
+          justification: stageNeedsJustify(pendingItems, pendingTo) ? ((document.getElementById('stageJustify') || {}).value || '') : '',
           comment: String((document.getElementById('stageComment') || {}).value || '').trim(),
           user: stageUser()
         };
@@ -5752,13 +5928,13 @@
     var justifyWrap = document.getElementById('stageJustifyWrap');
     var justify = document.getElementById('stageJustify');
     if (justify) justify.value = '';
-    if (justifyWrap) justifyWrap.hidden = to !== 'Revise';
+    if (justifyWrap) justifyWrap.hidden = !needJustify;
     var commentEl = document.getElementById('stageComment');
     if (commentEl) commentEl.value = '';
     document.body.appendChild(modal);
     modal.hidden = false;
     syncStageConfirm();
-    var focusEl = to === 'Revise' ? justify : commentEl;
+    var focusEl = needJustify ? justify : commentEl;
     if (stageFocusTimer) clearTimeout(stageFocusTimer);
     stageFocusTimer = setTimeout(function () {
       stageFocusTimer = null;
@@ -5796,13 +5972,14 @@
   })();
 
   function applyTransition(row, hand, info) {
-    if (!hand || !window.SPHERE_DEMO) return;
+    if (!hand || !window.SPHERE_DEMO) return false;
     info = info || {};
     var from = row.getAttribute('data-status') || '';
     var to = hand.nextStatus;
-    if (!to || to === from) return;
+    if (!to || to === from) return false;
+    if (to === 'Frozen' && from !== 'Approved') return false;
     var comment = String(info.comment || '').replace(/\s+/g, ' ').trim();
-    var justification = to === 'Revise' ? String(info.justification || '').trim() : '';
+    var justification = String(info.justification || '').trim();
     var ev = {
       at: stageStampET(),
       action: flowActionName(hand, from),
@@ -5820,7 +5997,7 @@
     if (rec) {
       SPHERE_DEMO.updateRecord(rec.id, function (x) { x.status = to; x.isNew = false; x.history = x.history || []; x.history.push(ev); });
     } else {
-      SPHERE_DEMO.setStatus(flowKey(row), to);
+      SPHERE_DEMO.setStatus(flowKey(row), to, from);
       SPHERE_DEMO.addEvent(stageHistoryKey(row), ev);
     }
     row.classList.remove('is-flow-new');
@@ -5829,6 +6006,7 @@
     refreshRowWorkflowUI(row);
     flashRow(row, false);
     persistRuntimeRowFromDom(row);
+    return true;
   }
 
   /* Workflow popover (status pill) */
@@ -5862,10 +6040,14 @@
         '<div><strong>' + flowHandLabel(confirmHand, status) + '?</strong><br>' + flowStatusLabel(status) + ' → ' + flowStatusLabel(confirmHand.nextStatus) + '. Recorded in History with time and user.</div>' +
         '<div class="wf-pop-actions"><button type="button" class="btn primary sm" data-wf="confirm">Confirm</button><button type="button" class="btn sm" data-wf="cancel">Cancel</button></div></div>';
     } else {
+      var freezeBtn = '';
+      if (status === 'Approved') freezeBtn = '<button type="button" class="btn sm" data-wf="freeze">Freeze</button>';
+      else if (status !== 'Frozen') freezeBtn = '<button type="button" class="btn sm" data-wf="freeze" disabled title="Frozen is only available from Approved">Freeze</button>';
       html += '<div class="wf-pop-actions">' +
         (next ? '<button type="button" class="btn primary sm" data-wf="next">' + flowHandLabel(next, status) + '</button>'
-          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage - no further workflow actions</span>' : '<span class="muted" style="font-size:12px">No further workflow step.</span>')) +
+          : (status === 'In MW' ? '<span class="wf-released-note">✓ Released to MW · final stage - no further workflow actions</span>' : (status === 'Approved' ? '' : '<span class="muted" style="font-size:12px">No further workflow step.</span>'))) +
         (ret ? '<button type="button" class="btn sm" data-wf="revise">Return to Revise</button>' : '') +
+        freezeBtn +
         '<button type="button" class="btn sm" data-wf="history">History</button></div>';
     }
     wfPop.innerHTML = html;
@@ -5889,7 +6071,7 @@
     paintWfPop(null);
     wfPop.hidden = false;
     positionWfPop();
-    var first = wfPop.querySelector('[data-wf="next"], [data-wf="history"]');
+    var first = wfPop.querySelector('[data-wf="next"], [data-wf="freeze"]:not([disabled]), [data-wf="history"]');
     if (first) first.focus();
   }
   wfPop.addEventListener('click', function (e) {
@@ -5900,6 +6082,19 @@
     var status = row.getAttribute('data-status') || '';
     if (act === 'close') { closeWfPop(); return; }
     if (act === 'history') { closeWfPop(); openHistoryModal(row); return; }
+    if (act === 'freeze') {
+      if (status !== 'Approved' || b.disabled) return;
+      var freezeHand = { action: 'freeze', label: 'Freeze', nextStatus: 'Frozen' };
+      var freezeOpener = wfPopAnchor;
+      closeWfPop();
+      askStageChange([{ row: row, from: status, to: 'Frozen', hand: freezeHand }], function (info) {
+        applyTransition(row, freezeHand, info);
+        var bitsF = (((row.querySelector('.artifact-title')) || {}).textContent || '').trim().split(' · ');
+        showToast('Frozen · ' + (bitsF[0] || 'record'));
+        applyFilters();
+      }, null, freezeOpener);
+      return;
+    }
     if (act === 'next' || act === 'revise') {
       var hand = act === 'next'
         ? (window.SPHERE && SPHERE.nextHandoff ? SPHERE.nextHandoff(status) : null)
@@ -6189,7 +6384,14 @@
       shell: spec.shell || 'n/a',
       shellId: spec.shellId || '',
       assigned: spec.assigned || '',
-      job: spec.job || ''
+      job: spec.job || '',
+      jobMode: spec.jobMode || '',
+      lastRun: spec.lastRun || '',
+      programFile: spec.programFile ? 1 : 0,
+      qcFile: spec.qcFile ? 1 : 0,
+      prodRan: spec.prodRan ? 1 : 0,
+      qcRan: spec.qcRan ? 1 : 0,
+      outputReady: spec.outputReady ? 1 : 0
     };
     var idx = -1;
     for (var i = 0; i < list.length; i++) if (list[i] && list[i].recordId === spec.recordId) idx = i;
@@ -6231,7 +6433,14 @@
       shell: shell || 'n/a',
       shellId: row.getAttribute('data-shell-id') || '',
       assigned: assigned,
-      job: row.getAttribute('data-job') || ''
+      job: row.getAttribute('data-job') || '',
+      jobMode: row.getAttribute('data-job-mode') || '',
+      lastRun: row.getAttribute('data-last-run') || '',
+      programFile: programWritten(row, 'prod') ? 1 : 0,
+      qcFile: programWritten(row, 'qc') ? 1 : 0,
+      prodRan: row._prodRan ? 1 : 0,
+      qcRan: row._qcRan ? 1 : 0,
+      outputReady: row._outputReady ? 1 : 0
     };
     var list = readRuntimeRows();
     var found = false;
@@ -6246,6 +6455,30 @@
     writeRuntimeRows(list);
   }
 
+  function restoreFinishedJob(row, spec) {
+    var mode = spec.jobMode;
+    if (mode !== 'prod' && mode !== 'qc' && mode !== 'both') return;
+    var prog = runProgName(row);
+    if (!prog) return;
+    var jobState = String(spec.job || '').toLowerCase() === 'error' ? 'error' : 'done';
+    var end = spec.lastRun ? new Date(spec.lastRun) : new Date();
+    if (isNaN(end.getTime())) end = new Date();
+    var phases = mode === 'both'
+      ? [{ kind: 'Prod', dur: 4000 }, { kind: 'QC', dur: 4000 }]
+      : [{ kind: mode === 'qc' ? 'QC' : 'Prod', dur: 4000 }];
+    var j = {
+      id: ++runJobSeq, row: row, prog: prog, lang: programLang(prog, row), mode: mode,
+      phases: phases, phase: phases.length - 1, state: jobState, warn: false, warnPhase: -1,
+      batch: null, startedAt: end.getTime() - 4000, endedAt: end.getTime(), endDate: end, logs: {}
+    };
+    row._runJob = j;
+    row.setAttribute('data-job', j.state);
+    row.setAttribute('data-job-mode', mode);
+    if (spec.lastRun) row.setAttribute('data-last-run', end.toISOString());
+    sealFinishedJob(j);
+    renderJobCell(row);
+  }
+
   function hydrateRuntimeRows() {
     var scope = runtimeScopeId();
     readRuntimeRows().forEach(function (spec) {
@@ -6254,9 +6487,23 @@
       var id = String(spec.recordId).replace(/"/g, '');
       if (board.querySelector('.artifact-row[data-record-id="' + id + '"]')) return;
       var built = buildArtifactRow(spec);
+      if (spec.programFile && spec.program) {
+        noteProgramFile(spec.scope || scope, spec.program);
+        built.setAttribute('data-program-file', '1');
+      }
+      if (spec.qcFile && spec.program) {
+        var qn = qcProgramName(built);
+        if (qn) noteProgramFile(spec.scope || scope, qn);
+      }
+      if (spec.prodRan) built._prodRan = true;
+      if (spec.qcRan) built._qcRan = true;
+      if (spec.outputReady) built._outputReady = true;
       moveRowToSap(built, spec.sap || 'Demographics');
       var job = String(spec.job || '').toLowerCase();
-      if (job === 'done' || job === 'error') rememberFinishedSide(built, 'prod', job === 'done');
+      var mode = spec.jobMode || '';
+      if ((job === 'done' || job === 'error') && (mode === 'prod' || mode === 'qc' || mode === 'both')) {
+        restoreFinishedJob(built, spec);
+      }
     });
   }
 

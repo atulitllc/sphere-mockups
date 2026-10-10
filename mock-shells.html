@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4focus" />
+<link rel="stylesheet" href="shared-white.css?v=flow4rework" />
 <script>
 (function () {
   try {
@@ -519,7 +519,7 @@
 
 <script src="study-layout.js?v=flow4a"></script>
 <script src="sphere-access.js?v=flow4e"></script>
-<script src="demo-flow.js?v=flow4job"></script>
+<script src="demo-flow.js?v=flow4rework"></script>
 <script>
 (function () {
   /* -- chrome: theme + nav -- */
@@ -3660,6 +3660,33 @@
     lay.sapRef = '';
     return lay;
   }
+  function copyScopeBits(id) {
+    var raw = String(id || 'ONC-204-301');
+    var cut = raw.indexOf('::');
+    return {
+      study: cut < 0 ? raw : raw.slice(0, cut),
+      deliverable: cut < 0 ? 'CSR' : (raw.slice(cut + 2) || 'CSR')
+    };
+  }
+  function copyActorName() {
+    try {
+      if (window.SPHERE_ACCESS && SPHERE_ACCESS.current) {
+        var who = SPHERE_ACCESS.current();
+        if (who && who.name) return who.name;
+      }
+    } catch (eActor) {}
+    return (window.SPHERE_DEMO && SPHERE_DEMO.CURRENT_USER) || 'Jordan Patel';
+  }
+  function readCopiedSource(scope, name, side, legacyId) {
+    if (!window.SPHERE_DEMO || !SPHERE_DEMO.getSource || !name) return '';
+    var hit = SPHERE_DEMO.getSource(scope + '|' + name + ':' + side);
+    if (hit) return hit;
+    if (legacyId && scope === 'ONC-204-301') {
+      hit = SPHERE_DEMO.getSource('ONC-204-301|' + legacyId + ':' + side);
+      if (hit) return hit;
+    }
+    return '';
+  }
   function copyTrackerDraft(src, draft, targetId) {
     if (!window.SPHERE_DEMO || !SPHERE_DEMO.addRecord) return;
     var linked = src.syncedAt || src.recordId || isTrackerLinked(src);
@@ -3684,19 +3711,43 @@
       roles: { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' }
     };
     if (!rec.roles) rec.roles = { prod: 'Jordan Patel', qc: 'Priya Shah', stats: 'Dana Brooks', mw: 'Avery Lopez' };
+    var program = String(rec.program || (draft.layout && draft.layout.program) || '').split('/').pop();
+    rec.program = program;
+    var qc = program && SPHERE_DEMO.qcName ? SPHERE_DEMO.qcName(program) : '';
+    var legacyId = existing && existing.id ? existing.id : '';
+    var headerRec = JSON.parse(JSON.stringify(rec));
+    headerRec.study = sourceId;
+    var prodText = readCopiedSource(sourceId, program, 'prod', legacyId);
+    var qcText = qc ? readCopiedSource(sourceId, qc, 'qc', legacyId) : '';
+    if (!prodText && program && SPHERE_DEMO.programHeader) prodText = SPHERE_DEMO.programHeader(headerRec, 'prod');
+    if (qc && !qcText && SPHERE_DEMO.programHeader) qcText = SPHERE_DEMO.programHeader(headerRec, 'qc');
     rec.id = 'rec-copy-' + draft.id;
     rec.shellId = draft.id;
     rec.number = draft.number;
     rec.title = draft.title;
     rec.status = 'Draft';
-    rec.history = [{ at: SPHERE_DEMO.stamp(), action: 'Copied as Draft', status: 'Draft', person: SPHERE_DEMO.CURRENT_USER, note: 'Copied with shell ' + src.number }];
+    rec.isNew = false;
+    var bits = copyScopeBits(sourceId);
+    var shellNo = src.number || draft.number || '';
+    var sentence = 'Copied as Draft from ' + bits.study + ' / ' + bits.deliverable + ' / ' + shellNo + ' (' + program + ')';
+    rec.history = [{
+      at: SPHERE_DEMO.stamp(),
+      action: sentence,
+      status: 'Draft',
+      person: copyActorName(),
+      note: ''
+    }];
     rec.syncedAt = SPHERE_DEMO.stamp();
     delete rec.study;
     if (targetId && targetId !== sourceId) rec.study = targetId;
     else if (sourceId !== 'ONC-204-301') rec.study = sourceId;
+    var destScope = rec.study || 'ONC-204-301';
+    if (program && prodText) SPHERE_DEMO.setSource(destScope + '|' + program + ':prod', prodText);
+    if (qc && qcText) SPHERE_DEMO.setSource(destScope + '|' + qc + ':qc', qcText);
     SPHERE_DEMO.addRecord(rec);
     draft.recordId = rec.id;
     draft.syncedAt = rec.syncedAt;
+    draft.generatedOutputs = [];
   }
   function performCopy() {
     var dest = copyDestinations().filter(function (d) { return copyDeliverable && d.id === copyDeliverable.value; })[0];
@@ -4227,6 +4278,13 @@
     render();
     paintMissingEditor();
   }
+  document.addEventListener('keydown', function (e) {
+    if (!shellMissingId || e.key !== 'Enter') return;
+    var editor = document.querySelector('.shell-editor.is-missing');
+    if (!editor || !editor.contains(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
   (function bootFromShellQuery() {
     if (shellQueryMissing) return;
     var requested = '';

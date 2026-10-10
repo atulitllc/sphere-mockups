@@ -14,13 +14,24 @@
     s.records = s.records || [];    /* tracker records created from Mock Shells */
     s.status = s.status || {};      /* program -> status override (existing rows) */
     s.events = s.events || {};      /* program -> [history events] (existing rows) */
-    s.sources = s.sources || {};    /* program -> saved source (existing rows) */
+    s.sources = s.sources || {};    /* scope|program:side -> saved source */
     s.roles = s.roles || {};        /* row key -> {prod,qc,stats,mw} role overrides (Roles editor) */
     s.shellSync = s.shellSync || {}; /* study|number -> {title, footnotes, changedAt, why} */
     s.lastRun = s.lastRun || {};     /* program -> ISO time of last completed run */
     s.programTx = s.programTx || []; /* program renames: old, new, user, time */
     s.programByNumber = s.programByNumber || {}; /* study|number -> program file name */
     s.fileRenames = s.fileRenames || {}; /* old file name -> new file name */
+    if (!s.sourcesScoped) {
+      var migrated = {};
+      var home = 'ONC-204-301';
+      Object.keys(s.sources).forEach(function (k) {
+        if (k.indexOf('|') >= 0) migrated[k] = s.sources[k];
+        else migrated[home + '|' + k] = s.sources[k];
+      });
+      s.sources = migrated;
+      s.sourcesScoped = 1;
+      try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (eMig) {}
+    }
     return s;
   }
   function write(s) {
@@ -54,7 +65,7 @@
   function qcName(prog) {
     prog = String(prog || '').split('/').pop();
     if (!prog || prog === '-') return '';
-    if (/^qc-/i.test(prog)) return prog;
+    if (/^qc[-_]/i.test(prog)) return prog;
     return 'qc-' + prog;
   }
 
@@ -349,7 +360,13 @@
     },
     programHeader: programHeader,
     getStatus: function (prog) { return read().status[prog] || null; },
-    setStatus: function (prog, status) { var s = read(); s.status[prog] = status; write(s); },
+    setStatus: function (prog, status, from) {
+      if (status === 'Frozen' && from !== 'Approved') return null;
+      var s = read();
+      s.status[prog] = status;
+      write(s);
+      return status;
+    },
     getEvents: function (prog) { return read().events[prog] || []; },
     getRoles: function (key) { return read().roles[key] || null; },
     setRoles: function (key, roles) { var s = read(); s.roles[key] = roles; write(s); },
