@@ -386,8 +386,9 @@
   var WF_KEY = 'sphere-tracker-workflow';
   var WF_DEFAULT = { stats: true, mw: true, programsFolders: 'single', versionControl: 'local' };
   /* programsFolders: 'single' = one programs/ tree with editable+locked files
-     'dev-prod' = dev and prod at deliverable level: <deliverable>/dev (editable in In dev and
-     Revise) + <deliverable>/prod (approved, read-only), each with the standard study folders.
+     'dev-prod' = no programs/ folder; program and QC files live in <deliverable>/dev
+     (editable in In dev and Revise) and <deliverable>/prod (approved, read-only), siblings
+     of data/raw, sdtm, adam, tlf, logs and docs.
      The older 'dev-qc-prod' value is read as 'dev-prod'. Set in Admin > Study layout.
      versionControl: 'local' (default) | 'github' (Enterprise GitHub backend, not connected) */
 
@@ -468,7 +469,7 @@
   function programPathHint(filename, status) {
     var mode = getProgramsFolderMode();
     if (mode === 'dev-prod') {
-      return programFolderForStatus(status) + '/programs/' + filename;
+      return programFolderForStatus(status) + '/' + filename;
     }
     return 'programs/' + filename;
   }

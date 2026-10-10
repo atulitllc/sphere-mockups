@@ -7831,6 +7831,4 @@ body:has(.modal-backdrop:not([hidden])) .tenant-float-logo { opacity: 0; }
 .path-chip.is-prod { color: var(--muted); border-style: dashed; }
 /* File Explorer: dev/ and prod/ areas under each deliverable */
 .files-studies .lt-area-badge { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 600; padding: 0 5px; }
-.files-studies .lt-area-dev .lt-area-badge { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, var(--border)); }
-.files-studies .lt-area-prod > .lt-row > .lt-browse { color: var(--muted); }
-.files-studies .lt-area-prod > .lt-row > .lt-browse.active { color: var(--accent); }
+.files-studies .lt-area-prod .lt-folder .lt-area-badge { margin-left: 4px; vertical-align: 0; }

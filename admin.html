@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010g" />
+<link rel="stylesheet" href="shared-white.css?v=20261010h" />
 <script src="tenant-brand.js?v=20261010g"></script>
 <script>
 (function () {
@@ -34,7 +34,7 @@
   } catch (e) {}
 })();
 </script>
-<script src="study-layout.js?v=20261010f"></script>
+<script src="study-layout.js?v=20261010h"></script>
 <script src="sphere-access.js?v=20261010d"></script>
 </head>
 <body>
@@ -661,7 +661,7 @@
                   </div>
                   <div class="note-banner" role="note" style="margin-top:8px">
                     <span class="note-label">Programs</span>
-                    <div>Editable vs read-only program files: choose <strong>single <code>programs/</code></strong> or <strong>dev and prod at deliverable level</strong> under <a href="#programsFolderLayout">Programs folder layout</a> below. Dev and prod: <code>CSR/dev</code> (editable) and <code>CSR/prod</code> (approved, read-only), each with the standard folders.</div>
+                    <div>Editable vs read-only program files: choose <strong>single <code>programs/</code></strong> or <strong>dev and prod at deliverable level</strong> under <a href="#programsFolderLayout">Programs folder layout</a> below. Dev and prod: programs live in <code>CSR/dev</code> (editable) and <code>CSR/prod</code> (approved, read-only) instead of <code>programs/</code>.</div>
                   </div>
 
                   <div class="layout-level" id="layoutLevel" role="radiogroup" aria-label="Study folder hierarchy">
@@ -764,7 +764,7 @@
                         <input type="radio" name="programsFolders" value="dev-prod" />
                         <div>
                           <strong>Dev and prod at deliverable level: <code>CSR/dev</code> + <code>CSR/prod</code></strong>
-                          <div class="hint"><code>CSR/dev</code> (editable in In&nbsp;dev and Revise) and <code>CSR/prod</code> (approved, read-only), each with the standard study folders. Same for DMC, DSUR and every other deliverable. Approve or promote copies dev into prod. No separate qc folder.</div>
+                          <div class="hint">No <code>programs/</code> folder. Program and QC program files live in <code>CSR/dev</code> (editable in In&nbsp;dev and Revise) and <code>CSR/prod</code> (approved, read-only), next to data/raw, sdtm, adam, tlf, logs and docs. Same for DMC, DSUR and every other deliverable. Approve or promote copies dev into prod.</div>
                         </div>
                       </label>
                     </div>
@@ -1155,11 +1155,9 @@
     var pre = studyPrefix();
     var split = window.SPHERE && SPHERE.isSplitProgramsFolderMode && SPHERE.isSplitProgramsFolderMode();
     layoutPreview.innerHTML = folderNames().map(function (n) {
-      if (split) return '<span class="path-chip">' + pre + '/dev/' + n + '</span>';
+      if (split && n === 'programs') return '<span class="path-chip">' + pre + '/dev</span><span class="path-chip is-prod">' + pre + '/prod</span>';
       return '<span class="path-chip">' + pre + '/' + n + '</span>';
-    }).join('') + (split ? folderNames().map(function (n) {
-      return '<span class="path-chip is-prod">' + pre + '/prod/' + n + '</span>';
-    }).join('') : '');
+    }).join('') + (split && folderNames().indexOf('programs') < 0 ? '<span class="path-chip">' + pre + '/dev</span><span class="path-chip is-prod">' + pre + '/prod</span>' : '');
   }
   window.SPHERE_refreshLayoutPreview = refreshPreview;
 
@@ -1558,7 +1556,7 @@
   paint();
 })();
 </script>
-<script src="shared-chrome.js?v=20261010f"></script>
+<script src="shared-chrome.js?v=20261010h"></script>
 <script>
 /* Admin > Branding: Save persists name, accent and logo (tenant-brand.js applies them on every page). */
 (function () {
