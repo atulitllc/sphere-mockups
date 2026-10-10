@@ -5795,6 +5795,34 @@ html[data-contrast="low"][data-theme="dark"] {
 .studies-table-wide .study-name-cell {
   white-space: normal;
 }
+/* Studies table: compact count columns (Mock shells, TLFs, SDTM, ADaM).
+   Headers may break onto two lines so the four counts fit at 1280. */
+.studies-table-wide th { white-space: normal; line-height: 1.25; }
+.studies-table-wide th.count-col,
+.studies-table-wide td.count-col {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  padding-left: 2px;
+  padding-right: 4px;
+}
+.studies-table-wide th.count-col { width: 1%; }
+/* Room for the counts at 1280: study names wrap a little sooner and the
+   three milestone dates sit a half step smaller. */
+.studies-table-wide th:nth-child(2),
+.studies-table-wide td:nth-child(2) { min-width: 108px; }
+.studies-table-wide td:nth-child(6),
+.studies-table-wide td:nth-child(7),
+.studies-table-wide td:nth-child(8) { font-size: 11px; }
+.studies-table-wide td.count-col { color: var(--text); }
+/* Narrow screens: the table already scrolls in its pane. Keep Mock shells and
+   TLFs at 1024 and below; phones drop the count columns. */
+@media (max-width: 1100px) {
+  .studies-table-wide .count-sdtm,
+  .studies-table-wide .count-adam { display: none; }
+}
+@media (max-width: 640px) {
+  .studies-table-wide .count-col { display: none; }
+}
 .study-name-cell {
   font-weight: 600;
   color: var(--text);

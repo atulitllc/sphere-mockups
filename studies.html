@@ -35,6 +35,32 @@
 </script>
 <script src="study-layout.js?v=flow3j"></script>
 <script src="sphere-access.js?v=acct1"></script>
+<script src="demo-flow.js?v=progname2"></script>
+<script>
+/* Count cells for the studies table: Mock Shells, TLFs, SDTM, ADaM (see SPHERE_DEMO.studyCounts). */
+window.SPHERE_studyStoreId = function (protocol, deliverable) {
+  if (!protocol) return '';
+  return (!deliverable || deliverable === 'CSR') ? protocol : protocol + '::' + deliverable;
+};
+window.SPHERE_studyCounts = function (list) {
+  var sum = { shells: 0, tlf: 0, sdtm: 0, adam: 0 };
+  (list || []).forEach(function (x) {
+    var c = window.SPHERE_DEMO && SPHERE_DEMO.studyCounts ? SPHERE_DEMO.studyCounts(x.id, x.meta) : null;
+    if (!c) { sum = null; return; }
+    if (sum) { sum.shells += c.shells; sum.tlf += c.tlf; sum.sdtm += c.sdtm; sum.adam += c.adam; }
+  });
+  return sum;
+};
+window.SPHERE_studyCountCells = function (list, note) {
+  var c = window.SPHERE_studyCounts(list);
+  var cols = [['shells', 'Mock shells'], ['tlf', 'TLFs'], ['sdtm', 'SDTM datasets'], ['adam', 'ADaM datasets']];
+  return cols.map(function (k) {
+    var v = c ? c[k[0]] : null;
+    var tip = v == null ? '' : ' title="' + v + ' ' + k[1] + (note ? ' · ' + note : '') + '"';
+    return '<td class="num count-col count-' + k[0] + '"' + tip + '>' + (v == null ? '<span class="cell-empty">-</span>' : v) + '</td>';
+  }).join('');
+};
+</script>
 </head>
 <body class="studies-view-list">
 <div class="nav-backdrop" id="navBackdrop" hidden></div>
@@ -277,6 +303,10 @@
               <th>LPLV</th>
               <th>DB lock</th>
               <th>Phase</th>
+              <th class="count-col count-shells" title="Mock shells">Mock shells</th>
+              <th class="count-col count-tlf" title="Tables, listings and figures">TLFs</th>
+              <th class="count-col count-sdtm" title="SDTM datasets">SDTM</th>
+              <th class="count-col count-adam" title="ADaM datasets">ADaM</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -294,6 +324,7 @@
               <td class="num">2025-11-30</td>
               <td class="num">2026-03-15</td>
               <td>3</td>
+              <td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td>
               <td><span class="badge locked">Active</span></td>
             </tr>
             <tr class="row-link" data-href="study-home.html?study=ONC-118-402" data-folder="ONC-118-402">
@@ -309,6 +340,7 @@
               <td class="num"><span class="cell-empty">-</span></td>
               <td class="num"><span class="cell-empty">-</span></td>
               <td>2</td>
+              <td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td>
               <td><span class="badge locked">Active</span></td>
             </tr>
             <tr class="row-link" data-href="study-home.html?study=VAC-302-011" data-folder="VAC-302-011">
@@ -324,6 +356,7 @@
               <td class="num"><span class="cell-empty">-</span></td>
               <td class="num"><span class="cell-empty">-</span></td>
               <td>3</td>
+              <td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td>
               <td><span class="badge running">Startup</span></td>
             </tr>
             <tr class="row-link" data-href="study-home.html?study=HEM-220-015" data-folder="HEM-220-015">
@@ -339,6 +372,7 @@
               <td class="num">2024-02-14</td>
               <td class="num">2024-05-01</td>
               <td>1/2</td>
+              <td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td><td class="num count-col"><span class="cell-empty">-</span></td>
               <td><span class="badge not-started">Closed</span></td>
             </tr>
           </tbody>
@@ -774,6 +808,7 @@
           '<td class="num">' + fmtDate(data.lplv) + '</td>' +
           '<td class="num">' + fmtDate(data.dblock) + '</td>' +
           '<td>' + esc(data.phase) + '</td>' +
+          SPHERE_studyCountCells([{ id: SPHERE_studyStoreId(data.protocol || data.folder, data.deliverable || data.type), meta: { deliverable: data.deliverable || data.type, status: data.status || 'Startup' } }]) +
           '<td><span class="badge ' + (data.status === 'Active' ? 'locked' : 'running') + '">' + esc(data.status || 'Startup') + '</span></td>';
 
         if (opts.append) tbody.appendChild(tr); else tbody.insertBefore(tr, tbody.firstChild);
@@ -1003,6 +1038,17 @@
     });
     return n;
   }
+  /* One count entry per study store (deliverables that share a store count once). */
+  function countList(list) {
+    var seen = {};
+    return list.map(function (e) {
+      return { id: SPHERE_studyStoreId(e.protocol || e.compound, e.deliverable), meta: { deliverable: e.deliverable, status: e.status } };
+    }).filter(function (x) {
+      if (!x.id || seen[x.id]) return false;
+      seen[x.id] = 1;
+      return true;
+    });
+  }
   function openStudy(e, protocol) {
     var path = L.entryPath(e);
     location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || protocol) +
@@ -1031,6 +1077,7 @@
       '<td class="num">' + empty(primary.lplv) + '</td>' +
       '<td class="num">' + empty(primary.dblock) + '</td>' +
       '<td>' + empty(primary.phase) + '</td>' +
+      SPHERE_studyCountCells(countList(expandable ? rows : [primary]), expandable ? 'total across ' + deliverableCount(rows) + ' deliverables' : '') +
       '<td>' + badge(primary) + '</td>';
     tbody.appendChild(tr);
     if (!expandable) {
@@ -1053,6 +1100,7 @@
         '<td class="num">' + empty(e.lplv) + '</td>' +
         '<td class="num">' + empty(e.dblock) + '</td>' +
         '<td>' + empty(e.phase) + '</td>' +
+        SPHERE_studyCountCells(countList([e]), '') +
         '<td>' + badge(e) + '</td>';
       fr.addEventListener('click', function () { openStudy(e, p); });
       fr.addEventListener('keydown', function (ev) {

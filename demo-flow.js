@@ -1104,5 +1104,72 @@
     ensureSide(qcName(rec.program), 'qc');
     if (changed) write(s);
   })();
+  /* Studies list counts: Mock Shells, TLFs, SDTM and ADaM datasets per study store.
+     Home study (ONC-204-301 CSR) uses its demo data: the Mock Shells catalog (22 seed
+     shells, or the saved catalog), the static Tracker board (20 Table/Listing/Figure
+     rows) plus Tracker records saved for that store, File Explorer sdtm/ datasets, and
+     ADaM datasets from adam/ plus Tracker Dataset rows. Other stores use a saved
+     catalog and saved records when present, otherwise stable numbers seeded from the
+     store id, scaled down for studies still in startup. */
+  var HOME_COUNTS = {
+    shells: 22,
+    tlf: 20,
+    sdtm: ['AE', 'DM', 'EX', 'VS'],
+    adam: ['ADSL', 'ADAE', 'ADTTE']
+  };
+  function seedHash(str) {
+    var h = 2166136261;
+    str = String(str || '');
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function datasetName(rec) {
+    var t = String(rec.title || rec.program || '').split(/\s|·/)[0];
+    return t.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  }
+  api.studyCounts = function (storeId, meta) {
+    meta = meta || {};
+    var id = storeId || STUDY;
+    var s = read();
+    var saved = s.shells[id];
+    var recs = (s.records || []).filter(function (r) { return r && (r.study || STUDY) === id; });
+    var recTlf = recs.filter(function (r) { return /^(Table|Listing|Figure)$/i.test(r.type || 'Table'); }).length;
+    var recData = recs.filter(function (r) { return /^Dataset$/i.test(r.type || ''); });
+    var out;
+    if (id === STUDY) {
+      var adam = {};
+      HOME_COUNTS.adam.forEach(function (n) { adam[n] = 1; });
+      recData.forEach(function (r) { var n = datasetName(r); if (/^AD/.test(n)) adam[n] = 1; });
+      out = {
+        shells: saved && saved.length ? saved.length : HOME_COUNTS.shells,
+        tlf: HOME_COUNTS.tlf + recTlf,
+        sdtm: HOME_COUNTS.sdtm.length,
+        adam: Object.keys(adam).length,
+        seeded: false
+      };
+    } else {
+      var h = seedHash(id);
+      var csr = !meta.deliverable || meta.deliverable === 'CSR';
+      var startup = /startup/i.test(meta.status || '');
+      var shells = csr ? 24 + h % 23 : 8 + h % 9;
+      var tlf = Math.round(shells * (0.78 + ((h >>> 5) % 20) / 100));
+      var sdtm = csr ? 14 + (h >>> 9) % 11 : 8 + (h >>> 9) % 6;
+      var adamN = csr ? 8 + (h >>> 13) % 8 : 4 + (h >>> 13) % 4;
+      if (startup) {
+        shells = Math.max(3, Math.round(shells * 0.45));
+        tlf = Math.round(tlf * 0.12);
+        sdtm = 2 + (h >>> 17) % 5;
+        adamN = (h >>> 21) % 3;
+      }
+      out = {
+        shells: saved && saved.length ? saved.length : shells,
+        tlf: tlf + recTlf,
+        sdtm: sdtm,
+        adam: adamN + recData.length,
+        seeded: !(saved && saved.length)
+      };
+    }
+    return out;
+  };
   window.SPHERE_DEMO = api;
 })();
