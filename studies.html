@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4row2" />
+<link rel="stylesheet" href="shared-white.css?v=20261010c" />
 <script>
 (function () {
   try {
@@ -35,31 +35,87 @@
 </script>
 <script src="study-layout.js?v=flow3j"></script>
 <script src="sphere-access.js?v=acct1"></script>
-<script src="demo-flow.js?v=progname2"></script>
 <script>
-/* Count cells for the studies table: Mock Shells, TLFs, SDTM, ADaM (see SPHERE_DEMO.studyCounts). */
-window.SPHERE_studyStoreId = function (protocol, deliverable) {
-  if (!protocol) return '';
-  return (!deliverable || deliverable === 'CSR') ? protocol : protocol + '::' + deliverable;
-};
-window.SPHERE_studyCounts = function (list) {
-  var sum = { shells: 0, tlf: 0, sdtm: 0, adam: 0 };
-  (list || []).forEach(function (x) {
-    var c = window.SPHERE_DEMO && SPHERE_DEMO.studyCounts ? SPHERE_DEMO.studyCounts(x.id, x.meta) : null;
-    if (!c) { sum = null; return; }
-    if (sum) { sum.shells += c.shells; sum.tlf += c.tlf; sum.sdtm += c.sdtm; sum.adam += c.adam; }
-  });
-  return sum;
-};
-window.SPHERE_studyCountCells = function (list, note) {
-  var c = window.SPHERE_studyCounts(list);
-  var cols = [['shells', 'Mock shells'], ['tlf', 'TLFs'], ['sdtm', 'SDTM datasets'], ['adam', 'ADaM datasets']];
-  return cols.map(function (k) {
-    var v = c ? c[k[0]] : null;
-    var tip = v == null ? '' : ' title="' + v + ' ' + k[1] + (note ? ' · ' + note : '') + '"';
-    return '<td class="num count-col count-' + k[0] + '"' + tip + '>' + (v == null ? '<span class="cell-empty">-</span>' : v) + '</td>';
-  }).join('');
-};
+/* Studies list counts: Mock shells, TLFs, SDTM and ADaM per study store.
+   Self-contained on purpose: it reads the demo-flow store in localStorage
+   directly, so a stale cached demo-flow.js can never blank the columns.
+   Home study (ONC-204-301 CSR) uses its demo data: the Mock Shells catalog
+   (22 seed shells, or the saved catalog), the static Tracker board (20
+   Table/Listing/Figure rows plus the 14.1.3 disposition record, so 21)
+   plus other Tracker records saved for that store, File
+   Explorer sdtm/ datasets, and ADaM datasets from adam/ plus Tracker Dataset
+   rows. Other stores use a saved catalog and saved records when present,
+   otherwise stable numbers seeded from the store id, scaled down for studies
+   still in startup. */
+(function () {
+  var HOME = 'ONC-204-301';
+  var HOME_COUNTS = { shells: 22, tlf: 21, sdtm: 4, adam: ['ADSL', 'ADAE', 'ADTTE'] };
+  function store() {
+    try { return JSON.parse(localStorage.getItem('sphere-demo-flow-v1') || 'null') || {}; } catch (e) { return {}; }
+  }
+  function seedHash(str) {
+    var h = 2166136261;
+    str = String(str || '');
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function studyCounts(id, meta) {
+    meta = meta || {};
+    id = id || HOME;
+    var s = store();
+    var saved = s.shells && s.shells[id];
+    var recs = (Array.isArray(s.records) ? s.records : []).filter(function (r) { return r && (r.study || HOME) === id; });
+    var recTlf = recs.filter(function (r) {
+      if (id === HOME && (r.id === 'rec-14-1-3' || r.shellId === '14.1.3')) return false; /* already in the home seed */
+      return /^(Table|Listing|Figure)$/i.test(r.type || 'Table');
+    }).length;
+    var recData = recs.filter(function (r) { return /^Dataset$/i.test(r.type || ''); });
+    var hasSaved = Array.isArray(saved) && saved.length > 0;
+    if (id === HOME) {
+      var adam = {};
+      HOME_COUNTS.adam.forEach(function (n) { adam[n] = 1; });
+      recData.forEach(function (r) {
+        var n = String(r.title || r.program || '').split(/\s|·/)[0].replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+        if (/^AD/.test(n)) adam[n] = 1;
+      });
+      return { shells: hasSaved ? saved.length : HOME_COUNTS.shells, tlf: HOME_COUNTS.tlf + recTlf, sdtm: HOME_COUNTS.sdtm, adam: Object.keys(adam).length };
+    }
+    var h = seedHash(id);
+    var csr = !meta.deliverable || meta.deliverable === 'CSR';
+    var shells = csr ? 24 + h % 23 : 8 + h % 9;
+    var tlf = Math.round(shells * (0.78 + ((h >>> 5) % 20) / 100));
+    var sdtm = csr ? 14 + (h >>> 9) % 11 : 8 + (h >>> 9) % 6;
+    var adamN = csr ? 8 + (h >>> 13) % 8 : 4 + (h >>> 13) % 4;
+    if (/startup/i.test(meta.status || '')) {
+      shells = Math.max(3, Math.round(shells * 0.45));
+      tlf = Math.round(tlf * 0.12);
+      sdtm = 2 + (h >>> 17) % 5;
+      adamN = (h >>> 21) % 3;
+    }
+    return { shells: hasSaved ? saved.length : shells, tlf: tlf + recTlf, sdtm: sdtm, adam: adamN + recData.length };
+  }
+  window.SPHERE_studyStoreId = function (protocol, deliverable) {
+    if (!protocol) return '';
+    return (!deliverable || deliverable === 'CSR') ? protocol : protocol + '::' + deliverable;
+  };
+  window.SPHERE_studyCounts = function (list) {
+    var sum = { shells: 0, tlf: 0, sdtm: 0, adam: 0 };
+    (list || []).forEach(function (x) {
+      var c;
+      try { c = studyCounts(x.id, x.meta); } catch (e) { c = studyCounts('', {}); }
+      sum.shells += c.shells; sum.tlf += c.tlf; sum.sdtm += c.sdtm; sum.adam += c.adam;
+    });
+    return sum;
+  };
+  window.SPHERE_studyCountCells = function (list, note) {
+    var c = window.SPHERE_studyCounts(list && list.length ? list : [{ id: '', meta: {} }]);
+    var cols = [['shells', 'Mock shells'], ['tlf', 'TLFs'], ['sdtm', 'SDTM datasets'], ['adam', 'ADaM datasets']];
+    return cols.map(function (k) {
+      var v = c[k[0]];
+      return '<td class="num count-col count-' + k[0] + '" title="' + v + ' ' + k[1] + (note ? ' · ' + note : '') + '">' + v + '</td>';
+    }).join('');
+  };
+})();
 </script>
 </head>
 <body class="studies-view-list">
