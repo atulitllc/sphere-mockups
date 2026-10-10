@@ -2739,12 +2739,31 @@
     return '&study=' + encodeURIComponent(protocol) + '&deliverable=' + encodeURIComponent(deliverable);
   }
 
-  function linkedShellId(title, shellLabel) {
+  function shellIdInStore(store, key) {
+    if (!key || !window.SPHERE_DEMO || !SPHERE_DEMO.getShells) return '';
+    var shells = SPHERE_DEMO.getShells(store) || [];
+    var i;
+    for (i = 0; i < shells.length; i++) if (String(shells[i].id) === String(key)) return shells[i].id;
+    for (i = 0; i < shells.length; i++) if (String(shells[i].number) === String(key)) return shells[i].id;
+    return '';
+  }
+
+  function linkedShellId(title, shellLabel, store) {
     var label = String(shellLabel || '').replace(/\s+/g, ' ').trim();
     if (!shellStatusLinks(label)) return '';
-    if (/^draft-/i.test(label) || /^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(label)) return label;
-    var raw = String(title || '').split('·')[0].replace(/\s+/g, ' ').trim();
-    if (/^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(raw)) return raw;
+    var key = '';
+    if (/^draft-/i.test(label) || /^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(label)) key = label;
+    if (!key) {
+      var raw = String(title || '').split('·')[0].replace(/\s+/g, ' ').trim();
+      if (/^\d+(?:\.\d+)+[a-z]*(?:-c\d+)?$/i.test(raw)) key = raw;
+    }
+    if (!key) return '';
+    var scope = store || (typeof runtimeScopeId === 'function' ? runtimeScopeId() : '') || 'ONC-204-301';
+    var hit = shellIdInStore(scope, key);
+    if (hit) return hit;
+    /* Home CSR seed shells use the output number as their id, including before the catalog is saved. */
+    var saved = window.SPHERE_DEMO && SPHERE_DEMO.getShells ? SPHERE_DEMO.getShells(scope) : null;
+    if (scope === 'ONC-204-301' && !(saved && saved.length)) return key;
     return '';
   }
 
@@ -3450,7 +3469,7 @@
         program: program,
         title: title,
         shell: field('nrShell').value,
-        shellId: linkedShellId(title, field('nrShell').value),
+        shellId: linkedShellId(title, field('nrShell').value, runtimeScopeId()),
         recordId: mintRecordId()
       };
       rememberRuntimeRow(spec);

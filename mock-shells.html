@@ -4184,6 +4184,15 @@
         renderCatalog();
         loadShellIntoEditor(stay);
       } else {
+        if (requested && studyStore[CURRENT_STUDY]) {
+          studyStore[CURRENT_STUDY].selectedId = null;
+          catalogSelectedIds = [];
+          catalogAnchorId = null;
+          var numEl = document.getElementById('metaNumber');
+          if (numEl) numEl.value = '';
+          var titleEl = document.getElementById('shellTitle');
+          if (titleEl) titleEl.textContent = '';
+        }
         updateStudyChrome();
         renderCatalog();
       }
