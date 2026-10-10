@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=flow4bar" />
+<link rel="stylesheet" href="shared-white.css?v=flow4chev" />
 <script>
 (function () {
   try {
@@ -993,15 +993,36 @@
     if (!groups[p]) { groups[p] = []; order.push(p); }
     groups[p].push(e);
   });
+  function deliverableCount(list) {
+    var seen = {};
+    var n = 0;
+    list.forEach(function (e) {
+      var d = String(e.deliverable || '').trim();
+      if (!d || seen[d]) return;
+      seen[d] = 1;
+      n += 1;
+    });
+    return n;
+  }
+  function openStudy(e, protocol) {
+    var path = L.entryPath(e);
+    location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || protocol) +
+      '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR') +
+      '&path=' + encodeURIComponent(path);
+  }
   tbody.innerHTML = '';
   order.forEach(function (p) {
     var rows = groups[p];
     var primary = rows.filter(function (e) { return e.current || e.row; })[0] || rows[0];
+    var expandable = deliverableCount(rows) > 1;
+    var control = expandable
+      ? '<button type="button" class="proto-toggle" aria-expanded="false" aria-label="Show deliverables for ' + esc(p) + '">' +
+        '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
+      : '<span class="proto-toggle-spacer" aria-hidden="true"></span>';
     var tr = document.createElement('tr');
-    tr.className = 'protocol-row';
+    tr.className = 'protocol-row' + (expandable ? '' : ' is-link');
     tr.innerHTML =
-      '<td class="num"><button type="button" class="proto-toggle" aria-expanded="false" aria-label="Show folders for ' + esc(p) + '">' +
-      '<svg class="sap-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button> ' + esc(p) + '</td>' +
+      '<td class="num">' + control + ' ' + esc(p) + '</td>' +
       '<td><div class="study-name-cell">' + esc(tidy(primary.name || p)) + '</div>' +
       '<div class="study-sub muted">' + rows.length + ' folder' + (rows.length === 1 ? '' : 's') + '</div></td>' +
       '<td>' + chips(primary) + '</td>' +
@@ -1013,10 +1034,16 @@
       '<td>' + empty(primary.phase) + '</td>' +
       '<td>' + badge(primary) + '</td>';
     tbody.appendChild(tr);
+    if (!expandable) {
+      tr.addEventListener('click', function () { openStudy(primary, p); });
+      return;
+    }
     var folderRows = rows.map(function (e) {
       var fr = document.createElement('tr');
       fr.className = 'protocol-folder';
       fr.hidden = true;
+      fr.tabIndex = 0;
+      fr.setAttribute('aria-label', 'Open ' + tidy(e.name || e.deliverable || p));
       fr.innerHTML =
         '<td></td>' +
         '<td><div class="study-name-cell">' + esc(tidy(e.name || e.deliverable || p)) + '</div></td>' +
@@ -1028,11 +1055,11 @@
         '<td class="num">' + empty(e.dblock) + '</td>' +
         '<td>' + empty(e.phase) + '</td>' +
         '<td>' + badge(e) + '</td>';
-      fr.addEventListener('click', function () {
-        var path = L.entryPath(e);
-        location.href = 'study-home.html?study=' + encodeURIComponent(e.protocol || p) +
-          '&deliverable=' + encodeURIComponent(e.deliverable || 'CSR') +
-          '&path=' + encodeURIComponent(path);
+      fr.addEventListener('click', function () { openStudy(e, p); });
+      fr.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        openStudy(e, p);
       });
       tbody.appendChild(fr);
       return fr;
@@ -1040,8 +1067,10 @@
     tr.querySelector('.proto-toggle').addEventListener('click', function (ev) {
       ev.stopPropagation();
       var open = this.getAttribute('aria-expanded') === 'true';
-      this.setAttribute('aria-expanded', open ? 'false' : 'true');
-      folderRows.forEach(function (fr) { fr.hidden = open; });
+      var next = !open;
+      this.setAttribute('aria-expanded', next ? 'true' : 'false');
+      this.setAttribute('aria-label', (next ? 'Hide deliverables for ' : 'Show deliverables for ') + p);
+      folderRows.forEach(function (fr) { fr.hidden = !next; });
     });
   });
 })();
