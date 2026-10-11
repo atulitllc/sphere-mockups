@@ -13,7 +13,6 @@
   var LOGO_H = 'assets/sample-biopharma-logo-horizontal.svg';
   var LOGO_H_DARK = 'assets/sample-biopharma-logo-horizontal-dark.svg';
   var LOGO_MARK = 'assets/sample-biopharma-mark.svg';
-  /* Header logo height is fixed (about 30px). The old floating-logo slider is gone. */
   var PERSONAL_AT = 'sphere-accent-chosen-at';
   /* null = follow what is saved. 'default' | 'none' | 'custom' are live Admin previews. */
   var previewMode = null;
@@ -26,9 +25,10 @@
     } catch (e) { return {}; }
   }
   function name() { var n = String(read().name || '').trim(); return n || DEFAULT_NAME; }
+  /* Accessible name for a logo image: 'Sample Pharma logo'. */
+  function logoLabel() { return name() + ' logo'; }
   function validHex(v) { return /^#[0-9a-f]{6}$/i.test(String(v || '')); }
   function applyAccent() {
-    document.documentElement.style.removeProperty('--tenant-logo-h');
     var root = document.documentElement;
     var b = read();
     var personal = 0;
@@ -106,7 +106,7 @@
   /* Header slot: logo when the tenant has one, otherwise the existing text pill.
      Default assets switch in CSS (horizontal at 1024+, mark below that). */
   function paintHeader(state) {
-    var tenant = name();
+    var tenant = logoLabel();
     document.querySelectorAll('header.top .tenant-pill, header.top .company-pill').forEach(function (pill) {
       rememberLabel(pill);
       pill.classList.remove('has-tenant-logo', 'is-custom-logo');
@@ -147,7 +147,7 @@
       img.className = 'nav-mobile-mark';
       client.insertBefore(img, client.firstChild);
     }
-    var tenant = name();
+    var tenant = logoLabel();
     img.alt = tenant;
     img.setAttribute('aria-label', tenant);
     img.title = tenant;
@@ -165,7 +165,7 @@
     if (strong) strong.removeAttribute('aria-hidden');
     if (state.mode === 'none') return;
     row.classList.add('has-tenant-logo');
-    var tenant = name();
+    var tenant = logoLabel();
     var anchor = row.querySelector('.login-tenant-dot');
     if (state.mode === 'custom') {
       row.classList.add('is-custom-logo');
@@ -189,8 +189,6 @@
   }
   function paintLogo() {
     if (observer) observer.disconnect();
-    document.querySelectorAll('#tenantFloatLogo').forEach(function (n) { n.remove(); });
-    document.body.classList.remove('has-tenant-float-logo');
     var state = logoState();
     paintHeader(state);
     paintNav(state);
@@ -252,7 +250,6 @@
         b.logoRemoved = true;
       }
     }
-    delete b.logoSize;
     b.savedAt = Date.now();
     try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) { return false; }
     previewMode = null;
@@ -286,6 +283,7 @@
       paintLogo();
     },
     name: name,
+    logoLabel: logoLabel,
     repaint: paintLogo,
     save: save,
     reset: reset,

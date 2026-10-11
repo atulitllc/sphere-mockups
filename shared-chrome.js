@@ -953,7 +953,10 @@
     var pill = document.querySelector('header.top .company-pill, header.top .tenant-pill');
     var label = '';
     if (pill) {
-      label = (pill.getAttribute('aria-label') || pill.textContent || '').replace(/\s+/g, ' ').trim();
+      /* A logo pill's aria-label reads 'X logo'; the drawer shows just the tenant name. */
+      label = (pill.classList.contains('has-tenant-logo') && window.SPHERE_BRAND && SPHERE_BRAND.name)
+        ? SPHERE_BRAND.name()
+        : (pill.getAttribute('aria-label') || pill.textContent || '').replace(/\s+/g, ' ').trim();
     }
     if (!label && window.SPHERE_BRAND && SPHERE_BRAND.name) label = SPHERE_BRAND.name();
     var block = document.createElement('div');
