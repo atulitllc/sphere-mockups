@@ -7392,12 +7392,31 @@ html[data-theme="dark"] .export-menu {
   border-top: 1px solid var(--nav-border);
 }
 .nav-mobile-client {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 12px 2px;
   color: var(--nav-fg, #e8eefc);
   font-size: 13px;
   font-weight: 700;
   text-align: left;
 }
+.nav-mobile-mark {
+  display: none;
+  height: 28px;
+  width: 28px;
+  object-fit: contain;
+  flex: none;
+  border-radius: 7px;
+}
+.nav-mobile-client.is-custom .nav-mobile-mark {
+  width: auto;
+  max-width: 148px;
+  height: 28px;
+  border-radius: 0;
+}
+/* Mark moves into the drawer only after the header slot is shed, so it is not shown twice. */
+body.is-bar-nopill .nav-mobile-mark { display: block; }
 .nav-mobile-signout {
   display: flex;
   align-items: center;
@@ -7783,33 +7802,92 @@ body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
   --nav-bg: color-mix(in srgb, var(--tenant-accent) 40%, #0b1220);
   --nav-active-bg: color-mix(in srgb, var(--tenant-accent) 30%, transparent);
 }
-/* Tenant logo inside the tenant pill */
-/* Tenant logo (Admin > Branding): small, lighter (original colors) badge fixed at the bottom-right of app pages.
-   Sits below the bulk bar (25), header (30), background jobs (70), modals and toasts (80+),
-   lets clicks pass through, and hides while the jobs panel is open and on phones. */
-.tenant-float-logo {
-  position: fixed;
-  right: 14px;
-  bottom: 12px;
-  z-index: 20;
-  pointer-events: none;
+/* Tenant logo in the header slot that used to be the name pill.
+   Desktop (1024+): horizontal lockup, 30px tall, light or dark file.
+   768 to 1023: mark only. Phones keep the mark in the bar until fitBar sheds it
+   into the nav client block. An uploaded logo is a single image in that same slot. */
+header.top .tenant-pill.has-tenant-logo,
+header.top .company-pill.has-tenant-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
   line-height: 0;
-  opacity: 0.55; /* lighter but in its own colors: no grayscale or desaturate */
-  transition: opacity 0.15s ease;
+  flex: 0 0 auto;
+  box-shadow: none;
 }
-.tenant-float-logo img { display: block; height: var(--tenant-logo-h, 48px); width: auto; max-width: calc(var(--tenant-logo-h, 48px) * 4); object-fit: contain; }
-[data-theme="dark"] .tenant-float-logo { opacity: 0.62; }
-body.has-tenant-float-logo .content { padding-bottom: calc(var(--tenant-logo-h, 48px) + 24px); }
-body:has(.bgjobs:not([hidden])) .tenant-float-logo,
-body:has(.copilot-panel:not([hidden])) .tenant-float-logo,
-body:has(.modal-backdrop:not([hidden])) .tenant-float-logo { opacity: 0; }
-@media (max-width: 639px) {
-  .tenant-float-logo { display: none; }
-  body.has-tenant-float-logo .content { padding-bottom: 0; }
+header.top .has-tenant-logo img {
+  display: none;
+  height: 30px;
+  width: auto;
+  max-width: 168px;
+  object-fit: contain;
+}
+header.top .has-tenant-logo.is-custom-logo .tenant-logo-custom { display: block; }
+@media (min-width: 1024px) {
+  header.top .has-tenant-logo:not(.is-custom-logo) .tenant-logo-light { display: block; }
+  [data-theme="dark"] header.top .has-tenant-logo:not(.is-custom-logo) .tenant-logo-light { display: none; }
+  [data-theme="dark"] header.top .has-tenant-logo:not(.is-custom-logo) .tenant-logo-dark { display: block; }
+}
+@media (max-width: 1023px) {
+  header.top .has-tenant-logo:not(.is-custom-logo) .tenant-logo-mark {
+    display: block;
+    width: 30px;
+    height: 30px;
+  }
+  header.top .has-tenant-logo.is-custom-logo .tenant-logo-custom {
+    height: 30px;
+    max-width: 96px;
+  }
+}
+@media (max-width: 767px) {
+  header.top .tenant-pill.has-tenant-logo,
+  header.top .company-pill.has-tenant-logo { display: inline-flex; }
+  header.top .has-tenant-logo:not(.is-custom-logo) .tenant-logo-mark {
+    width: 28px;
+    height: 28px;
+  }
+  header.top .has-tenant-logo.is-custom-logo .tenant-logo-custom {
+    height: 28px;
+    max-width: 72px;
+  }
+}
+header.top.is-bar-nopill .tenant-pill.has-tenant-logo,
+header.top.is-bar-nopill .company-pill.has-tenant-logo { display: none; }
+
+/* Login tenant chip: same default lockup, or the uploaded file. */
+.login-tenant { position: relative; }
+.login-tenant-logo { display: none; height: 32px; width: auto; max-width: 210px; object-fit: contain; }
+.login-tenant.has-tenant-logo .login-tenant-logo.is-light { display: block; }
+[data-theme="dark"] .login-tenant.has-tenant-logo .login-tenant-logo.is-light { display: none; }
+[data-theme="dark"] .login-tenant.has-tenant-logo .login-tenant-logo.is-dark { display: block; }
+.login-tenant.has-tenant-logo.is-custom-logo .login-tenant-logo.is-custom { display: block; }
+.login-tenant.has-tenant-logo strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 /* Admin > Branding */
 .brand-logo-row { display: flex; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
-.logo-placeholder.has-logo { border-style: solid; background: var(--surface); padding: 6px; }
+.logo-placeholder.has-logo {
+  border-style: solid;
+  background: var(--surface);
+  padding: 6px;
+  width: auto;
+  min-width: 72px;
+  max-width: 240px;
+  height: 72px;
+}
 .logo-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 .brand-logo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .brand-logo-hint { margin-top: 8px; }
@@ -7832,9 +7910,3 @@ body:has(.modal-backdrop:not([hidden])) .tenant-float-logo { opacity: 0; }
 .files-studies .lt-area-badge { background: transparent; color: var(--muted); border: 1px solid var(--border); font-weight: 600; padding: 0 5px; }
 .files-studies .lt-area-prod .lt-folder .lt-area-badge { margin-left: 4px; vertical-align: 0; }
 
-/* Admin > Branding: floating logo size slider */
-.brand-logo-size { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-.brand-logo-size-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 2px; }
-.brand-logo-size input[type="range"] { width: 180px; max-width: 100%; accent-color: var(--accent); padding: 0; border: 0; background: transparent; box-shadow: none; }
-.brand-logo-size .btn.sm { min-width: 28px; padding-left: 0; padding-right: 0; justify-content: center; }
-.brand-logo-size output { min-width: 44px; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text); }

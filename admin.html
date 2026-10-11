@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="shared-white.css?v=20261010k" />
-<script src="tenant-brand.js?v=20261010i"></script>
+<link rel="stylesheet" href="shared-white.css?v=20261011a" />
+<script src="tenant-brand.js?v=20261011b"></script>
 <script>
 (function () {
   try {
@@ -71,7 +71,7 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Admin
     </a>
-    <div class="nav-footer">Northwind Biopharma · tenant</div>
+    <div class="nav-footer">Sample Biopharma · tenant</div>
   </aside>
 
   <section class="main">
@@ -115,7 +115,7 @@
           <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/></svg>
           <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         </button>
-        <div class="tenant-pill">Northwind Biopharma · Admin</div>
+        <div class="tenant-pill">Sample Biopharma · Admin</div>
       </div>
     </header>
 
@@ -162,7 +162,7 @@
                   <div class="meta-grid">
                     <div class="meta-item">
                       <div class="k">Tenant</div>
-                      <div class="v">Northwind Biopharma</div>
+                      <div class="v">Sample Biopharma</div>
                     </div>
                     <div class="meta-item">
                       <div class="k">Plan / SKU</div>
@@ -309,7 +309,7 @@
                   <div class="grid2">
                     <label>
                       <span>Display name</span>
-                      <input type="text" id="brandName" value="Northwind Biopharma" maxlength="60" autocomplete="off" />
+                      <input type="text" id="brandName" value="Sample Biopharma" maxlength="60" autocomplete="off" />
                       <span class="field-error-text" id="brandNameError" hidden>Display name is required.</span>
                     </label>
                     <label>
@@ -329,16 +329,10 @@
                         <div class="brand-logo-actions">
                           <button class="btn" type="button" id="brandLogoBtn">Upload logo</button>
                           <button class="btn ghost" type="button" id="brandLogoRemove" hidden>Remove logo</button>
+                          <button class="btn ghost" type="button" id="brandLogoDefault" hidden>Use default logo</button>
                         </div>
                         <input type="file" id="brandLogoFile" accept="image/png,image/svg+xml,image/jpeg" hidden />
-                        <div class="hint brand-logo-hint">PNG, SVG or JPG up to 1 MB. Shown faded in the bottom-right corner of every page.</div>
-                        <div class="brand-logo-size">
-                          <label class="brand-logo-size-label" for="brandLogoSize">Logo size</label>
-                          <button class="btn sm ghost" type="button" id="brandLogoSmaller" aria-label="Smaller logo">-</button>
-                          <input type="range" id="brandLogoSize" min="24" max="120" step="4" value="48" aria-describedby="brandLogoSizeOut" />
-                          <button class="btn sm ghost" type="button" id="brandLogoBigger" aria-label="Bigger logo">+</button>
-                          <output id="brandLogoSizeOut" for="brandLogoSize">48 px</output>
-                        </div>
+                        <div class="hint brand-logo-hint">PNG, SVG or JPG up to 1 MB. Shown in the header. Until you upload one, the Sample Biopharma logo is used. Remove logo to show the tenant name instead.</div>
                         <div class="brand-logo-error" id="brandLogoError" role="alert" hidden></div>
                       </div>
                     </div>
@@ -782,7 +776,7 @@
                     <label>
                       <span>Default template pack</span>
                       <select>
-                        <option>Northwind Biopharma standard v1.4</option>
+                        <option>Sample Biopharma standard v1.4</option>
                         <option>ICH E3 core</option>
                         <option>Oncology TLF pack</option>
                       </select>
@@ -1458,7 +1452,7 @@
   function auditSentence(e) {
     if (e.note === 'company change' || e.type === 'company change') {
       var bits = [e.user || 'User', 'company change'];
-      if (e.company) bits.push(String(e.company) === 'X Pharma' ? 'Northwind Biopharma' : e.company);
+      if (e.company) bits.push(String(e.company) === 'X Pharma' ? 'Sample Biopharma' : e.company);
       return bits.join(' · ');
     }
     var verb = e.type === 'reactivate' ? 'reactivated' : 'deactivated';
@@ -1563,7 +1557,7 @@
   paint();
 })();
 </script>
-<script src="shared-chrome.js?v=20261010j"></script>
+<script src="shared-chrome.js?v=20261011b"></script>
 <script>
 /* Admin > Branding: Save persists name, accent and logo (tenant-brand.js applies them on every page). */
 (function () {
@@ -1578,32 +1572,23 @@
   var logoErr = document.getElementById('brandLogoError');
   var saved = document.getElementById('brandSaved');
   var pendingLogo = null;
-  var sizeEl = document.getElementById('brandLogoSize');
-  var sizeOut = document.getElementById('brandLogoSizeOut');
-  function setSize(px, live) {
-    px = Math.max(B.MIN_LOGO_SIZE, Math.min(B.MAX_LOGO_SIZE, parseInt(px, 10) || B.DEFAULT_LOGO_SIZE));
-    sizeEl.value = px;
-    sizeOut.textContent = px + ' px';
-    if (live) B.previewLogoSize(px);
-  }
-  sizeEl.addEventListener('input', function () { setSize(sizeEl.value, true); });
-  document.getElementById('brandLogoSmaller').addEventListener('click', function () { setSize(+sizeEl.value - 4, true); });
-  document.getElementById('brandLogoBigger').addEventListener('click', function () { setSize(+sizeEl.value + 4, true); });
-  function showLogo(url) {
-    prev.classList.toggle('has-logo', !!url);
-    prev.innerHTML = url ? '<img alt="Tenant logo preview" />' : 'Logo<br/>placeholder';
-    if (url) prev.querySelector('img').src = url;
-    rm.hidden = !url;
+  var useDefaultBtn = document.getElementById('brandLogoDefault');
+  var DEFAULT_PREVIEW = 'assets/sample-biopharma-logo-horizontal.svg';
+  function showLogo(mode, url) {
+    var src = mode === 'custom' ? url : (mode === 'default' ? DEFAULT_PREVIEW : '');
+    prev.classList.toggle('has-logo', !!src);
+    prev.innerHTML = src ? '<img alt="Tenant logo preview" />' : 'No logo<br/>Name only';
+    if (src) prev.querySelector('img').src = src;
+    rm.hidden = mode === 'none';
+    if (useDefaultBtn) useDefaultBtn.hidden = mode === 'default';
   }
   function fill() {
     var b = B.get();
     nameEl.value = b.name;
     color.value = b.accent;
     hex.value = b.accent.toUpperCase();
-    pendingLogo = b.logo || '';
-    showLogo(pendingLogo);
-    setSize(b.logoSize, false);
-    B.previewLogoSize(b.logoSize);
+    pendingLogo = b.logoMode === 'custom' ? b.logo : (b.logoMode === 'none' ? '' : null);
+    showLogo(b.logoMode || 'default', b.logo || '');
     B.previewLogo(null);
     logoErr.hidden = true;
   }
@@ -1626,10 +1611,11 @@
       logoErr.textContent = 'That file is ' + (f.size / 1048576).toFixed(1) + ' MB. The limit is 1 MB.'; logoErr.hidden = false; return;
     }
     var r = new FileReader();
-    r.onload = function () { pendingLogo = String(r.result || ''); showLogo(pendingLogo); B.previewLogo(pendingLogo); };
+    r.onload = function () { pendingLogo = String(r.result || ''); showLogo('custom', pendingLogo); B.previewLogo(pendingLogo); };
     r.readAsDataURL(f);
   });
-  rm.addEventListener('click', function () { pendingLogo = ''; showLogo(''); B.previewLogo(''); });
+  rm.addEventListener('click', function () { pendingLogo = ''; showLogo('none', ''); B.previewLogo(''); });
+  if (useDefaultBtn) useDefaultBtn.addEventListener('click', function () { pendingLogo = null; showLogo('default', ''); B.previewLogo('default'); });
   function flashSaved(text) {
     saved.lastChild.textContent = text;
     saved.hidden = false;
@@ -1645,7 +1631,7 @@
     document.getElementById('brandNameError').hidden = !nameBad;
     document.getElementById('brandAccentError').hidden = !hexBad;
     if (nameBad || hexBad) return;
-    var ok = B.save({ name: n, accent: h.toUpperCase(), logo: pendingLogo || '', logoSize: parseInt(sizeEl.value, 10) || B.DEFAULT_LOGO_SIZE });
+    var ok = B.save({ name: n, accent: h.toUpperCase(), logo: pendingLogo });
     if (!ok) { logoErr.textContent = 'Could not save: browser storage is full. Try a smaller logo.'; logoErr.hidden = false; return; }
     fill();
     flashSaved('Saved');
