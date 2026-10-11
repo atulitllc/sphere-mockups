@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="316" height="80" viewBox="36 30 316 80">
+  
+  <g transform="translate(36,30)">
+    <rect width="80" height="80" rx="18" fill="#0E7C86"/>
+    <!-- leaf / droplet mark -->
+    <path d="M40 16 C58 30, 62 46, 54 58 C48 67, 32 67, 26 58 C18 46, 22 30, 40 16 Z" fill="#FFFFFF"/>
+    <path d="M40 30 C40 42, 40 52, 40 62" stroke="#0E7C86" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <path d="M40 44 L48 37 M40 52 L32 45" stroke="#0E7C86" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="61" cy="20" r="5.5" fill="#9BE3DA"/>
+  </g>
+  <text x="138" y="72" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF" letter-spacing="-0.5">Sample</text>
+  <text x="140" y="104" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500" fill="#9BE3DA" letter-spacing="4">BIOPHARMA</text>
+</svg>

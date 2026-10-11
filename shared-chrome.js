@@ -888,8 +888,23 @@
     });
   }
 
+  /* The logo (or the name pill) is shed when the current page name would clip,
+     or when the bar itself would spill past the viewport. */
+  function barOverflows(top) {
+    if (top.scrollWidth > top.clientWidth + 1) return true;
+    var right = top.querySelector('.top-right');
+    if (!right) return false;
+    return right.getBoundingClientRect().right > top.getBoundingClientRect().right + 1.5;
+  }
+
   /* Parents ellipsize first. Then control labels, the user name, and the client pill, in that order.
      The current page name ellipsizes only after those have given way. At 100% desktop nothing gives way. */
+  function fits(top, crumb) {
+    if (barOverflows(top)) return false;
+    if (!crumb || crumb.clientWidth < 8) return true;
+    return pageNameFits(crumb);
+  }
+
   function fitBar() {
     var top = document.querySelector('header.top');
     if (!top) return;
@@ -897,17 +912,17 @@
     document.body.classList.remove('is-bar-nopill');
     fitCrumbs();
     var crumb = top.querySelector('.crumb');
-    if (!crumb || crumb.clientWidth < 8 || pageNameFits(crumb)) return;
+    if (fits(top, crumb)) return;
     top.classList.add('is-bar-icons');
     fitCrumbs();
-    if (pageNameFits(crumb)) return;
+    if (fits(top, crumb)) return;
     top.classList.add('is-bar-noname');
     fitCrumbs();
-    if (pageNameFits(crumb)) return;
+    if (fits(top, crumb)) return;
     top.classList.add('is-bar-nopill');
     document.body.classList.add('is-bar-nopill');
     fitCrumbs();
-    if (!pageNameFits(crumb)) {
+    if (crumb && !pageNameFits(crumb)) {
       var current = crumb.querySelector('.crumb-current');
       if (current && current.scrollWidth > crumb.clientWidth + 1) crumb.classList.add('is-tight');
     }
@@ -936,7 +951,11 @@
     var nav = document.querySelector('aside.nav');
     if (!nav || document.getElementById('navMobileTools')) return;
     var pill = document.querySelector('header.top .company-pill, header.top .tenant-pill');
-    var label = pill ? pill.textContent.replace(/\s+/g, ' ').trim() : '';
+    var label = '';
+    if (pill) {
+      label = (pill.getAttribute('aria-label') || pill.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    if (!label && window.SPHERE_BRAND && SPHERE_BRAND.name) label = SPHERE_BRAND.name();
     var block = document.createElement('div');
     block.className = 'nav-mobile-tools';
     block.id = 'navMobileTools';
@@ -954,6 +973,7 @@
         else location.href = 'login.html';
       });
     }
+    if (window.SPHERE_BRAND && SPHERE_BRAND.repaint) SPHERE_BRAND.repaint();
   }
 
   if (document.readyState === 'loading') {

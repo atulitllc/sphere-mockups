@@ -1,24 +1,24 @@
 /* Tenant branding (Admin > Tenant config > Branding). Stored in localStorage
    'sphere-tenant-branding' as { name, accent, logo (data URL), savedAt }.
    Loaded in the head of every page: the accent applies before paint, and once the
-   DOM is ready the tenant name replaces the default everywhere it is shown and the
-   logo appears in the tenant pill. A personal accent picked later in the header
-   accent menu wins over the tenant accent. */
+   DOM is ready the tenant name replaces the default everywhere it is shown.
+   The header slot that held the name pill shows the tenant logo (default Sample
+   Biopharma lockup, or an uploaded logo). With no logo at all, that slot falls
+   back to the text pill. A personal accent picked later in the header accent
+   menu wins over the tenant accent. */
 (function () {
   var KEY = 'sphere-tenant-branding';
-  var DEFAULT_NAME = 'Northwind Biopharma';
+  var DEFAULT_NAME = 'Sample Biopharma';
   var DEFAULT_ACCENT = '#2563EB';
-  /* Floating logo height in px (Admin > Branding > Logo size). Width caps at 4x. */
-  var DEFAULT_LOGO_SIZE = 48, MIN_LOGO_SIZE = 24, MAX_LOGO_SIZE = 120;
-  function logoSize(v) {
-    var n = parseInt(v, 10);
-    if (!isFinite(n)) return DEFAULT_LOGO_SIZE;
-    return Math.max(MIN_LOGO_SIZE, Math.min(MAX_LOGO_SIZE, n));
-  }
-  function applyLogoSize(px) {
-    document.documentElement.style.setProperty('--tenant-logo-h', logoSize(px == null ? read().logoSize : px) + 'px');
-  }
+  var LOGO_H = 'assets/sample-biopharma-logo-horizontal.svg';
+  var LOGO_H_DARK = 'assets/sample-biopharma-logo-horizontal-dark.svg';
+  var LOGO_MARK = 'assets/sample-biopharma-mark.svg';
+  /* Header logo height is fixed (about 30px). The old floating-logo slider is gone. */
   var PERSONAL_AT = 'sphere-accent-chosen-at';
+  /* null = follow what is saved. 'default' | 'none' | 'custom' are live Admin previews. */
+  var previewMode = null;
+  var previewUrl = '';
+
   function read() {
     try {
       var b = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -28,7 +28,7 @@
   function name() { var n = String(read().name || '').trim(); return n || DEFAULT_NAME; }
   function validHex(v) { return /^#[0-9a-f]{6}$/i.test(String(v || '')); }
   function applyAccent() {
-    applyLogoSize();
+    document.documentElement.style.removeProperty('--tenant-logo-h');
     var root = document.documentElement;
     var b = read();
     var personal = 0;
@@ -43,6 +43,20 @@
     }
   }
   function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function storedLogoState() {
+    var b = read();
+    if (b.logo) return { mode: 'custom', url: String(b.logo) };
+    /* logoRemoved is set only by Remove logo. Older saves with an empty logo
+       still get the built-in Sample Biopharma lockup. */
+    if (b.logoRemoved) return { mode: 'none', url: '' };
+    return { mode: 'default', url: '' };
+  }
+  function logoState() {
+    if (previewMode === 'custom') return { mode: 'custom', url: previewUrl };
+    if (previewMode === 'none') return { mode: 'none', url: '' };
+    if (previewMode === 'default') return { mode: 'default', url: '' };
+    return storedLogoState();
+  }
   var lastName = DEFAULT_NAME;
   function replaceIn(root, from, to) {
     if (!root || from === to) return;
@@ -66,33 +80,123 @@
       });
     });
   }
-  /* The uploaded logo floats, faded, in the bottom-right corner of every app page
-     (not in the header pill). Nothing is shown without a logo; login has no badge. */
-  var previewUrl = null;
-  function paintLogo() {
-    document.querySelectorAll('img.tenant-logo').forEach(function (img) { img.remove(); });
-    document.querySelectorAll('.has-tenant-logo').forEach(function (el) { el.classList.remove('has-tenant-logo'); });
-    var logo = previewUrl != null ? previewUrl : (read().logo || '');
-    var box = document.getElementById('tenantFloatLogo');
-    var appPage = !!document.querySelector('header.top, .app, .sidebar');
-    if (!logo || !appPage) {
-      if (box) box.remove();
-      document.body.classList.remove('has-tenant-float-logo');
+  function rememberLabel(pill) {
+    if (pill.hasAttribute('data-tenant-suffix')) return;
+    var raw = pill.textContent.replace(/\s+/g, ' ').trim();
+    var idx = raw.indexOf(' · ');
+    pill.setAttribute('data-tenant-suffix', idx >= 0 ? raw.slice(idx) : '');
+  }
+  function labelFor(pill) {
+    rememberLabel(pill);
+    return name() + (pill.getAttribute('data-tenant-suffix') || '');
+  }
+  function refit() {
+    try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+  }
+  function imgEl(cls, src, tenant, named) {
+    var img = document.createElement('img');
+    img.className = cls;
+    img.alt = named ? tenant : '';
+    if (named) img.setAttribute('aria-label', tenant);
+    else img.setAttribute('aria-hidden', 'true');
+    img.addEventListener('load', refit);
+    img.src = src;
+    return img;
+  }
+  /* Header slot: logo when the tenant has one, otherwise the existing text pill.
+     Default assets switch in CSS (horizontal at 1024+, mark below that). */
+  function paintHeader(state) {
+    var tenant = name();
+    document.querySelectorAll('header.top .tenant-pill, header.top .company-pill').forEach(function (pill) {
+      rememberLabel(pill);
+      pill.classList.remove('has-tenant-logo', 'is-custom-logo');
+      if (state.mode === 'none') {
+        pill.removeAttribute('role');
+        pill.removeAttribute('aria-label');
+        pill.removeAttribute('title');
+        pill.textContent = labelFor(pill);
+        return;
+      }
+      pill.classList.add('has-tenant-logo');
+      if (state.mode === 'custom') pill.classList.add('is-custom-logo');
+      pill.setAttribute('role', 'img');
+      pill.setAttribute('aria-label', tenant);
+      pill.title = tenant;
+      while (pill.firstChild) pill.removeChild(pill.firstChild);
+      if (state.mode === 'custom') {
+        pill.appendChild(imgEl('tenant-logo tenant-logo-custom', state.url, tenant, true));
+      } else {
+        pill.appendChild(imgEl('tenant-logo tenant-logo-light', LOGO_H, tenant, true));
+        pill.appendChild(imgEl('tenant-logo tenant-logo-dark', LOGO_H_DARK, tenant, false));
+        pill.appendChild(imgEl('tenant-logo tenant-logo-mark', LOGO_MARK, tenant, false));
+      }
+    });
+  }
+  /* Phone drawer: the mark lives here only when the header slot has been shed. */
+  function paintNav(state) {
+    var client = document.querySelector('.nav-mobile-client');
+    if (!client) return;
+    var img = client.querySelector('.nav-mobile-mark');
+    if (state.mode === 'none') {
+      if (img) img.remove();
+      client.classList.remove('is-custom');
       return;
     }
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'tenantFloatLogo';
-      box.className = 'tenant-float-logo';
-      box.setAttribute('aria-hidden', 'true');
-      box.appendChild(document.createElement('img'));
-      document.body.appendChild(box);
+    if (!img) {
+      img = document.createElement('img');
+      img.className = 'nav-mobile-mark';
+      client.insertBefore(img, client.firstChild);
     }
-    var img = box.querySelector('img');
-    img.alt = '';
-    if (img.getAttribute('src') !== logo) img.setAttribute('src', logo);
-    box.title = name();
-    document.body.classList.add('has-tenant-float-logo');
+    var tenant = name();
+    img.alt = tenant;
+    img.setAttribute('aria-label', tenant);
+    img.title = tenant;
+    var src = state.mode === 'custom' ? state.url : LOGO_MARK;
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+    client.classList.toggle('is-custom', state.mode === 'custom');
+  }
+  /* Login uses the horizontal lockup (or the upload). v2 stays in assets as the bordered reference. */
+  function paintLogin(state) {
+    var row = document.querySelector('.login-tenant');
+    if (!row) return;
+    row.querySelectorAll('.login-tenant-logo').forEach(function (n) { n.remove(); });
+    row.classList.remove('has-tenant-logo', 'is-custom-logo');
+    var strong = row.querySelector('strong');
+    if (strong) strong.removeAttribute('aria-hidden');
+    if (state.mode === 'none') return;
+    row.classList.add('has-tenant-logo');
+    var tenant = name();
+    var anchor = row.querySelector('.login-tenant-dot');
+    if (state.mode === 'custom') {
+      row.classList.add('is-custom-logo');
+      var custom = imgEl('login-tenant-logo is-custom', state.url, tenant, true);
+      custom.title = tenant;
+      if (anchor) anchor.insertAdjacentElement('afterend', custom);
+      else row.insertBefore(custom, row.firstChild);
+    } else {
+      var light = imgEl('login-tenant-logo is-light', LOGO_H, tenant, true);
+      var dark = imgEl('login-tenant-logo is-dark', LOGO_H_DARK, tenant, false);
+      light.title = tenant;
+      if (anchor) {
+        anchor.insertAdjacentElement('afterend', dark);
+        anchor.insertAdjacentElement('afterend', light);
+      } else {
+        row.insertBefore(dark, row.firstChild);
+        row.insertBefore(light, row.firstChild);
+      }
+    }
+    if (strong) strong.setAttribute('aria-hidden', 'true');
+  }
+  function paintLogo() {
+    if (observer) observer.disconnect();
+    document.querySelectorAll('#tenantFloatLogo').forEach(function (n) { n.remove(); });
+    document.body.classList.remove('has-tenant-float-logo');
+    var state = logoState();
+    paintHeader(state);
+    paintNav(state);
+    paintLogin(state);
+    if (observer && document.body) observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    refit();
   }
   var observer = null;
   function applyDom() {
@@ -120,7 +224,7 @@
             Array.prototype.forEach.call(m.addedNodes || [], function (node) { replaceIn(node, DEFAULT_NAME, to); });
           }
           Array.prototype.forEach.call(m.addedNodes || [], function (node) {
-            if (node.nodeType === 1 && (node.matches('.tenant-pill, .company-pill') || node.querySelector('.tenant-pill, .company-pill'))) needLogo = true;
+            if (node.nodeType === 1 && (node.matches('.tenant-pill, .company-pill, .nav-mobile-client, .login-tenant') || node.querySelector('.tenant-pill, .company-pill, .nav-mobile-client, .login-tenant'))) needLogo = true;
           });
         });
         if (needLogo) paintLogo();
@@ -131,9 +235,27 @@
   }
   function save(patch) {
     var b = read();
-    Object.keys(patch || {}).forEach(function (k) { b[k] = patch[k]; });
+    var hasLogo = !!(patch && Object.prototype.hasOwnProperty.call(patch, 'logo'));
+    Object.keys(patch || {}).forEach(function (k) {
+      if (k === 'logo') return;
+      b[k] = patch[k];
+    });
+    if (hasLogo) {
+      if (patch.logo) {
+        b.logo = patch.logo;
+        delete b.logoRemoved;
+      } else if (patch.logo == null) {
+        delete b.logo;
+        delete b.logoRemoved;
+      } else {
+        b.logo = '';
+        b.logoRemoved = true;
+      }
+    }
+    delete b.logoSize;
     b.savedAt = Date.now();
     try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) { return false; }
+    previewMode = null;
     applyAccent();
     applyDom();
     try { window.dispatchEvent(new CustomEvent('sphere-branding-change', { detail: b })); } catch (e2) {}
@@ -141,6 +263,7 @@
   }
   function reset() {
     try { localStorage.removeItem(KEY); } catch (e) {}
+    previewMode = null;
     applyAccent();
     applyDom();
     try { window.dispatchEvent(new CustomEvent('sphere-branding-change', { detail: {} })); } catch (e2) {}
@@ -148,15 +271,22 @@
   window.SPHERE_BRAND = {
     DEFAULT_NAME: DEFAULT_NAME,
     DEFAULT_ACCENT: DEFAULT_ACCENT,
-    get: function () { var b = read(); return { name: name(), accent: validHex(b.accent) ? b.accent : DEFAULT_ACCENT, logo: b.logo || '', logoSize: logoSize(b.logoSize) }; },
-    DEFAULT_LOGO_SIZE: DEFAULT_LOGO_SIZE,
-    MIN_LOGO_SIZE: MIN_LOGO_SIZE,
-    MAX_LOGO_SIZE: MAX_LOGO_SIZE,
-    /* Live preview from the Admin slider (not saved until Save branding). */
-    previewLogoSize: applyLogoSize,
-    /* Admin preview: show this logo in the floating corner before it is saved ('' hides). */
-    previewLogo: function (url) { previewUrl = url; paintLogo(); },
+    get: function () {
+      var b = read();
+      var st = storedLogoState();
+      return { name: name(), accent: validHex(b.accent) ? b.accent : DEFAULT_ACCENT, logo: st.mode === 'custom' ? st.url : '', logoMode: st.mode };
+    },
+    logoState: logoState,
+    /* Admin preview. null follows storage, '' hides the logo, 'default' shows the built-in lockup, a data URL shows that file. */
+    previewLogo: function (url) {
+      if (url == null) previewMode = null;
+      else if (url === '') { previewMode = 'none'; previewUrl = ''; }
+      else if (url === 'default') { previewMode = 'default'; previewUrl = ''; }
+      else { previewMode = 'custom'; previewUrl = String(url); }
+      paintLogo();
+    },
     name: name,
+    repaint: paintLogo,
     save: save,
     reset: reset,
     /* Called by the header accent menu: a personal pick overrides the tenant accent. */
