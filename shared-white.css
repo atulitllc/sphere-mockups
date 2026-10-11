@@ -7784,7 +7784,7 @@ body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
   --nav-active-bg: color-mix(in srgb, var(--tenant-accent) 30%, transparent);
 }
 /* Tenant logo inside the tenant pill */
-/* Tenant logo (Admin > Branding): small faded badge fixed at the bottom-right of app pages.
+/* Tenant logo (Admin > Branding): small, lighter (original colors) badge fixed at the bottom-right of app pages.
    Sits below the bulk bar (25), header (30), background jobs (70), modals and toasts (80+),
    lets clicks pass through, and hides while the jobs panel is open and on phones. */
 .tenant-float-logo {
@@ -7794,12 +7794,11 @@ body.is-bar-nopill .nav .nav-footer { margin-top: 8px; }
   z-index: 20;
   pointer-events: none;
   line-height: 0;
-  opacity: 0.42;
-  filter: grayscale(0.35);
+  opacity: 0.55; /* lighter but in its own colors: no grayscale or desaturate */
   transition: opacity 0.15s ease;
 }
 .tenant-float-logo img { display: block; height: var(--tenant-logo-h, 48px); width: auto; max-width: calc(var(--tenant-logo-h, 48px) * 4); object-fit: contain; }
-[data-theme="dark"] .tenant-float-logo { opacity: 0.5; filter: grayscale(0.35) brightness(1.15); }
+[data-theme="dark"] .tenant-float-logo { opacity: 0.62; }
 body.has-tenant-float-logo .content { padding-bottom: calc(var(--tenant-logo-h, 48px) + 24px); }
 body:has(.bgjobs:not([hidden])) .tenant-float-logo,
 body:has(.copilot-panel:not([hidden])) .tenant-float-logo,
